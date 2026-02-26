@@ -13,6 +13,10 @@ import ApplyButton from './components/ApplyButton';
 
 const CONTAINER_ID = 'nai-tag-builder-root';
 
+function closeOverlay() {
+  document.getElementById(CONTAINER_ID)?.remove();
+}
+
 function startDrag(clientX: number, clientY: number) {
   const el = document.getElementById(CONTAINER_ID) as HTMLElement | null;
   if (!el) return;
@@ -49,10 +53,7 @@ function startDrag(clientX: number, clientY: number) {
 export default function App() {
   const [state, dispatch] = useMetadataState();
   const [isApplying, setIsApplying] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
   const [isCollapsed, setIsCollapsed] = useState(false);
-
-  if (!isVisible) return null;
 
   const handleApply = async () => {
     setIsApplying(true);
@@ -61,13 +62,25 @@ export default function App() {
       const blob = await generatePngWithMetadata(comment);
       dispatchPasteEvent(blob);
       console.log('✅ 메타데이터 주입 완료 및 Paste 이벤트 발생!');
-      setIsVisible(false);
+      closeOverlay();
     } catch (error) {
       console.error('Error applying preset:', error);
       alert('적용 중 오류가 발생했습니다.');
-    } finally {
       setIsApplying(false);
     }
+  };
+
+  const headerBtnStyle: React.CSSProperties = {
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    background: 'none',
+    border: 'none',
+    padding: '0 2px',
+    cursor: 'pointer',
+    fontWeight: 'bold',
+    fontSize: '16px',
+    lineHeight: 1,
   };
 
   return (
@@ -85,8 +98,14 @@ export default function App() {
     }}>
       {/* Header — drag handle */}
       <div
-        onMouseDown={(e) => { if (e.button === 0) startDrag(e.clientX, e.clientY); }}
-        onTouchStart={(e) => startDrag(e.touches[0].clientX, e.touches[0].clientY)}
+        onMouseDown={(e) => {
+          if ((e.target as Element).closest('button')) return;
+          if (e.button === 0) startDrag(e.clientX, e.clientY);
+        }}
+        onTouchStart={(e) => {
+          if ((e.target as Element).closest('button')) return;
+          startDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }}
         style={{
           backgroundColor: theme.crust,
           padding: '10px 16px',
@@ -103,6 +122,7 @@ export default function App() {
           cursor: 'grab',
           borderRadius: isCollapsed ? '12px' : '12px 12px 0 0',
           userSelect: 'none',
+          touchAction: 'none',
         }}
       >
         <span>NAI Tag Builder v2.0</span>
@@ -111,14 +131,15 @@ export default function App() {
           <button
             onClick={() => setIsCollapsed(c => !c)}
             title={isCollapsed ? '펼치기' : '접기'}
-            style={{ background: 'none', border: 'none', color: theme.subtext0, cursor: 'pointer', fontWeight: 'bold', fontSize: '16px', lineHeight: 1 }}
+            style={{ ...headerBtnStyle, color: theme.subtext0 }}
           >
             {isCollapsed ? '▲' : '▼'}
           </button>
           {/* Close button */}
           <button
-            onClick={() => setIsVisible(false)}
-            style={{ background: 'none', border: 'none', color: theme.red, cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}
+            onClick={closeOverlay}
+            title="닫기"
+            style={{ ...headerBtnStyle, color: theme.red }}
           >
             &#10005;
           </button>
