@@ -11,10 +11,46 @@ import NegativePrompt from './components/NegativePrompt';
 import AdvancedParams from './components/AdvancedParams';
 import ApplyButton from './components/ApplyButton';
 
+const CONTAINER_ID = 'nai-tag-builder-root';
+
+function startDrag(clientX: number, clientY: number) {
+  const el = document.getElementById(CONTAINER_ID) as HTMLElement | null;
+  if (!el) return;
+
+  const rect = el.getBoundingClientRect();
+  el.style.right = '';
+  el.style.left = rect.left + 'px';
+  el.style.top = rect.top + 'px';
+
+  let lx = clientX, ly = clientY;
+
+  const move = (cx: number, cy: number) => {
+    el.style.left = (parseFloat(el.style.left) + cx - lx) + 'px';
+    el.style.top = (parseFloat(el.style.top) + cy - ly) + 'px';
+    lx = cx;
+    ly = cy;
+  };
+
+  const onMM = (e: MouseEvent) => move(e.clientX, e.clientY);
+  const onTM = (e: TouchEvent) => { e.preventDefault(); move(e.touches[0].clientX, e.touches[0].clientY); };
+  const up = () => {
+    document.removeEventListener('mousemove', onMM);
+    document.removeEventListener('mouseup', up);
+    document.removeEventListener('touchmove', onTM);
+    document.removeEventListener('touchend', up);
+  };
+
+  document.addEventListener('mousemove', onMM);
+  document.addEventListener('mouseup', up);
+  document.addEventListener('touchmove', onTM, { passive: false });
+  document.addEventListener('touchend', up);
+}
+
 export default function App() {
   const [state, dispatch] = useMetadataState();
   const [isApplying, setIsApplying] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   if (!isVisible) return null;
 
@@ -37,49 +73,69 @@ export default function App() {
   return (
     <div style={{
       width: '320px',
-      maxHeight: '80vh',
-      overflowY: 'auto',
+      maxHeight: isCollapsed ? 'none' : '80vh',
+      overflowY: isCollapsed ? 'visible' : 'auto',
       backgroundColor: theme.base,
       color: theme.text,
       borderRadius: '12px',
       boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
       fontFamily: 'sans-serif',
       border: `1px solid ${theme.surface0}`,
-      paddingBottom: '12px',
+      paddingBottom: isCollapsed ? '0' : '12px',
     }}>
-      {/* Header */}
-      <div style={{
-        backgroundColor: theme.crust,
-        padding: '10px 16px',
-        fontWeight: 'bold',
-        fontSize: '14px',
-        borderBottom: `1px solid ${theme.surface0}`,
-        marginBottom: '12px',
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        position: 'sticky',
-        top: 0,
-        zIndex: 1,
-      }}>
+      {/* Header — drag handle */}
+      <div
+        onMouseDown={(e) => { if (e.button === 0) startDrag(e.clientX, e.clientY); }}
+        onTouchStart={(e) => startDrag(e.touches[0].clientX, e.touches[0].clientY)}
+        style={{
+          backgroundColor: theme.crust,
+          padding: '10px 16px',
+          fontWeight: 'bold',
+          fontSize: '14px',
+          borderBottom: isCollapsed ? 'none' : `1px solid ${theme.surface0}`,
+          marginBottom: isCollapsed ? '0' : '12px',
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          position: 'sticky',
+          top: 0,
+          zIndex: 1,
+          cursor: 'grab',
+          borderRadius: isCollapsed ? '12px' : '12px 12px 0 0',
+          userSelect: 'none',
+        }}
+      >
         <span>NAI Tag Builder v2.0</span>
-        <button
-          onClick={() => setIsVisible(false)}
-          style={{ background: 'none', border: 'none', color: theme.red, cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}
-        >
-          &#10005;
-        </button>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
+          {/* Collapse button */}
+          <button
+            onClick={() => setIsCollapsed(c => !c)}
+            title={isCollapsed ? '펼치기' : '접기'}
+            style={{ background: 'none', border: 'none', color: theme.subtext0, cursor: 'pointer', fontWeight: 'bold', fontSize: '16px', lineHeight: 1 }}
+          >
+            {isCollapsed ? '▲' : '▼'}
+          </button>
+          {/* Close button */}
+          <button
+            onClick={() => setIsVisible(false)}
+            style={{ background: 'none', border: 'none', color: theme.red, cursor: 'pointer', fontWeight: 'bold', fontSize: '16px' }}
+          >
+            &#10005;
+          </button>
+        </div>
       </div>
 
       {/* Body */}
-      <div style={{ padding: '0 12px' }}>
-        <PromptSection value={state.basePrompt} dispatch={dispatch} />
-        <GenerationParams state={state} dispatch={dispatch} />
-        <CharacterCaptions characters={state.characters} dispatch={dispatch} />
-        <NegativePrompt state={state} dispatch={dispatch} />
-        <AdvancedParams state={state} dispatch={dispatch} />
-        <ApplyButton isApplying={isApplying} onApply={handleApply} />
-      </div>
+      {!isCollapsed && (
+        <div style={{ padding: '0 12px' }}>
+          <PromptSection value={state.basePrompt} dispatch={dispatch} />
+          <GenerationParams state={state} dispatch={dispatch} />
+          <CharacterCaptions characters={state.characters} dispatch={dispatch} />
+          <NegativePrompt state={state} dispatch={dispatch} />
+          <AdvancedParams state={state} dispatch={dispatch} />
+          <ApplyButton isApplying={isApplying} onApply={handleApply} />
+        </div>
+      )}
     </div>
   );
 }
