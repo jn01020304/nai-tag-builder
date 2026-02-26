@@ -54,13 +54,14 @@ export default function App() {
   const [state, dispatch] = useMetadataState();
   const [isApplying, setIsApplying] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [autoGenerate, setAutoGenerate] = useState(false);
 
   const handleApply = async () => {
     setIsApplying(true);
     try {
       const comment = buildCommentJson(state);
       const blob = await generatePngWithMetadata(comment);
-      dispatchPasteEvent(blob);
+      dispatchPasteEvent(blob, autoGenerate);
       console.log('✅ 메타데이터 주입 완료 및 Paste 이벤트 발생!');
       setIsCollapsed(true);
     } catch (error) {
@@ -155,6 +156,15 @@ export default function App() {
           <CharacterCaptions characters={state.characters} dispatch={dispatch} />
           <NegativePrompt state={state} dispatch={dispatch} />
           <AdvancedParams state={state} dispatch={dispatch} />
+          <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: theme.subtext0, marginBottom: '8px', cursor: 'pointer' }}>
+            <input
+              type="checkbox"
+              checked={autoGenerate}
+              onChange={(e) => setAutoGenerate(e.target.checked)}
+              style={{ accentColor: theme.blue }}
+            />
+            적용 후 자동 생성
+          </label>
           <ApplyButton isApplying={isApplying} onApply={handleApply} />
         </div>
       )}

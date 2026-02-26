@@ -15,7 +15,7 @@ async function waitFor<T>(
   return null;
 }
 
-async function autoImportAndScroll(): Promise<void> {
+async function autoImportAndScroll(autoGenerate: boolean): Promise<void> {
   try {
     // 1. Import Metadata 버튼이 나타날 때까지 대기 (최대 3초)
     const importBtn = await waitFor<HTMLButtonElement>(
@@ -34,17 +34,22 @@ async function autoImportAndScroll(): Promise<void> {
       3000
     );
 
-    // 3. Generate 버튼으로 스크롤
+    // 3. Generate 버튼 찾기
     await delay(300);
     const genBtn = Array.from(document.querySelectorAll('button'))
       .find(b => b.textContent?.includes('Generate')) as HTMLButtonElement | undefined;
-    genBtn?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+    if (autoGenerate && genBtn) {
+      genBtn.click();
+    } else {
+      genBtn?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   } catch {
     // 자동화 실패해도 기본 import 흐름은 유지됨
   }
 }
 
-export function dispatchPasteEvent(blob: Blob): void {
+export function dispatchPasteEvent(blob: Blob, autoGenerate = false): void {
   const file = new File([blob], 'novelai_image.png', { type: 'image/png' });
   const dt = new DataTransfer();
   dt.items.add(file);
@@ -58,5 +63,5 @@ export function dispatchPasteEvent(blob: Blob): void {
   const target = document.querySelector('.ProseMirror') || document.body;
   target.dispatchEvent(pasteEvent);
 
-  void autoImportAndScroll();
+  void autoImportAndScroll(autoGenerate);
 }
