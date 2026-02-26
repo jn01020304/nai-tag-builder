@@ -62,7 +62,7 @@ export default function App() {
       const blob = await generatePngWithMetadata(comment);
       dispatchPasteEvent(blob);
       console.log('✅ 메타데이터 주입 완료 및 Paste 이벤트 발생!');
-      closeOverlay();
+      setIsCollapsed(true);
     } catch (error) {
       console.error('Error applying preset:', error);
       alert('적용 중 오류가 발생했습니다.');
