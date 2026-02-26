@@ -46,10 +46,18 @@ Session bug log and working notes. Reset on phase transition; keep Evergreen Not
 - Listeners are registered identically under mobile UA.
 - Image page JS chunk: `1883-e81a1cb415362c52.js` (lines 226, 1) logs parsed tEXt metadata on paste.
 
+### React Rendering on NovelAI Page
+- NovelAI is a Next.js app with its own React 19 instance.
+- Bundled React's async scheduler (MessageChannel-based) does not fire on this page. `createRoot().render()` creates the container but never flushes content.
+- Fix: wrap `root.render()` in `flushSync()` from `react-dom` to force synchronous rendering. Confirmed working.
+
 ### Delivery Path
 - Mobile OS clipboard has no standard UX for image paste — not viable.
 - Bookmarklet as loader: injects external JS into NovelAI page.
 - Chrome mobile cannot run userscripts/extensions — bookmarklet is the only injection method.
+- localhost script injection from HTTPS page blocked by Chrome Private Network Access policy. Must serve from public HTTPS (GitHub Pages).
+- GitHub Pages URL: `https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js`
+- Chrome DevTools Snippets can paste and run large (210KB+) JS; Console cannot (truncation → SyntaxError).
 
 ---
 
@@ -59,9 +67,9 @@ Session bug log and working notes. Reset on phase transition; keep Evergreen Not
 
 ## Session Log
 
-### Paste blocker investigation
-- diagnose-paste.js: DataTransfer preserves PNG bytes (IDENTICAL). Hypothesis 1 (browser re-encoding) eliminated.
-- diagnose-paste-lsb.js: LSB-only PNG → self-check PASS, alpha LSB MATCH, but no modal at all. NovelAI web frontend does not detect stealth_pngcomp signature.
-- tEXt (Title + Software only, no Comment) + LSB → generic image modal, not Import.
-- inspect-nai-paste.js: pasting real NovelAI image logs full tEXt object from `1883-***.js`. Web frontend reads tEXt on paste.
-- Root cause: previous tEXt set was missing `Source` and `Generation time` chunks. Adding all 6 chunks → Import succeeds, prompt populated, image generated correctly.
+### v2.0 refactor and deployment
+- Refactored monolithic App.tsx (~280 lines) into modular architecture (16 source files).
+- React scheduler conflict: `createRoot().render()` silently produces empty DOM on NovelAI page. No errors, no content. Cause: bundled React's MessageChannel-based scheduler fails to fire alongside NovelAI's own React 19. Fix: `flushSync()`.
+- localhost injection blocked: Chrome Private Network Access policy blocks `<script src="http://localhost">` from HTTPS pages. Error: "Permission was denied for this request to access the loopback address space." Console paste also fails (210KB truncated → SyntaxError). Solution: GitHub Pages deployment.
+- GitHub Actions workflow deploys `dist/` to Pages on push to main. Bookmarklet loads from `https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js`.
+- End-to-end verified on desktop Chrome (mobile emulation): bookmarklet → overlay → Apply → Import modal → image generated matching prompt.
