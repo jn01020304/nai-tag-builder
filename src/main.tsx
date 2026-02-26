@@ -2,7 +2,6 @@ import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import App from './App.tsx';
-import './index.css';
 
 const CONTAINER_ID = 'nai-tag-builder-root';
 
@@ -11,7 +10,7 @@ if (!document.getElementById(CONTAINER_ID)) {
   container.id = CONTAINER_ID;
 
   container.style.position = 'fixed';
-  container.style.bottom = '20px';
+  container.style.top = '20px';
   container.style.right = '20px';
   container.style.zIndex = '999999';
 
