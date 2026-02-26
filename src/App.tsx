@@ -66,6 +66,7 @@ export default function App() {
     } catch (error) {
       console.error('Error applying preset:', error);
       alert('적용 중 오류가 발생했습니다.');
+    } finally {
       setIsApplying(false);
     }
   };
