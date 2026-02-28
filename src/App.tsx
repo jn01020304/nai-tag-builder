@@ -59,6 +59,7 @@ export default function App() {
   const [minInterval, setMinInterval] = useState<number | string>(3);
   const [maxInterval, setMaxInterval] = useState<number | string>(1800);
   const [isLooping, setIsLooping] = useState(false);
+  const [overlayWidth, setOverlayWidth] = useState(320); // Track customizable width
   const loopRef = useRef<number | null>(null);
 
   const stopLoop = () => {
@@ -112,6 +113,35 @@ export default function App() {
     }
   };
 
+  const startResize = (clientX: number) => {
+    let startX = clientX;
+    let startWidth = overlayWidth;
+
+    const onMM = (e: MouseEvent) => {
+      e.preventDefault();
+      setOverlayWidth(Math.max(320, startWidth + (e.clientX - startX)));
+    };
+
+    const onTM = (e: TouchEvent) => {
+      e.preventDefault();
+      setOverlayWidth(Math.max(320, startWidth + (e.touches[0].clientX - startX)));
+    };
+
+    const up = () => {
+      document.body.style.cursor = '';
+      document.removeEventListener('mousemove', onMM);
+      document.removeEventListener('mouseup', up);
+      document.removeEventListener('touchmove', onTM);
+      document.removeEventListener('touchend', up);
+    };
+
+    document.body.style.cursor = 'ew-resize';
+    document.addEventListener('mousemove', onMM);
+    document.addEventListener('mouseup', up);
+    document.addEventListener('touchmove', onTM, { passive: false });
+    document.addEventListener('touchend', up);
+  };
+
   const headerBtnStyle: React.CSSProperties = {
     display: 'inline-flex',
     alignItems: 'center',
@@ -133,7 +163,7 @@ export default function App() {
 
   return (
     <div style={{
-      width: 'fit-content',
+      width: `${overlayWidth}px`,
       minWidth: '320px',
       maxWidth: '90vw',
       maxHeight: isCollapsed ? 'none' : '80vh',
@@ -145,7 +175,26 @@ export default function App() {
       fontFamily: 'sans-serif',
       border: `1px solid ${theme.surface0}`,
       paddingBottom: isCollapsed ? '0' : '12px',
+      position: 'relative', // Relative for absolute components like the handle
     }}>
+      {/* Right Edge Resize Handle */}
+      {!isCollapsed && (
+        <div
+          onMouseDown={(e) => { e.preventDefault(); startResize(e.clientX); }}
+          onTouchStart={(e) => { e.preventDefault(); startResize(e.touches[0].clientX); }}
+          style={{
+            position: 'absolute',
+            top: 0,
+            right: 0,
+            width: '8px',
+            height: '100%',
+            cursor: 'ew-resize',
+            zIndex: 10,
+            touchAction: 'none'
+          }}
+        />
+      )}
+
       {/* Header — drag handle */}
       <div
         onMouseDown={(e) => {
