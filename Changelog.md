@@ -13,7 +13,16 @@ writing:
 
 # Changelog
 
-## v2.1 (2026-02-27)
+## v2.3 (2026-03-01)
+Preset Progression, Rotation, and Randomization.
+- Preset data model: `Preset` interface (`id`, `name`, `state: MetadataState`, `createdAt`) in `src/types/preset.ts`.
+- localStorage CRUD layer: `src/model/presetStorage.ts` (save by name, load all, delete by id, get by id, reorder).
+- `LOAD_PRESET` action in `useMetadataState.ts` — replaces entire editor state with a saved preset's snapshot.
+- `PresetManager.tsx`: save current state as named preset, list presets with Load/Queue/Delete, queue chip display with ▲/▼ reorder, Progression/Random mode selector.
+- Auto-generate loop extended: when queue is non-empty, each tick loads the next preset (sequential or random) from localStorage and dispatches its metadata instead of the fixed editor state.
+- Preset Import/Export: 📥 Import (JSON file → merge into localStorage) and 📤 Export (all presets → JSON file download) buttons in PresetManager UI.
+
+## v2.2 (2026-02-28)
 Mobile verification + UX overhaul.
 - Mobile end-to-end verified on Samsung Galaxy (Chrome). Bookmarklet → overlay → Apply → Import → Generate → image created.
 - Auto-import: paste dispatch now auto-clicks "Import Metadata" and scrolls to Generate button. No manual modal interaction needed.
