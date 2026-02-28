@@ -14,7 +14,8 @@ export type MetadataAction =
   | { type: 'UPDATE_CHARACTER'; id: string; field: keyof CharacterEntry; value: string | number }
   | { type: 'UPDATE_NEG_CHARACTER'; id: string; field: keyof CharacterEntry; value: string | number }
   | { type: 'SWAP_DIMENSIONS' }
-  | { type: 'RESET_TO_DEFAULTS' };
+  | { type: 'RESET_TO_DEFAULTS' }
+  | { type: 'LOAD_PRESET'; state: MetadataState };
 
 function reducer(state: MetadataState, action: MetadataAction): MetadataState {
   switch (action.type) {
@@ -60,6 +61,9 @@ function reducer(state: MetadataState, action: MetadataAction): MetadataState {
 
     case 'RESET_TO_DEFAULTS':
       return { ...DEFAULT_STATE };
+
+    case 'LOAD_PRESET':
+      return { ...action.state };
 
     default:
       return state;

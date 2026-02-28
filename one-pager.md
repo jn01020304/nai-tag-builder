@@ -101,3 +101,17 @@ Session bug log and working notes. Reset on phase transition; keep Evergreen Not
 - Label and number input placed in a flex row with `justify-content: space-between`.
 - Slider uses `accentColor: theme.blue` for consistent theming.
 - Number input uses the same `onBlur` clamping pattern as repeat interval inputs.
+
+### v2.3 Preset Progression, Rotation, Randomization
+
+#### localStorage preset storage
+- Each preset is a full `MetadataState` snapshot (all ~25 fields including character arrays) serialized as JSON.
+- Stored as a JSON array under a single key (`nai-tb-presets`) in `localStorage`. Simple and sufficient — each preset is ~2-4 KB, well within the 5 MB cap.
+- `structuredClone(state)` used on save to break all object references; prevents state mutation from affecting stored presets.
+
+#### Queue-driven auto-generate loop
+- Queue is `string[]` of preset IDs stored in React state (`useState`). Queue index tracked in a `useRef` (not state) to avoid stale closure issues inside `setInterval`.
+- On each interval tick: if queue is non-empty, load the next preset from localStorage by ID, build CommentJson from it, dispatch the paste. If queue is empty, fall back to current editor state.
+- `queueIndexRef.current` resets to 0 on each new `handleApply` call to restart the cycle from the beginning.
+- Mode selector is a `<select>` element with two options: Progression (sequential `% queue.length`) and Randomization (`Math.floor(Math.random() * queue.length)`).
+- Seed bumping logic (for bypassing disabled Generate button) uses the next preset's seed setting, not the editor's current seed.

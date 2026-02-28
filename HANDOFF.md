@@ -12,30 +12,33 @@ writing:
 ---
 
 # Handoff
-Status: v2.2 deployed to GitHub Pages. All v2.1 pending verifications cleared by user on mobile. New UX features confirmed working on desktop.
+Status: v2.3 built locally. Preset Progression, Rotation, Randomization, and Import/Export implementation complete. Not yet deployed.
 
 ## What Was Done This Session
-- Cache-busting: bookmarklet URL now appends `?v='+Date.now()` to bypass stale mobile cache without manual clearing.
-- Number input clamping fix: moved `clamp` logic from `onChange` to `onBlur` so backspace works naturally on all numeric inputs (repeat interval, min/max limits).
-- Slider (gauge bar) controls: Steps and Scale now have `<input type="range">` sliders alongside compact number inputs for easier mobile adjustment.
-- Prompt textarea resize: users can drag the bottom edge to adjust height (`resize: vertical`).
-- Overlay window resize: custom right-edge drag handle allows resizing the entire overlay width. Minimum 320px, maximum 90vw. Uses `position: absolute` invisible 8px-wide handle on the right edge with `cursor: ew-resize`.
-- Seed duplication fix in auto-generate loop: when Generate button is disabled (identical seed + params), the loop now dispatches a fresh paste with incremented seed (fixed seed) or re-randomized seed (seed=0) to bypass the block.
+- Preset data model: `Preset` interface and `QueueMode` type in `src/types/preset.ts`.
+- Preset storage layer: localStorage CRUD utility in `src/model/presetStorage.ts` (save, load, delete, reorder, get-by-id).
+- LOAD_PRESET reducer action: added to `useMetadataState.ts` to replace entire editor state with a saved preset.
+- PresetManager UI component: collapsible section with save-by-name input, preset list (load/queue/delete per item), queue chip display with reorder arrows, and Progression/Random mode selector.
+- Auto-generate loop integration: `App.tsx` now holds queue state (`queue`, `queueMode`, `queueIndexRef`). When queue is non-empty, each loop iteration pulls the next preset from the queue (sequential or random) and dispatches it with seed bumping.
+- Preset Import/Export: `exportPresets()` serializes all presets to JSON for download, `importPresets()` reads a JSON file and merges new presets (skipping duplicate IDs). 📥 Import / 📤 Export buttons added to PresetManager UI.
 
 ## Current State
-- Source: 16 TypeScript files under `src/`.
-- Build: `npm run build` → `dist/nai-tag-builder.js` (~216KB, gzip ~67KB).
+- Source: 19 TypeScript files under `src/`.
+- Build: `npm run build` → `dist/nai-tag-builder.js` (~222KB, gzip ~69KB).
 - Deploy: push to main → GitHub Actions builds → GitHub Pages serves.
 - Git repo: `https://github.com/jn01020304/nai-tag-builder`
 - Bookmarklet URL: `javascript:void(document.body.appendChild(Object.assign(document.createElement('script'),{src:'https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js?v='+Date.now()})))`
 
 ## Pending Verification
+- Preset save/load/delete: not yet tested on the live NovelAI page.
+- Auto-generate with queued presets: Progression and Random modes not yet tested end-to-end.
+- Mobile touch on new PresetManager UI elements.
 - Overlay right-edge resize: confirmed on desktop, not yet tested on mobile touch.
 - Slider controls (Steps/Scale): confirmed on desktop, not yet tested on mobile touch.
-- Seed duplication fix: logic implemented but not yet tested in a real auto-generate session.
+- Preset Import/Export: not yet tested on the live NovelAI page.
 
 ## Next
-1. Feature work: preset save/load (localStorage), Danbooru tag autocomplete, character preset library.
-2. DB Import/Export for presets.
-3. Default values: set bookmarklet default prompt/settings to match user's actual NovelAI workflow.
-4. UX: make prompt and settings manipulation more user-friendly.
+1. Commit and push to deploy v2.3 to GitHub Pages.
+2. Default values: set bookmarklet default prompt/settings to match user's actual NovelAI workflow.
+3. UX: make prompt and settings manipulation more user-friendly.
+

@@ -3,6 +3,8 @@ import { useMetadataState } from './hooks/useMetadataState';
 import { buildCommentJson } from './model/buildCommentJson';
 import { generatePngWithMetadata } from './encoding/pngEncoder';
 import { dispatchPasteEvent } from './encoding/pasteDispatch';
+import { getPresetById } from './model/presetStorage';
+import type { QueueMode } from './types/preset';
 import { theme, inputStyle, labelStyle } from './styles/theme';
 import PromptSection from './components/PromptSection';
 import GenerationParams from './components/GenerationParams';
@@ -10,6 +12,7 @@ import CharacterCaptions from './components/CharacterCaptions';
 import NegativePrompt from './components/NegativePrompt';
 import AdvancedParams from './components/AdvancedParams';
 import ApplyButton from './components/ApplyButton';
+import PresetManager from './components/PresetManager';
 
 const CONTAINER_ID = 'nai-tag-builder-root';
 
@@ -62,6 +65,11 @@ export default function App() {
   const [overlayWidth, setOverlayWidth] = useState(320); // Track customizable width
   const loopRef = useRef<number | null>(null);
 
+  // Preset queue state
+  const [queue, setQueue] = useState<string[]>([]);
+  const [queueMode, setQueueMode] = useState<QueueMode>('progression');
+  const queueIndexRef = useRef(0);
+
   const stopLoop = () => {
     if (loopRef.current) { clearInterval(loopRef.current); loopRef.current = null; }
     setIsLooping(false);
@@ -72,6 +80,19 @@ export default function App() {
   const handleClose = () => {
     stopLoop();
     document.getElementById(CONTAINER_ID)?.remove();
+  };
+
+  const getNextQueueState = () => {
+    if (queue.length === 0) return null;
+    let idx: number;
+    if (queueMode === 'randomization') {
+      idx = Math.floor(Math.random() * queue.length);
+    } else {
+      idx = queueIndexRef.current % queue.length;
+      queueIndexRef.current = idx + 1;
+    }
+    const preset = getPresetById(queue[idx]);
+    return preset?.state ?? null;
   };
 
   const handleApply = async () => {
@@ -85,19 +106,17 @@ export default function App() {
       if (autoGenerate && Number(repeatInterval) > 0) {
         const sec = clamp(Number(repeatInterval), Number(minInterval), Number(maxInterval));
         setIsLooping(true);
+        queueIndexRef.current = 0; // Reset queue position on new loop start
         let currentLoopSeed = Number(state.seed);
         loopRef.current = window.setInterval(async () => {
           const genBtn = Array.from(document.querySelectorAll('button'))
             .find(b => b.textContent?.includes('Generate')) as HTMLButtonElement | undefined;
 
           if (genBtn && genBtn.disabled) {
-            // Button blocked due to identical seed + parameters. 
-            // Dispatch a fresh paste with randomized or incremented seed to bypass.
-            if (state.seed !== 0) {
-              currentLoopSeed += 1;
-            }
-            // By passing seed: 0, buildCommentJson will naturally generate a random seed if state.seed was 0.
-            const loopComment = buildCommentJson({ ...state, seed: state.seed === 0 ? 0 : currentLoopSeed });
+            // Button blocked — dispatch a fresh paste to bypass.
+            const nextState = getNextQueueState() ?? state;
+            const seedToUse = nextState.seed === 0 ? 0 : (currentLoopSeed += 1);
+            const loopComment = buildCommentJson({ ...nextState, seed: seedToUse });
             const loopBlob = await generatePngWithMetadata(loopComment);
             dispatchPasteEvent(loopBlob, true);
           } else {
@@ -258,6 +277,14 @@ export default function App() {
       {/* Body */}
       {!isCollapsed && (
         <div style={{ padding: '0 12px' }}>
+          <PresetManager
+            state={state}
+            dispatch={dispatch}
+            queue={queue}
+            setQueue={setQueue}
+            queueMode={queueMode}
+            setQueueMode={setQueueMode}
+          />
           <PromptSection value={state.basePrompt} dispatch={dispatch} />
           <GenerationParams state={state} dispatch={dispatch} />
           <CharacterCaptions characters={state.characters} dispatch={dispatch} />

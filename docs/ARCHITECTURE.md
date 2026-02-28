@@ -40,21 +40,25 @@ Bookmarklet (user tap)
 ```
 src/
 ├── main.tsx                    Entry point. DOM container + React mount.
-├── App.tsx                     Root component. Overlay shell, drag, collapse, auto-generate loop.
+├── App.tsx                     Root component. Overlay shell, drag, collapse, auto-generate loop, preset queue.
 │
-├── types/metadata.ts           NovelAI V4 Comment JSON TypeScript types.
+├── types/
+│   ├── metadata.ts             NovelAI V4 Comment JSON TypeScript types.
+│   └── preset.ts               Preset interface (id, name, state, createdAt) and QueueMode type.
 ├── model/
 │   ├── defaults.ts             Default values for all ~25 metadata fields.
-│   └── buildCommentJson.ts     UI state → Comment JSON transform.
+│   ├── buildCommentJson.ts     UI state → Comment JSON transform.
+│   └── presetStorage.ts        localStorage CRUD for presets (save, load, delete, reorder, get-by-id, export, import).
 │
 ├── encoding/
 │   ├── pngEncoder.ts           PNG generation: tEXt chunks + stealth_pngcomp LSB encoding.
 │   └── pasteDispatch.ts        Paste event dispatch + post-paste automation (auto-import, auto-generate).
 │
 ├── hooks/
-│   └── useMetadataState.ts     useReducer central state for all metadata fields.
+│   └── useMetadataState.ts     useReducer central state. Actions include LOAD_PRESET.
 │
 ├── components/
+│   ├── PresetManager.tsx        Preset save/load/delete UI and queue management with Progression/Random mode.
 │   ├── PromptSection.tsx        Base prompt textarea (vertical resize).
 │   ├── GenerationParams.tsx     Width/height presets, steps/scale (slider + number), sampler/noise/seed.
 │   ├── CharacterCaptions.tsx    Multi-character entries with x/y center coords.
@@ -99,6 +103,7 @@ Bookmarklet tap
 - Close: ✕ removes the container div from DOM. Clears any active auto-generate loop.
 - Resize: invisible 8px-wide `<div>` on the right edge (`position: absolute; right: 0; cursor: ew-resize`). Drag updates `overlayWidth` state. Minimum 320px, maximum 90vw. Hidden when collapsed.
 - Auto-generate loop: `setInterval` clicks Generate every N seconds. Stop button (■) visible in collapsed header. Interval clamped between configurable min (default 3s) and max (default 1800s). If Generate button is disabled (identical seed+params), loop dispatches a fresh paste with incremented or randomized seed to bypass.
+- Preset queue: when a preset queue is active, each loop iteration loads the next preset from localStorage, builds CommentJson from it, and dispatches it instead of the current editor state. Mode is Progression (sequential) or Randomization (random pick). Queue position tracked via `useRef` to avoid stale closure issues.
 
 ## Encoding Pipeline
 Two parallel encoding methods in pngEncoder.ts, both embedded in the same PNG:
