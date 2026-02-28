@@ -133,7 +133,9 @@ export default function App() {
 
   return (
     <div style={{
-      width: '320px',
+      width: 'fit-content',
+      minWidth: '320px',
+      maxWidth: '90vw',
       maxHeight: isCollapsed ? 'none' : '80vh',
       overflowY: isCollapsed ? 'visible' : 'auto',
       backgroundColor: theme.base,
