@@ -17,7 +17,7 @@ export default function PromptSection({ value, dispatch }: Props) {
         width: '100%',
         boxSizing: 'border-box',
         minHeight: '80px',
-        resize: 'both',
+        resize: 'vertical',
         marginBottom: '8px',
       }}
     />
