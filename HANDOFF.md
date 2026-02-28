@@ -20,6 +20,8 @@ Status: v2.1 deployed to GitHub Pages. Mobile end-to-end verified on Samsung Gal
 - Auto-import: paste dispatch auto-clicks Import Metadata, scrolls to Generate button.
 - Auto-generate: optional checkbox auto-clicks Generate after import. Repeat mode generates every N seconds (configurable interval with min/max limits).
 - Bug fixes: overlay position (bottom → top), index.css global style leak removed, isApplying reset, bookmarklet re-entry after close.
+- Number Input Clamping Fix: `onChange` clamping bug fixed by pushing clamping behavior to `onBlur`, allowing users to delete numbers freely.
+- Cache-busting: added dynamic parameter to the bookmarklet URL (`?v=timestamp`) to bypass mobile Chrome cache issues instantly.
 
 ## Current State
 - Source: 16 TypeScript files under `src/`.
@@ -29,11 +31,9 @@ Status: v2.1 deployed to GitHub Pages. Mobile end-to-end verified on Samsung Gal
 - Bookmarklet URL: `javascript:void(document.body.appendChild(Object.assign(document.createElement('script'),{src:'https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js?v='+Date.now()})))`
 
 ## Pending Verification
-- Drag: not yet confirmed working on mobile (touchAction: none deployed but user hasn't tested latest build with cache cleared). → Clear
-- Collapse button (▼): not yet confirmed visible on mobile (may be obscured by host-page CSS). → Clear
-- Repeat auto-generate: not yet tested on mobile.
+- (All previous pending verifications cleared by user confirmation.)
 
 ## Next
-1. Verify pending items above on mobile (cache cleared).
-~~2. Cache-busting: add `?v=timestamp` or hash param to bookmarklet script URL to avoid stale cache issues.~~ (Done)
+1. UI improvements: use slider (gauge bar) controls for numeric generation settings like Steps and Scale.
+2. Seed Generation: handle identical seeds in repeat mode (e.g., randomize seed on each generation or set to 0).
 3. Feature work: preset save/load (localStorage), Danbooru tag autocomplete, character preset library.
