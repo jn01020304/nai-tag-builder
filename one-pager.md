@@ -113,4 +113,9 @@ Session bug log and working notes. Reset on phase transition; keep Evergreen Not
 - GitHub Pages serves script with default cache headers.
 - After pushing a new build, users must clear mobile Chrome cache to see changes.
 - Path: Settings → Privacy → Clear browsing data → Cached images and files.
-- Future improvement: cache-busting query param in bookmarklet URL.
+- Fix: cache-busting query param (`?v=timestamp`) added to bookmarklet URL.
+
+#### React Input Clamping Issue
+- When using `onChange` with a clamping function (e.g. `clamp(Number(e.target.value), min, max)`), a user trying to backspace the number '3' creates an empty string.
+- This empty string is cast to `0`, which is below the minimum limit, so `clamp` instantly forces the input back to `3`, preventing deletion.
+- Fix: Allow empty strings during `onChange` state updates (e.g. typing), and move the clamping logic strictly to the `onBlur` event handler.
