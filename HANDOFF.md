@@ -12,28 +12,30 @@ writing:
 ---
 
 # Handoff
-Status: v2.1 deployed to GitHub Pages. Mobile end-to-end verified on Samsung Galaxy (Chrome). Auto-import, drag, collapse, repeat-generate all working.
+Status: v2.2 deployed to GitHub Pages. All v2.1 pending verifications cleared by user on mobile. New UX features confirmed working on desktop.
 
 ## What Was Done This Session
-- Mobile real-device testing: bookmarklet installation, execution, full end-to-end flow confirmed.
-- Overlay UX: drag to reposition (mouse + touch), collapse/expand (▼/▲), close removes DOM for clean re-entry.
-- Auto-import: paste dispatch auto-clicks Import Metadata, scrolls to Generate button.
-- Auto-generate: optional checkbox auto-clicks Generate after import. Repeat mode generates every N seconds (configurable interval with min/max limits).
-- Bug fixes: overlay position (bottom → top), index.css global style leak removed, isApplying reset, bookmarklet re-entry after close.
-- Number Input Clamping Fix: `onChange` clamping bug fixed by pushing clamping behavior to `onBlur`, allowing users to delete numbers freely.
-- Cache-busting: added dynamic parameter to the bookmarklet URL (`?v=timestamp`) to bypass mobile Chrome cache issues instantly.
+- Cache-busting: bookmarklet URL now appends `?v='+Date.now()` to bypass stale mobile cache without manual clearing.
+- Number input clamping fix: moved `clamp` logic from `onChange` to `onBlur` so backspace works naturally on all numeric inputs (repeat interval, min/max limits).
+- Slider (gauge bar) controls: Steps and Scale now have `<input type="range">` sliders alongside compact number inputs for easier mobile adjustment.
+- Prompt textarea resize: users can drag the bottom edge to adjust height (`resize: vertical`).
+- Overlay window resize: custom right-edge drag handle allows resizing the entire overlay width. Minimum 320px, maximum 90vw. Uses `position: absolute` invisible 8px-wide handle on the right edge with `cursor: ew-resize`.
+- Seed duplication fix in auto-generate loop: when Generate button is disabled (identical seed + params), the loop now dispatches a fresh paste with incremented seed (fixed seed) or re-randomized seed (seed=0) to bypass the block.
 
 ## Current State
 - Source: 16 TypeScript files under `src/`.
-- Build: `npm run build` → `dist/nai-tag-builder.js` (213KB, gzip 66KB).
+- Build: `npm run build` → `dist/nai-tag-builder.js` (~216KB, gzip ~67KB).
 - Deploy: push to main → GitHub Actions builds → GitHub Pages serves.
 - Git repo: `https://github.com/jn01020304/nai-tag-builder`
 - Bookmarklet URL: `javascript:void(document.body.appendChild(Object.assign(document.createElement('script'),{src:'https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js?v='+Date.now()})))`
 
 ## Pending Verification
-- (All previous pending verifications cleared by user confirmation.)
+- Overlay right-edge resize: confirmed on desktop, not yet tested on mobile touch.
+- Slider controls (Steps/Scale): confirmed on desktop, not yet tested on mobile touch.
+- Seed duplication fix: logic implemented but not yet tested in a real auto-generate session.
 
 ## Next
-1. UI improvements: use slider (gauge bar) controls for numeric generation settings like Steps and Scale.
-2. Seed Generation: handle identical seeds in repeat mode (e.g., randomize seed on each generation or set to 0).
-3. Feature work: preset save/load (localStorage), Danbooru tag autocomplete, character preset library.
+1. Feature work: preset save/load (localStorage), Danbooru tag autocomplete, character preset library.
+2. DB Import/Export for presets.
+3. Default values: set bookmarklet default prompt/settings to match user's actual NovelAI workflow.
+4. UX: make prompt and settings manipulation more user-friendly.

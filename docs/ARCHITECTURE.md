@@ -26,7 +26,7 @@ Enable end-to-end prompt and setting workflows within the NovelAI mobile site to
 ## Injection Mechanism
 ```
 Bookmarklet (user tap)
-  → <script src="...github.io/nai-tag-builder.js">
+  → <script src="...github.io/nai-tag-builder.js?v='+Date.now()">
     → main.tsx creates fixed-position container div
       → ReactDOM.createRoot + flushSync renders <App/>
 ```
@@ -55,8 +55,8 @@ src/
 │   └── useMetadataState.ts     useReducer central state for all metadata fields.
 │
 ├── components/
-│   ├── PromptSection.tsx        Base prompt textarea.
-│   ├── GenerationParams.tsx     Width/height/steps/scale/sampler/noise/seed.
+│   ├── PromptSection.tsx        Base prompt textarea (vertical resize).
+│   ├── GenerationParams.tsx     Width/height presets, steps/scale (slider + number), sampler/noise/seed.
 │   ├── CharacterCaptions.tsx    Multi-character entries with x/y center coords.
 │   ├── NegativePrompt.tsx       Negative base + per-character captions.
 │   ├── AdvancedParams.tsx       CFG rescale, SMEA, dynamic thresholding, etc.
@@ -97,7 +97,8 @@ Bookmarklet tap
 - Drag: header acts as drag handle. Mouse (mousedown/move/up) + touch (touchstart/move/end). `touchAction: 'none'` on header prevents browser scroll interception. On first drag, position switches from `right`-based to `left`-based.
 - Collapse: ▼/▲ toggle hides/shows body. Apply triggers collapse (not removal).
 - Close: ✕ removes the container div from DOM. Clears any active auto-generate loop.
-- Auto-generate loop: `setInterval` clicks Generate every N seconds. Stop button (■) visible in collapsed header. Interval clamped between configurable min (default 3s) and max (default 1800s).
+- Resize: invisible 8px-wide `<div>` on the right edge (`position: absolute; right: 0; cursor: ew-resize`). Drag updates `overlayWidth` state. Minimum 320px, maximum 90vw. Hidden when collapsed.
+- Auto-generate loop: `setInterval` clicks Generate every N seconds. Stop button (■) visible in collapsed header. Interval clamped between configurable min (default 3s) and max (default 1800s). If Generate button is disabled (identical seed+params), loop dispatches a fresh paste with incremented or randomized seed to bypass.
 
 ## Encoding Pipeline
 Two parallel encoding methods in pngEncoder.ts, both embedded in the same PNG:

@@ -58,6 +58,22 @@ Session bug log and working notes. Reset on phase transition; keep Evergreen Not
 - localhost script injection from HTTPS page blocked by Chrome Private Network Access policy. Must serve from public HTTPS (GitHub Pages).
 - GitHub Pages URL: `https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js`
 - Chrome DevTools Snippets can paste and run large (210KB+) JS; Console cannot (truncation → SyntaxError).
+- Cache-busting: bookmarklet URL must include `?v='+Date.now()` to bypass default GitHub Pages cache headers. Without this, mobile Chrome serves stale builds even after push.
+
+### React `<input type="number">` Clamping Pattern
+- Applying min/max clamping inside `onChange` (e.g. `clamp(Number(e.target.value), min, max)`) breaks single-digit deletion. `Number("")` → `0` → clamp forces back to min.
+- Fix: allow empty strings during `onChange`. Apply clamping only in `onBlur`. State type: `number | string`.
+- Same pattern applies to all numeric inputs (repeat interval, limits, steps, scale).
+
+### CSS `resize` Limitations
+- CSS `resize: both` on an element only provides a small drag handle at the bottom-right corner.
+- Browser does not support edge-resize (dragging any border) via CSS alone.
+- To achieve window-like edge resizing, a custom invisible `<div>` positioned absolutely on the desired edge with its own mousedown/touchstart drag handlers is required.
+
+### CSS `fit-content` for Parent-Child Sizing
+- `width: fit-content` on a parent makes it expand to match its largest child's intrinsic width.
+- Useful when a resizable child (e.g. textarea with `resize: both`) needs to push the parent wider.
+- Limitation: does not allow resizing the parent independently of the child.
 
 ---
 
@@ -65,57 +81,23 @@ Session bug log and working notes. Reset on phase transition; keep Evergreen Not
 
 ### Future Test
 - Check auto generation mode to avoid the ban.
+- NovelAI may disable Generate button when seed + all params are identical to previous generation. Auto-generate loop handles this by dispatching a fresh paste with incremented/randomized seed.
 
 ---
 
 ## Session Log
 
-### v2.1 mobile verification and UX
+### v2.2 UX improvements and bug fixes
 
-#### Mobile Chrome bookmarklet execution
-- Bookmarklet cannot be dragged on mobile. Must: bookmark any page → edit bookmark URL to `javascript:void(...)`.
-- To run: type bookmark name in address bar → tap the ★ icon item in dropdown. Pressing Enter triggers a Google search instead.
-- Generic names like "test" get buried by search suggestions. Use unique names like "nai-tag".
-- Alternative: Chrome menu (⋮) → Bookmarks → tap the bookmarklet directly.
+#### Overlay right-edge resize
+- Custom invisible `<div>` (8px wide, `position: absolute`, `right: 0`, full height) acts as a drag handle.
+- `mousedown`/`touchstart` on the handle starts tracking delta and updates `overlayWidth` state.
+- `document.body.style.cursor = 'ew-resize'` during drag for visual feedback even when cursor leaves the handle.
+- Minimum width 320px, maximum 90vw.
+- Hidden when overlay is collapsed.
 
-#### NovelAI DOM selectors
-- Styled-components class names (`sc-2f2fb315-0`, etc.) are hashed per build — never use them as selectors.
-- Use `textContent` matching: `b.textContent?.trim() === 'Import Metadata'`, `b.textContent?.includes('Generate')`.
-- 45+ buttons on the page. The ▼ panel collapse toggle is NOT a `<button>` — may be a div or SVG.
-
-#### Overlay positioning on mobile
-- `position: fixed; bottom: 20px` covers NovelAI's Generate button (also at screen bottom).
-- Fix: `top: 20px`. Overlay at top, Generate button at bottom — no conflict.
-
-#### Global CSS leak from Vite defaults
-- Default `index.css` has global rules: `body { display: flex; min-height: 100vh }`, `button { border-radius: 8px; background-color: #1a1a1a }`.
-- These override NovelAI's own styles — can hide buttons or break layout.
-- Fix: remove `import './index.css'` from main.tsx. All overlay styles use inline React styles via theme.ts.
-
-#### Bookmarklet re-entry after close
-- `setIsVisible(false)` → React returns null but container div remains in DOM.
-- Next bookmarklet invocation: `document.getElementById(CONTAINER_ID)` finds the empty div → skips creation → nothing happens.
-- Fix: `document.getElementById(CONTAINER_ID)?.remove()` on close. Full DOM removal lets bookmarklet recreate from scratch.
-
-#### Mobile touch drag
-- `onTouchStart` via React is passive by default in Chrome — browser claims the gesture for scrolling.
-- CSS `touchAction: 'none'` on the drag handle is required. Tells browser to not handle any touch gestures on that element.
-- Must also add `touchmove` listener to `document` with `{ passive: false }` and call `e.preventDefault()`.
-- Use `(e.target as Element).closest('button')` check to skip drag when tapping header buttons.
-
-#### Paste side effect: blank PNG in image panel
-- Dispatching paste event with a PNG makes NovelAI add the image to its history/display panel.
-- On mobile, the image panel expands → pushes Generate button below fold.
-- Not a bug in our code — side effect of the paste-based injection method.
-- Mitigated by auto-clicking Import Metadata + scrolling to Generate button after import.
-
-#### Browser cache on mobile
-- GitHub Pages serves script with default cache headers.
-- After pushing a new build, users must clear mobile Chrome cache to see changes.
-- Path: Settings → Privacy → Clear browsing data → Cached images and files.
-- Fix: cache-busting query param (`?v=timestamp`) added to bookmarklet URL.
-
-#### React Input Clamping Issue
-- When using `onChange` with a clamping function (e.g. `clamp(Number(e.target.value), min, max)`), a user trying to backspace the number '3' creates an empty string.
-- This empty string is cast to `0`, which is below the minimum limit, so `clamp` instantly forces the input back to `3`, preventing deletion.
-- Fix: Allow empty strings during `onChange` state updates (e.g. typing), and move the clamping logic strictly to the `onBlur` event handler.
+#### Slider controls for Steps and Scale
+- `<input type="range">` paired with compact `<input type="number">` (48px wide).
+- Label and number input placed in a flex row with `justify-content: space-between`.
+- Slider uses `accentColor: theme.blue` for consistent theming.
+- Number input uses the same `onBlur` clamping pattern as repeat interval inputs.
