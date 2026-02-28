@@ -1,0 +1,246 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Wildcards txt files</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      width: 320px;
+      padding: 12px;
+    }
+
+    ul {
+      padding: 0;
+      list-style: none;
+    }
+
+    li {
+      margin: 4px 0;
+    }
+
+    .folder-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      cursor: pointer;
+      font-weight: bold;
+      color: blue;
+      transition: box-shadow 0.2s ease-in-out;
+    }
+
+    .folder-header.active {
+      box-shadow: 0 0 8px 3px rgba(255, 152, 0, 0.8);
+      animation: pulse 1s infinite alternate;
+    }
+
+    .file-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      word-break: break-all;
+    }
+
+    .file-item.selected {
+      background: #d0eaff;
+    }
+
+    button {
+      margin-left: 8px;
+    }
+
+    select {
+      margin-left: 8px;
+    }
+
+    .folder-list {
+      padding-left: 12px;
+      display: none;
+    }
+
+    .folder-header.drop-target {
+      background-color: #e0f7fa;
+      border: 2px dashed #00acc1;
+    }
+
+    #backBtn {
+      transition: box-shadow 0.2s ease-in-out;
+    }
+
+    #backBtn.active {
+      box-shadow: 0 0 8px 3px rgba(255, 152, 0, 0.8);
+      animation: pulse 1s infinite alternate;
+    }
+
+    #backBtn.drop-target {
+      background-color: #fff3e0;
+      border: 2px dashed #fb8c00;
+    }
+
+    @keyframes pulse {
+      from {
+        box-shadow: 0 0 8px 3px rgba(255, 152, 0, 0.8);
+      }
+
+      to {
+        box-shadow: 0 0 16px 6px rgba(255, 152, 0, 0.8);
+      }
+    }
+
+    #langToggle {
+      text-align: right;
+      margin-bottom: 8px;
+    }
+
+    #langToggle button {
+      margin: 0 4px;
+      padding: 2px 6px;
+    }
+
+    li.file-item {
+      position: relative;
+      transition: box-shadow 0.2s ease, border-color 0.2s ease;
+    }
+
+    li.file-item:hover {
+      box-shadow: 0 0 0 2px rgba(0, 172, 193, 0.8);
+      cursor: pointer;
+    }
+
+    .folder-header {
+      position: relative;
+      transition: box-shadow 0.2s ease, background-color 0.2s ease;
+    }
+
+    .folder-header:hover {
+      box-shadow: 0 0 0 2px rgba(0, 172, 193, 0.8);
+      background-color: rgba(0, 172, 193, 0.1);
+      cursor: pointer;
+    }
+
+    #folder-create {
+      display: flex;
+    }
+
+    #newFolderName {
+      margin-left: -5px;
+    }
+
+    #folder-create button {
+      white-space: nowrap;
+    }
+
+    #fileCreateInFolder {
+      display: flex;
+    }
+
+    #newFileNameInFolder {
+      margin-left: -5px;
+      flex: 0.5;
+      width: 120px;
+    }
+
+    #renameFolderBtn button {
+      white-space: nowrap;
+    }
+
+    #viewTitle {
+      cursor: pointer;
+      position: relative;
+    }
+
+    #viewTitle::after {
+      content: "▶";
+      font-size: 0.8em;
+      margin-left: 5px;
+      transition: transform 0.3s;
+      display: inline-block;
+    }
+
+    #viewTitle.collapsed::after {
+      transform: rotate(90deg);
+    }
+
+    #viewTitle.inFolder::after {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+  <button id="backBtn" style="display:none; margin-bottom:8px;">◀ Back</button>
+  <header style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+    <h2 id="viewTitle" data-i18n-key="settings">Settings</h2>
+    <div id="langToggle">
+      <button id="btn-en">EN</button>
+      <button id="btn-jp">JP</button>
+    </div>
+  </header>
+
+  <!-- Root view content -->
+  <div id="rootContent">
+    <!-- Settings -->
+    <div id="settings">
+      <label style="font-size:0.85rem;">
+        <input type="checkbox" id="preservePrompt" checked>
+        <b id="preserveLabel" data-i18n-key="preserveLabel">Preserve Original img prompts on Enhance</b><br>
+        <span id="preserveDesc" data-i18n-key="preserveDesc">・Uncheck this to randomize enhance prompts.</span>
+      </label><br>
+
+      <label style="font-size:0.85rem;">
+        <input type="checkbox" id="alternativeDanbooruAutocomplete">
+        <b id="alternativeLabel" data-i18n-key="alternativeLabel">Full Alternative Danbooru Autocomplete</b><br>
+        <span id="alternativeDesc" data-i18n-key="alternativeDesc">・a1111 WebUI style Danbooru Autocomplete.</span>
+      </label><br><br>
+
+      <b id="triggerTitle" data-i18n-key="triggerTitle" style="font-size:0.9rem;">Autocomplete Trigger Keys</b><br>
+      <label style="font-size:0.85rem;">
+        <input type="checkbox" id="triggerSpace" checked>
+        <b id="spaceLabel" data-i18n-key="space">Space</b>: <span id="spaceDesc" data-i18n-key="spaceDesc">Works fine
+          along with NAI default.</span>
+      </label><br>
+      <label style="font-size:0.85rem;">
+        <input type="checkbox" id="triggerTab">
+        <b id="tabLabel" data-i18n-key="tab">Tab</b>: <span id="tabDesc" data-i18n-key="tabDesc">Use with "Disable Tag
+          Suggestions" ON.</span>
+      </label><br>
+    </div>
+    <!-- Root upload -->
+    <h2 id="wildcardsTitle" data-i18n-key="wildcards">Wildcards</h2>
+    <div id="folder-create">
+      <input type="text" id="newFolderName" placeholder="New Name">
+      <button id="createFolderBtn">New Folder</button>
+      <button id="createFileBtn">New File</button>
+    </div><br>
+    <input type="file" id="fileRoot" accept=".txt" multiple><br><br>
+  </div>
+
+  <!-- Folder-specific -->
+  <div id="fileCreateInFolder" style="display:none;">
+    <input type="text" id="newFileNameInFolder" placeholder="New Name">
+    <button id="renameFolderBtn">Rename Folder</button>
+    <button id="createFileBtnInFolder">New File</button>
+  </div><br>
+  <input type="file" id="fileInFolder" accept=".txt" multiple style="display:none;">
+  <!-- List container -->
+  <ul id="list"></ul>
+
+  <div id="editor-mode" style="display: none;">
+    <button id="editor-back-btn">◀ Back</button>
+    <div style="margin: 10px 0;">
+      <label for="file-name-editor">Wildcards Name:</label>
+      <input type="text" id="file-name-editor" style="width: 80%;">
+    </div>
+    <div style="margin: 10px 0;">
+      <textarea id="file-content-editor" style="width: 100%; height: 350px; resize: vertical;"></textarea>
+    </div>
+    <button id="save-file-btn">Save</button>
+  </div>
+
+  <!-- External scripts only -->
+  <script src="popup.js"></script>
+</body>
+
+</html>

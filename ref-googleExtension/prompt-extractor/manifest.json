@@ -1,0 +1,31 @@
+{
+   "action": {
+      "default_title": "__MSG_extensionName__"
+   },
+   "background": {
+      "service_worker": "background.js",
+      "type": "module"
+   },
+   "content_scripts": [ {
+      "js": [ "content.js" ],
+      "matches": [ "\u003Call_urls>" ]
+   } ],
+   "default_locale": "en",
+   "description": "__MSG_extensionDescription__",
+   "host_permissions": [ "\u003Call_urls>", "file:///*" ],
+   "icons": {
+      "128": "icons/icon128.png",
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png"
+   },
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3tlSAPxPHTJUDGKaHUHh1xP3x/Cbhtc+l47V8JZggeCUwmNRSmOkrPz/CIvi0QkSxC8ARf846GRZqABBltViUzyW/sjJJL6Mlnpvaw5UV2fFm5t5XXOkjZkJCtzaUOYPSMlgHV/OEws5CGDfytJC9zcUROVIBuTqAf7YTZUVhB7Kx+4Hz4lDvpz/NxF6ZkCfmJWz0zqC0l/HdKHtpkGZ2wbNalKdPShZ2FSKoWMMoMtxIMdx+h7Q4EltZQhq+kKUfToqnmpez0r+Fj0gYSDUk1Wp1VunojWmgYIFcIpQUjClaETnJMZ84cEj7M+UDKyh7dOrhq+F49ZYYH+St55o1QIDAQAB",
+   "manifest_version": 3,
+   "name": "__MSG_extensionName__",
+   "permissions": [ "storage", "contextMenus" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "0.8.0",
+   "web_accessible_resources": [ {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "fonts/Paperlogy-4Regular.woff2", "fonts/PretendardVariable.woff2", "modal.css" ]
+   } ]
+}
