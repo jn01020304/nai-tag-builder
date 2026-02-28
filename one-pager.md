@@ -63,13 +63,54 @@ Session bug log and working notes. Reset on phase transition; keep Evergreen Not
 
 ## Bug Investigation
 
+### Future Test
+- Check auto generation mode to avoid the ban.
+
 ---
 
 ## Session Log
 
-### v2.0 refactor and deployment
-- Refactored monolithic App.tsx (~280 lines) into modular architecture (16 source files).
-- React scheduler conflict: `createRoot().render()` silently produces empty DOM on NovelAI page. No errors, no content. Cause: bundled React's MessageChannel-based scheduler fails to fire alongside NovelAI's own React 19. Fix: `flushSync()`.
-- localhost injection blocked: Chrome Private Network Access policy blocks `<script src="http://localhost">` from HTTPS pages. Error: "Permission was denied for this request to access the loopback address space." Console paste also fails (210KB truncated → SyntaxError). Solution: GitHub Pages deployment.
-- GitHub Actions workflow deploys `dist/` to Pages on push to main. Bookmarklet loads from `https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js`.
-- End-to-end verified on desktop Chrome (mobile emulation): bookmarklet → overlay → Apply → Import modal → image generated matching prompt.
+### v2.1 mobile verification and UX
+
+#### Mobile Chrome bookmarklet execution
+- Bookmarklet cannot be dragged on mobile. Must: bookmark any page → edit bookmark URL to `javascript:void(...)`.
+- To run: type bookmark name in address bar → tap the ★ icon item in dropdown. Pressing Enter triggers a Google search instead.
+- Generic names like "test" get buried by search suggestions. Use unique names like "nai-tag".
+- Alternative: Chrome menu (⋮) → Bookmarks → tap the bookmarklet directly.
+
+#### NovelAI DOM selectors
+- Styled-components class names (`sc-2f2fb315-0`, etc.) are hashed per build — never use them as selectors.
+- Use `textContent` matching: `b.textContent?.trim() === 'Import Metadata'`, `b.textContent?.includes('Generate')`.
+- 45+ buttons on the page. The ▼ panel collapse toggle is NOT a `<button>` — may be a div or SVG.
+
+#### Overlay positioning on mobile
+- `position: fixed; bottom: 20px` covers NovelAI's Generate button (also at screen bottom).
+- Fix: `top: 20px`. Overlay at top, Generate button at bottom — no conflict.
+
+#### Global CSS leak from Vite defaults
+- Default `index.css` has global rules: `body { display: flex; min-height: 100vh }`, `button { border-radius: 8px; background-color: #1a1a1a }`.
+- These override NovelAI's own styles — can hide buttons or break layout.
+- Fix: remove `import './index.css'` from main.tsx. All overlay styles use inline React styles via theme.ts.
+
+#### Bookmarklet re-entry after close
+- `setIsVisible(false)` → React returns null but container div remains in DOM.
+- Next bookmarklet invocation: `document.getElementById(CONTAINER_ID)` finds the empty div → skips creation → nothing happens.
+- Fix: `document.getElementById(CONTAINER_ID)?.remove()` on close. Full DOM removal lets bookmarklet recreate from scratch.
+
+#### Mobile touch drag
+- `onTouchStart` via React is passive by default in Chrome — browser claims the gesture for scrolling.
+- CSS `touchAction: 'none'` on the drag handle is required. Tells browser to not handle any touch gestures on that element.
+- Must also add `touchmove` listener to `document` with `{ passive: false }` and call `e.preventDefault()`.
+- Use `(e.target as Element).closest('button')` check to skip drag when tapping header buttons.
+
+#### Paste side effect: blank PNG in image panel
+- Dispatching paste event with a PNG makes NovelAI add the image to its history/display panel.
+- On mobile, the image panel expands → pushes Generate button below fold.
+- Not a bug in our code — side effect of the paste-based injection method.
+- Mitigated by auto-clicking Import Metadata + scrolling to Generate button after import.
+
+#### Browser cache on mobile
+- GitHub Pages serves script with default cache headers.
+- After pushing a new build, users must clear mobile Chrome cache to see changes.
+- Path: Settings → Privacy → Clear browsing data → Cached images and files.
+- Future improvement: cache-busting query param in bookmarklet URL.

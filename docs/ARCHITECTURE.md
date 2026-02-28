@@ -13,65 +13,106 @@ writing:
 
 # Architecture
 
-Goal: build and inject NovelAI generation presets from a single overlay UI on the NovelAI page, without leaving the page.
+## Objective
+Enable end-to-end prompt and setting workflows within the NovelAI mobile site to eliminate external screen switching.
 
-## Delivery
+## Planned Solutions
+1. Full Presets: Ready-to-use configurations for immediate image generation.
+2. Category Presets: Modular selection and combination of elements (outfits, backgrounds, etc.).
+3. Tag Auto-Complete: Suggested tags during prompt entry (Benchmark: `@ref-googleExtension\danbooru-auto-complete`).
 
-Bookmarklet injects a `<script>` tag pointing to GitHub Pages. The script is an IIFE that bundles React + all application code into a single file (`nai-tag-builder.js`, ~211KB). No external dependencies at runtime.
+---
 
-Bookmarklet → `<script src="https://...github.io/.../nai-tag-builder.js">` → IIFE executes → fixed-position overlay appears.
+## Injection Mechanism
+```
+Bookmarklet (user tap)
+  → <script src="...github.io/nai-tag-builder.js">
+    → main.tsx creates fixed-position container div
+      → ReactDOM.createRoot + flushSync renders <App/>
+```
+
+- Bookmarklet loads the bundled JS from GitHub Pages into the NovelAI page.
+- `flushSync()` is required because NovelAI's own React 19 scheduler conflicts with our bundled React's async MessageChannel scheduler. Without it, createRoot().render() silently produces empty DOM.
+- Container: `position: fixed; top: 20px; right: 20px; z-index: 999999`. Bottom positioning is avoided because NovelAI's Generate button is fixed at the bottom on mobile.
+- No `index.css` import — global CSS leaks into the host page and breaks NovelAI's own button/body styles. All styling uses inline React styles via `theme.ts`.
 
 ## Module Structure
-
 ```
 src/
-  main.tsx                    Entry point. Creates container div, mounts React with flushSync.
-  App.tsx                     Orchestrator. Wires state, components, and apply handler.
-
-  types/metadata.ts           CommentJson, MetadataState, CharCaption, Sampler, NoiseSchedule.
-  model/defaults.ts           Default values for all metadata fields.
-  model/buildCommentJson.ts   Pure function: MetadataState → CommentJson.
-
-  encoding/pngEncoder.ts      Canvas → PNG with tEXt chunks (6 keys) + alpha LSB (stealth_pngcomp).
-  encoding/pasteDispatch.ts   Creates ClipboardEvent with DataTransfer, dispatches to ProseMirror.
-
-  hooks/useMetadataState.ts   useReducer managing ~25 fields. Character add/remove auto-syncs positive/negative.
-
-  components/
-    CollapsibleSection.tsx    Reusable accordion wrapper.
-    PromptSection.tsx         Base prompt textarea.
-    GenerationParams.tsx      Width/height (with presets), steps, scale, sampler, noise, seed.
-    CharacterCaptions.tsx     Dynamic add/remove. Each: textarea + x/y center inputs.
-    NegativePrompt.tsx        Base negative textarea + per-character negatives (auto-synced).
-    AdvancedParams.tsx        CFG rescale, uncond scale, SMEA, thresholding, brownian, vibe, coords/order.
-    ApplyButton.tsx           Apply button with loading state.
-
-  styles/theme.ts             Catppuccin Mocha color tokens + shared input/label styles.
+├── main.tsx                    Entry point. DOM container + React mount.
+├── App.tsx                     Root component. Overlay shell, drag, collapse, auto-generate loop.
+│
+├── types/metadata.ts           NovelAI V4 Comment JSON TypeScript types.
+├── model/
+│   ├── defaults.ts             Default values for all ~25 metadata fields.
+│   └── buildCommentJson.ts     UI state → Comment JSON transform.
+│
+├── encoding/
+│   ├── pngEncoder.ts           PNG generation: tEXt chunks + stealth_pngcomp LSB encoding.
+│   └── pasteDispatch.ts        Paste event dispatch + post-paste automation (auto-import, auto-generate).
+│
+├── hooks/
+│   └── useMetadataState.ts     useReducer central state for all metadata fields.
+│
+├── components/
+│   ├── PromptSection.tsx        Base prompt textarea.
+│   ├── GenerationParams.tsx     Width/height/steps/scale/sampler/noise/seed.
+│   ├── CharacterCaptions.tsx    Multi-character entries with x/y center coords.
+│   ├── NegativePrompt.tsx       Negative base + per-character captions.
+│   ├── AdvancedParams.tsx       CFG rescale, SMEA, dynamic thresholding, etc.
+│   ├── CollapsibleSection.tsx   Reusable ▶/▼ collapsible wrapper.
+│   └── ApplyButton.tsx          Apply button with loading state.
+│
+└── styles/theme.ts             Catppuccin Mocha palette + shared input/label/button styles.
 ```
 
 ## Data Flow
+```
+User input
+  → useMetadataState (useReducer)
+    → buildCommentJson(state) → Comment JSON object
+      → pngEncoder: tEXt chunks + LSB stealth encoding → PNG Blob
+        → pasteDispatch: ClipboardEvent('paste') to .ProseMirror
+          → autoImportAndScroll:
+              waitFor("Import Metadata" button) → click
+              waitFor(modal closes) → scroll/click Generate
+```
 
-1. User edits fields → dispatch actions to useMetadataState reducer.
-2. Apply button clicked → `buildCommentJson(state)` produces full Comment JSON.
-3. `generatePngWithMetadata(json)` creates a canvas, writes LSB bits in alpha channel (column-major), exports to PNG blob, injects 6 tEXt chunks after IHDR.
-4. `dispatchPasteEvent(blob)` wraps blob in File/DataTransfer, fires ClipboardEvent on ProseMirror element.
-5. NovelAI's paste listener reads tEXt chunks → Import modal → fields populated.
+## Overlay Lifecycle
+```
+Bookmarklet tap
+  → Container div created, React mounts <App/>
+    → User fills fields, taps Apply
+      → PNG generated, paste dispatched
+      → Overlay collapses to header strip (not removed)
+      → Auto-import runs in background
+    → User can expand (▲) to edit and re-apply
+    → User taps ✕
+      → stopLoop() (if auto-generate active)
+      → Container div removed from DOM entirely
+        → Next bookmarklet tap recreates from scratch
+```
 
-## Key Design Decisions
+## Overlay UX
+- Drag: header acts as drag handle. Mouse (mousedown/move/up) + touch (touchstart/move/end). `touchAction: 'none'` on header prevents browser scroll interception. On first drag, position switches from `right`-based to `left`-based.
+- Collapse: ▼/▲ toggle hides/shows body. Apply triggers collapse (not removal).
+- Close: ✕ removes the container div from DOM. Clears any active auto-generate loop.
+- Auto-generate loop: `setInterval` clicks Generate every N seconds. Stop button (■) visible in collapsed header. Interval clamped between configurable min (default 3s) and max (default 1800s).
 
-flushSync for rendering: NovelAI (Next.js) has its own React 19 instance. Our bundled React's async scheduler (MessageChannel) silently fails to fire on this page. `flushSync()` forces synchronous rendering, bypassing the scheduler entirely.
+## Encoding Pipeline
+Two parallel encoding methods in pngEncoder.ts, both embedded in the same PNG:
 
-Character sync: Adding a positive character auto-creates a matching negative character entry (same ID). Removing one removes both. This mirrors NovelAI's expectation that char_captions arrays are parallel.
+1. tEXt chunks (primary): 6 chunks inserted after IHDR — `Title`, `Description`, `Software`, `Source`, `Generation time`, `Comment`. NovelAI reads these on paste to trigger the Import modal.
 
-Dual-write for negative prompt: `uc` (legacy string) and `v4_negative_prompt.caption.base_caption` both receive the same negative base text. NovelAI reads both for V3/V4 compatibility.
+2. stealth_pngcomp LSB (defense-in-depth): gzip-compressed JSON embedded in alpha channel LSBs, column-major order. Signature: "stealth_pngcomp" (120 bits). Not used by NovelAI's web frontend for import detection, but kept for compatibility with Python tools.
 
-Seed 0 = random: The seed field stores 0 as "generate random." `buildCommentJson` generates `Math.floor(Math.random() * 2**32)` at apply time, not at state-change time, so each Apply produces a fresh seed.
+## Appendix: NovelAI V4 Comment JSON Reference
+Captured from a real 2-character generation. This is the `Comment` tEXt chunk payload.
 
-IIFE format: Vite builds as IIFE so the entire bundle executes immediately when the script tag loads. No module system, no import maps needed on the host page.
+Key structures:
+- `v4_prompt.caption.base_caption` — shared prompt
+- `v4_prompt.caption.char_captions[]` — per-character prompts with `centers[].x/y`
+- `v4_negative_prompt` — same structure for negative
+- Top-level `prompt` and `uc` — duplicates of base_caption / negative base_caption
 
-CSS-in-JS via inline styles: Avoids leaking styles to NovelAI's page and avoids NovelAI's styles affecting our overlay. `vite-plugin-css-injected-by-js` handles the minimal global CSS (index.css).
-
-## Build and Deploy
-
-`npm run build` → Vite builds `dist/nai-tag-builder.js` (IIFE).
-Push to main → GitHub Actions: checkout → npm ci → npm run build → deploy dist/ to GitHub Pages.
+See `⏳History.md` lines 489-557 for the full captured JSON sample.

@@ -55,9 +55,9 @@ export default function App() {
   const [isApplying, setIsApplying] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [autoGenerate, setAutoGenerate] = useState(false);
-  const [repeatInterval, setRepeatInterval] = useState(30);
-  const [minInterval, setMinInterval] = useState(3);
-  const [maxInterval, setMaxInterval] = useState(1800);
+  const [repeatInterval, setRepeatInterval] = useState<number | string>(30);
+  const [minInterval, setMinInterval] = useState<number | string>(3);
+  const [maxInterval, setMaxInterval] = useState<number | string>(1800);
   const [isLooping, setIsLooping] = useState(false);
   const loopRef = useRef<number | null>(null);
 
@@ -81,8 +81,8 @@ export default function App() {
       dispatchPasteEvent(blob, autoGenerate);
       setIsCollapsed(true);
 
-      if (autoGenerate && repeatInterval > 0) {
-        const sec = clamp(repeatInterval, minInterval, maxInterval);
+      if (autoGenerate && Number(repeatInterval) > 0) {
+        const sec = clamp(Number(repeatInterval), Number(minInterval), Number(maxInterval));
         setIsLooping(true);
         loopRef.current = window.setInterval(() => {
           const genBtn = Array.from(document.querySelectorAll('button'))
@@ -221,7 +221,8 @@ export default function App() {
                     value={repeatInterval}
                     min={minInterval}
                     max={maxInterval}
-                    onChange={(e) => setRepeatInterval(clamp(Number(e.target.value), minInterval, maxInterval))}
+                    onChange={(e) => setRepeatInterval(e.target.value === '' ? '' : Number(e.target.value))}
+                    onBlur={() => setRepeatInterval(clamp(Number(repeatInterval) || 0, Number(minInterval), Number(maxInterval)))}
                     style={smallNumInput}
                   />
                   <span style={{ fontSize: '12px', color: theme.subtext0 }}>초 ({minInterval}~{maxInterval})</span>
@@ -233,7 +234,8 @@ export default function App() {
                     type="number"
                     value={minInterval}
                     min={1}
-                    onChange={(e) => setMinInterval(Math.max(1, Number(e.target.value)))}
+                    onChange={(e) => setMinInterval(e.target.value === '' ? '' : Number(e.target.value))}
+                    onBlur={() => setMinInterval(Math.max(1, Number(minInterval) || 1))}
                     style={{ ...smallNumInput, width: '48px', fontSize: '11px' }}
                   />
                   <span>~</span>
@@ -241,7 +243,8 @@ export default function App() {
                     type="number"
                     value={maxInterval}
                     min={minInterval}
-                    onChange={(e) => setMaxInterval(Math.max(minInterval, Number(e.target.value)))}
+                    onChange={(e) => setMaxInterval(e.target.value === '' ? '' : Number(e.target.value))}
+                    onBlur={() => setMaxInterval(Math.max(Number(minInterval) || 1, Number(maxInterval) || 1))}
                     style={{ ...smallNumInput, width: '48px', fontSize: '11px' }}
                   />
                   <span>초</span>

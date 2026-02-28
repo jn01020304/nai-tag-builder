@@ -1,0 +1,14 @@
+{
+   "contextMenuTitle": {
+      "description": "컨텍스트 메뉴 항목 텍스트입니다.",
+      "message": "프롬프트 정보 보기"
+   },
+   "extensionDescription": {
+      "description": "확장 프로그램의 설명입니다.",
+      "message": "AI 이미지(WebUI, ComfyUI, NAI)의 PNG 메타데이터를 우클릭 메뉴로 간편하게 확인합니다."
+   },
+   "extensionName": {
+      "description": "확장 프로그램의 이름입니다.",
+      "message": "프롬프트 뷰어"
+   }
+}

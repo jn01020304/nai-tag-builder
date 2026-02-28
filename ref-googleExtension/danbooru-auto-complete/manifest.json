@@ -1,0 +1,22 @@
+{
+   "action": {
+      "default_popup": "popup.html"
+   },
+   "content_scripts": [ {
+      "js": [ "bridge.js" ],
+      "matches": [ "*://*.novelai.net/*" ],
+      "run_at": "document_start"
+   } ],
+   "description": "swap __wildcards__ prompts to .txt file content + Alternative prompt autocomplete",
+   "host_permissions": [ "https://image.novelai.net/*" ],
+   "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAqDDWIMwMxjoAItRU9QkIjMxrivVrqrDPjRS2GTK7neFudXb/r5g00Sz+tZR0NKh3jr8qxaTEQlpHbFOHnqpEXHVviUgBKA2Tgu0laTtiyPnqeI0k7/aXKpdNYbqSlt+Q5yvV6Im0UXWS4lJbGjEewo2G0aXRXX5v8oSFhQHV7Z+0styHhIiKVS6tgU8gJZP7fTap3SUaiS2QvZN0nQlnTD9UGQggPs1NbcnLiGYjsSwVNuALh02jiYfRKBjKabPjQwbJoDdF9rh5cIsCjsfFxoICCvHawAEJU+EOakcZHOvwu77paOjcPT41vykvrTR1z6yHO93fbjzK2bJubupRTQIDAQAB",
+   "manifest_version": 3,
+   "name": "Wildcards and Danbooru Autocomplete for NovelAI Diffusion",
+   "permissions": [ "storage" ],
+   "update_url": "https://clients2.google.com/service/update2/crx",
+   "version": "3.0.4",
+   "web_accessible_resources": [ {
+      "matches": [ "\u003Call_urls>" ],
+      "resources": [ "injector.js", "dictionary.csv" ]
+   } ]
+}

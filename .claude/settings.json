@@ -1,0 +1,26 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git mv \"AG_세팅가이드/tarot-arcana.css\" \"module-tarotArcana/src/tarot-arcana.css\")",
+      "Bash(git mv \"AG_세팅가이드/tarot-regex.json\" \"module-tarotArcana/src/tarot-regex.json\")",
+      "Bash(git mv \"AG_세팅가이드/tarot-triggers.json\" \"module-tarotArcana/src/tarot-triggers.json\")",
+      "Bash(git -C \"d:/Archive-Risu/RisuAI\" show HEAD:\"module-tarotArcana/src/tarot-arcana.css\")",
+      "Bash(python -c \":*)",
+      "Bash(grep -l \"editDisplay\\\\|editdisplay\" /d/Archive-Risu/RisuAI/src/**/*.svelte)",
+      "Bash(git add module-tarotArcana/src/tarot-arcana.lua module-tarotArcana/src/tarot-arcana.css module-tarotArcana/src/tarot-regex.json module-tarotArcana/HANDOFF.md module-tarotArcana/Changelog.md module-tarotArcana/Roadmap.md module-tarotArcana/one-pager.md)",
+      "Bash(git reset HEAD module-dynamicMap/ \"AG_세팅가이드/\")",
+      "Bash(git commit:*)",
+      "Bash(xxd \"d:/Archive-Risu/RisuAI/module-tarotArcana/src/tarot-arcana.lua\")",
+      "Bash(grep -rn \"@\\\\w\\\\+\\\\|@-\" module-*/ --include=\"*.ts\" --include=\"*.json\" --include=\"*.lua\")",
+      "Bash(xargs grep -l \"DOMPurify\")",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(curl -s https://raw.githubusercontent.com/NovelAI/novelai-image-metadata/main/nai_meta_writer.py)",
+      "Bash(node -c dist/nai-tag-builder.js)",
+      "Bash(node -e \":*)"
+    ],
+    "additionalDirectories": [
+      "d:\\Archive-Risu\\RisuAI\\.claude\\skills"
+    ]
+  }
+}
