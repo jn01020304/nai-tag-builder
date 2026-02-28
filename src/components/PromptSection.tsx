@@ -15,8 +15,8 @@ export default function PromptSection({ value, dispatch }: Props) {
       style={{
         ...inputStyle,
         width: '100%',
-        height: '80px',
-        resize: 'none',
+        minHeight: '80px',
+        resize: 'vertical',
         marginBottom: '8px',
       }}
     />

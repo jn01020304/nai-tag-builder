@@ -84,10 +84,24 @@ export default function App() {
       if (autoGenerate && Number(repeatInterval) > 0) {
         const sec = clamp(Number(repeatInterval), Number(minInterval), Number(maxInterval));
         setIsLooping(true);
-        loopRef.current = window.setInterval(() => {
+        let currentLoopSeed = Number(state.seed);
+        loopRef.current = window.setInterval(async () => {
           const genBtn = Array.from(document.querySelectorAll('button'))
             .find(b => b.textContent?.includes('Generate')) as HTMLButtonElement | undefined;
-          genBtn?.click();
+
+          if (genBtn && genBtn.disabled) {
+            // Button blocked due to identical seed + parameters. 
+            // Dispatch a fresh paste with randomized or incremented seed to bypass.
+            if (state.seed !== 0) {
+              currentLoopSeed += 1;
+            }
+            // By passing seed: 0, buildCommentJson will naturally generate a random seed if state.seed was 0.
+            const loopComment = buildCommentJson({ ...state, seed: state.seed === 0 ? 0 : currentLoopSeed });
+            const loopBlob = await generatePngWithMetadata(loopComment);
+            dispatchPasteEvent(loopBlob, true);
+          } else {
+            genBtn?.click();
+          }
         }, sec * 1000);
       }
     } catch (error) {

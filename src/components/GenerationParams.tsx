@@ -101,26 +101,49 @@ export default function GenerationParams({ state, dispatch }: Props) {
       {/* Steps + Scale */}
       <div style={rowStyle}>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Steps</label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <label style={labelStyle}>Steps</label>
+            <input
+              type="number"
+              value={state.steps}
+              min={1}
+              max={50}
+              onChange={e => set('steps', e.target.value === '' ? '' as any : Number(e.target.value))}
+              onBlur={() => set('steps', Math.max(1, Math.min(50, Number(state.steps) || 1)))}
+              style={{ ...inputStyle, width: '48px', padding: '2px 4px', textAlign: 'center' }}
+            />
+          </div>
           <input
-            type="number"
+            type="range"
             value={state.steps}
             min={1}
             max={50}
             onChange={e => set('steps', Number(e.target.value))}
-            style={{ ...inputStyle, width: '100%' }}
+            style={{ width: '100%', accentColor: theme.blue, marginTop: '4px' }}
           />
         </div>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Scale</label>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <label style={labelStyle}>Scale</label>
+            <input
+              type="number"
+              value={state.scale}
+              min={0}
+              max={10}
+              step={0.1}
+              onChange={e => set('scale', e.target.value === '' ? '' as any : Number(e.target.value))}
+              onBlur={() => set('scale', Math.max(0, Math.min(10, Number(state.scale) || 0)))}
+              style={{ ...inputStyle, width: '48px', padding: '2px 4px', textAlign: 'center' }}
+            />
+          </div>
           <input
-            type="number"
+            type="range"
             value={state.scale}
             min={0}
             max={10}
             step={0.1}
             onChange={e => set('scale', Number(e.target.value))}
-            style={{ ...inputStyle, width: '100%' }}
+            style={{ width: '100%', accentColor: theme.blue, marginTop: '4px' }}
           />
         </div>
       </div>
