@@ -13,6 +13,13 @@ writing:
 
 # Changelog
 
+## v2.4 (2026-03-01)
+Live adjustments, Auto-Generate Seed Rules, and Mobile limitations documented.
+- **Live Adjustable Loop:** Transitioned the Auto-Generate loop from `setInterval` to a recursive `setTimeout` referencing live React `useRef`s, allowing users to modify Interval and Target Count without stopping the loop.
+- **Live Adjustment UI**: Added '조절 단위' (adjustStep) configuration and `[-]` / `[+]` buttons to Interval and Target Count inputs.
+- **Seed Rule Automation:** Added dropdown for Seed Rules (None, Random, +1, -1) when the preset queue is empty. Preserves autonomy by exclusively manipulating the NAI Seed `<input>` DOM element natively instead of using Global Paste.
+- **Fallback Heuristics & Mobile:** Added deep DOM traversal to find hidden Seed inputs and trigger React synthetic events. Added a fallback to click the NAI `Randomize` dice button if the input fails. Identified that mobile layout hides and unmounts inputs, necessitating a native Seed=0 workaround.
+
 ## v2.3 (2026-03-01)
 Preset Progression, Rotation, and Randomization.
 - Preset data model: `Preset` interface (`id`, `name`, `state: MetadataState`, `createdAt`) in `src/types/preset.ts`.

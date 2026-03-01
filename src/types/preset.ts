@@ -7,4 +7,5 @@ export interface Preset {
   createdAt: number;
 }
 
+export type SeedRule = 'none' | 'random' | 'decrement' | 'increment';
 export type QueueMode = 'progression' | 'randomization';
