@@ -79,6 +79,15 @@ Session bug log and working notes. Reset on phase transition; keep Evergreen Not
 
 ## Bug Investigation
 
+### Seed Injection Failure — ACTIVE, UNRESOLVED
+Symptom: Despite `revealSeedInputAndSet()` path executing and `setReactInputValue()` dispatching `input`/`change`/`keydown`/`keyup` events, NovelAI still shows "Identical parameters" and blocks generation.
+Attempts made:
+1. Direct `findNaiSeedInput()` — searches by ID/Name, then by proximity to "Seed" text up to 6 parent levels. May find the wrong `<input>` due to the broad heuristic.
+2. `setReactInputValue()` — uses `nativeInputValueSetter` + synthetic events. Confirmed pattern works on standard React apps, but NovelAI may use a non-standard state management (e.g., MobX, Zustand, or custom hooks) that does not listen to DOM events.
+3. Seed value `0` does NOT mean "random" in the NAI UI — it is treated as a fixed seed of `0`. Changed to `Math.floor(Math.random() * 4294967295)`.
+4. UI crawler clicks `▲`, gear icons, SVG buttons — but the user reports it still fails. Unclear whether the correct button is being clicked on the user's specific viewport.
+Next: user will provide `[SEED-DEBUG]` console output to trace exactly where the flow breaks.
+
 ### Future Test
 - Check auto generation mode to avoid the ban.
 - NovelAI may disable Generate button when seed + all params are identical to previous generation. Auto-generate loop handles this by dispatching a fresh paste with incremented/randomized seed.
@@ -113,5 +122,39 @@ Session bug log and working notes. Reset on phase transition; keep Evergreen Not
 - Queue is `string[]` of preset IDs stored in React state (`useState`). Queue index tracked in a `useRef` (not state) to avoid stale closure issues inside `setInterval`.
 - On each interval tick: if queue is non-empty, load the next preset from localStorage by ID, build CommentJson from it, dispatch the paste. If queue is empty, fall back to current editor state.
 - `queueIndexRef.current` resets to 0 on each new `handleApply` call to restart the cycle from the beginning.
-- Mode selector is a `<select>` element with two options: Progression (sequential `% queue.length`) and Randomization (`Math.floor(Math.random() * queue.length)`).
 - Seed bumping logic (for bypassing disabled Generate button) uses the next preset's seed setting, not the editor's current seed.
+
+### v2.4 Auto-Generate Live Loop & Mobile UI Limitations
+
+#### React DOM Unmounting on Mobile
+- NovelAI's responsive design unmounts the right-hand parameter panel (including Seed, Steps, Guidance inputs) when closed on narrow mobile screens.
+- Elements are removed from the DOM, making any `querySelectorAll` or TreeWalker DOM traversal fail 100%. Hidden elements cannot be manipulated.
+
+#### Identical Parameters UI Block
+- The "Identical parameters to last generation" error is a React state-level block that strictly disables the "Generate" `<button>`.
+- Because the block happens *before* any network request is created, it cannot be bypassed by intercepting `window.fetch` or WebSocket connections.
+- The ONLY way to bypass it natively is to change a React state parameter (like Seed) so the button re-enables itself.
+
+#### Robust React Input Manipulation
+- Finding specific inputs (like Seed) in a compiled Next.js app is fragile. IDs/Names are often missing.
+- *Robust Heuristic:* Walk the DOM to find any text node matching "Seed" (or the localized equivalent), then traverse up to 5 parent levels and search all siblings for an `<input>`.
+- *Triggering React State:* Modifying `input.value` is not enough. To force React's synthetic event system to register the change, you must:
+  1. `input.focus()`
+  2. Call `Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype, 'value').set.call(input, newValue)`
+  3. Dispatch `input`, `change`, `keydown`, `keyup` events consecutively.
+  4. `input.blur()`
+- STATUS: this sequence is NOT confirmed working on NovelAI. Pending debug log analysis.
+
+#### Non-Interfering Automation vs. Complete Override
+- Global `Paste` events (how the bookmarklet loads full presets) overwrite the entire NAI prompt state. This violates user autonomy if the user is typing manually into the NAI interface.
+- To provide Seed Increment/Decrement (+1/-1) autonomously, we use direct DOM manipulation (`findNaiSeedInput`).
+- If DOM modification fails (e.g. mobile panel unmounted) and the Generate button is blocked, a fallback heuristic searches for a "Randomize" (🎲) button and clicks it to bypass the block.
+
+#### NovelAI Mobile UI Layout (User-Confirmed)
+- Narrow viewport (<=375px): `▲` button at bottom center toggles the main prompt text area, NOT the parameter panel. The `⚙️` gear icon at bottom-left opens the parameter panel (Steps, Guidance, Seed).
+- Medium viewport (~850px desktop with sidebar collapsed): `▲` button is at the bottom of the sidebar column, next to the Sampler dropdown. Clicking it expands the full parameter panel including Seed.
+- The correct button to click depends entirely on viewport width. The crawler must try both `▲` and `⚙️`-style buttons.
+
+#### Seed value 0 is NOT random
+- Previously assumed NAI treats seed=0 as "use random". User confirmed this is false: NAI uses 0 as a literal fixed seed.
+- Corrected to generate `Math.floor(Math.random() * 4294967295)` when the Random rule is active.
