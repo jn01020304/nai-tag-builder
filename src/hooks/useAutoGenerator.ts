@@ -54,7 +54,7 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
         if (loopTimeoutRef.current) clearTimeout(loopTimeoutRef.current);
     }, []);
 
-    const getNextQueueState = () => {
+    const getNextQueueState = async () => {
         const currentQueue = queueRef.current;
         const currentQueueMode = queueModeRef.current;
         if (currentQueue.length === 0) return null;
@@ -65,7 +65,7 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
             idx = queueIndexRef.current % currentQueue.length;
             queueIndexRef.current = idx + 1;
         }
-        const preset = getPresetById(currentQueue[idx]);
+        const preset = await getPresetById(currentQueue[idx]);
         return preset?.state ?? null;
     };
 
@@ -86,7 +86,8 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
             const currentQueue = queueRef.current;
             const currentSeedRule = seedRuleRef.current;
 
-            const nextState = currentQueue.length > 0 ? (getNextQueueState() ?? currentState) : currentState;
+            const nextQueueState = currentQueue.length > 0 ? await getNextQueueState() : null;
+            const nextState = nextQueueState ?? currentState;
             let nextSeed = currentLoopSeed;
 
             if (currentQueue.length > 0) {

@@ -20,20 +20,23 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
     const [saveName, setSaveName] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    // Reload presets from localStorage
-    const refresh = () => setPresets(loadPresets());
+    // Reload presets from IndexedDB
+    const refresh = async () => {
+        const loaded = await loadPresets();
+        setPresets(loaded);
+    };
 
     useEffect(() => { refresh(); }, []);
 
-    const handleSave = () => {
+    const handleSave = async () => {
         const name = saveName.trim() || `Preset ${presets.length + 1}`;
-        savePreset(name, state);
+        await savePreset(name, state);
         setSaveName('');
-        refresh();
+        await refresh();
     };
 
-    const handleExport = () => {
-        const json = exportPresets();
+    const handleExport = async () => {
+        const json = await exportPresets();
         const blob = new Blob([json], { type: 'application/json' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -47,10 +50,10 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
         const file = e.target.files?.[0];
         if (!file) return;
         const reader = new FileReader();
-        reader.onload = () => {
+        reader.onload = async () => {
             try {
-                const count = importPresets(reader.result as string);
-                refresh();
+                const count = await importPresets(reader.result as string);
+                await refresh();
                 alert(`${count}개 프리셋 가져옴`);
             } catch {
                 alert('잘못된 프리셋 파일입니다.');
@@ -60,10 +63,10 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
         e.target.value = '';
     };
 
-    const handleDelete = (id: string) => {
-        deletePreset(id);
+    const handleDelete = async (id: string) => {
+        await deletePreset(id);
         setQueue(q => q.filter(qid => qid !== id));
-        refresh();
+        await refresh();
     };
 
     const handleLoad = (preset: Preset) => {
