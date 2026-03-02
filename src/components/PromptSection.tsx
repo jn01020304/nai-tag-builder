@@ -1,5 +1,6 @@
 import type { MetadataAction } from '../hooks/useMetadataState';
 import { inputStyle } from '../styles/theme';
+import HighlightedTextarea from './HighlightedTextarea';
 
 interface Props {
   value: string;
@@ -8,7 +9,7 @@ interface Props {
 
 export default function PromptSection({ value, dispatch }: Props) {
   return (
-    <textarea
+    <HighlightedTextarea
       value={value}
       onChange={e => dispatch({ type: 'SET_FIELD', field: 'basePrompt', value: e.target.value })}
       placeholder="base prompt tags..."

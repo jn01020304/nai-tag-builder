@@ -80,7 +80,7 @@ Status: v2.5 built and deployed to GitHub Pages. Theme sync verified by user. Aw
 
 ### Known Weaknesses (Technical Debt)
 - `isVeryDark` heuristic: compares `mainBg` against hardcoded RGB strings. Should switch to luminance calculation.
-- Intensity color scraping depends on prompt content. Empty prompt → no intensity spans → fallback defaults.
+- Intensity color extraction uses probe element technique: creates hidden `<span class="{type}-intensity-color-40">`, reads `getComputedStyle().backgroundColor`, removes span. NovelAI defines literal CSS classes `.{low|mid|high}-intensity-color-{0..40}` (NOT hashed Styled-Components). Level 40 = 100% alpha = pure base RGB.
 - Font scraping incomplete: `body.fontFamily` returns one font, but NAI Theme Editor has separate Header Font and Paragraph Font.
 - `document.head` MutationObserver fires on all style changes, not just theme. 300ms debounce mitigates but may cause performance issues under heavy page activity.
 
