@@ -47,10 +47,16 @@ export default function HighlightedTextarea(props: Props) {
                     margin: 0,
                     pointerEvents: 'none',
                     color: 'transparent',
-                    overflow: 'hidden',
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
                     whiteSpace: 'pre-wrap',
                     wordWrap: 'break-word',
                     backgroundColor: style?.backgroundColor || 'transparent',
+                    fontFamily: style?.fontFamily || 'inherit',
+                    fontSize: style?.fontSize || 'inherit',
+                    lineHeight: style?.lineHeight || 'inherit',
+                    letterSpacing: style?.letterSpacing || 'normal',
+                    wordSpacing: style?.wordSpacing || 'normal',
                     zIndex: 0,
                 }}
             >
@@ -69,7 +75,7 @@ export default function HighlightedTextarea(props: Props) {
                             style={{
                                 backgroundColor: bgColor,
                                 borderRadius: bgColor !== 'transparent' ? '2px' : '0',
-                                padding: '0', // Adjust padding if needed to match NAI
+                                padding: '0',
                             }}
                         >
                             {token.text}
@@ -92,6 +98,11 @@ export default function HighlightedTextarea(props: Props) {
                     background: 'transparent',
                     color: theme.text,
                     margin: 0,
+                    fontFamily: style?.fontFamily || 'inherit',
+                    fontSize: style?.fontSize || 'inherit',
+                    lineHeight: style?.lineHeight || 'inherit',
+                    letterSpacing: style?.letterSpacing || 'normal',
+                    wordSpacing: style?.wordSpacing || 'normal',
                     zIndex: 1,
                     width: '100%',
                     height: '100%',
