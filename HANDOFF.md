@@ -11,8 +11,8 @@ writing:
   closing_summary: false
 ---
 
-# Handoff — 2026-03-01
-Status: v2.4 built locally. Refactoring complete. Awaiting manual browser test by user.
+# Handoff — 2026-03-02
+Status: v2.5 built and deployed to GitHub Pages. Theme sync verified by user. Awaiting further polish.
 
 ## Evergreen Notes
 
@@ -39,53 +39,50 @@ Status: v2.4 built locally. Refactoring complete. Awaiting manual browser test b
 - Importing `index.css` into the NovelAI page destroys NAI's own button/body styles.
 - All styles must go through inline React style objects or `theme.ts`.
 
+### NovelAI Styled-Components Theming
+- NovelAI does NOT use CSS custom properties. All colors injected via Styled-Components with hashed class names.
+- `document.body.backgroundColor` always stays `rgb(19, 21, 44)` regardless of theme. Real themed background is on `.image-gen-page`.
+- Theme changes replace `<style>` tags in `<head>`. No class/attribute changes on `<html>`/`<body>`.
+- Observe `document.head` with `MutationObserver({ childList: true, subtree: true })` for real-time detection.
+
 ---
 
 ## What Was Done This Session
 
-### Seed Injection Final Fix
-- Fixed `random` seed rule: was only clicking the button without injecting metadata, causing "Identical parameters" block.
-- `random` now generates `Math.floor(Math.random() * 4294967295)` per loop, embeds it in PNG metadata, and pastes.
-- `none` is the only rule that clicks the button without metadata injection.
-- Button re-enable wait increased from 300ms to 500ms. Button is re-queried before click to avoid stale DOM references.
+### Dynamic Theme Sync (v2.5)
+- Discovered NovelAI uses Styled-Components with no CSS variables. Previous CSS variable approach was fundamentally wrong.
+- Implemented DOM computed style scraping from `.image-gen-page`, `.image-gen-prompt-main`, `.settings-panel`, `textarea`, `input[type="text"]`, `label`, and Generate button.
+- Added `ThemeColors` fields: `fontFamily`, `intensityLow`, `intensityMid`, `intensityHigh`, `warningError`, `headerText`.
+- Created `ThemeProvider` context (`src/contexts/ThemeContext.tsx`) wrapping the app to distribute dynamic theme.
+- Added `MutationObserver` on `document.head` with 300ms debounce for real-time theme sync when user switches themes in NAI settings.
+- Updated all components (`ApplyButton`, `PresetManager`, `CharacterCaptions`, `AutoGeneratePanel`) to use the new theme colors (`warningError` for delete buttons, `green`/`intensityMid` for action buttons).
 
-### Seed Rule Definitions
-- `none`: clicks Generate only, no metadata injection. User sets NAI UI manually.
-- `random`: injects a random seed via metadata paste each loop. Prevents duplicate-parameter blocks.
-- `increment` / `decrement`: adjusts seed by ±1 via metadata paste. For sequential seed exploration.
+### Textarea Resize
+- Character prompt and Negative prompt textareas changed from `resize: 'none'` to `resize: 'vertical'` with `minHeight` instead of fixed `height`.
 
-### Code Refactoring (App.tsx God Component Split)
-- `App.tsx`: 505 lines → 274 lines.
-- `src/hooks/useAutoGenerator.ts` [NEW]: auto-generate loop, seed rules, preset queue cycling logic.
-- `src/components/AutoGeneratePanel.tsx` [NEW]: auto-generate UI (checkbox, seed rule dropdown, interval/count inputs).
-- `src/types/preset.ts`: added and exported `SeedRule` type.
-
-### ARCHITECTURE.md Update
-- Rewritten with As-Is (current) and To-Be (target) structure.
-- Removed obsolete DOM manipulation code references. Accurately documents current seed rules and encoding pipeline.
-- Specifies future extension points (DB adapter swap, preset progression hook expansion).
+### Browser Subagent Investigations
+- Two browser subagent sessions deployed to NovelAI to map DOM structure.
+- Identified reliable selectors: `.image-gen-page`, `.image-gen-prompt-main`, `.settings-panel`.
+- Confirmed intensity color classes: `low-intensity-color-*`, `mid-intensity-color-*`, `high-intensity-color-*` on `<span>` elements.
 
 ---
 
 ## Current State
-- Build: success (`dist/nai-tag-builder.js` 228KB)
-- Unused variable cleanup in App.tsx: done
-- Browser manual test: pending (user must verify)
+- Build: success (`dist/nai-tag-builder.js`)
+- Deploy: pushed to `main`, GitHub Pages live
+- Theme sync: working — user confirmed basic theme switching works
 - Git repo: `https://github.com/jn01020304/nai-tag-builder`
 - Bookmarklet: `javascript:void(document.body.appendChild(Object.assign(document.createElement('script'),{src:'https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js?v='+Date.now()})))`
 
 ---
 
-## ## What Remains
+## What Remains
 
-### Immediate — Manual Testing
-- User tests new build on NovelAI:
-  - `random` rule: confirm repeated generation without "Identical parameters" error.
-  - `increment` rule: confirm seed increments by +1 each loop.
-  - Preset queue + auto-generate: confirm existing behavior unchanged.
-
-### Known Technical Debt
-- `executeLoop` inside `useAutoGenerator.startLoop` captures `state`/`queue`/`seedRule` via closure. Currently works, but must switch to `useRef` pattern when implementing preset progression.
+### Known Weaknesses (Technical Debt)
+- `isVeryDark` heuristic: compares `mainBg` against hardcoded RGB strings. Should switch to luminance calculation.
+- Intensity color scraping depends on prompt content. Empty prompt → no intensity spans → fallback defaults.
+- Font scraping incomplete: `body.fontFamily` returns one font, but NAI Theme Editor has separate Header Font and Paragraph Font.
+- `document.head` MutationObserver fires on all style changes, not just theme. 300ms debounce mitigates but may cause performance issues under heavy page activity.
 
 ### Roadmap from ARCHITECTURE.md
 
@@ -100,39 +97,18 @@ Priority 2 — Core Pipeline:
 - Prompt compiler (tag object array → NovelAI syntax string)
 - Image generation call and result display
 
-Priority 3 — Management:
-- Tinder-style swipe image selection UI
-- Image error detection (vision AI heatmap)
-- Tap-to-mask inpainting assist
-- Side-by-side image comparison UI
-- Prompt history archive (search and reuse)
-
-Priority 3 — Authoring Convenience:
-- Tag chip drag-and-drop reordering
-- Negative prompt template toggle
-- AI prompt recombination suggestions
-- Smart tab auto-categorization ([character], [background], [composition])
-- Bottom sheet weight adjustment popup
-- Comic/storyboard generation mode
-
-Priority 3 — Automation:
-- AI usage pattern prompt recommendation report
-- DB import/export
-- Cross-device sync (Firebase/Supabase + Google login)
-
-Later:
-- AI assistant personality/tone settings
-- User taste statistics UI
-- Onboarding screen
-- App name decision (candidates: PromptAIO, TagMaster AIO, OmniPrompt, DanbooruAIO, AIO Canvas)
-- iOS/Android gesture conflict testing
-- API key client-side security decision
+Priority 3 — Management, Authoring, Automation:
+- See ARCHITECTURE.md for full list.
 
 ---
 
 ## Previous Session History
 
 ### Seed Injection Debugging (Resolved)
-- Implemented `revealSeedInputAndSet()` UI crawler. Failed due to React 19 controlled input behavior making DOM manipulation impossible.
-- Added `[SEED-DEBUG]` logging, analyzed output, switched to metadata PNG paste approach. Issue resolved.
-- Debug logging removed.
+- Implemented `revealSeedInputAndSet()` UI crawler. Failed due to React 19 controlled input behavior.
+- Switched to metadata PNG paste approach. All seed rules (random, increment, decrement) now use paste pipeline.
+
+### Code Refactoring (v2.4)
+- `App.tsx`: 505 lines → 274 lines.
+- `src/hooks/useAutoGenerator.ts` [NEW]: auto-generate loop, seed rules, preset queue cycling.
+- `src/components/AutoGeneratePanel.tsx` [NEW]: auto-generate UI.

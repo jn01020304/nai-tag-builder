@@ -75,22 +75,29 @@ Session bug log and working notes. Reset on phase transition; keep Evergreen Not
 - Useful when a resizable child (e.g. textarea with `resize: both`) needs to push the parent wider.
 - Limitation: does not allow resizing the parent independently of the child.
 
+### NovelAI Styled-Components Theming
+- NovelAI does NOT use CSS custom properties (variables like `--bg-color`) for theming.
+- All theme colors are injected via Styled-Components with hashed class names (e.g. `sc-a5f...`, `sc-9882ac77-0`).
+- `document.body.backgroundColor` always stays `rgb(19, 21, 44)` regardless of active theme. It is NOT the themed background.
+- Real themed background is on `.image-gen-page`. Panel background is on `.image-gen-prompt-main` or `.settings-panel`.
+- When the user switches themes, Styled-Components replaces `<style>` tags in `<head>`. No class/attribute changes on `<html>` or `<body>`.
+- To detect theme changes in real time, observe `document.head` with `MutationObserver({ childList: true, subtree: true })`.
+- Intensity colors are applied to `<span>` elements with class names matching `low-intensity-color-*`, `mid-intensity-color-*`, `high-intensity-color-*`. These spans only exist when the prompt area contains weighted tags.
+- Theme Editor exposes separate Header Font and Paragraph Font. `body.fontFamily` only returns one of them.
+
 ---
 
 ## Bug Investigation
 
-### Seed Injection Failure — ACTIVE, UNRESOLVED
-Symptom: Despite `revealSeedInputAndSet()` path executing and `setReactInputValue()` dispatching `input`/`change`/`keydown`/`keyup` events, NovelAI still shows "Identical parameters" and blocks generation.
-Attempts made:
-1. Direct `findNaiSeedInput()` — searches by ID/Name, then by proximity to "Seed" text up to 6 parent levels. May find the wrong `<input>` due to the broad heuristic.
-2. `setReactInputValue()` — uses `nativeInputValueSetter` + synthetic events. Confirmed pattern works on standard React apps, but NovelAI may use a non-standard state management (e.g., MobX, Zustand, or custom hooks) that does not listen to DOM events.
-3. Seed value `0` does NOT mean "random" in the NAI UI — it is treated as a fixed seed of `0`. Changed to `Math.floor(Math.random() * 4294967295)`.
-4. UI crawler clicks `▲`, gear icons, SVG buttons — but the user reports it still fails. Unclear whether the correct button is being clicked on the user's specific viewport.
-Next: user will provide `[SEED-DEBUG]` console output to trace exactly where the flow breaks.
+### Seed Injection Failure — RESOLVED
+Root cause: React 19 controlled inputs revert values set via DOM manipulation. `nativeInputValueSetter` + synthetic events are overwritten by React's fiber reconciler.
+Resolution: abandoned DOM Seed manipulation entirely. All seed changes now go through the PNG metadata paste pipeline (`pngEncoder.ts` → `pasteDispatch.ts`). `random` rule generates `Math.floor(Math.random() * 4294967295)` per loop.
 
-### Future Test
-- Check auto generation mode to avoid the ban.
-- NovelAI may disable Generate button when seed + all params are identical to previous generation. Auto-generate loop handles this by dispatching a fresh paste with incremented/randomized seed.
+### Theme Color Mismatch — RESOLVED
+Symptom: Tag Builder displayed hardcoded dark navy theme instead of matching NovelAI's active theme (e.g. Sand, Ink, Slate).
+Root cause: initial code attempted to read CSS variables from `:root`/`body`. NovelAI uses Styled-Components with no CSS variables.
+Resolution: switched to direct DOM computed style scraping from `.image-gen-page`, `.image-gen-prompt-main`, `.settings-panel`, and Generate button. Added `MutationObserver` on `document.head` for real-time sync.
+Known weakness: `isVeryDark` uses hardcoded RGB string comparison instead of luminance calculation. Intensity color scraping depends on prompt content.
 
 ---
 
@@ -158,3 +165,27 @@ Next: user will provide `[SEED-DEBUG]` console output to trace exactly where the
 #### Seed value 0 is NOT random
 - Previously assumed NAI treats seed=0 as "use random". User confirmed this is false: NAI uses 0 as a literal fixed seed.
 - Corrected to generate `Math.floor(Math.random() * 4294967295)` when the Random rule is active.
+
+### v2.5 Dynamic Theme Sync
+
+#### DOM Computed Style Scraping
+- `document.body.backgroundColor` is always `rgb(19, 21, 44)` regardless of theme. Unreliable as theme source.
+- Correct targets: `.image-gen-page` (main background), `.image-gen-prompt-main` (prompt panel), `.settings-panel` (sidebar), `textarea` / `input[type="text"]` (input background).
+- Text color scraped from `.image-gen-page` computed `color`. Header/label color scraped from `label` elements.
+- Generate button `backgroundColor` used as accent/action color.
+
+#### Real-Time Theme Observer
+- Styled-Components replaces `<style>` tags in `<head>` on theme change. No class or attribute changes on `<html>`/`<body>`.
+- `MutationObserver` on `document.head` with `{ childList: true, subtree: true }` catches these style replacements.
+- 300ms debounce prevents excessive `updateTheme()` calls during rapid style injection.
+- Initial theme load uses `setTimeout(updateTheme, 100)` to allow DOM to settle after bookmarklet injection.
+
+#### isVeryDark Heuristic
+- Current implementation compares `mainBg` against a whitelist of known dark RGB strings: `rgb(0, 0, 0)`, `rgb(19, 21, 44)`, `rgb(11, 12, 26)`, `rgb(37, 41, 49)`.
+- Fragile: any theme with a background color not in the whitelist defaults to light-mode styling.
+- Future improvement: parse RGB values and calculate relative luminance (`(0.299*R + 0.587*G + 0.114*B) / 255 < 0.5`).
+
+#### Intensity Color Scraping
+- NovelAI assigns `low-intensity-color-*`, `mid-intensity-color-*`, `high-intensity-color-*` classes to `<span>` elements in the prompt editor.
+- These spans only exist when weighted tags are visible in the prompt. Empty prompt → no spans → fallback defaults used.
+- Fallback defaults: Low=`rgba(4, 102, 206, 0.3)`, Mid=`rgba(0, 151, 7, 0.5)`, High=`rgba(184, 55, 0, 0.5)`.

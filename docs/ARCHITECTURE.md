@@ -68,6 +68,28 @@ src/
 
 ---
 
+## 동적 테마 시스템
+
+NovelAI는 CSS 변수를 쓰지 않고 Styled-Components로 해시 클래스명에 색상을 하드코딩한다.
+이 때문에 테마 색상을 외부에서 읽으려면 DOM 요소의 computedStyle을 직접 긁어와야 한다.
+
+```
+src/
+├── styles/
+│   └── theme.ts            ThemeColors 인터페이스, useDynamicTheme 훅, 글로벌 스타일 헬퍼
+├── contexts/
+│   └── ThemeContext.tsx     [NEW] ThemeProvider + useTheme 컨텍스트
+```
+
+설계 결정:
+- CSS 변수 → Styled-Components가 변수를 노출하지 않으므로 불가능
+- computedStyle 직접 스크래핑 채택. `.image-gen-page`, `.image-gen-prompt-main`, `.settings-panel`, Generate 버튼 등 안정적 셀렉터 사용
+- `document.head` MutationObserver로 `<style>` 태그 교체를 감지하여 실시간 동기화
+- isVeryDark 판별: 현재 하드코딩 RGB 비교. 향후 luminance 계산으로 교체 예정
+- ThemeColors에 기본 색상 외에 `intensityLow/Mid/High`, `warningError`, `headerText`, `fontFamily` 포함
+
+---
+
 # 할 일 목록
 
 ## 1순위 — 기초 토대
