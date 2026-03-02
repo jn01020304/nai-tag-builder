@@ -12,7 +12,7 @@ writing:
 ---
 
 # Handoff — 2026-03-02
-Status: v2.6.1 built and deployed to GitHub Pages. Fixed Tag Weight highlighting alignment and strict regex bugs.
+Status: v2.6.2 built and deployed to GitHub Pages. Enforced textarea transparency with !important to fix NovelAI CSS overrides hiding the highlights in Main Prompt.
 
 ## Evergreen Notes
 
