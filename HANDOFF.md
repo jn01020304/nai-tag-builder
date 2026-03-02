@@ -12,7 +12,7 @@ writing:
 ---
 
 # Handoff — 2026-03-03
-Status: v2.7 built and deployed to GitHub Pages. Implemented PNG Metadata Drag and Drop Import (reads NovelAI tEXt chunks directly).
+Status: v2.7 built and deployed to GitHub Pages. Implemented PNG Metadata Import via Drag&Drop, and added a "Load PNG" button in the Preset Manager for mobile users.
 
 ## Evergreen Notes
 
