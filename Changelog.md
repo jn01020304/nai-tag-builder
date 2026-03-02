@@ -13,6 +13,16 @@ writing:
 
 # Changelog
 
+## v2.5 (2026-03-02)
+Dynamic Theme Sync with NovelAI.
+- Discovered NovelAI uses Styled-Components with no CSS custom properties. All theme colors are injected via hashed class names into `<style>` tags.
+- Implemented DOM computed style scraping: `.image-gen-page` (main bg), `.image-gen-prompt-main` (panel bg), `.settings-panel` (sidebar), `textarea`/`input[type="text"]` (input bg), `label` (header text), Generate button (accent).
+- Created `src/contexts/ThemeContext.tsx` with `ThemeProvider` and `useTheme` hook for context-based theme distribution.
+- Extended `ThemeColors` interface: added `fontFamily`, `intensityLow`/`Mid`/`High`, `warningError`, `headerText`.
+- Real-time theme sync via `MutationObserver` on `document.head` (300ms debounce). Theme changes apply without page refresh.
+- Updated all components (`ApplyButton`, `PresetManager`, `CharacterCaptions`, `AutoGeneratePanel`) to use new semantic theme colors.
+- Character prompt and Negative prompt textareas now vertically resizable (`resize: 'vertical'`, `minHeight` instead of fixed `height`).
+
 ## v2.4 (2026-03-01)
 Live adjustments, Auto-Generate Seed Rules, and Mobile limitations documented.
 - **Live Adjustable Loop:** Transitioned the Auto-Generate loop from `setInterval` to a recursive `setTimeout` referencing live React `useRef`s, allowing users to modify Interval and Target Count without stopping the loop.
