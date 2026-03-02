@@ -87,15 +87,21 @@ export default function HighlightedTextarea(props: Props) {
             </div>
 
             {/* Foreground (Actual Textarea) */}
+            <style>{`
+                .nai-tag-builder-transparent-textarea {
+                    background: transparent !important;
+                    background-color: transparent !important;
+                }
+            `}</style>
             <textarea
                 ref={textareaRef}
                 value={value}
                 onChange={onChange}
                 onScroll={handleScroll}
+                className={`nai-tag-builder-transparent-textarea ${props.className || ''}`}
                 style={{
                     ...style,
                     position: 'relative',
-                    background: 'transparent',
                     color: theme.text,
                     margin: 0,
                     fontFamily: style?.fontFamily || 'inherit',
