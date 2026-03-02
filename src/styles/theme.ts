@@ -126,11 +126,37 @@ export function useDynamicTheme() {
       // Intensity Scraping
       const getIntensity = (regexStr: string, fallback: string) => {
         const regex = new RegExp(regexStr);
+
+        // 1. Try finding an existing span first
         const spans = Array.from(document.querySelectorAll('span')).filter(s => Array.from(s.classList).some(c => regex.test(c)));
         for (const s of spans) {
           const bg = getComputedStyle(s).backgroundColor;
           if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return bg;
         }
+
+        // 2. Fallback to searching all stylesheets
+        try {
+          for (let i = 0; i < document.styleSheets.length; i++) {
+            const sheet = document.styleSheets[i];
+            try {
+              if (sheet.cssRules) {
+                for (let j = 0; j < sheet.cssRules.length; j++) {
+                  const rule = sheet.cssRules[j] as CSSStyleRule;
+                  if (rule.selectorText && regex.test(rule.selectorText)) {
+                    if (rule.style.backgroundColor && rule.style.backgroundColor !== 'transparent' && rule.style.backgroundColor !== 'rgba(0, 0, 0, 0)') {
+                      return rule.style.backgroundColor;
+                    }
+                  }
+                }
+              }
+            } catch (e) {
+              // Ignore CORS errors on external stylesheets
+            }
+          }
+        } catch (e) {
+          // Ignore
+        }
+
         return fallback;
       };
 

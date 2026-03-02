@@ -85,26 +85,25 @@ Status: v2.5 built and deployed to GitHub Pages. Theme sync verified by user. Aw
 - `document.head` MutationObserver fires on all style changes, not just theme. 300ms debounce mitigates but may cause performance issues under heavy page activity.
 
 ### Pre-Refactoring Required
-
 Before proceeding to Priority 1–2 roadmap features, the following structural issues should be addressed.
 
-#### R1. Theme Globals → Context Hook Migration
+#### R1. isVeryDark → Luminance Calculation
+- Current: `isVeryDark` compares `mainBg` against 5 hardcoded RGB strings.
+- Problem: any new theme with an unlisted dark color defaults to light-mode styling. Breaks silently.
+- Fix: parse RGB, calculate luminance: `(0.299*R + 0.587*G + 0.114*B) / 255 < 0.5`.
+- Blocks: nothing directly, but is a ticking reliability issue.
+
+#### R2. Theme Globals → Context Hook Migration
 - Current: 10 components import `theme`, `inputStyle`, `labelStyle`, `smallBtnStyle` as mutable module-level globals from `theme.ts`. These globals are reassigned at runtime by `useDynamicTheme()`.
 - Problem: works by coincidence — React re-render happens to pick up mutated globals. But globals are evaluated once at module load time for static constants like `miniBtn` and `chipStyle` in `AutoGeneratePanel.tsx` and `PresetManager.tsx` (lines 29–32, 94–113). These never update after theme change.
 - Fix: all components should consume theme via `useTheme()` from `ThemeContext`. Remove the global `export let theme` pattern. Move style builders into the component render path or into a `useStyles(theme)` hook.
 - Blocks: design system setup (Priority 1). Any new component would inherit the broken pattern.
 
-#### R2. App.tsx Drag/Resize Logic Extraction
+#### R3. App.tsx Drag/Resize Logic Extraction
 - Current: `startDrag()` (lines 19–50) and `startResize()` (lines 98–125) are defined inside `AppContent`, attaching raw `mousemove`/`touchmove` listeners to `window`.
 - Problem: mixes window interaction logic with business rendering. Makes App.tsx harder to extend.
 - Fix: extract into `useWindowDrag(ref)` and `useEdgeResize(ref)` custom hooks.
 - Blocks: adding new draggable/resizable panels (e.g. tag weight editor).
-
-#### R3. MetadataState Flat Structure
-- Current: `MetadataState` is a flat object with 22 fields, mixing prompt content (`basePrompt`, `characters`) with generation params (`steps`, `scale`, `sampler`) and advanced flags (`smea`, `preferBrownian`).
-- Problem: prompt compiler (Priority 2) needs to operate on prompt data separately from generation params. Current flat structure forces the compiler to cherry-pick fields.
-- Fix: restructure into nested sub-types: `{ prompt: PromptState, params: GenerationParams, advanced: AdvancedFlags }`.
-- Blocks: prompt compiler, tag weight editing UI (Priority 2).
 
 #### R4. presetStorage Leaky Abstraction
 - Current: `presetStorage.ts` functions (`loadPresets`, `savePreset`, etc.) directly serialize and deserialize `MetadataState` as JSON strings. `PresetEntry.settings` is `string` (JSON blob).
@@ -112,17 +111,13 @@ Before proceeding to Priority 1–2 roadmap features, the following structural i
 - Fix: add a `version` field to `PresetEntry`. Write a migration layer that upgrades old schema presets on load.
 - Blocks: MetadataState restructuring (R3), DB schema design (Priority 1).
 
-#### R5. isVeryDark → Luminance Calculation
-- Current: `isVeryDark` compares `mainBg` against 5 hardcoded RGB strings.
-- Problem: any new theme with an unlisted dark color defaults to light-mode styling. Breaks silently.
-- Fix: parse RGB, calculate luminance: `(0.299*R + 0.587*G + 0.114*B) / 255 < 0.5`.
-- Blocks: nothing directly, but is a ticking reliability issue.
-
-#### Suggested Order
-R5 (trivial, standalone) → R1 (unblocks design system) → R2 (cleanup, standalone) → R4 (unblocks R3) → R3 (unblocks Priority 2 pipeline)
+#### R5. MetadataState Flat Structure
+- Current: `MetadataState` is a flat object with 22 fields, mixing prompt content (`basePrompt`, `characters`) with generation params (`steps`, `scale`, `sampler`) and advanced flags (`smea`, `preferBrownian`).
+- Problem: prompt compiler (Priority 2) needs to operate on prompt data separately from generation params. Current flat structure forces the compiler to cherry-pick fields.
+- Fix: restructure into nested sub-types: `{ prompt: PromptState, params: GenerationParams, advanced: AdvancedFlags }`.
+- Blocks: prompt compiler, tag weight editing UI (Priority 2).
 
 ### Roadmap from ARCHITECTURE.md
-
 Priority 1 — Foundation:
 - DB schema design (`{ id, keyword, category, weight, isEnabled, isNegative }`)
 - Design system setup
