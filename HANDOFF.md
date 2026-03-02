@@ -12,7 +12,7 @@ writing:
 ---
 
 # Handoff — 2026-03-02
-Status: v2.5 built and deployed to GitHub Pages. Theme sync verified by user. Awaiting further polish.
+Status: v2.6 built and deployed to GitHub Pages. Added Tag Weight highlighting to match NovelAI.
 
 ## Evergreen Notes
 
@@ -64,6 +64,11 @@ Status: v2.5 built and deployed to GitHub Pages. Theme sync verified by user. Aw
 - Two browser subagent sessions deployed to NovelAI to map DOM structure.
 - Identified reliable selectors: `.image-gen-page`, `.image-gen-prompt-main`, `.settings-panel`.
 - Confirmed intensity color classes: `low-intensity-color-*`, `mid-intensity-color-*`, `high-intensity-color-*` on `<span>` elements.
+
+### Tag Weight Highlighting (v2.6)
+- Created `intensityParser.ts` to tokenize NovelAI prompt syntax (`{}`, `[]`, `weight::tag::`) into `high`, `mid`, `low` intensity levels.
+- Created `HighlightedTextarea.tsx`, a custom component that layers a transparent textarea over a `div` holding colored `<span>` elements. 
+- Integrated this new component into `PromptSection`, `NegativePrompt`, and `CharacterCaptions` replacing standard textareas. Tags now highlight with NovelAI Theme colors in real time.
 
 ---
 
