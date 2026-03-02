@@ -13,8 +13,8 @@ export default function ApplyButton({ isApplying, onApply }: Props) {
       style={{
         width: '100%',
         padding: '12px',
-        backgroundColor: isApplying ? theme.surface1 : theme.blue,
-        color: theme.crust,
+        backgroundColor: isApplying ? theme.surface1 : theme.green,
+        color: isApplying ? theme.subtext0 : '#ffffff', // Usually white text over intensity button
         border: 'none',
         borderRadius: '6px',
         fontWeight: 'bold',

@@ -48,7 +48,7 @@ export default function AutoGeneratePanel({
                     type="checkbox"
                     checked={autoGenerate}
                     onChange={(e) => setAutoGenerate(e.target.checked)}
-                    style={{ accentColor: theme.blue }}
+                    style={{ accentColor: theme.blue }} // check box color (use blue / lowInt)
                 />
                 적용 후 자동 생성
             </label>

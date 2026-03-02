@@ -33,7 +33,7 @@ export default function CharacterCaptions({ characters, dispatch }: Props) {
             <label style={{ ...labelStyle, marginBottom: 0 }}>Character {idx + 1}</label>
             <button
               onClick={() => dispatch({ type: 'REMOVE_CHARACTER', id: char.id })}
-              style={{ background: 'none', border: 'none', color: theme.red, cursor: 'pointer', fontSize: '14px', padding: '0 2px' }}
+              style={{ background: 'none', border: 'none', color: theme.warningError, cursor: 'pointer', fontSize: '14px', padding: '0 2px' }}
             >
               &#10005;
             </button>
@@ -46,8 +46,8 @@ export default function CharacterCaptions({ characters, dispatch }: Props) {
             style={{
               ...inputStyle,
               width: '100%',
-              height: '50px',
-              resize: 'none',
+              minHeight: '50px',
+              resize: 'vertical',
               marginBottom: '4px',
             }}
           />

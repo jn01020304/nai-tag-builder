@@ -19,8 +19,8 @@ export default function NegativePrompt({ state, dispatch }: Props) {
         style={{
           ...inputStyle,
           width: '100%',
-          height: '50px',
-          resize: 'none',
+          minHeight: '50px',
+          resize: 'vertical',
           marginBottom: '8px',
         }}
       />
@@ -35,8 +35,8 @@ export default function NegativePrompt({ state, dispatch }: Props) {
             style={{
               ...inputStyle,
               width: '100%',
-              height: '36px',
-              resize: 'none',
+              minHeight: '36px',
+              resize: 'vertical',
             }}
           />
         </div>
