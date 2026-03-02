@@ -17,6 +17,7 @@ export interface ThemeColors {
   overlay0: string;   // Dividers
   tagPositiveBg: string;
   tagNegativeBg: string;
+  fontFamily: string; // NovelAI font
 }
 
 // Fallback to NovelAI Deep Navy (Ink theme will override these)
@@ -37,6 +38,7 @@ const fallbackTheme: ThemeColors = {
   overlay0: '#4a5078',
   tagPositiveBg: 'rgba(102, 59, 39, 0.8)',
   tagNegativeBg: 'rgba(29, 66, 115, 0.8)',
+  fontFamily: 'sans-serif',
 };
 
 export const defaultInputStyle = (theme: ThemeColors): React.CSSProperties => ({
@@ -105,29 +107,32 @@ export function useDynamicTheme() {
       const generateBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent && b.textContent.includes('Generate'));
       const accentBg = generateBtn ? getComputedStyle(generateBtn).backgroundColor : fallbackTheme.yellow;
 
-      const mainBg = getComputedStyle(document.body).backgroundColor;
-      const panelBg = getBg(['textarea', 'nav', 'aside'], fallbackTheme.surface0);
-      const textFg = getFg(['p', 'h1', 'h2', 'span', 'textarea', 'body'], fallbackTheme.text);
+      const mainBg = getBg(['.image-gen-page', 'main', '#__next > div > div'], getComputedStyle(document.body).backgroundColor || fallbackTheme.base);
+      const panelBg = getBg(['.image-gen-prompt-main', 'nav', 'aside', 'textarea'], fallbackTheme.surface0);
+      const textFg = getFg(['.image-gen-page', 'p', 'h1', 'h2', 'span', 'body'], fallbackTheme.text);
 
-      const isVeryDark = mainBg === 'rgb(0, 0, 0)' || mainBg === 'rgba(0, 0, 0, 1)';
+      const scrapedFont = getComputedStyle(document.body).fontFamily || fallbackTheme.fontFamily;
+
+      const isVeryDark = mainBg === 'rgb(0, 0, 0)' || mainBg === 'rgba(0, 0, 0, 1)' || mainBg === 'rgb(19, 21, 44)' || mainBg === 'rgb(11, 12, 26)';
 
       const newTheme: ThemeColors = {
         base: mainBg,
         mantle: panelBg,
-        crust: isVeryDark ? '#111' : 'rgba(0, 0, 0, 0.4)',
+        crust: isVeryDark ? '#0b0c1a' : 'rgba(0, 0, 0, 0.25)',
         surface0: panelBg,
-        surface1: 'rgba(255, 255, 255, 0.1)',
-        surface2: 'rgba(255, 255, 255, 0.2)',
+        surface1: isVeryDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
+        surface2: isVeryDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
         text: textFg,
-        subtext0: 'rgba(255, 255, 255, 0.6)',
-        subtext1: 'rgba(255, 255, 255, 0.8)',
+        subtext0: isVeryDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+        subtext1: isVeryDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
         blue: fallbackTheme.blue,
         red: fallbackTheme.red,
         green: fallbackTheme.green,
         yellow: accentBg,
-        overlay0: 'rgba(0, 0, 0, 0.3)',
+        overlay0: isVeryDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
         tagPositiveBg: fallbackTheme.tagPositiveBg,
         tagNegativeBg: fallbackTheme.tagNegativeBg,
+        fontFamily: scrapedFont,
       };
 
       // Update globals for legacy components
@@ -140,21 +145,25 @@ export function useDynamicTheme() {
     };
 
     // Initial update
-    updateTheme();
+    setTimeout(updateTheme, 100);
 
-    // Listen for changes (MutationObserver on root className or attribute helps if NovelAI swaps themes)
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.type === 'attributes' && (mutation.attributeName === 'class' || mutation.attributeName === 'style')) {
-          updateTheme();
-        }
-      }
+    // Listen for changes
+    let debounceTimer: ReturnType<typeof setTimeout>;
+    const observer = new MutationObserver(() => {
+      clearTimeout(debounceTimer);
+      debounceTimer = setTimeout(() => {
+        updateTheme();
+      }, 300); // 300ms debounce allows DOM to settle
     });
 
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] });
     observer.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] });
+    observer.observe(document.head, { childList: true, subtree: true });
 
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+      clearTimeout(debounceTimer);
+    };
   }, []);
 
   return currentTheme;
