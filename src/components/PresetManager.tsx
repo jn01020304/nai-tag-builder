@@ -5,6 +5,8 @@ import type { MetadataAction } from '../hooks/useMetadataState';
 import { loadPresets, savePreset, deletePreset, exportPresets, importPresets } from '../model/presetStorage';
 import { theme, inputStyle, smallBtnStyle } from '../styles/theme';
 import CollapsibleSection from './CollapsibleSection';
+import { parseNovelAIPng } from '../utils/pngParser';
+import { translateNovelAiMetadata } from '../utils/metadataTranslator';
 
 interface Props {
     state: MetadataState;
@@ -19,6 +21,7 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
     const [presets, setPresets] = useState<Preset[]>([]);
     const [saveName, setSaveName] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const pngInputRef = useRef<HTMLInputElement>(null);
 
     // Reload presets from IndexedDB
     const refresh = async () => {
@@ -60,6 +63,25 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
             }
         };
         reader.readAsText(file);
+        e.target.value = '';
+    };
+
+    const handleImportPng = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        try {
+            const buffer = await file.arrayBuffer();
+            const jsonMeta = parseNovelAIPng(buffer);
+            if (jsonMeta) {
+                const newState = translateNovelAiMetadata(jsonMeta);
+                dispatch({ type: 'LOAD_PRESET', state: { ...state, ...newState } });
+            } else {
+                alert('No NovelAI metadata found in this PNG.');
+            }
+        } catch (err) {
+            console.error('Error parsing PNG:', err);
+            alert('Failed to read PNG file.');
+        }
         e.target.value = '';
     };
 
@@ -138,11 +160,21 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
                     onChange={handleImport}
                     style={{ display: 'none' }}
                 />
+                <input
+                    ref={pngInputRef}
+                    type="file"
+                    accept="image/png"
+                    onChange={handleImportPng}
+                    style={{ display: 'none' }}
+                />
                 <button onClick={() => fileInputRef.current?.click()} style={{ ...smallBtnStyle, flex: 1, color: theme.blue }}>
-                    📥 Import
+                    📥 JSON
                 </button>
                 <button onClick={handleExport} style={{ ...smallBtnStyle, flex: 1, color: theme.yellow }}>
-                    📤 Export
+                    📤 JSON
+                </button>
+                <button onClick={() => pngInputRef.current?.click()} style={{ ...smallBtnStyle, flex: 1, color: theme.text }}>
+                    🖼️ Load PNG
                 </button>
             </div>
 
