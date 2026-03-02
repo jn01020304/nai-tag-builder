@@ -12,7 +12,7 @@ writing:
 ---
 
 # Handoff — 2026-03-02
-Status: v2.6 built and deployed to GitHub Pages. Added Tag Weight highlighting to match NovelAI.
+Status: v2.6.1 built and deployed to GitHub Pages. Fixed Tag Weight highlighting alignment and strict regex bugs.
 
 ## Evergreen Notes
 
