@@ -198,7 +198,7 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
                         <button
                             onClick={() => handleDelete(p.id)}
                             title="Delete"
-                            style={{ ...smallBtnStyle, fontSize: '11px', padding: '2px 6px', color: theme.red }}
+                            style={{ ...smallBtnStyle, fontSize: '11px', padding: '2px 6px', color: theme.warningError }}
                         >
                             ✕
                         </button>
@@ -233,7 +233,7 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
                                 {p.name}
                                 <button onClick={() => moveInQueue(p.id, -1)} style={tinyBtn} title="Move up">▲</button>
                                 <button onClick={() => moveInQueue(p.id, 1)} style={tinyBtn} title="Move down">▼</button>
-                                <button onClick={() => toggleQueue(p.id)} style={{ ...tinyBtn, color: theme.red }} title="Remove">✕</button>
+                                <button onClick={() => toggleQueue(p.id)} style={{ ...tinyBtn, color: theme.warningError }} title="Remove">✕</button>
                             </span>
                         ))}
                     </div>

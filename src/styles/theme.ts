@@ -18,6 +18,11 @@ export interface ThemeColors {
   tagPositiveBg: string;
   tagNegativeBg: string;
   fontFamily: string; // NovelAI font
+  intensityLow: string; // low-intensity-color-*, < 1.0 weights
+  intensityMid: string; // mid-intensity-color-*, 1.0 weights
+  intensityHigh: string; // high-intensity-color-*, > 1.0 weights
+  warningError: string; // Error red
+  headerText: string; // Dimmer text used for headers/labels
 }
 
 // Fallback to NovelAI Deep Navy (Ink theme will override these)
@@ -39,6 +44,11 @@ const fallbackTheme: ThemeColors = {
   tagPositiveBg: 'rgba(102, 59, 39, 0.8)',
   tagNegativeBg: 'rgba(29, 66, 115, 0.8)',
   fontFamily: 'sans-serif',
+  intensityLow: 'rgba(4, 102, 206, 0.3)',
+  intensityMid: 'rgba(0, 151, 7, 0.5)',
+  intensityHigh: 'rgba(184, 55, 0, 0.5)',
+  warningError: 'rgb(248, 48, 48)',
+  headerText: 'rgba(255, 255, 255, 0.5)',
 };
 
 export const defaultInputStyle = (theme: ThemeColors): React.CSSProperties => ({
@@ -108,31 +118,53 @@ export function useDynamicTheme() {
       const accentBg = generateBtn ? getComputedStyle(generateBtn).backgroundColor : fallbackTheme.yellow;
 
       const mainBg = getBg(['.image-gen-page', 'main', '#__next > div > div'], getComputedStyle(document.body).backgroundColor || fallbackTheme.base);
-      const panelBg = getBg(['.image-gen-prompt-main', 'nav', 'aside', 'textarea'], fallbackTheme.surface0);
+      const panelBg = getBg(['.settings-panel', '.image-gen-prompt-main', 'nav', 'aside'], fallbackTheme.surface0);
+      const inputBg = getBg(['textarea', 'input[type="text"]'], fallbackTheme.mantle);
       const textFg = getFg(['.image-gen-page', 'p', 'h1', 'h2', 'span', 'body'], fallbackTheme.text);
+      const headerFg = getFg(['label', '.sc-9882ac77-42'], fallbackTheme.headerText);
+
+      // Intensity Scraping
+      const getIntensity = (regexStr: string, fallback: string) => {
+        const regex = new RegExp(regexStr);
+        const spans = Array.from(document.querySelectorAll('span')).filter(s => Array.from(s.classList).some(c => regex.test(c)));
+        for (const s of spans) {
+          const bg = getComputedStyle(s).backgroundColor;
+          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return bg;
+        }
+        return fallback;
+      };
+
+      const lowInt = getIntensity('low-intensity-color', fallbackTheme.intensityLow);
+      const midInt = getIntensity('mid-intensity-color', fallbackTheme.intensityMid);
+      const highInt = getIntensity('high-intensity-color', fallbackTheme.intensityHigh);
 
       const scrapedFont = getComputedStyle(document.body).fontFamily || fallbackTheme.fontFamily;
 
-      const isVeryDark = mainBg === 'rgb(0, 0, 0)' || mainBg === 'rgba(0, 0, 0, 1)' || mainBg === 'rgb(19, 21, 44)' || mainBg === 'rgb(11, 12, 26)';
+      const isVeryDark = mainBg === 'rgb(0, 0, 0)' || mainBg === 'rgba(0, 0, 0, 1)' || mainBg === 'rgb(19, 21, 44)' || mainBg === 'rgb(11, 12, 26)' || mainBg === 'rgb(37, 41, 49)';
 
       const newTheme: ThemeColors = {
-        base: mainBg,
-        mantle: panelBg,
-        crust: isVeryDark ? '#0b0c1a' : 'rgba(0, 0, 0, 0.25)',
-        surface0: panelBg,
+        base: mainBg, // Background
+        mantle: inputBg, // Input Background
+        crust: isVeryDark ? '#0b0c1a' : 'rgba(0, 0, 0, 0.25)', // Dark Background
+        surface0: panelBg, // Sidebar / Prompt Main
         surface1: isVeryDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
         surface2: isVeryDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
-        text: textFg,
-        subtext0: isVeryDark ? 'rgba(255, 255, 255, 0.6)' : 'rgba(0, 0, 0, 0.6)',
+        text: textFg, // Foreground
+        subtext0: headerFg, // Header / Labels
         subtext1: isVeryDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
-        blue: fallbackTheme.blue,
-        red: fallbackTheme.red,
-        green: fallbackTheme.green,
+        blue: lowInt,
+        red: fallbackTheme.warningError, // Warning/Error
+        green: midInt,
         yellow: accentBg,
         overlay0: isVeryDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
         tagPositiveBg: fallbackTheme.tagPositiveBg,
         tagNegativeBg: fallbackTheme.tagNegativeBg,
         fontFamily: scrapedFont,
+        intensityLow: lowInt,
+        intensityMid: midInt,
+        intensityHigh: highInt,
+        warningError: fallbackTheme.warningError,
+        headerText: headerFg,
       };
 
       // Update globals for legacy components
