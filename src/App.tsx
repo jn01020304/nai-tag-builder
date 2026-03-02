@@ -5,7 +5,7 @@ import { generatePngWithMetadata } from './encoding/pngEncoder';
 import { dispatchPasteEvent } from './encoding/pasteDispatch';
 import { useAutoGenerator } from './hooks/useAutoGenerator';
 import type { QueueMode } from './types/preset';
-import { theme } from './styles/theme';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import PromptSection from './components/PromptSection';
 import GenerationParams from './components/GenerationParams';
 import CharacterCaptions from './components/CharacterCaptions';
@@ -49,7 +49,8 @@ function startDrag(clientX: number, clientY: number) {
   document.addEventListener('touchend', up);
 }
 
-export default function App() {
+function AppContent() {
+  const theme = useTheme();
   const [state, dispatch] = useMetadataState();
   const [isApplying, setIsApplying] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
@@ -269,5 +270,13 @@ export default function App() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
+    </ThemeProvider>
   );
 }
