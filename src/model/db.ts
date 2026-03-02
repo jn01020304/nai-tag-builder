@@ -19,15 +19,24 @@ export interface PresetEntry {
     createdAt: number;
 }
 
+export interface StateEntry {
+    id: string; // Singleton "current"
+    stateJson: string;
+}
+
 export class NaiDatabase extends Dexie {
     tags!: EntityTable<TagEntry, 'id'>;
     presets!: EntityTable<PresetEntry, 'id'>;
+    appState!: EntityTable<StateEntry, 'id'>;
 
     constructor() {
         super('NaiTagBuilderDB');
         this.version(1).stores({
-            tags: '++id, keyword, category, isEnabled, isNegative, createdAt', // Indexed fields
+            tags: '++id, keyword, category, isEnabled, isNegative, createdAt',
             presets: 'id, name, queueOrder, createdAt',
+        });
+        this.version(2).stores({
+            appState: 'id',
         });
     }
 }
