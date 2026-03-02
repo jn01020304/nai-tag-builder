@@ -1,6 +1,7 @@
 import type { CharacterEntry } from '../types/metadata';
 import type { MetadataAction } from '../hooks/useMetadataState';
 import CollapsibleSection from './CollapsibleSection';
+import HighlightedTextarea from './HighlightedTextarea';
 import { theme, inputStyle, labelStyle, smallBtnStyle } from '../styles/theme';
 
 interface Props {
@@ -39,7 +40,7 @@ export default function CharacterCaptions({ characters, dispatch }: Props) {
             </button>
           </div>
 
-          <textarea
+          <HighlightedTextarea
             value={char.caption}
             onChange={e => dispatch({ type: 'UPDATE_CHARACTER', id: char.id, field: 'caption', value: e.target.value })}
             placeholder="character tags..."

@@ -25,6 +25,14 @@ export interface ThemeColors {
   headerText: string; // Dimmer text used for headers/labels
 }
 
+export function withAlpha(color: string, alpha: number): string {
+  const match = color.match(/\d+(\.\d+)?/g);
+  if (match && match.length >= 3) {
+    return `rgba(${match[0]}, ${match[1]}, ${match[2]}, ${alpha})`;
+  }
+  return color;
+}
+
 // Fallback to NovelAI Deep Navy (Ink theme will override these)
 const fallbackTheme: ThemeColors = {
   base: '#13152c',
