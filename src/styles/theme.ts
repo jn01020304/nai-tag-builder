@@ -78,33 +78,54 @@ export function useDynamicTheme() {
 
   useEffect(() => {
     const updateTheme = () => {
-      const root = document.documentElement;
-      const style = getComputedStyle(root);
-
-      const getVar = (name: string, fb: string) => {
-        const val = style.getPropertyValue(name).trim();
-        return val ? val : fb;
+      // Since NovelAI uses styled-components without CSS vars, we sample actual DOM elements.
+      const getBg = (selectors: string[], fb: string) => {
+        for (const sel of selectors) {
+          const el = document.querySelector(sel);
+          if (el) {
+            const bg = getComputedStyle(el).backgroundColor;
+            if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return bg;
+          }
+        }
+        return fb;
       };
 
-      // Heuristics to find NovelAI theme colors
-      // Default NovelAI uses vars like --color-background, --color-text, --color-surface
-      // We approximate matching our theme tokens to NovelAI's CSS vars.
+      const getFg = (selectors: string[], fb: string) => {
+        for (const sel of selectors) {
+          const el = document.querySelector(sel);
+          if (el) {
+            const fg = getComputedStyle(el).color;
+            if (fg && fg !== 'rgba(0, 0, 0, 0)' && fg !== 'transparent') return fg;
+          }
+        }
+        return fb;
+      };
+
+      // Find the Generate button
+      const generateBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent && b.textContent.includes('Generate'));
+      const accentBg = generateBtn ? getComputedStyle(generateBtn).backgroundColor : fallbackTheme.yellow;
+
+      const mainBg = getComputedStyle(document.body).backgroundColor;
+      const panelBg = getBg(['textarea', 'nav', 'aside'], fallbackTheme.surface0);
+      const textFg = getFg(['p', 'h1', 'h2', 'span', 'textarea', 'body'], fallbackTheme.text);
+
+      const isVeryDark = mainBg === 'rgb(0, 0, 0)' || mainBg === 'rgba(0, 0, 0, 1)';
+
       const newTheme: ThemeColors = {
-        base: getVar('--background', getVar('--color-background', fallbackTheme.base)),
-        mantle: getVar('--background-light', getVar('--color-surface', fallbackTheme.mantle)),
-        crust: getVar('--background-dark', fallbackTheme.crust),
-        surface0: getVar('--color-surface-dim', fallbackTheme.surface0),
-        surface1: getVar('--color-surface-bright', fallbackTheme.surface1),
-        surface2: getVar('--color-surface-brighter', fallbackTheme.surface2),
-        text: getVar('--color-text', getVar('--text', fallbackTheme.text)),
-        subtext0: getVar('--color-text-dim', fallbackTheme.subtext0),
-        subtext1: getVar('--color-text-dimmer', fallbackTheme.subtext1),
-        blue: getVar('--color-blue', fallbackTheme.blue),
-        red: getVar('--color-red', fallbackTheme.red),
-        green: getVar('--color-green', fallbackTheme.green),
-        yellow: getVar('--color-primary', getVar('--primary', fallbackTheme.yellow)), // NovelAI pale yellow
-        overlay0: getVar('--color-border', fallbackTheme.overlay0),
-        // Tags
+        base: mainBg,
+        mantle: panelBg,
+        crust: isVeryDark ? '#111' : 'rgba(0, 0, 0, 0.4)',
+        surface0: panelBg,
+        surface1: 'rgba(255, 255, 255, 0.1)',
+        surface2: 'rgba(255, 255, 255, 0.2)',
+        text: textFg,
+        subtext0: 'rgba(255, 255, 255, 0.6)',
+        subtext1: 'rgba(255, 255, 255, 0.8)',
+        blue: fallbackTheme.blue,
+        red: fallbackTheme.red,
+        green: fallbackTheme.green,
+        yellow: accentBg,
+        overlay0: 'rgba(0, 0, 0, 0.3)',
         tagPositiveBg: fallbackTheme.tagPositiveBg,
         tagNegativeBg: fallbackTheme.tagNegativeBg,
       };
