@@ -11,8 +11,8 @@ writing:
   closing_summary: false
 ---
 
-# Handoff — 2026-03-02
-Status: v2.6.2 built and deployed to GitHub Pages. Enforced textarea transparency with !important to fix NovelAI CSS overrides hiding the highlights in Main Prompt.
+# Handoff — 2026-03-03
+Status: v2.7 built and deployed to GitHub Pages. Implemented PNG Metadata Drag and Drop Import (reads NovelAI tEXt chunks directly).
 
 ## Evergreen Notes
 
