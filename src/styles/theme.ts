@@ -1,19 +1,23 @@
-// Catppuccin Mocha palette
+// NovelAI UI Palette
 export const theme = {
-  base: '#1e1e2e',
-  mantle: '#181825',
-  crust: '#11111b',
-  surface0: '#313244',
-  surface1: '#45475a',
-  surface2: '#585b70',
-  text: '#cdd6f4',
-  subtext0: '#a6adc8',
-  subtext1: '#bac2de',
-  blue: '#89b4fa',
-  red: '#f38ba8',
-  green: '#a6e3a1',
-  yellow: '#f9e2af',
-  overlay0: '#6c7086',
+  base: '#13152c',       // NovelAI Deep Navy (Main Background)
+  mantle: '#1c1f3c',     // NovelAI slightly lighter navy (Input backgrounds)
+  crust: '#0b0c1a',      // Very dark
+  surface0: '#22253f',   // NovelAI Dark Slate Blue (Secondary panels)
+  surface1: '#2f345a',   // Hover states, borders
+  surface2: '#3c4273',   // Active states
+  text: '#ffffff',       // Pure white for primary text
+  subtext0: '#a0a0b0',   // Grayed out text
+  subtext1: '#d0d0e0',   // Lighter gray text
+  blue: '#3b82f6',       // Generic blue for highlights if needed
+  red: '#ef4444',        // Error states
+  green: '#10b981',      // Success states
+  yellow: '#f5f3c2',     // NovelAI Pale Yellow (Primary Action / Accent)
+  overlay0: '#4a5078',   // De-emphasized borders/dividers
+
+  // Custom Tag Colors
+  tagPositiveBg: 'rgba(102, 59, 39, 0.8)', // Orange-Brown
+  tagNegativeBg: 'rgba(29, 66, 115, 0.8)', // Deep Blue
 } as const;
 
 export const inputStyle: React.CSSProperties = {
