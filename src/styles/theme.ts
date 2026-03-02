@@ -123,46 +123,26 @@ export function useDynamicTheme() {
       const textFg = getFg(['.image-gen-page', 'p', 'h1', 'h2', 'span', 'body'], fallbackTheme.text);
       const headerFg = getFg(['label', '.sc-9882ac77-42'], fallbackTheme.headerText);
 
-      // Intensity Scraping
-      const getIntensity = (regexStr: string, fallback: string) => {
-        const regex = new RegExp(regexStr);
-
-        // 1. Try finding an existing span first
-        const spans = Array.from(document.querySelectorAll('span')).filter(s => Array.from(s.classList).some(c => regex.test(c)));
-        for (const s of spans) {
-          const bg = getComputedStyle(s).backgroundColor;
-          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return bg;
-        }
-
-        // 2. Fallback to searching all stylesheets
+      // Intensity Color Extraction via Probe Element
+      // NovelAI defines literal CSS classes: {type}-intensity-color-{0..40}
+      // Level 40 = 100% alpha = pure base RGB color
+      // Creating a temporary span with the class name lets the browser resolve the color
+      const probeIntensityColor = (type: string, fallback: string): string => {
         try {
-          for (let i = 0; i < document.styleSheets.length; i++) {
-            const sheet = document.styleSheets[i];
-            try {
-              if (sheet.cssRules) {
-                for (let j = 0; j < sheet.cssRules.length; j++) {
-                  const rule = sheet.cssRules[j] as CSSStyleRule;
-                  if (rule.selectorText && regex.test(rule.selectorText)) {
-                    if (rule.style.backgroundColor && rule.style.backgroundColor !== 'transparent' && rule.style.backgroundColor !== 'rgba(0, 0, 0, 0)') {
-                      return rule.style.backgroundColor;
-                    }
-                  }
-                }
-              }
-            } catch (e) {
-              // Ignore CORS errors on external stylesheets
-            }
-          }
-        } catch (e) {
-          // Ignore
-        }
-
+          const probe = document.createElement('span');
+          probe.className = `${type}-intensity-color-40`;
+          probe.style.display = 'none';
+          document.body.appendChild(probe);
+          const bg = getComputedStyle(probe).backgroundColor;
+          document.body.removeChild(probe);
+          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return bg;
+        } catch (_) { /* ignore */ }
         return fallback;
       };
 
-      const lowInt = getIntensity('low-intensity-color', fallbackTheme.intensityLow);
-      const midInt = getIntensity('mid-intensity-color', fallbackTheme.intensityMid);
-      const highInt = getIntensity('high-intensity-color', fallbackTheme.intensityHigh);
+      const lowInt = probeIntensityColor('low', fallbackTheme.intensityLow);
+      const midInt = probeIntensityColor('mid', fallbackTheme.intensityMid);
+      const highInt = probeIntensityColor('high', fallbackTheme.intensityHigh);
 
       const scrapedFont = getComputedStyle(document.body).fontFamily || fallbackTheme.fontFamily;
 
