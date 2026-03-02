@@ -70,6 +70,35 @@ function reducer(state: MetadataState, action: MetadataAction): MetadataState {
   }
 }
 
+import { useEffect, useRef } from 'react';
+import { db } from '../model/db';
+
 export function useMetadataState() {
-  return useReducer(reducer, DEFAULT_STATE);
+  const [state, dispatch] = useReducer(reducer, DEFAULT_STATE);
+  const isInitialized = useRef(false);
+
+  // Load from DB on mount
+  useEffect(() => {
+    db.appState.get('current').then(entry => {
+      if (entry) {
+        dispatch({ type: 'LOAD_PRESET', state: JSON.parse(entry.stateJson) });
+      }
+      isInitialized.current = true;
+    }).catch(e => {
+      console.error("Failed to load state", e);
+      isInitialized.current = true;
+    });
+  }, []);
+
+  // Save to DB on change (debounce slightly or just save direct)
+  useEffect(() => {
+    if (!isInitialized.current) return;
+
+    // Save current state
+    db.appState.put({ id: 'current', stateJson: JSON.stringify(state) }).catch(e => {
+      console.error("Failed to save state", e);
+    });
+  }, [state]);
+
+  return [state, dispatch] as const;
 }
