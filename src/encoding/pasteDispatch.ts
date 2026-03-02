@@ -20,7 +20,10 @@ async function autoImportAndScroll(autoGenerate: boolean): Promise<void> {
     // 1. Import Metadata 버튼이 나타날 때까지 대기 (최대 3초)
     const importBtn = await waitFor<HTMLButtonElement>(
       () => Array.from(document.querySelectorAll('button'))
-        .find(b => b.textContent?.trim() === 'Import Metadata') as HTMLButtonElement | undefined,
+        .find(b => {
+          const t = b.textContent?.trim();
+          return t === 'Import Metadata' || t === '메타데이터 불러오기';
+        }) as HTMLButtonElement | undefined,
       3000
     );
     if (!importBtn) return;
@@ -30,14 +33,20 @@ async function autoImportAndScroll(autoGenerate: boolean): Promise<void> {
     // 2. 모달이 닫힐 때까지 대기 (Import Metadata 버튼 사라짐)
     await waitFor(
       () => !Array.from(document.querySelectorAll('button'))
-        .find(b => b.textContent?.trim() === 'Import Metadata'),
+        .find(b => {
+          const t = b.textContent?.trim();
+          return t === 'Import Metadata' || t === '메타데이터 불러오기';
+        }),
       3000
     );
 
     // 3. Generate 버튼 찾기
     await delay(300);
     const genBtn = Array.from(document.querySelectorAll('button'))
-      .find(b => b.textContent?.includes('Generate')) as HTMLButtonElement | undefined;
+      .find(b => {
+        const t = b.textContent || '';
+        return t.includes('Generate') || t.includes('생성');
+      }) as HTMLButtonElement | undefined;
 
     if (autoGenerate && genBtn) {
       genBtn.click();

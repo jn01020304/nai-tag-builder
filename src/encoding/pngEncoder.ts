@@ -138,8 +138,8 @@ export async function generatePngWithMetadata(comment: CommentJson): Promise<Blo
   const allChunks = [
     createTextChunk('Title', 'NovelAI generated image'),
     createTextChunk('Description', comment.prompt),
-    createTextChunk('Software', 'NovelAI'),
-    createTextChunk('Source', 'NovelAI Diffusion V4.5 4BDE2A90'),
+    createTextChunk('Software', 'NovelAI Diffusion V4.5 48DE2A9D'),
+    createTextChunk('Source', 'NovelAI Diffusion V4.5 48DE2A9D'),
     createTextChunk('Generation time', '0.0'),
     createTextChunk('Comment', jsonString),
   ];
