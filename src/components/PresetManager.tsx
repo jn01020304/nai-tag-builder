@@ -73,8 +73,14 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
         try {
             const buffer = await file.arrayBuffer();
             const jsonMeta = parseNovelAIPng(buffer);
-            if (jsonMeta) {
-                const newState = translateNovelAiMetadata(jsonMeta);
+            if (jsonMeta && jsonMeta.data) {
+                console.log('[CALLER-DEBUG] jsonMeta keys:', Object.keys(jsonMeta));
+                console.log('[CALLER-DEBUG] jsonMeta.data type:', typeof jsonMeta.data, 'keys:', Object.keys(jsonMeta.data).slice(0, 10));
+                console.log('[CALLER-DEBUG] jsonMeta.data.prompt:', typeof jsonMeta.data.prompt, jsonMeta.data.prompt ? String(jsonMeta.data.prompt).substring(0, 40) : 'N/A');
+                console.log('[CALLER-DEBUG] jsonMeta.data.steps:', jsonMeta.data.steps);
+                console.log('[CALLER-DEBUG] jsonMeta.source:', jsonMeta.source);
+                const newState = translateNovelAiMetadata(jsonMeta.data, jsonMeta.source);
+                console.log('[CALLER-DEBUG] newState.basePrompt:', newState.basePrompt.substring(0, 40));
                 onImportRequest(newState);
             } else {
                 alert('No NovelAI metadata found in this PNG.');
