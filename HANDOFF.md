@@ -12,7 +12,7 @@ writing:
 ---
 
 # Handoff — 2026-03-03
-Status: v2.7 built and deployed to GitHub Pages. Implemented PNG Metadata Import via Drag&Drop, and added a "Load PNG" button in the Preset Manager for mobile users.
+Status: v2.8 built and deployed to GitHub Pages. Added an interactive Import Modal that allows users to select which metadata fields (Prompt, Negative Prompt, Seed, Settings) to import when loading a PNG.
 
 ## Evergreen Notes
 

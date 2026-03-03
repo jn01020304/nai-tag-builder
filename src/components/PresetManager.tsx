@@ -15,9 +15,10 @@ interface Props {
     setQueue: React.Dispatch<React.SetStateAction<string[]>>;
     queueMode: QueueMode;
     setQueueMode: React.Dispatch<React.SetStateAction<QueueMode>>;
+    onImportRequest: (state: MetadataState) => void;
 }
 
-export default function PresetManager({ state, dispatch, queue, setQueue, queueMode, setQueueMode }: Props) {
+export default function PresetManager({ state, dispatch, queue, setQueue, queueMode, setQueueMode, onImportRequest }: Props) {
     const [presets, setPresets] = useState<Preset[]>([]);
     const [saveName, setSaveName] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -74,7 +75,7 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
             const jsonMeta = parseNovelAIPng(buffer);
             if (jsonMeta) {
                 const newState = translateNovelAiMetadata(jsonMeta);
-                dispatch({ type: 'LOAD_PRESET', state: { ...state, ...newState } });
+                onImportRequest(newState);
             } else {
                 alert('No NovelAI metadata found in this PNG.');
             }

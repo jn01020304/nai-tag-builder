@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useMetadataState } from './hooks/useMetadataState';
+import type { MetadataState } from './types/metadata';
 import { buildCommentJson } from './model/buildCommentJson';
 import { generatePngWithMetadata } from './encoding/pngEncoder';
 import { dispatchPasteEvent } from './encoding/pasteDispatch';
@@ -14,6 +15,7 @@ import AdvancedParams from './components/AdvancedParams';
 import ApplyButton from './components/ApplyButton';
 import PresetManager from './components/PresetManager';
 import AutoGeneratePanel from './components/AutoGeneratePanel';
+import ImportModal from './components/ImportModal';
 import { parseNovelAIPng } from './utils/pngParser';
 import { translateNovelAiMetadata } from './utils/metadataTranslator';
 
@@ -62,6 +64,9 @@ function AppContent() {
   const [queue, setQueue] = useState<string[]>([]);
   const [queueMode, setQueueMode] = useState<QueueMode>('progression');
 
+  // Import Modal state
+  const [pendingImport, setPendingImport] = useState<MetadataState | null>(null);
+
   // Drag and drop state
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -90,7 +95,7 @@ function AppContent() {
           const jsonMeta = parseNovelAIPng(buffer);
           if (jsonMeta) {
             const newState = translateNovelAiMetadata(jsonMeta);
-            dispatch({ type: 'LOAD_PRESET', state: { ...state, ...newState } });
+            setPendingImport(newState);
           } else {
             alert('No NovelAI metadata found in this PNG.');
           }
@@ -313,6 +318,7 @@ function AppContent() {
             setQueue={setQueue}
             queueMode={queueMode}
             setQueueMode={setQueueMode}
+            onImportRequest={setPendingImport}
           />
           <PromptSection value={state.basePrompt} dispatch={dispatch} />
           <GenerationParams state={state} dispatch={dispatch} />
@@ -339,6 +345,17 @@ function AppContent() {
 
           <ApplyButton isApplying={isApplying} onApply={handleApply} />
         </div>
+      )}
+
+      {pendingImport && (
+        <ImportModal
+          importedState={pendingImport}
+          onConfirm={(partial) => {
+            dispatch({ type: 'LOAD_PRESET', state: { ...state, ...partial } });
+            setPendingImport(null);
+          }}
+          onCancel={() => setPendingImport(null)}
+        />
       )}
     </div>
   );
