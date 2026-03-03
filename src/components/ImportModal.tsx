@@ -63,6 +63,12 @@ export default function ImportModal({ importedState, onConfirm, onCancel }: Prop
             partial.wonkyVibeCorrelation = importedState.wonkyVibeCorrelation;
         }
 
+        // Always import the source model hash. 
+        // A prompt formulated for Anime V4 Full may not work as intended on Curated.
+        if (importedState.source) {
+            partial.source = importedState.source;
+        }
+
         onConfirm(partial);
     };
 
