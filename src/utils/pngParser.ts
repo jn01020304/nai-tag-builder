@@ -1,4 +1,5 @@
 export function extractPngMetadata(buffer: ArrayBuffer): Record<string, string> {
+    console.log('[PNG-DEBUG] extractPngMetadata called, buffer size:', buffer.byteLength);
     const dataView = new DataView(buffer);
     const uint8View = new Uint8Array(buffer);
 
@@ -33,6 +34,7 @@ export function extractPngMetadata(buffer: ArrayBuffer): Record<string, string> 
         offset += 4;
 
         // Chunk data
+        console.log('[PNG-DEBUG] Chunk:', typeString, 'length:', chunkLength);
         if (typeString === 'tEXt') {
             let keyword = '';
             let textStart = offset;
@@ -49,6 +51,7 @@ export function extractPngMetadata(buffer: ArrayBuffer): Record<string, string> 
             if (keyword) {
                 const text = textDecoder.decode(uint8View.slice(textStart, offset + chunkLength));
                 metadata[keyword] = text;
+                console.log('[PNG-DEBUG] Found tEXt key:', keyword, 'value length:', text.length);
             }
         }
 
@@ -62,13 +65,19 @@ export function extractPngMetadata(buffer: ArrayBuffer): Record<string, string> 
 export function parseNovelAIPng(buffer: ArrayBuffer): { data: any, source?: string } | null {
     try {
         const meta = extractPngMetadata(buffer);
+        console.log('[PNG-DEBUG] All extracted metadata keys:', Object.keys(meta));
 
         // NovelAI stores JSON payload in the "Comment" tEXt chunk
         if (meta['Comment']) {
             const data = JSON.parse(meta['Comment']);
+            console.log('[PNG-DEBUG] Comment JSON keys:', Object.keys(data));
+            console.log('[PNG-DEBUG] has prompt:', !!data.prompt, 'has v4_prompt:', !!data.v4_prompt);
+            console.log('[PNG-DEBUG] Source chunk:', meta['Source']);
+            console.log('[PNG-DEBUG] Description chunk:', meta['Description']?.substring(0, 100));
 
             // Fallback for missing prompt if stored in Description chunk
             if (!data.prompt && !data.v4_prompt && meta['Description']) {
+                console.log('[PNG-DEBUG] Using Description fallback for prompt');
                 data.prompt = meta['Description'];
             }
 
@@ -78,10 +87,10 @@ export function parseNovelAIPng(buffer: ArrayBuffer): { data: any, source?: stri
             };
         }
 
-        console.warn("No 'Comment' chunk found in PNG metadata.", meta);
+        console.warn("[PNG-DEBUG] No 'Comment' chunk found in PNG metadata.", Object.keys(meta));
         return null;
     } catch (e) {
-        console.error("Failed to parse NovelAI PNG metadata:", e);
+        console.error("[PNG-DEBUG] Failed to parse NovelAI PNG metadata:", e);
         return null;
     }
 }
