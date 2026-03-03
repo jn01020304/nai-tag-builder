@@ -7,6 +7,7 @@ import { DEFAULT_STATE } from '../model/defaults';
  * Therefore, we map it entirely to `basePrompt` and clear `characters` to avoid duplications.
  */
 export function translateNovelAiMetadata(data: any, source?: string): MetadataState {
+    console.log('[TRANSLATE-DEBUG] translateNovelAiMetadata called, v2 with full field mapping');
     const state: MetadataState = { ...DEFAULT_STATE };
 
     if (!data) return state;
@@ -21,9 +22,11 @@ export function translateNovelAiMetadata(data: any, source?: string): MetadataSt
             centerX: c.centers?.[0]?.x ?? 0.5,
             centerY: c.centers?.[0]?.y ?? 0.5,
         }));
+        console.log('[TRANSLATE-DEBUG] v4_prompt basePrompt:', state.basePrompt.substring(0, 60), '... chars:', state.characters.length);
     } else if (typeof data.prompt === 'string') {
         state.basePrompt = data.prompt;
-        state.characters = []; // Prevent multiplying characters on import
+        state.characters = [];
+        console.log('[TRANSLATE-DEBUG] flat prompt:', state.basePrompt.substring(0, 60));
     }
 
     if (data.v4_negative_prompt?.caption) {
@@ -65,6 +68,8 @@ export function translateNovelAiMetadata(data: any, source?: string): MetadataSt
     if (typeof data.cfg_sched_eligibility === 'string') state.cfgSchedEligibility = data.cfg_sched_eligibility;
     if (typeof data.uncond_per_vibe === 'boolean') state.uncondPerVibe = data.uncond_per_vibe;
     if (typeof data.wonky_vibe_correlation === 'boolean') state.wonkyVibeCorrelation = data.wonky_vibe_correlation;
+
+    console.log('[TRANSLATE-DEBUG] Final state: scale=', state.scale, 'steps=', state.steps, 'seed=', state.seed, 'sampler=', state.sampler, 'size=', state.width, 'x', state.height);
 
     // Dimensions
     if (typeof data.resolution === 'string') {
