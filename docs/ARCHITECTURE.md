@@ -36,57 +36,29 @@ App.tsx가 500줄 이상의 God Component:
 
 # 목표 구조 (To-Be) — 리팩토링 방향
 
-## 자동 생성 로직 분리
+단기적으로 진행해야 할 핵심 리팩토링 목표(기술 부채 해소)는 다음과 같습니다:
 
-executeLoop와 관련 상태/로직을 커스텀 훅으로 분리:
+## 1. 전역 Theme 변수 → Context 훅 마이그레이션
+현재 `theme.ts`에서 `export let theme` 형태로 전역 변수를 내보내어 10여 개의 컴포넌트가 직접 참조하고 있습니다. 
+문제는 정적 스타일 객체(static constants)들이 사이드 이펙트로 한 번만 평가되고 런타임 테마 변경 시 업데이트되지 않는 버그가 발생할 수 있다는 점입니다.
+모든 컴포넌트가 `<ThemeContext.Provider>` 하위에서 `useTheme()` 훅을 통해 테마 색상을 구독하도록 전면 수정해야 합니다.
 
-```
-src/
-├── hooks/
-│   ├── useMetadataState.ts     (기존 유지)
-│   └── useAutoGenerator.ts     [NEW] 자동 생성 루프, 시드 규칙, 프리셋 큐 순환 로직
-```
+## 2. App.tsx 이벤트 로직 분리 (Drag & Resize)
+`startDrag`와 `startResize` 등 창 조절을 담당하는 마우스/터치 이벤트 핸들러가 `AppContent` 컴포넌트 안에 하드코딩되어 있습니다. 
+비즈니스 로직과 UI 렌더링, 윈도우 인터랙션 로직이 혼재되어 있으니, 이를 `useWindowDrag()` 및 `useEdgeResize()` 형태의 외부 훅으로 분리해야 합니다.
 
-이렇게 하면 App.tsx는 "UI 껍데기"만 담당하고, 자동 생성 로직은 독립적으로 테스트/확장 가능.
-프리셋 프로그레션 기능 추가 시 useAutoGenerator.ts만 수정하면 됨.
+## 3. MetadataState 계층 구조화 (Flat Structure 개선)
+현재 `MetadataState`는 프롬프트(`basePrompt`, `characters`)와 생성 파라미터(`steps`, `scale`), 고급 설정(`smea`, `smeaDyn`) 등이 모두 평탄화(Flat)된 하나의 객체로 관리됩니다.
+추후 추가할 핵심 기능인 프롬프트 컴파일러(태그 객체 배열 → NAI 텍스트 변환)가 프롬프트 데이터에만 집중할 수 있도록, `{ prompt: PromptState, params: GenerationParams, advanced: AdvancedFlags }` 형태의 계층적 구조로 재설계해야 합니다.
 
-## 자동 생성 설정 UI 분리
+## 4. presetStorage 하위 호환성 (Migration Layer)
+`presetStorage.ts`가 현재 `MetadataState` 배열 객체를 JSON으로 직렬화해 그대로 저장하고 있습니다. 
+위의 계층 구조화 작업이 진행되면 기존 `localStorage`에 저장된 프리셋 데이터 형식이 깨지게 됩니다. 
+이를 막기 위해 `version` 필드를 도입하고 스키마 이주(Migration) 레이어를 구축해야 합니다.
 
-App.tsx의 return문 안에 하드코딩된 자동 생성 UI를 별도 컴포넌트로:
-
-```
-src/
-├── components/
-│   └── AutoGeneratePanel.tsx   [NEW] 시드 규칙 드롭다운, 간격/횟수 입력, +/- 버튼
-```
-
-## 추후 확장을 위한 자리 (향후 로드맵 연결)
-
-- useAutoGenerator 내부에 "다음 state와 seed를 결정하는 함수"를 분리해두면, 프리셋 프로그레션/로테이션 로직을 끼워넣기 쉬움
-- DB 연동 시 presetStorage.ts의 localStorage → DB 어댑터로 교체 가능하도록 인터페이스 유지
-- 태그 시스템 추가 시 model/ 하위에 태그 관련 모듈 배치
-
----
-
-## 동적 테마 시스템
-
-NovelAI는 CSS 변수를 쓰지 않고 Styled-Components로 해시 클래스명에 색상을 하드코딩한다.
-이 때문에 테마 색상을 외부에서 읽으려면 DOM 요소의 computedStyle을 직접 긁어와야 한다.
-
-```
-src/
-├── styles/
-│   └── theme.ts            ThemeColors 인터페이스, useDynamicTheme 훅, 글로벌 스타일 헬퍼
-├── contexts/
-│   └── ThemeContext.tsx     [NEW] ThemeProvider + useTheme 컨텍스트
-```
-
-설계 결정:
-- CSS 변수 → Styled-Components가 변수를 노출하지 않으므로 불가능
-- computedStyle 직접 스크래핑 채택. `.image-gen-page`, `.image-gen-prompt-main`, `.settings-panel`, Generate 버튼 등 안정적 셀렉터 사용
-- `document.head` MutationObserver로 `<style>` 태그 교체를 감지하여 실시간 동기화
-- isVeryDark 판별: 현재 하드코딩 RGB 비교. 향후 luminance 계산으로 교체 예정
-- ThemeColors에 기본 색상 외에 `intensityLow/Mid/High`, `warningError`, `headerText`, `fontFamily` 포함
+## 5. 밝기(Luminance) 기반 색상 판독
+현재 `isVeryDark` 플래그는 몇 가지 하드코딩된 RGB 문자열과 직접 비교하여 다크 모드를 판별하고 있습니다.
+화이트리스트에 없는 다크 테마가 추가될 경우 텍스트가 안 보이는 오류가 발생할 수 있으므로, RGB 값을 파싱하여 실제 밝기(Luminance) 수식을 적용하는 방식으로 수정해야 합니다.
 
 ---
 

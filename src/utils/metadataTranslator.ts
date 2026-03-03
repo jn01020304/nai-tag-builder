@@ -6,10 +6,11 @@ import { DEFAULT_STATE } from '../model/defaults';
  * Note: NovelAI prompt format contains all characters compiled into one string.
  * Therefore, we map it entirely to `basePrompt` and clear `characters` to avoid duplications.
  */
-export function translateNovelAiMetadata(data: any): MetadataState {
+export function translateNovelAiMetadata(data: any, source?: string): MetadataState {
     const state: MetadataState = { ...DEFAULT_STATE };
 
     if (!data) return state;
+    if (source) state.source = source;
 
     if (data.v4_prompt?.caption) {
         state.basePrompt = data.v4_prompt.caption.base_caption || '';

@@ -94,7 +94,7 @@ async function buildStealthBitstream(jsonString: string): Promise<Uint8Array> {
 
 // ── Public API ───────────────────────────────────────────
 
-export async function generatePngWithMetadata(comment: CommentJson): Promise<Blob> {
+export async function generatePngWithMetadata(comment: CommentJson, source?: string): Promise<Blob> {
   const jsonString = JSON.stringify(comment);
 
   // 1. LSB bitstream
@@ -138,8 +138,8 @@ export async function generatePngWithMetadata(comment: CommentJson): Promise<Blo
   const allChunks = [
     createTextChunk('Title', 'NovelAI generated image'),
     createTextChunk('Description', comment.prompt),
-    createTextChunk('Software', 'NovelAI Diffusion V4.5 48DE2A9D'),
-    createTextChunk('Source', 'NovelAI Diffusion V4.5 48DE2A9D'),
+    createTextChunk('Software', 'NovelAI Diffusion V4.5'),
+    createTextChunk('Source', source || 'NovelAI Diffusion V4.5 48DE2A9D'),
     createTextChunk('Generation time', '0.0'),
     createTextChunk('Comment', jsonString),
   ];

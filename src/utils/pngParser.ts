@@ -59,13 +59,16 @@ export function extractPngMetadata(buffer: ArrayBuffer): Record<string, string> 
     return metadata;
 }
 
-export function parseNovelAIPng(buffer: ArrayBuffer): any | null {
+export function parseNovelAIPng(buffer: ArrayBuffer): { data: any, source?: string } | null {
     try {
         const meta = extractPngMetadata(buffer);
 
         // NovelAI stores JSON payload in the "Comment" tEXt chunk
         if (meta['Comment']) {
-            return JSON.parse(meta['Comment']);
+            return {
+                data: JSON.parse(meta['Comment']),
+                source: meta['Source']
+            };
         }
 
         console.warn("No 'Comment' chunk found in PNG metadata.", meta);
