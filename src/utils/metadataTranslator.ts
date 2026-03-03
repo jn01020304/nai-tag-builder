@@ -43,13 +43,30 @@ export function translateNovelAiMetadata(data: any, source?: string): MetadataSt
         }
     }
 
+    // Basic generation params
     if (typeof data.seed === 'number') state.seed = data.seed;
     if (typeof data.steps === 'number') state.steps = data.steps;
     if (typeof data.sampler === 'string') state.sampler = data.sampler;
-    if (typeof data.guidance === 'number') state.scale = data.guidance;
+    // NovelAI uses 'scale' in JSON, but older versions may use 'guidance'
+    if (typeof data.scale === 'number') state.scale = data.scale;
+    else if (typeof data.guidance === 'number') state.scale = data.guidance;
     if (typeof data.sm === 'boolean') state.smea = data.sm;
     if (typeof data.sm_dyn === 'boolean') state.smeaDyn = data.sm_dyn;
+    if (typeof data.noise_schedule === 'string') state.noiseSchedule = data.noise_schedule;
+    if (typeof data.n_samples === 'number') state.nSamples = data.n_samples;
 
+    // Advanced params
+    if (typeof data.cfg_rescale === 'number') state.cfgRescale = data.cfg_rescale;
+    if (typeof data.uncond_scale === 'number') state.uncondScale = data.uncond_scale;
+    if (typeof data.dynamic_thresholding === 'boolean') state.dynamicThresholding = data.dynamic_thresholding;
+    if (data.skip_cfg_above_sigma !== undefined) state.skipCfgAboveSigma = data.skip_cfg_above_sigma;
+    if (typeof data.skip_cfg_below_sigma === 'number') state.skipCfgBelowSigma = data.skip_cfg_below_sigma;
+    if (typeof data.prefer_brownian === 'boolean') state.preferBrownian = data.prefer_brownian;
+    if (typeof data.cfg_sched_eligibility === 'string') state.cfgSchedEligibility = data.cfg_sched_eligibility;
+    if (typeof data.uncond_per_vibe === 'boolean') state.uncondPerVibe = data.uncond_per_vibe;
+    if (typeof data.wonky_vibe_correlation === 'boolean') state.wonkyVibeCorrelation = data.wonky_vibe_correlation;
+
+    // Dimensions
     if (typeof data.resolution === 'string') {
         const parts = data.resolution.split('x');
         if (parts.length === 2) {
