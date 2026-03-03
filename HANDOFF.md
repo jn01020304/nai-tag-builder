@@ -76,6 +76,22 @@ Status: v2.8.2 built and deployed to GitHub Pages. Added granular checkbox lists
 - Added `ImportModal.tsx` to allow users to selectively import specific fields (Prompt, Negative Prompt, Seed, Settings) instead of blind overwriting.
 - Discovered NovelAI v4's `v4_prompt.caption.char_captions` metadata structure and added granular character-by-character checkbox extraction support.
 
+### Bug Investigation: Generation Consistency Loss (Resolved)
+- **Issue**: Importing an original NAI PNG and generating via bookmarklet produced slightly different images.
+- **Initial Hypothesis**: Missing `v4_prompt` regional structured metadata.
+- **True Cause**: Diffing raw PNG `tEXt` chunks revealed the Tag Builder was hardcoding the `Source` parameter (e.g. `NovelAI Diffusion V4.5 48DE2A9D`). This mismatch caused the NovelAI UI to silently fall back to a different model version (e.g. Curated instead of Full).
+- **Resolution**: Extracted the exact `Source` hash during PNG import and perfectly preserved it during export.
+
+### Bug Investigation: Load PNG Default Settings (Resolved)
+- **Issue**: Clicking "Load PNG" with certain NovelAI generated images populated the editor with default settings rather than the image's metadata.
+- **Cause**: NovelAI occasionally omits the `prompt` or `v4_prompt` property entirely from the `Comment` JSON payload, opting instead to only store it in the base `Description` tEXt chunk. The JSON parsing strategy did not merge this property back, meaning that `translateNovelAiMetadata` saw an undefined `data.prompt`, which caused it to fall back to `DEFAULT_STATE`.
+- **Resolution**: Enhanced `parseNovelAIPng()` to watch for a missing `{ prompt }` or absent `v4_prompt` in the decoded JSON. If missing, we inject the pre-extracted PNG `Description` chunk property directly into `data.prompt` prior to feeding it to the UI Translator.
+
+### AI Model Selection Dropdown (v2.9)
+- Added `models.ts` defining known NovelAI model hashes (Anime V4 Full, Anime V4 Curated, etc.).
+- Integrated a "Model" `<select>` dropdown in `GenerationParams.tsx` for users to directly choose the AI model.
+- Allows "Custom / Imported" fallback to preserve foreign `Source` hashes from unsupported models.
+
 ---
 
 ## Current State
@@ -88,11 +104,6 @@ Status: v2.8.2 built and deployed to GitHub Pages. Added granular checkbox lists
 ---
 
 ## What Remains
-
-### Bug Investigation: Generation Consistency Loss
-- **Issue**: Importing an original NovelAI PNG into the Tag Builder and generating an image via the bookmarklet produces a different image than when pasting the identical PNG directly into the NovelAI interface.
-- **Cause Hypothesis**: The `buildCommentJson.ts` utility currently flattens all character prompts into the main `prompt` string and fails to reconstruct the `v4_prompt` object (`use_coords`, `use_order`, `char_captions`). The missing regional/structured v4 metadata causes NovelAI's backend generation to shift or lose specific region grounding, resulting in a slightly different image.
-- **Action Required**: Refactor `buildCommentJson.ts` to output exact `v4_prompt` and `v4_negative_prompt` JSON structures to ensure 1:1 identical reproduction of images.
 
 ### Known Weaknesses (Technical Debt)
 - `isVeryDark` heuristic: compares `mainBg` against hardcoded RGB strings. Should switch to luminance calculation.

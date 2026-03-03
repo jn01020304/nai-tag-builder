@@ -65,8 +65,15 @@ export function parseNovelAIPng(buffer: ArrayBuffer): { data: any, source?: stri
 
         // NovelAI stores JSON payload in the "Comment" tEXt chunk
         if (meta['Comment']) {
+            const data = JSON.parse(meta['Comment']);
+
+            // Fallback for missing prompt if stored in Description chunk
+            if (!data.prompt && !data.v4_prompt && meta['Description']) {
+                data.prompt = meta['Description'];
+            }
+
             return {
-                data: JSON.parse(meta['Comment']),
+                data,
                 source: meta['Source']
             };
         }
