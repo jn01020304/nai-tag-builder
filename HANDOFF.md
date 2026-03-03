@@ -12,7 +12,7 @@ writing:
 ---
 
 # Handoff — 2026-03-03
-Status: v2.8.1 built and deployed to GitHub Pages. Enhanced the PNG metadata importer to support extracting Character Prompts (`v4_prompt.caption.char_captions`).
+Status: v2.8.2 built and deployed to GitHub Pages. Added granular checkbox lists for Character Prompts in the Import Modal, allowing selective import on a per-character basis.
 
 ## Evergreen Notes
 

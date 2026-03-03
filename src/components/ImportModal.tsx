@@ -9,23 +9,34 @@ interface Props {
 }
 
 export default function ImportModal({ importedState, onConfirm, onCancel }: Props) {
-    const [importPrompt, setImportPrompt] = useState(true);
+    const [importBasePrompt, setImportBasePrompt] = useState(true);
+    const [selectedChars, setSelectedChars] = useState<string[]>(
+        importedState.characters.map(c => c.id)
+    );
+
     const [importNegative, setImportNegative] = useState(true);
+    const [selectedNegChars, setSelectedNegChars] = useState<string[]>(
+        importedState.negativeCharacters.map(c => c.id)
+    );
+
     const [importSeed, setImportSeed] = useState(true);
     const [importSettings, setImportSettings] = useState(true);
 
     const handleApply = () => {
         const partial: Partial<MetadataState> = {};
 
-        if (importPrompt) {
+        if (importBasePrompt) {
             partial.basePrompt = importedState.basePrompt;
-            partial.characters = importedState.characters;
         }
+
+        // Always attach the selected characters list (even if empty, it means we chose 0 characters intentionally)
+        partial.characters = importedState.characters.filter(c => selectedChars.includes(c.id));
 
         if (importNegative) {
             partial.negativeBase = importedState.negativeBase;
-            partial.negativeCharacters = importedState.negativeCharacters;
         }
+
+        partial.negativeCharacters = importedState.negativeCharacters.filter(c => selectedNegChars.includes(c.id));
 
         if (importSeed) {
             partial.seed = importedState.seed;
@@ -71,6 +82,8 @@ export default function ImportModal({ importedState, onConfirm, onCancel }: Prop
         borderRadius: '12px',
         padding: '24px',
         width: '320px',
+        maxHeight: '80vh',
+        overflowY: 'auto',
         boxShadow: '0 10px 40px rgba(0,0,0,0.8)',
         display: 'flex',
         flexDirection: 'column',
@@ -81,7 +94,7 @@ export default function ImportModal({ importedState, onConfirm, onCancel }: Prop
 
     const rowStyle: React.CSSProperties = {
         display: 'flex',
-        alignItems: 'center',
+        alignItems: 'flex-start',
         gap: '10px',
         fontSize: '14px',
         cursor: 'pointer',
@@ -96,19 +109,59 @@ export default function ImportModal({ importedState, onConfirm, onCancel }: Prop
                 </p>
 
                 <label style={rowStyle}>
-                    <input type="checkbox" checked={importPrompt} onChange={e => setImportPrompt(e.target.checked)} />
-                    프롬프트 (Prompt)
+                    <input style={{ marginTop: '4px' }} type="checkbox" checked={importBasePrompt} onChange={e => setImportBasePrompt(e.target.checked)} />
+                    메인 프롬프트 (Base Prompt)
                 </label>
+
+                {importedState.characters.length > 0 && (
+                    <div style={{ paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '8px' }}>
+                        {importedState.characters.map((c, idx) => (
+                            <label key={c.id} style={{ ...rowStyle, fontSize: '12px', color: theme.subtext1 }}>
+                                <input
+                                    style={{ marginTop: '2px' }}
+                                    type="checkbox"
+                                    checked={selectedChars.includes(c.id)}
+                                    onChange={e => {
+                                        if (e.target.checked) setSelectedChars([...selectedChars, c.id]);
+                                        else setSelectedChars(selectedChars.filter(id => id !== c.id));
+                                    }}
+                                />
+                                캐릭터 {idx + 1}: {c.caption.substring(0, 30)}{c.caption.length > 30 && '...'}
+                            </label>
+                        ))}
+                    </div>
+                )}
+
                 <label style={rowStyle}>
-                    <input type="checkbox" checked={importNegative} onChange={e => setImportNegative(e.target.checked)} />
+                    <input style={{ marginTop: '4px' }} type="checkbox" checked={importNegative} onChange={e => setImportNegative(e.target.checked)} />
                     부정 프롬프트 (Negative Prompt)
                 </label>
+
+                {importedState.negativeCharacters.length > 0 && (
+                    <div style={{ paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '8px' }}>
+                        {importedState.negativeCharacters.map((c, idx) => (
+                            <label key={c.id} style={{ ...rowStyle, fontSize: '12px', color: theme.subtext1 }}>
+                                <input
+                                    style={{ marginTop: '2px' }}
+                                    type="checkbox"
+                                    checked={selectedNegChars.includes(c.id)}
+                                    onChange={e => {
+                                        if (e.target.checked) setSelectedNegChars([...selectedNegChars, c.id]);
+                                        else setSelectedNegChars(selectedNegChars.filter(id => id !== c.id));
+                                    }}
+                                />
+                                부정 캐릭터 {idx + 1}: {c.caption.substring(0, 30)}{c.caption.length > 30 && '...'}
+                            </label>
+                        ))}
+                    </div>
+                )}
+
                 <label style={rowStyle}>
-                    <input type="checkbox" checked={importSeed} onChange={e => setImportSeed(e.target.checked)} />
+                    <input style={{ marginTop: '4px' }} type="checkbox" checked={importSeed} onChange={e => setImportSeed(e.target.checked)} />
                     시드 (Seed)
                 </label>
                 <label style={rowStyle}>
-                    <input type="checkbox" checked={importSettings} onChange={e => setImportSettings(e.target.checked)} />
+                    <input style={{ marginTop: '4px' }} type="checkbox" checked={importSettings} onChange={e => setImportSettings(e.target.checked)} />
                     나머지 세부 설정 전체
                 </label>
 
