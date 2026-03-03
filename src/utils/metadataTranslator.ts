@@ -7,13 +7,21 @@ import { DEFAULT_STATE } from '../model/defaults';
  * Therefore, we map it entirely to `basePrompt` and clear `characters` to avoid duplications.
  */
 export function translateNovelAiMetadata(data: any, source?: string): MetadataState {
-    console.log('[TRANSLATE-DEBUG] translateNovelAiMetadata called, v2 with full field mapping');
+    console.log('[TRANSLATE-DEBUG] v3 called');
     const state: MetadataState = { ...DEFAULT_STATE };
 
-    if (!data) return state;
+    if (!data) { console.log('[TRANSLATE-DEBUG] data is falsy, returning defaults'); return state; }
     if (source) state.source = source;
 
+    // Deep inspect data
+    console.log('[TRANSLATE-DEBUG] data type:', typeof data);
+    console.log('[TRANSLATE-DEBUG] data.prompt type:', typeof data.prompt, 'value:', typeof data.prompt === 'string' ? data.prompt.substring(0, 40) : data.prompt);
+    console.log('[TRANSLATE-DEBUG] data.v4_prompt type:', typeof data.v4_prompt);
+    console.log('[TRANSLATE-DEBUG] data.v4_prompt?.caption:', data.v4_prompt?.caption ? 'EXISTS' : 'MISSING');
+    console.log('[TRANSLATE-DEBUG] data.steps:', data.steps, 'data.seed:', data.seed, 'data.scale:', data.scale);
+
     if (data.v4_prompt?.caption) {
+        console.log('[TRANSLATE-DEBUG] ENTERING v4_prompt branch');
         state.basePrompt = data.v4_prompt.caption.base_caption || '';
         const charCaptions = data.v4_prompt.caption.char_captions || [];
         state.characters = charCaptions.map((c: any, i: number) => ({
@@ -22,11 +30,13 @@ export function translateNovelAiMetadata(data: any, source?: string): MetadataSt
             centerX: c.centers?.[0]?.x ?? 0.5,
             centerY: c.centers?.[0]?.y ?? 0.5,
         }));
-        console.log('[TRANSLATE-DEBUG] v4_prompt basePrompt:', state.basePrompt.substring(0, 60), '... chars:', state.characters.length);
+        console.log('[TRANSLATE-DEBUG] v4_prompt basePrompt:', state.basePrompt.substring(0, 60), '| chars:', state.characters.length);
     } else if (typeof data.prompt === 'string') {
+        console.log('[TRANSLATE-DEBUG] ENTERING flat prompt branch');
         state.basePrompt = data.prompt;
         state.characters = [];
-        console.log('[TRANSLATE-DEBUG] flat prompt:', state.basePrompt.substring(0, 60));
+    } else {
+        console.log('[TRANSLATE-DEBUG] NO PROMPT BRANCH TAKEN');
     }
 
     if (data.v4_negative_prompt?.caption) {
@@ -50,7 +60,6 @@ export function translateNovelAiMetadata(data: any, source?: string): MetadataSt
     if (typeof data.seed === 'number') state.seed = data.seed;
     if (typeof data.steps === 'number') state.steps = data.steps;
     if (typeof data.sampler === 'string') state.sampler = data.sampler;
-    // NovelAI uses 'scale' in JSON, but older versions may use 'guidance'
     if (typeof data.scale === 'number') state.scale = data.scale;
     else if (typeof data.guidance === 'number') state.scale = data.guidance;
     if (typeof data.sm === 'boolean') state.smea = data.sm;
@@ -69,7 +78,7 @@ export function translateNovelAiMetadata(data: any, source?: string): MetadataSt
     if (typeof data.uncond_per_vibe === 'boolean') state.uncondPerVibe = data.uncond_per_vibe;
     if (typeof data.wonky_vibe_correlation === 'boolean') state.wonkyVibeCorrelation = data.wonky_vibe_correlation;
 
-    console.log('[TRANSLATE-DEBUG] Final state: scale=', state.scale, 'steps=', state.steps, 'seed=', state.seed, 'sampler=', state.sampler, 'size=', state.width, 'x', state.height);
+    console.log('[TRANSLATE-DEBUG] Final: prompt=', state.basePrompt.substring(0, 40), '| scale=', state.scale, '| steps=', state.steps, '| seed=', state.seed, '| sampler=', state.sampler, '| size=', state.width, 'x', state.height);
 
     // Dimensions
     if (typeof data.resolution === 'string') {
