@@ -11,15 +11,35 @@ export function translateNovelAiMetadata(data: any): MetadataState {
 
     if (!data) return state;
 
-    if (typeof data.prompt === 'string') {
+    if (data.v4_prompt?.caption) {
+        state.basePrompt = data.v4_prompt.caption.base_caption || '';
+        const charCaptions = data.v4_prompt.caption.char_captions || [];
+        state.characters = charCaptions.map((c: any, i: number) => ({
+            id: 'char_' + Date.now() + '_' + i,
+            caption: c.char_caption || '',
+            centerX: c.centers?.[0]?.x ?? 0.5,
+            centerY: c.centers?.[0]?.y ?? 0.5,
+        }));
+    } else if (typeof data.prompt === 'string') {
         state.basePrompt = data.prompt;
         state.characters = []; // Prevent multiplying characters on import
     }
 
-    const neg = data.negative_prompt || data.uc;
-    if (typeof neg === 'string') {
-        state.negativeBase = neg;
-        state.negativeCharacters = [];
+    if (data.v4_negative_prompt?.caption) {
+        state.negativeBase = data.v4_negative_prompt.caption.base_caption || '';
+        const charCaptions = data.v4_negative_prompt.caption.char_captions || [];
+        state.negativeCharacters = charCaptions.map((c: any, i: number) => ({
+            id: 'char_neg_' + Date.now() + '_' + i,
+            caption: c.char_caption || '',
+            centerX: c.centers?.[0]?.x ?? 0.5,
+            centerY: c.centers?.[0]?.y ?? 0.5,
+        }));
+    } else {
+        const neg = data.negative_prompt || data.uc;
+        if (typeof neg === 'string') {
+            state.negativeBase = neg;
+            state.negativeCharacters = [];
+        }
     }
 
     if (typeof data.seed === 'number') state.seed = data.seed;
