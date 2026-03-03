@@ -12,7 +12,7 @@ writing:
 ---
 
 # Handoff — 2026-03-03
-Status: v2.8 built and deployed to GitHub Pages. Added an interactive Import Modal that allows users to select which metadata fields (Prompt, Negative Prompt, Seed, Settings) to import when loading a PNG.
+Status: v2.8.1 built and deployed to GitHub Pages. Enhanced the PNG metadata importer to support extracting Character Prompts (`v4_prompt.caption.char_captions`).
 
 ## Evergreen Notes
 
