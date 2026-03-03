@@ -70,6 +70,12 @@ Status: v2.8.2 built and deployed to GitHub Pages. Added granular checkbox lists
 - Created `HighlightedTextarea.tsx`, a custom component that layers a transparent textarea over a `div` holding colored `<span>` elements. 
 - Integrated this new component into `PromptSection`, `NegativePrompt`, and `CharacterCaptions` replacing standard textareas. Tags now highlight with NovelAI Theme colors in real time.
 
+### PNG Metadata Extraction (v2.7 & v2.8)
+- Added direct in-browser PNG `tEXt` chunk parsing (`pngParser.ts`).
+- Supported both Drag & Drop and a mobile-friendly "Load PNG" file input button.
+- Added `ImportModal.tsx` to allow users to selectively import specific fields (Prompt, Negative Prompt, Seed, Settings) instead of blind overwriting.
+- Discovered NovelAI v4's `v4_prompt.caption.char_captions` metadata structure and added granular character-by-character checkbox extraction support.
+
 ---
 
 ## Current State
@@ -82,6 +88,11 @@ Status: v2.8.2 built and deployed to GitHub Pages. Added granular checkbox lists
 ---
 
 ## What Remains
+
+### Bug Investigation: Generation Consistency Loss
+- **Issue**: Importing an original NovelAI PNG into the Tag Builder and generating an image via the bookmarklet produces a different image than when pasting the identical PNG directly into the NovelAI interface.
+- **Cause Hypothesis**: The `buildCommentJson.ts` utility currently flattens all character prompts into the main `prompt` string and fails to reconstruct the `v4_prompt` object (`use_coords`, `use_order`, `char_captions`). The missing regional/structured v4 metadata causes NovelAI's backend generation to shift or lose specific region grounding, resulting in a slightly different image.
+- **Action Required**: Refactor `buildCommentJson.ts` to output exact `v4_prompt` and `v4_negative_prompt` JSON structures to ensure 1:1 identical reproduction of images.
 
 ### Known Weaknesses (Technical Debt)
 - `isVeryDark` heuristic: compares `mainBg` against hardcoded RGB strings. Should switch to luminance calculation.
@@ -136,16 +147,3 @@ Priority 2 — Core Pipeline:
 
 Priority 3 — Management, Authoring, Automation:
 - See ARCHITECTURE.md for full list.
-
----
-
-## Previous Session History
-
-### Seed Injection Debugging (Resolved)
-- Implemented `revealSeedInputAndSet()` UI crawler. Failed due to React 19 controlled input behavior.
-- Switched to metadata PNG paste approach. All seed rules (random, increment, decrement) now use paste pipeline.
-
-### Code Refactoring (v2.4)
-- `App.tsx`: 505 lines → 274 lines.
-- `src/hooks/useAutoGenerator.ts` [NEW]: auto-generate loop, seed rules, preset queue cycling.
-- `src/components/AutoGeneratePanel.tsx` [NEW]: auto-generate UI.

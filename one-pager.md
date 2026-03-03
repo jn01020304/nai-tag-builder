@@ -185,7 +185,23 @@ Known weakness: `isVeryDark` uses hardcoded RGB string comparison instead of lum
 - Fragile: any theme with a background color not in the whitelist defaults to light-mode styling.
 - Future improvement: parse RGB values and calculate relative luminance (`(0.299*R + 0.587*G + 0.114*B) / 255 < 0.5`).
 
-#### Intensity Color Scraping
-- NovelAI assigns `low-intensity-color-*`, `mid-intensity-color-*`, `high-intensity-color-*` classes to `<span>` elements in the prompt editor.
-- These spans only exist when weighted tags are visible in the prompt. Empty prompt → no spans → fallback defaults used.
-- Fallback defaults: Low=`rgba(4, 102, 206, 0.3)`, Mid=`rgba(0, 151, 7, 0.5)`, High=`rgba(184, 55, 0, 0.5)`.
+### v2.6 Tag Weight Highlighting
+- Highlight colors needed to match the active NAI theme.
+- Extracted tag intensities using an AST-like parser (`intensityParser.ts`) that scores `[]` as negative (-1 per bracket) and `{}` as positive (+1 per bracket).
+- Layered a transparent `<textarea>` over a `<div aria-hidden="true">` containing styled `<span>` elements to achieve text highlighting without `contenteditable`.
+- Forced `background-color: transparent !important` to bypass NAI's aggressive inline CSS injection on textareas.
+
+### v2.7 & v2.8 PNG Metadata Extraction & Selective Import
+- Reading PNG `tEXt` chunks directly in JavaScript using `ArrayBuffer` and `DataView` (`pngParser.ts`). No server needed.
+- Allowed users to selectively import (Prompt, Negative Prompt, Seed, Settings) via an Import Modal overlay.
+- Discovered NovelAI v4 uses `v4_prompt.caption.char_captions` to store Character Prompts, separating them from the base string.
+- Extracted character prompts into an array of interactive checkboxes, allowing granular per-character imports from multi-character images.
+
+---
+
+## Bug Investigation
+
+### Generation Consistency Loss (Bookmarklet vs Native Paste) — UNRESOLVED
+- **Symptom**: Pasting an original NovelAI PNG directly into the NovelAI page generates Image A. Importing that same PNG into the Tag Builder, and then clicking Apply (which dispatchs a paste event back to NovelAI), generates Image B. They are not identical.
+- **Root Cause Hypothesis**: The Tag Builder's `buildCommentJson.ts` currently compiles the state back into a flat `prompt` string and completely omits the `v4_prompt` object. `v4_prompt` contains critical spatial grounding (`use_coords`), ordering (`use_order`), and separated `char_captions`. Without these, the NAI backend loses the v4 regional character data, resulting in visual drift.
+- **Next Step**: Reconstruct the `v4_prompt` and `v4_negative_prompt` objects accurately inside `buildCommentJson.ts` before dispatching the paste event.

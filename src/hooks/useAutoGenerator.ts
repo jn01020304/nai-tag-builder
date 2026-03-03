@@ -121,7 +121,7 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
 
             currentLoopSeed = nextSeed;
             const loopComment = buildCommentJson({ ...nextState, seed: nextSeed });
-            const loopBlob = await generatePngWithMetadata(loopComment);
+            const loopBlob = await generatePngWithMetadata(loopComment, nextState.source);
             dispatchPasteEvent(loopBlob, true);
 
             loopCountRef.current += 1;

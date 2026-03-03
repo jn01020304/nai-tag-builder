@@ -13,6 +13,19 @@ writing:
 
 # Changelog
 
+## v2.8 (2026-03-03)
+PNG Metadata Extraction Pipeline & Granular Selective Import.
+- Implemented direct in-browser PNG `tEXt` chunk parsing (`pngParser.ts`), bypassing external dependencies.
+- Added Drag & Drop support and a mobile-friendly "Load PNG" button in the Preset Manager for device compatibility.
+- Introduced an interactive `ImportModal.tsx` overlay, enabling users to selectively apply specific metadata groups (Main Prompt, Negative Prompt, Seed, Settings) without forcibly overwriting the current state.
+- Enabled granular character-level extraction: parsed the `v4_prompt.caption.char_captions` schema to build dynamic checkbox grids, allowing users to import individual character properties from multi-character images.
+
+## v2.6 (2026-03-02)
+Prompt Highlighting System.
+- Created an AST-style token parser (`intensityParser.ts`) to calculate weighted NovelAI syntax (`{}`, `[]`, `weight::tag::`).
+- Deployed a custom `HighlightedTextarea` component that layers a transparent `<textarea>` over colored `<span>` elements, bypassing default browser `contenteditable` limitations.
+- Match highlighting colors dynamically to the active NovelAI themed intensity settings.
+
 ## v2.5 (2026-03-02)
 Dynamic Theme Sync with NovelAI.
 - Discovered NovelAI uses Styled-Components with no CSS custom properties. All theme colors are injected via hashed class names into `<style>` tags.
@@ -31,32 +44,13 @@ Live adjustments, Auto-Generate Seed Rules, and Mobile limitations documented.
 - **Fallback Heuristics & Mobile:** Added deep DOM traversal to find hidden Seed inputs and trigger React synthetic events. Added a fallback to click the NAI `Randomize` dice button if the input fails. Identified that mobile layout hides and unmounts inputs, necessitating a native Seed=0 workaround.
 
 ## v2.3 (2026-03-01)
-Preset Progression, Rotation, and Randomization.
-- Preset data model: `Preset` interface (`id`, `name`, `state: MetadataState`, `createdAt`) in `src/types/preset.ts`.
-- localStorage CRUD layer: `src/model/presetStorage.ts` (save by name, load all, delete by id, get by id, reorder).
-- `LOAD_PRESET` action in `useMetadataState.ts` — replaces entire editor state with a saved preset's snapshot.
-- `PresetManager.tsx`: save current state as named preset, list presets with Load/Queue/Delete, queue chip display with ▲/▼ reorder, Progression/Random mode selector.
-- Auto-generate loop extended: when queue is non-empty, each tick loads the next preset (sequential or random) from localStorage and dispatches its metadata instead of the fixed editor state.
-- Preset Import/Export: 📥 Import (JSON file → merge into localStorage) and 📤 Export (all presets → JSON file download) buttons in PresetManager UI.
+Added Preset Progression, Rotation, and Randomization auto-generation features backed by `localStorage`.
 
 ## v2.2 (2026-02-28)
-Mobile verification + UX overhaul.
-- Mobile end-to-end verified on Samsung Galaxy (Chrome). Bookmarklet → overlay → Apply → Import → Generate → image created.
-- Auto-import: paste dispatch now auto-clicks "Import Metadata" and scrolls to Generate button. No manual modal interaction needed.
-- Optional auto-generate: "적용 후 자동 생성" checkbox auto-clicks Generate button after import. Repeat mode generates every N seconds (configurable, default 30s, clamp 3~1800s).
-- Overlay collapse (▼/▲): minimize to header-only strip. Apply button collapses instead of closing.
-- Drag to reposition: header acts as drag handle (mouse + touch). `touchAction: 'none'` for mobile.
-- Overlay reopen: close (✕) removes container from DOM so bookmarklet can recreate it without page refresh.
-- Fixed: overlay at `bottom: 20px` covered Generate button on mobile → moved to `top: 20px`.
-- Fixed: index.css global styles (`body`, `button`, `a`) leaked into NovelAI page → removed import.
-- Fixed: `isApplying` stuck true after successful Apply → moved reset to `finally` block.
+Mobile UI overhaul and Bookmarklet Paste pipeline improvements.
 
 ## v2.0 (2026-02-27)
-- Refactored monolithic App.tsx into modular architecture (types, model, encoding, hooks, components, styles).
-- Full NovelAI V4 metadata support: multi-character presets (char_captions), negative prompt, all generation parameters.
-- UI: collapsible sections for Parameters (default open), Characters, Negative Prompt, Advanced. Dimension presets (Portrait/Landscape/Square). Sampler and noise schedule dropdowns.
-- Fixed React rendering on NovelAI page: flushSync() to bypass scheduler conflict with host page React.
-- GitHub Pages deployment via GitHub Actions. Bookmarklet now loads from public HTTPS URL.
+Refactored monolithic App.tsx into modular hooks/components and added NovelAI V4 metadata layout support.
 
 ## v1.2
 - Added stealth_pngcomp LSB encoding (defense-in-depth alongside tEXt).

@@ -12,6 +12,8 @@
   "dependencies": {
     "dexie": "^4.3.0",
     "dexie-react-hooks": "^4.2.0",
+    "png-chunk-text": "^1.0.0",
+    "png-chunks-extract": "^1.0.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "styled-components": "^6.3.11"

@@ -93,8 +93,8 @@ function AppContent() {
         try {
           const buffer = await file.arrayBuffer();
           const jsonMeta = parseNovelAIPng(buffer);
-          if (jsonMeta) {
-            const newState = translateNovelAiMetadata(jsonMeta);
+          if (jsonMeta && jsonMeta.data) {
+            const newState = translateNovelAiMetadata(jsonMeta.data, jsonMeta.source);
             setPendingImport(newState);
           } else {
             alert('No NovelAI metadata found in this PNG.');
@@ -130,7 +130,7 @@ function AppContent() {
     setIsApplying(true);
     try {
       const comment = buildCommentJson(state);
-      const blob = await generatePngWithMetadata(comment);
+      const blob = await generatePngWithMetadata(comment, state.source);
       dispatchPasteEvent(blob, autoGenerate);
       setIsCollapsed(true);
 

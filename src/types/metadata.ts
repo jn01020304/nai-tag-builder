@@ -93,4 +93,5 @@ export interface MetadataState {
 
   useCoords: boolean;
   useOrder: boolean;
+  source?: string;
 }
