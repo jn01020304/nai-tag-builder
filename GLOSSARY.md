@@ -49,28 +49,28 @@ intensity color classes
 
 ## 프로젝트 개념
 MetadataState
-: 앱 내부 상태 인터페이스. 26필드 — prompt 4개, params 8개, advanced 11개, v4 2개, meta 1개. NAI의 44필드 Comment JSON 중 30개를 매핑.
+: 앱 내부 상태 인터페이스. nested 구조 — `{ prompt: PromptState, params: ParamsState, advanced: AdvancedFlags, useCoords, useOrder, source? }`. NAI Comment JSON 44필드 중 37필드를 매핑 (나머지 3필드는 buildCommentJson에서 하드코딩, 4필드는 서버 생성).
 
 CommentJson
 : MetadataState에서 변환된 NAI Comment JSON 형식. `buildCommentJson()`이 생성. pngEncoder가 이를 tEXt 청크에 삽입.
 
 buildCommentJson
-: MetadataState → CommentJson 변환 함수. v4_prompt 구조 재구성, seed=0 랜덤화, 30개 필드 직렬화. 14개 NAI 필드 미매핑 (데이터 유실 버그).
+: MetadataState → CommentJson 변환 함수. v4_prompt 구조 재구성, seed=0 랜덤화, 44개 필드 직렬화 (37필드는 state에서, 3필드는 하드코딩, signed_hash는 빈 문자열).
 
 metadataTranslator
-: `translateNovelAiMetadata()`. 임포트된 PNG의 Comment JSON → MetadataState 변환. `v4_prompt.use_coords`/`use_order` 파싱 누락 버그 있음.
+: `translateNovelAiMetadata()`. 임포트된 PNG의 Comment JSON → MetadataState 변환. v4_prompt/v4_negative_prompt 구조 파싱, 37필드 매핑.
 
 paste pipeline
 : 메타데이터 주입 경로. CommentJson 직렬화 → PNG 생성 (tEXt + LSB) → DataTransfer paste 이벤트 dispatch. React 19 fiber 특성상 DOM 직접 조작 불가이므로 유일한 파라미터 주입 방법.
 
 round-trip test
-: 검증 프로세스. 원본 PNG → parse → translate → buildCommentJson → 원본과 diff. 15개 필드 불일치 발견 (use_coords 파싱 + 14개 미매핑).
+: 검증 프로세스. 원본 PNG → parse → translate → buildCommentJson → 원본과 diff. 0 DIFF (signed_hash 제외 — 서버 생성).
 
 intensityParser
 : AST 유사 토크나이저. `{}` = high (+depth), `[]` = low (-depth), `weight::tag::` = 숫자 가중치. Token[]에 type/level 부여하여 하이라이팅에 사용.
 
 presetStorage
-: IndexedDB (Dexie) 기반 프리셋 저장. `NaiTagBuilderDB.presets` 테이블에 PresetEntry 레코드. settings 필드에 MetadataState를 JSON 문자열로 직렬화. version 필드 없음 — 스키마 변경 시 로드 타임 정규화(`{ ...DEFAULT_STATE, ...parsed }`)로 대응 예정. 구 localStorage(`nai-tb-presets`)에서 자동 마이그레이션 지원.
+: IndexedDB (Dexie) 기반 프리셋 저장. `NaiTagBuilderDB.presets` 테이블에 PresetEntry 레코드. settings 필드에 MetadataState를 JSON 문자열로 직렬화. 로드 시 `normalizeMetadataState()`로 정규화 (flat→nested 마이그레이션 + 누락 필드 기본값). 구 localStorage에서 자동 마이그레이션 지원.
 
 preset queue
 : 프리셋 ID의 `string[]`. React state로 저장, 인덱스는 useRef로 추적 (stale closure 회피). 매 tick마다 다음 프리셋 로드 → CommentJson 빌드 → paste dispatch.
@@ -83,7 +83,7 @@ probe element technique
 : intensity 색상 추출 방법. 임시 `<span class="{type}-intensity-color-40">`을 DOM에 삽입, `getComputedStyle().backgroundColor` 읽기, 즉시 제거. level 40 = 100% alpha = 순수 기본 RGB.
 
 module-level static constants
-: 컴포넌트 함수 바깥에서 선언된 CSS-in-JS 스타일 객체. 모듈 로드 시점에 한 번 평가. mutable `theme` global을 참조하는 3개 (`miniBtn`, `smallNumInput`, `checkboxRowStyle`)는 테마 변경 후 갱신 안 됨.
+: 컴포넌트 함수 바깥에서 선언된 CSS-in-JS 스타일 객체. 모듈 로드 시점에 한 번 평가. 버그 3개 (`miniBtn`, `smallNumInput`, `checkboxRowStyle`)는 컴포넌트 함수 내부로 이동하여 수정 완료 (R1).
 
 nativeInputValueSetter
 : React controlled input에 직접 값을 설정하는 DOM 트릭. React 19에서는 fiber reconciler가 즉시 되돌림 — 원천적으로 불가. paste pipeline만 유효.
