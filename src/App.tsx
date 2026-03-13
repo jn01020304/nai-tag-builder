@@ -5,6 +5,7 @@ import { buildCommentJson } from './model/buildCommentJson';
 import { generatePngWithMetadata } from './encoding/pngEncoder';
 import { dispatchPasteEvent } from './encoding/pasteDispatch';
 import { useAutoGenerator } from './hooks/useAutoGenerator';
+import { useEdgeResize } from './hooks/useEdgeResize';
 import type { QueueMode } from './types/preset';
 import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import PromptSection from './components/PromptSection';
@@ -58,7 +59,7 @@ function AppContent() {
   const [state, dispatch] = useMetadataState();
   const [isApplying, setIsApplying] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [overlayWidth, setOverlayWidth] = useState(320);
+  const { overlayWidth, startResize } = useEdgeResize(320);
 
   // Preset queue state
   const [queue, setQueue] = useState<string[]>([]);
@@ -145,35 +146,6 @@ function AppContent() {
     } finally {
       setIsApplying(false);
     }
-  };
-
-  const startResize = (clientX: number) => {
-    let startX = clientX;
-    let startWidth = overlayWidth;
-
-    const onMM = (e: MouseEvent) => {
-      e.preventDefault();
-      setOverlayWidth(Math.max(320, startWidth + (e.clientX - startX)));
-    };
-
-    const onTM = (e: TouchEvent) => {
-      e.preventDefault();
-      setOverlayWidth(Math.max(320, startWidth + (e.touches[0].clientX - startX)));
-    };
-
-    const up = () => {
-      document.body.style.cursor = '';
-      document.removeEventListener('mousemove', onMM);
-      document.removeEventListener('mouseup', up);
-      document.removeEventListener('touchmove', onTM);
-      document.removeEventListener('touchend', up);
-    };
-
-    document.body.style.cursor = 'ew-resize';
-    document.addEventListener('mousemove', onMM);
-    document.addEventListener('mouseup', up);
-    document.addEventListener('touchmove', onTM, { passive: false });
-    document.addEventListener('touchend', up);
   };
 
   const headerBtnStyle: React.CSSProperties = {
