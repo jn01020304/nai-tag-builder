@@ -19,18 +19,6 @@ interface AutoGeneratePanelProps {
     queueLength: number;
 }
 
-const smallNumInput: React.CSSProperties = {
-    ...inputStyle,
-    width: '60px',
-    textAlign: 'center',
-    padding: '4px',
-};
-
-const miniBtn: React.CSSProperties = {
-    background: theme.surface1, color: theme.text, border: 'none', borderRadius: '4px',
-    width: '24px', height: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
-};
-
 export default function AutoGeneratePanel({
     autoGenerate, setAutoGenerate,
     seedRule, setSeedRule,
@@ -41,6 +29,18 @@ export default function AutoGeneratePanel({
     adjustValue,
     queueLength,
 }: AutoGeneratePanelProps) {
+    const smallNumInput: React.CSSProperties = {
+        ...inputStyle,
+        width: '60px',
+        textAlign: 'center',
+        padding: '4px',
+    };
+
+    const miniBtn: React.CSSProperties = {
+        background: theme.surface1, color: theme.text, border: 'none', borderRadius: '4px',
+        width: '24px', height: '24px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center'
+    };
+
     return (
         <div style={{ marginBottom: '8px' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '12px', color: theme.subtext0, cursor: 'pointer' }}>
