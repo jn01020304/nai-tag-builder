@@ -1,5 +1,6 @@
 import type { MetadataState, Sampler, NoiseSchedule } from '../types/metadata';
 import type { MetadataAction } from '../hooks/useMetadataState';
+import { KNOWN_MODELS, getModelBySource } from '../model/models';
 import CollapsibleSection from './CollapsibleSection';
 import { theme, inputStyle, labelStyle, smallBtnStyle } from '../styles/theme';
 
@@ -40,19 +41,19 @@ const fieldStyle: React.CSSProperties = {
 };
 
 export default function GenerationParams({ state, dispatch }: Props) {
-  const set = (field: keyof MetadataState, value: MetadataState[keyof MetadataState]) =>
-    dispatch({ type: 'SET_FIELD', field, value });
+  const setP = (field: keyof MetadataState['params'], value: MetadataState['params'][keyof MetadataState['params']]) =>
+    dispatch({ type: 'SET_PARAMS', field, value });
 
   return (
     <CollapsibleSection title="Parameters" defaultOpen>
       {/* Dimension presets */}
       <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
         {DIMENSION_PRESETS.map(p => {
-          const active = state.width === p.w && state.height === p.h;
+          const active = state.params.width === p.w && state.params.height === p.h;
           return (
             <button
               key={p.label}
-              onClick={() => { set('width', p.w); set('height', p.h); }}
+              onClick={() => { setP('width', p.w); setP('height', p.h); }}
               style={{
                 ...smallBtnStyle,
                 flex: 1,
@@ -71,10 +72,10 @@ export default function GenerationParams({ state, dispatch }: Props) {
           <label style={labelStyle}>Width</label>
           <input
             type="number"
-            value={state.width}
+            value={state.params.width}
             step={64}
             min={64}
-            onChange={e => set('width', Number(e.target.value))}
+            onChange={e => setP('width', Number(e.target.value))}
             style={{ ...inputStyle, width: '100%' }}
           />
         </div>
@@ -89,10 +90,10 @@ export default function GenerationParams({ state, dispatch }: Props) {
           <label style={labelStyle}>Height</label>
           <input
             type="number"
-            value={state.height}
+            value={state.params.height}
             step={64}
             min={64}
-            onChange={e => set('height', Number(e.target.value))}
+            onChange={e => setP('height', Number(e.target.value))}
             style={{ ...inputStyle, width: '100%' }}
           />
         </div>
@@ -105,20 +106,20 @@ export default function GenerationParams({ state, dispatch }: Props) {
             <label style={labelStyle}>Steps</label>
             <input
               type="number"
-              value={state.steps}
+              value={state.params.steps}
               min={1}
               max={50}
-              onChange={e => set('steps', e.target.value === '' ? '' as any : Number(e.target.value))}
-              onBlur={() => set('steps', Math.max(1, Math.min(50, Number(state.steps) || 1)))}
+              onChange={e => setP('steps', e.target.value === '' ? '' as any : Number(e.target.value))}
+              onBlur={() => setP('steps', Math.max(1, Math.min(50, Number(state.params.steps) || 1)))}
               style={{ ...inputStyle, width: '48px', padding: '2px 4px', textAlign: 'center' }}
             />
           </div>
           <input
             type="range"
-            value={state.steps}
+            value={state.params.steps}
             min={1}
             max={50}
-            onChange={e => set('steps', Number(e.target.value))}
+            onChange={e => setP('steps', Number(e.target.value))}
             style={{ width: '100%', accentColor: theme.blue, marginTop: '4px' }}
           />
         </div>
@@ -127,22 +128,22 @@ export default function GenerationParams({ state, dispatch }: Props) {
             <label style={labelStyle}>Scale</label>
             <input
               type="number"
-              value={state.scale}
+              value={state.params.scale}
               min={0}
               max={10}
               step={0.1}
-              onChange={e => set('scale', e.target.value === '' ? '' as any : Number(e.target.value))}
-              onBlur={() => set('scale', Math.max(0, Math.min(10, Number(state.scale) || 0)))}
+              onChange={e => setP('scale', e.target.value === '' ? '' as any : Number(e.target.value))}
+              onBlur={() => setP('scale', Math.max(0, Math.min(10, Number(state.params.scale) || 0)))}
               style={{ ...inputStyle, width: '48px', padding: '2px 4px', textAlign: 'center' }}
             />
           </div>
           <input
             type="range"
-            value={state.scale}
+            value={state.params.scale}
             min={0}
             max={10}
             step={0.1}
-            onChange={e => set('scale', Number(e.target.value))}
+            onChange={e => setP('scale', Number(e.target.value))}
             style={{ width: '100%', accentColor: theme.blue, marginTop: '4px' }}
           />
         </div>
@@ -153,8 +154,8 @@ export default function GenerationParams({ state, dispatch }: Props) {
         <div style={fieldStyle}>
           <label style={labelStyle}>Sampler</label>
           <select
-            value={state.sampler}
-            onChange={e => set('sampler', e.target.value as Sampler)}
+            value={state.params.sampler}
+            onChange={e => setP('sampler', e.target.value as Sampler)}
             style={{ ...inputStyle, width: '100%' }}
           >
             {SAMPLERS.map(s => <option key={s} value={s}>{s}</option>)}
@@ -163,8 +164,8 @@ export default function GenerationParams({ state, dispatch }: Props) {
         <div style={fieldStyle}>
           <label style={labelStyle}>Noise</label>
           <select
-            value={state.noiseSchedule}
-            onChange={e => set('noiseSchedule', e.target.value as NoiseSchedule)}
+            value={state.params.noiseSchedule}
+            onChange={e => setP('noiseSchedule', e.target.value as NoiseSchedule)}
             style={{ ...inputStyle, width: '100%' }}
           >
             {NOISE_SCHEDULES.map(n => <option key={n} value={n}>{n}</option>)}
@@ -172,17 +173,47 @@ export default function GenerationParams({ state, dispatch }: Props) {
         </div>
       </div>
 
-      {/* Seed */}
-      <div style={{ marginBottom: '4px' }}>
-        <label style={labelStyle}>Seed (0 = random)</label>
-        <input
-          type="number"
-          value={state.seed}
-          min={0}
-          onChange={e => set('seed', Number(e.target.value))}
-          style={{ ...inputStyle, width: '100%' }}
-        />
+      {/* Model + Seed */}
+      <div style={rowStyle}>
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Model</label>
+          <select
+            value={getModelBySource(state.source)?.source || 'custom'}
+            onChange={e => {
+              if (e.target.value !== 'custom') {
+                dispatch({ type: 'SET_META', field: 'source', value: e.target.value });
+              }
+            }}
+            style={{ ...inputStyle, width: '100%' }}
+          >
+            {KNOWN_MODELS.map(m => <option key={m.source} value={m.source}>{m.label}</option>)}
+            <option value="custom">Custom / Imported</option>
+          </select>
+        </div>
+        <div style={fieldStyle}>
+          <label style={labelStyle}>Seed (0 = random)</label>
+          <input
+            type="number"
+            value={state.params.seed}
+            min={0}
+            onChange={e => setP('seed', Number(e.target.value))}
+            style={{ ...inputStyle, width: '100%' }}
+          />
+        </div>
       </div>
+
+      {!getModelBySource(state.source) && (
+        <div style={{ marginBottom: '4px' }}>
+          <label style={labelStyle}>Custom Model Hash</label>
+          <input
+            type="text"
+            value={state.source || ''}
+            onChange={e => dispatch({ type: 'SET_META', field: 'source', value: e.target.value })}
+            style={{ ...inputStyle, width: '100%', fontSize: '11px' }}
+            placeholder="e.g. NovelAI Diffusion V4.5 4BDE2A90"
+          />
+        </div>
+      )}
     </CollapsibleSection>
   );
 }

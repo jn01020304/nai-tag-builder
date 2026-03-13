@@ -13,6 +13,14 @@ writing:
 
 # Changelog
 
+## v2.9 (2026-03-03)
+PNG Import Metadata Validation & UI Polish.
+- **Metadata Validation:** Added `validateMetadata` function to `ImportModal.tsx` to check for missing required fields (Prompt, Negative Prompt, Seed, Sampler, Resolution, Steps, Scale) before importing.
+- **UI Feedback:** Added visual indicators (red border, warning icon) to the Import Modal for any missing required fields.
+- **User Experience:** Added "Required" badge to the Import Modal title and individual field labels for clarity.
+- **Compatibility:** Added `source_ai_model_hash` to the Import Modal's "Settings" checkbox group, ensuring the AI model hash is always imported when Settings are enabled.
+- **Documentation:** Updated `README.md` with detailed PNG Import requirements and troubleshooting.
+
 ## v2.8 (2026-03-03)
 PNG Metadata Extraction Pipeline & Granular Selective Import.
 - Implemented direct in-browser PNG `tEXt` chunk parsing (`pngParser.ts`), bypassing external dependencies.

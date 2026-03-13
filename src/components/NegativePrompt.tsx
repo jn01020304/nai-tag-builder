@@ -14,8 +14,8 @@ export default function NegativePrompt({ state, dispatch }: Props) {
     <CollapsibleSection title="Negative Prompt">
       <label style={labelStyle}>Base Negative</label>
       <HighlightedTextarea
-        value={state.negativeBase}
-        onChange={e => dispatch({ type: 'SET_FIELD', field: 'negativeBase', value: e.target.value })}
+        value={state.prompt.negativeBase}
+        onChange={e => dispatch({ type: 'SET_PROMPT', field: 'negativeBase', value: e.target.value })}
         placeholder="negative tags..."
         style={{
           ...inputStyle,
@@ -26,7 +26,7 @@ export default function NegativePrompt({ state, dispatch }: Props) {
         }}
       />
 
-      {state.negativeCharacters.map((nc, idx) => (
+      {state.prompt.negativeCharacters.map((nc, idx) => (
         <div key={nc.id} style={{ marginBottom: '6px' }}>
           <label style={labelStyle}>Character {idx + 1} Negative</label>
           <HighlightedTextarea
@@ -43,7 +43,7 @@ export default function NegativePrompt({ state, dispatch }: Props) {
         </div>
       ))}
 
-      {state.negativeCharacters.length === 0 && (
+      {state.prompt.negativeCharacters.length === 0 && (
         <div style={{ fontSize: '12px', color: theme.overlay0, textAlign: 'center', padding: '4px 0' }}>
           Add characters above to set per-character negatives.
         </div>

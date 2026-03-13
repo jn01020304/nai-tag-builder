@@ -1,4 +1,5 @@
 import type { CommentJson } from '../types/metadata';
+import { getModelBySource } from '../model/models';
 
 // ── CRC32 ────────────────────────────────────────────────
 
@@ -135,11 +136,15 @@ export async function generatePngWithMetadata(comment: CommentJson, source?: str
   const pngBytes = new Uint8Array(await lsbBlob.arrayBuffer());
   const insertOffset = 33;
 
+  const modelInfo = getModelBySource(source);
+  const softwareStr = modelInfo ? modelInfo.software : 'NovelAI Diffusion V4.5';
+  const sourceStr = source || 'NovelAI Diffusion V4.5 48DE2A9D';
+
   const allChunks = [
     createTextChunk('Title', 'NovelAI generated image'),
     createTextChunk('Description', comment.prompt),
-    createTextChunk('Software', 'NovelAI Diffusion V4.5'),
-    createTextChunk('Source', source || 'NovelAI Diffusion V4.5 48DE2A9D'),
+    createTextChunk('Software', softwareStr),
+    createTextChunk('Source', sourceStr),
     createTextChunk('Generation time', '0.0'),
     createTextChunk('Comment', jsonString),
   ];

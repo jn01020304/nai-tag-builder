@@ -11,7 +11,7 @@ export default function PromptSection({ value, dispatch }: Props) {
   return (
     <HighlightedTextarea
       value={value}
-      onChange={e => dispatch({ type: 'SET_FIELD', field: 'basePrompt', value: e.target.value })}
+      onChange={e => dispatch({ type: 'SET_PROMPT', field: 'basePrompt', value: e.target.value })}
       placeholder="base prompt tags..."
       style={{
         ...inputStyle,

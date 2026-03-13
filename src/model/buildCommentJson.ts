@@ -1,69 +1,69 @@
 import type { CommentJson, MetadataState, CharCaption } from '../types/metadata';
 
 export function buildCommentJson(state: MetadataState): CommentJson {
-  const charCaptions: CharCaption[] = state.characters.map(c => ({
+  const charCaptions: CharCaption[] = state.prompt.characters.map(c => ({
     char_caption: c.caption,
     centers: [{ x: c.centerX, y: c.centerY }],
   }));
 
-  const negCharCaptions: CharCaption[] = state.negativeCharacters.map(c => ({
+  const negCharCaptions: CharCaption[] = state.prompt.negativeCharacters.map(c => ({
     char_caption: c.caption,
     centers: [{ x: c.centerX, y: c.centerY }],
   }));
 
-  const seed = state.seed === 0
+  const seed = state.params.seed === 0
     ? Math.floor(Math.random() * 2 ** 32)
-    : state.seed;
+    : state.params.seed;
 
   return {
-    prompt: state.basePrompt,
-    steps: state.steps,
-    height: state.height,
-    width: state.width,
-    scale: state.scale,
-    uncond_scale: state.uncondScale,
-    cfg_rescale: state.cfgRescale,
+    prompt: state.prompt.basePrompt,
+    steps: state.params.steps,
+    height: state.params.height,
+    width: state.params.width,
+    scale: state.params.scale,
+    uncond_scale: state.advanced.uncondScale,
+    cfg_rescale: state.advanced.cfgRescale,
     seed,
-    n_samples: state.nSamples,
-    noise_schedule: state.noiseSchedule,
+    n_samples: state.params.nSamples,
+    noise_schedule: state.params.noiseSchedule,
     legacy_v3_extend: false,
     reference_information_extracted_multiple: [],
     reference_strength_multiple: [],
     v4_prompt: {
-      caption: { base_caption: state.basePrompt, char_captions: charCaptions },
+      caption: { base_caption: state.prompt.basePrompt, char_captions: charCaptions },
       use_coords: state.useCoords,
       use_order: state.useOrder,
       legacy_uc: false,
     },
     v4_negative_prompt: {
-      caption: { base_caption: state.negativeBase, char_captions: negCharCaptions },
+      caption: { base_caption: state.prompt.negativeBase, char_captions: negCharCaptions },
       use_coords: false,
       use_order: false,
       legacy_uc: false,
     },
-    sampler: state.sampler,
+    sampler: state.params.sampler,
     controlnet_strength: 1,
     controlnet_model: null,
-    dynamic_thresholding: state.dynamicThresholding,
-    sm: state.smea,
-    sm_dyn: state.smeaDyn,
-    skip_cfg_above_sigma: state.skipCfgAboveSigma,
-    skip_cfg_below_sigma: state.skipCfgBelowSigma,
-    prefer_brownian: state.preferBrownian,
-    cfg_sched_eligibility: state.cfgSchedEligibility,
-    uncond_per_vibe: state.uncondPerVibe,
-    wonky_vibe_correlation: state.wonkyVibeCorrelation,
-    deliberate_euler_ancestral_bug: state.deliberateEulerAncestralBug,
-    explike_fine_detail: state.explikeFineDetail,
-    minimize_sigma_inf: state.minimizeSigmaInf,
-    dynamic_thresholding_percentile: state.dynamicThresholdingPercentile,
-    dynamic_thresholding_mimic_scale: state.dynamicThresholdingMimicScale,
-    director_reference_strengths: state.directorReferenceStrengths,
-    director_reference_descriptions: state.directorReferenceDescriptions,
-    director_reference_information_extracted: state.directorReferenceInformationExtracted,
-    director_reference_secondary_strengths: state.directorReferenceSecondaryStrengths,
-    lora_unet_weights: state.loraUnetWeights,
-    lora_clip_weights: state.loraClipWeights,
+    dynamic_thresholding: state.advanced.dynamicThresholding,
+    sm: state.advanced.smea,
+    sm_dyn: state.advanced.smeaDyn,
+    skip_cfg_above_sigma: state.advanced.skipCfgAboveSigma,
+    skip_cfg_below_sigma: state.advanced.skipCfgBelowSigma,
+    prefer_brownian: state.advanced.preferBrownian,
+    cfg_sched_eligibility: state.advanced.cfgSchedEligibility,
+    uncond_per_vibe: state.advanced.uncondPerVibe,
+    wonky_vibe_correlation: state.advanced.wonkyVibeCorrelation,
+    deliberate_euler_ancestral_bug: state.advanced.deliberateEulerAncestralBug,
+    explike_fine_detail: state.advanced.explikeFineDetail,
+    minimize_sigma_inf: state.advanced.minimizeSigmaInf,
+    dynamic_thresholding_percentile: state.advanced.dynamicThresholdingPercentile,
+    dynamic_thresholding_mimic_scale: state.advanced.dynamicThresholdingMimicScale,
+    director_reference_strengths: state.advanced.directorReferenceStrengths,
+    director_reference_descriptions: state.advanced.directorReferenceDescriptions,
+    director_reference_information_extracted: state.advanced.directorReferenceInformationExtracted,
+    director_reference_secondary_strengths: state.advanced.directorReferenceSecondaryStrengths,
+    lora_unet_weights: state.advanced.loraUnetWeights,
+    lora_clip_weights: state.advanced.loraClipWeights,
     stream: 'msgpack',
     signed_hash: '',
     extra_passthrough_testing: {
@@ -75,7 +75,7 @@ export function buildCommentJson(state: MetadataState): CommentJson {
       director_reference_secondary_strengths: null,
     },
     version: 1,
-    uc: state.negativeBase,
+    uc: state.prompt.negativeBase,
     request_type: 'PromptGenerateRequest',
   };
 }
