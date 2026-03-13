@@ -80,7 +80,7 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
                 console.log('[CALLER-DEBUG] jsonMeta.data.steps:', jsonMeta.data.steps);
                 console.log('[CALLER-DEBUG] jsonMeta.source:', jsonMeta.source);
                 const newState = translateNovelAiMetadata(jsonMeta.data, jsonMeta.source);
-                console.log('[CALLER-DEBUG] newState.basePrompt:', newState.basePrompt.substring(0, 40));
+                console.log('[CALLER-DEBUG] newState.basePrompt:', newState.prompt.basePrompt.substring(0, 40));
                 onImportRequest(newState);
             } else {
                 alert('No NovelAI metadata found in this PNG.');

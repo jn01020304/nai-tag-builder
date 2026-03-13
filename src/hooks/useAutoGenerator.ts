@@ -74,7 +74,7 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
         setIsLooping(true);
         loopCountRef.current = 0;
         queueIndexRef.current = 0;
-        let currentLoopSeed = Number(stateRef.current.seed);
+        let currentLoopSeed = Number(stateRef.current.params.seed);
 
         const executeLoop = async () => {
             if (loopCountRef.current >= targetCountRef.current) {
@@ -91,7 +91,7 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
             let nextSeed = currentLoopSeed;
 
             if (currentQueue.length > 0) {
-                if (nextState.seed === 0) {
+                if (nextState.params.seed === 0) {
                     nextSeed = Math.floor(Math.random() * 4294967295);
                 } else {
                     const genBtn = Array.from(document.querySelectorAll('button'))
@@ -99,7 +99,7 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
                     if (genBtn && genBtn.disabled) {
                         nextSeed = currentLoopSeed + 1;
                     } else {
-                        nextSeed = nextState.seed;
+                        nextSeed = nextState.params.seed;
                     }
                 }
             } else {
@@ -111,16 +111,20 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
                     nextSeed = Math.floor(Math.random() * 4294967295);
                 } else {
                     // 'none' rule
-                    if (nextState.seed === 0) {
+                    if (nextState.params.seed === 0) {
                         nextSeed = Math.floor(Math.random() * 4294967295);
                     } else {
-                        nextSeed = nextState.seed;
+                        nextSeed = nextState.params.seed;
                     }
                 }
             }
 
             currentLoopSeed = nextSeed;
-            const loopComment = buildCommentJson({ ...nextState, seed: nextSeed });
+            const loopState = {
+                ...nextState,
+                params: { ...nextState.params, seed: nextSeed },
+            };
+            const loopComment = buildCommentJson(loopState);
             const loopBlob = await generatePngWithMetadata(loopComment, nextState.source);
             dispatchPasteEvent(loopBlob, true);
 

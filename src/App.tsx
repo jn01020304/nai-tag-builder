@@ -322,9 +322,9 @@ function AppContent() {
             setQueueMode={setQueueMode}
             onImportRequest={setPendingImport}
           />
-          <PromptSection value={state.basePrompt} dispatch={dispatch} />
+          <PromptSection value={state.prompt.basePrompt} dispatch={dispatch} />
           <GenerationParams state={state} dispatch={dispatch} />
-          <CharacterCaptions characters={state.characters} dispatch={dispatch} />
+          <CharacterCaptions characters={state.prompt.characters} dispatch={dispatch} />
           <NegativePrompt state={state} dispatch={dispatch} />
           <AdvancedParams state={state} dispatch={dispatch} />
 
@@ -353,7 +353,14 @@ function AppContent() {
         <ImportModal
           importedState={pendingImport}
           onConfirm={(partial) => {
-            dispatch({ type: 'LOAD_PRESET', state: { ...state, ...partial } });
+            const merged: MetadataState = {
+              ...state,
+              ...partial,
+              prompt: { ...state.prompt, ...partial.prompt },
+              params: { ...state.params, ...partial.params },
+              advanced: { ...state.advanced, ...partial.advanced },
+            };
+            dispatch({ type: 'LOAD_PRESET', state: merged });
             setPendingImport(null);
           }}
           onCancel={() => setPendingImport(null)}
