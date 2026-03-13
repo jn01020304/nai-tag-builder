@@ -17,52 +17,47 @@ writing:
 NovelAI 이미지 생성 페이지에 주입하는 북마클릿 기반 태그 빌더.
 빌드 성공 (`dist/nai-tag-builder.js`), GitHub Pages 배포 중.
 
-코드베이스 정비 9개 항목 전부 구현 완료, 배포됨. 사이트 테스트 대기.
+코드베이스 정비 9개 항목 전부 완료, 사이트 테스트 통과. 로드맵 1순위(기초 토대) 의사결정 1차 탐색 시작.
 
 ## 완료
-- 코드베이스 정비 의사결정 0차~2차 완료
-- 9개 구현 항목 전부 완료:
-  - D1: metadataTranslator에 use_coords/use_order 파싱 추가 (00861f2)
-  - R3: MetadataState +11필드, CommentJson +14필드, translator/builder/UI 확장 (00861f2)
-  - R4: normalizeMetadataState() — presetStorage + useMetadataState 적용 (00861f2)
-  - D2: MetadataState flat→nested 구조 분리 (d59f4c2), 누락 2파일(PresetManager, useAutoGenerator) + ImportModal seed 버그 수정 (d59f4c2)
-  - R1: 정적 상수 3개 컴포넌트 함수 내부로 이동 (d95e6ac)
-  - R5: isVeryDark 휘도 수식 전환 (ff8a637)
-  - R2: startResize → useEdgeResize 훅 추출 (27982ab)
-  - C1: 디버그 로그 전량 제거 — 4파일 ~25건 (fb9c9f6)
-  - C2: 루트 정리 — 7삭제, 7→tests/, 7→archive/ (27fc72e)
-- 라운드트립 검증: 0 DIFF (signed_hash 제외)
-- 라이브 사이트 테스트: NAI Import Metadata 정상 작동 확인 (D1+R3+R4 이후)
+- 코드베이스 정비 9/9 완료 + 배포 + 사이트 테스트 통과
+  - D1(00861f2), R3(00861f2), R4(00861f2), D2(d59f4c2), R1(d95e6ac), R5(ff8a637), R2(27982ab), C1(fb9c9f6), C2(27fc72e)
+  - D2 누락 2파일 + ImportModal seed 버그 수정 (d59f4c2)
+  - 빌드+배포: 76d5759 (R5+R2+C1+C2)
+- ARCHITECTURE.md As-Is 갱신 (17a2d4d) — 현행 코드 상태 반영
+- 로드맵 1순위 의사결정 1차 탐색 (decision-making/roadmap-p1/1.md)
+  - DB 구조: TagEntry에 order/scope 추가 잠정 결정
+  - 디자인 시스템: 외부 라이브러리 미도입, 내부 공용 컴포넌트 점진 추출
+  - API 연동: 1순위에서 제외, DOM 자동화로 범위 재정의
 
 ## 대화 기록
 
-(이전 세션) 의사결정 0차~2차 완료.
+User: 사이트 테스트 완료. ARCHITECTURE.md 할 일 목록(1순위)으로 넘어가라.
 
-User: D1 구현 시작.
-AI: D1+R3+R4 구현, roundtrip PASS. ImportModal 누락 필드 수정. 빌드+배포.
+AI: 1순위 3항목(DB 구조, 디자인 시스템, API 연동) 탐색. TagEntry 스키마 갭 발견 (order/scope 누락). API 직접 연동은 제외하고 DOM 자동화로 전환. 잠정 결정 4개 + 심화 미결 5건 도출.
 
-User: 사이트 테스트 완료. D2 진행.
-AI: D2 구현 (flat→nested, ~90건 수정). 누락 파일 2개(PresetManager, useAutoGenerator) tsc 에러로 발견, 수정. ImportModal seed 버그 수정. 빌드+배포.
-
-User: R1→R5→R2→C1→C2 순서대로 진행.
-AI: 5개 항목 모두 완료, 개별 커밋 후 빌드+배포.
+User: wrap-up.
 
 ## 다음
-1. 사이트 최종 테스트 (전체 정비 후 1회)
-2. 테스트 통과 시 코드베이스 정비 완료
+1. 로드맵 1순위 2차 심화 — 심화 미결 5건 해소:
+   - TagEntry category 값 체계 (Danbooru vs 커스텀)
+   - basePrompt ↔ TagEntry[] source of truth 결정
+   - 기존 프리셋 마이그레이션 전략
+   - TagChip 시각 디자인
+   - DOM 자동화 범위 확인 (useAutoGenerator와 중복?)
+2. 심화 완료 후 구현 진입
 
 ## 검증 지시
 N/A
 
 ## 참고 파일
-- decision-making/codebase-overhaul/0.md — 메타 결정
-- decision-making/codebase-overhaul/1.md — 1차 탐색 (항목 목록, 접근 방식)
-- decision-making/codebase-overhaul/2.md — 2차 심화 (R4/D2/R1 확정)
+- decision-making/roadmap-p1/1.md — 1차 탐색 (DB/디자인/API 잠정 결정)
 - decision-making/codebase-overhaul/feedback_decision_making.md — 의사결정 프로세스 교정
-- d:/tmp/roundtrip-test.cjs — 라운드트립 검증 스크립트
+- docs/ARCHITECTURE.md — 현행 구조 + 할 일 목록
+- src/model/db.ts — TagEntry 스키마 (미사용)
+- src/utils/intensityParser.ts — 현재 태그 파싱 로직
 
 ## 보류
-- 9개 컴포넌트 전체 useTheme() 마이그레이션 — 범위 밖 (코드 품질, 버그 아님)
-- Priority 1 — DB 스키마 설계, 디자인 시스템, NovelAI API 통합 테스트
-- Priority 2 — 자연어→Danbooru 태그 변환, 태그 가중치 편집 UI, 프롬프트 컴파일러
+- 9개 컴포넌트 전체 useTheme() 마이그레이션 — 코드 품질, 버그 아님
+- Priority 2 — 자연어→Danbooru 태그 변환, 태그 가중치 편집 UI, 프롬프트 컴파일러, 이미지 생성 호출
 - Priority 3 — ARCHITECTURE.md 참조

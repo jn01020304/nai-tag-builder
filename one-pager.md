@@ -111,36 +111,25 @@ writing:
 - Observation: Transparent `<textarea>` layered over `<div aria-hidden="true">` with styled `<span>` elements achieves text highlighting without `contenteditable`.
 - Scope: `intensityParser.ts` scores `[]` as negative (-1 per bracket) and `{}` as positive (+1 per bracket). `background-color: transparent !important` required to bypass NAI's aggressive inline CSS injection on textareas.
 
+### NAI Comment JSON 44-Field Coverage
+- Observation: NAI Comment JSON contains 44 fields total.
+- Scope: 3 categories — 5 generation-affecting booleans/numbers (deliberate_euler_ancestral_bug, explike_fine_detail, minimize_sigma_inf, dynamic_thresholding_percentile, dynamic_thresholding_mimic_scale); 6 null-feature placeholders (director_reference_* 4, lora_* 2); 3 protocol fields (stream, signed_hash, extra_passthrough_testing).
+- Implication: MetadataState stores 37 fields (generation 5 + null 6 + existing 26). Protocol 3 are hardcoded in buildCommentJson. signed_hash="" is accepted by NAI — no server validation on import.
+
+### Dexie IndexedDB Load-Time Normalization
+- Observation: Dexie `version().stores()` only manages indexes; does not auto-transform existing records. `JSON.parse()` + type assertion enforces nothing at runtime.
+- Scope: When MetadataState schema changes (new fields, structural reorganization), existing records in IndexedDB lack new fields.
+- Implication: `normalizeMetadataState({ ...DEFAULT, ...parsed })` at every load point (presetStorage, appState). No DB version bump needed. Also handles flat→nested migration by detecting `'basePrompt' in raw && !('prompt' in raw)`.
+
 ---
 
 ## Findings
 
-### 2026-03-13 — D2 Nested Migration: Missed Files Discovery
-- Answers: D2 flat→nested restructuring touched 8 files (~90 accesses). Two files (PresetManager.tsx, useAutoGenerator.ts) were missed because they access MetadataState indirectly — PresetManager reads from translateNovelAiMetadata return value, useAutoGenerator reads from stateRef. Neither was in the initial impact analysis (2.md). Discovered only when tsc was run post-D2. Lesson: always run full tsc after structural refactoring, even when impact analysis seems complete.
+### 2026-03-13 — ImportModal Nested Merge Requirement
+- Answers: `{ ...state, ...partial }` shallow merge replaces nested objects entirely. When ImportModal sends `partial.prompt` (subset of PromptState), the user's existing basePrompt is lost if unchecked. Fix: merge each group separately — `prompt: { ...state.prompt, ...partial.prompt }, params: { ...state.params, ...partial.params }, advanced: { ...state.advanced, ...partial.advanced }`.
 
-### 2026-03-13 — isVeryDark BT.601 Luminance Formula
-- Answers: BT.601 weighted luminance `(0.299*R + 0.587*G + 0.114*B) / 255` replaces hardcoded 5-RGB-string whitelist. Threshold 0.5 (dark below, light above). Fallback on regex parse failure: `true` (assume dark). Handles all `rgb()` and `rgba()` format strings from `getComputedStyle`.
-
-### 2026-03-13 — useEdgeResize Hook Extraction Pattern
-- Answers: Resize logic extracted from App.tsx to `useEdgeResize(minWidth)`. Returns `{ overlayWidth, startResize }`. The `startResize` closure captures `overlayWidth` at call time into `startWidth` — this is intentional (drag starts from current width). React useState value is stale in the closure but only the initial capture matters for delta calculation.
-
-### 2026-03-13 — MetadataState Restructuring Impact
-- Answers: Flat→nested restructuring affects ~90 field access patterns across 8 files. Critical: buildCommentJson (23 accesses), metadataTranslator (22), GenerationParams (16), AdvancedParams (13), ImportModal (17), useMetadataState (12+). SET_FIELD dispatch pattern needs redesign. D2 must not be combined with R3 (data loss fix) — different urgency, atomic verification impossible if combined.
-
-### 2026-03-13 — Dexie IndexedDB Migration Strategy
-- Answers: Dexie `version().stores()` only manages indexes; does not auto-transform existing records. `JSON.parse()` of old data missing new fields succeeds but returns incomplete objects — `as MetadataState` assertion enforces nothing at runtime. Load-time normalization (`{ ...DEFAULT_STATE, ...partial }`) is preferred over Dexie upgrade hooks: matches existing `migrateOldLocalStorage()` pattern, no DB version bump, handles both PresetEntry.settings and StateEntry.stateJson.
-
-### 2026-03-13 — N차 의사결정: Code Work Adaptation
-- Corrections: Starting from a technical audit (listing code problems) is not 탐색. 탐색 starts from user intent and pain points, identifies components collaboratively. Simple investigations (grep, code search) must not be deferred to 심화 — do them immediately. Decision rounds must produce tentative decisions, not open questions for the user.
-- Answers: The decision-making process needs 4 adaptations for code work: (1) dependency mapping in 탐색, (2) [internal]/[external] breaking change tags, (3) verification criteria in 심화, (4) test co-creation in 구현. The base flow (탐색→심화→구현→확장) remains valid.
-
-### 2026-03-13 — D1+R3+R4 Roundtrip Verification (Live)
-- Answers: After D1 (use_coords/use_order parsing), R3 (14 field coverage), R4 (normalizeMetadataState), deployed build passes live NAI site test. PNG drag-and-drop → ImportModal → NAI paste pipeline: NAI internal JS (`1883-*.js`) accepts the rebuilt Comment JSON with signed_hash="" and hardcoded extra_passthrough_testing without rejection. All 44 Comment JSON keys are parsed. NAI UI correctly reflects imported values (Steps, Guidance, Seed, Sampler, Noise, Resolution, CFG Rescale). Roundtrip test: 0 DIFF (signed_hash excluded as server-generated).
-- Corrections: ImportModal.handleApply was missing 13 fields in the importSettings branch (11 R3 + 2 D1: useCoords/useOrder). Fixed before deployment.
-
-### 2026-03-13 — NAI Comment JSON Field Coverage
-- Answers: NAI Comment JSON contains 44 fields. MetadataState covers 26 (59%). 14 unmapped fields classified: 5 generation-affecting (deliberate_euler_ancestral_bug, explike_fine_detail, minimize_sigma_inf, dynamic_thresholding_percentile, dynamic_thresholding_mimic_scale) → add to MetadataState+UI; 6 null features (director_reference_* 4, lora_* 2) → add to MetadataState, no UI; 3 protocol (stream, signed_hash, extra_passthrough_testing) → hardcode in buildCommentJson. Additionally, metadataTranslator does not parse v4_prompt.use_coords/use_order — they fall back to DEFAULT_STATE values.
-- Corrections: Previous HANDOFF claimed buildCommentJson.ts "completely omits v4_prompt" — actually v4_prompt is present. The real bug is field coverage and translator parsing gaps, not structural omission.
+### 2026-03-13 — Roadmap P1: TagEntry Schema Gap
+- Answers: db.ts defines TagEntry (`keyword, category, weight, isEnabled, isNegative`) but it's never used. Current tags live as comma-separated text in `basePrompt` string with weight syntax (`1.5::tag::`). Missing fields for structured tag management: `order` (prompt position matters for NAI weighting) and `scope` ("base" vs "char_{id}" for character-specific tags). Category value taxonomy is undefined.
 
 ### 2026-03-01 (legacy) — Queue-driven Auto-generate Design
 - Answers: Queue is `string[]` of preset IDs in React state (`useState`). Queue index tracked via `useRef` (not state) to avoid stale closure issues inside `setInterval`. Each interval tick: if queue non-empty, load next preset by ID, build CommentJson, dispatch paste. If empty, fall back to current editor state.
