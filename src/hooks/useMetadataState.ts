@@ -1,5 +1,5 @@
 import { useReducer } from 'react';
-import type { MetadataState, CharacterEntry } from '../types/metadata';
+import type { MetadataState, CharacterEntry, PromptState, ParamsState, AdvancedFlags } from '../types/metadata';
 import { DEFAULT_STATE, normalizeMetadataState } from '../model/defaults';
 
 let nextId = 1;
@@ -8,7 +8,10 @@ function genId(): string {
 }
 
 export type MetadataAction =
-  | { type: 'SET_FIELD'; field: keyof MetadataState; value: MetadataState[keyof MetadataState] }
+  | { type: 'SET_PROMPT'; field: keyof PromptState; value: PromptState[keyof PromptState] }
+  | { type: 'SET_PARAMS'; field: keyof ParamsState; value: ParamsState[keyof ParamsState] }
+  | { type: 'SET_ADVANCED'; field: keyof AdvancedFlags; value: AdvancedFlags[keyof AdvancedFlags] }
+  | { type: 'SET_META'; field: 'useCoords' | 'useOrder' | 'source'; value: boolean | string }
   | { type: 'ADD_CHARACTER' }
   | { type: 'REMOVE_CHARACTER'; id: string }
   | { type: 'UPDATE_CHARACTER'; id: string; field: keyof CharacterEntry; value: string | number }
@@ -19,7 +22,16 @@ export type MetadataAction =
 
 function reducer(state: MetadataState, action: MetadataAction): MetadataState {
   switch (action.type) {
-    case 'SET_FIELD':
+    case 'SET_PROMPT':
+      return { ...state, prompt: { ...state.prompt, [action.field]: action.value } };
+
+    case 'SET_PARAMS':
+      return { ...state, params: { ...state.params, [action.field]: action.value } };
+
+    case 'SET_ADVANCED':
+      return { ...state, advanced: { ...state.advanced, [action.field]: action.value } };
+
+    case 'SET_META':
       return { ...state, [action.field]: action.value };
 
     case 'ADD_CHARACTER': {
@@ -28,36 +40,48 @@ function reducer(state: MetadataState, action: MetadataAction): MetadataState {
       const newNegChar: CharacterEntry = { id, caption: '', centerX: 0.5, centerY: 0.5 };
       return {
         ...state,
-        characters: [...state.characters, newChar],
-        negativeCharacters: [...state.negativeCharacters, newNegChar],
+        prompt: {
+          ...state.prompt,
+          characters: [...state.prompt.characters, newChar],
+          negativeCharacters: [...state.prompt.negativeCharacters, newNegChar],
+        },
       };
     }
 
     case 'REMOVE_CHARACTER':
       return {
         ...state,
-        characters: state.characters.filter(c => c.id !== action.id),
-        negativeCharacters: state.negativeCharacters.filter(c => c.id !== action.id),
+        prompt: {
+          ...state.prompt,
+          characters: state.prompt.characters.filter(c => c.id !== action.id),
+          negativeCharacters: state.prompt.negativeCharacters.filter(c => c.id !== action.id),
+        },
       };
 
     case 'UPDATE_CHARACTER':
       return {
         ...state,
-        characters: state.characters.map(c =>
-          c.id === action.id ? { ...c, [action.field]: action.value } : c
-        ),
+        prompt: {
+          ...state.prompt,
+          characters: state.prompt.characters.map(c =>
+            c.id === action.id ? { ...c, [action.field]: action.value } : c
+          ),
+        },
       };
 
     case 'UPDATE_NEG_CHARACTER':
       return {
         ...state,
-        negativeCharacters: state.negativeCharacters.map(c =>
-          c.id === action.id ? { ...c, [action.field]: action.value } : c
-        ),
+        prompt: {
+          ...state.prompt,
+          negativeCharacters: state.prompt.negativeCharacters.map(c =>
+            c.id === action.id ? { ...c, [action.field]: action.value } : c
+          ),
+        },
       };
 
     case 'SWAP_DIMENSIONS':
-      return { ...state, width: state.height, height: state.width };
+      return { ...state, params: { ...state.params, width: state.params.height, height: state.params.width } };
 
     case 'RESET_TO_DEFAULTS':
       return { ...DEFAULT_STATE };
@@ -90,11 +114,10 @@ export function useMetadataState() {
     });
   }, []);
 
-  // Save to DB on change (debounce slightly or just save direct)
+  // Save to DB on change
   useEffect(() => {
     if (!isInitialized.current) return;
 
-    // Save current state
     db.appState.put({ id: 'current', stateJson: JSON.stringify(state) }).catch(e => {
       console.error("Failed to save state", e);
     });

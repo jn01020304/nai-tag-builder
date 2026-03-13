@@ -78,12 +78,15 @@ export interface CharacterEntry {
   centerY: number;
 }
 
-export interface MetadataState {
+// D2: nested sub-interfaces
+export interface PromptState {
   basePrompt: string;
   characters: CharacterEntry[];
   negativeBase: string;
   negativeCharacters: CharacterEntry[];
+}
 
+export interface ParamsState {
   steps: number;
   width: number;
   height: number;
@@ -92,7 +95,9 @@ export interface MetadataState {
   seed: number;
   noiseSchedule: NoiseSchedule;
   nSamples: number;
+}
 
+export interface AdvancedFlags {
   cfgRescale: number;
   uncondScale: number;
   smea: boolean;
@@ -104,21 +109,23 @@ export interface MetadataState {
   cfgSchedEligibility: string;
   uncondPerVibe: boolean;
   wonkyVibeCorrelation: boolean;
-
-  // R3: 생성 영향
   deliberateEulerAncestralBug: boolean;
   explikeFineDetail: boolean;
   minimizeSigmaInf: boolean;
   dynamicThresholdingPercentile: number;
   dynamicThresholdingMimicScale: number;
-  // R3: null features
   directorReferenceStrengths: unknown | null;
   directorReferenceDescriptions: unknown | null;
   directorReferenceInformationExtracted: unknown | null;
   directorReferenceSecondaryStrengths: unknown | null;
   loraUnetWeights: unknown | null;
   loraClipWeights: unknown | null;
+}
 
+export interface MetadataState {
+  prompt: PromptState;
+  params: ParamsState;
+  advanced: AdvancedFlags;
   useCoords: boolean;
   useOrder: boolean;
   source?: string;

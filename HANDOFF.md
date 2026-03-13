@@ -1,160 +1,68 @@
 ---
-language: english
+language: korean
 formatting:
   tables: false
-  bold_emphasis: false
+  bold emphasis: false
   blockquotes: false
-  comments: false
 writing:
   preamble: false
   filler: false
-  closing_summary: false
+  closing summary: false
+  asides: false
 ---
 
-# Handoff — 2026-03-03
-Status: v2.8.2 built and deployed to GitHub Pages. Added granular checkbox lists for Character Prompts in the Import Modal, allowing selective import on a per-character basis.
+# Handoff — 2026-03-13
 
-## Evergreen Notes
+## 맥락
+NovelAI 이미지 생성 페이지에 주입하는 북마클릿 기반 태그 빌더.
+빌드 성공 (`dist/nai-tag-builder.js`), GitHub Pages 배포 중.
 
-### React 19 Controlled Input
-- React 19 controlled inputs revert values set via `nativeInputValueSetter` immediately.
-- `dispatchEvent(new Event('input', { bubbles: true }))` is also overwritten by React's fiber reconciler.
-- Conclusion: NovelAI's seed input cannot be set via DOM manipulation. Only the metadata PNG paste pipeline is reliable.
+코드베이스 정비 9개 항목 전부 구현 완료, 배포됨. 사이트 테스트 대기.
 
-### NovelAI Metadata Paste Pipeline
-- Dispatching `ClipboardEvent('paste')` on the `.ProseMirror` element causes NovelAI to intercept and show an "Import Metadata" button.
-- Automation sequence: click "Import Metadata" → wait for modal close → click Generate.
-- `autoImportAndScroll()` uses `waitFor()` polling to wait for the button (up to 3 seconds).
+## 완료
+- 코드베이스 정비 의사결정 0차~2차 완료
+- 9개 구현 항목 전부 완료:
+  - D1: metadataTranslator에 use_coords/use_order 파싱 추가 (00861f2)
+  - R3: MetadataState +11필드, CommentJson +14필드, translator/builder/UI 확장 (00861f2)
+  - R4: normalizeMetadataState() — presetStorage + useMetadataState 적용 (00861f2)
+  - D2: MetadataState flat→nested 구조 분리 (d59f4c2), 누락 2파일(PresetManager, useAutoGenerator) + ImportModal seed 버그 수정 (d59f4c2)
+  - R1: 정적 상수 3개 컴포넌트 함수 내부로 이동 (d95e6ac)
+  - R5: isVeryDark 휘도 수식 전환 (ff8a637)
+  - R2: startResize → useEdgeResize 훅 추출 (27982ab)
+  - C1: 디버그 로그 전량 제거 — 4파일 ~25건 (fb9c9f6)
+  - C2: 루트 정리 — 7삭제, 7→tests/, 7→archive/ (27fc72e)
+- 라운드트립 검증: 0 DIFF (signed_hash 제외)
+- 라이브 사이트 테스트: NAI Import Metadata 정상 작동 확인 (D1+R3+R4 이후)
 
-### Generate Button Disable Timing
-- Generate button stays `disabled` while a previous image is generating.
-- After clicking the Randomize (dice) button, Generate re-enables after 300–500ms due to React state update.
-- Stale DOM reference risk: always re-query the button via `querySelectorAll` right before clicking. Storing button references can lead to detached DOM nodes.
+## 대화 기록
 
-### flushSync Required
-- NovelAI uses React 19. The async MessageChannel scheduler in our bundled React conflicts with it, causing `createRoot().render()` to produce empty DOM.
-- Wrapping in `flushSync()` forces synchronous rendering.
+(이전 세션) 의사결정 0차~2차 완료.
 
-### No Global CSS
-- Importing `index.css` into the NovelAI page destroys NAI's own button/body styles.
-- All styles must go through inline React style objects or `theme.ts`.
+User: D1 구현 시작.
+AI: D1+R3+R4 구현, roundtrip PASS. ImportModal 누락 필드 수정. 빌드+배포.
 
-### NovelAI Styled-Components Theming
-- NovelAI does NOT use CSS custom properties. All colors injected via Styled-Components with hashed class names.
-- `document.body.backgroundColor` always stays `rgb(19, 21, 44)` regardless of theme. Real themed background is on `.image-gen-page`.
-- Theme changes replace `<style>` tags in `<head>`. No class/attribute changes on `<html>`/`<body>`.
-- Observe `document.head` with `MutationObserver({ childList: true, subtree: true })` for real-time detection.
+User: 사이트 테스트 완료. D2 진행.
+AI: D2 구현 (flat→nested, ~90건 수정). 누락 파일 2개(PresetManager, useAutoGenerator) tsc 에러로 발견, 수정. ImportModal seed 버그 수정. 빌드+배포.
 
----
+User: R1→R5→R2→C1→C2 순서대로 진행.
+AI: 5개 항목 모두 완료, 개별 커밋 후 빌드+배포.
 
-## What Was Done This Session
+## 다음
+1. 사이트 최종 테스트 (전체 정비 후 1회)
+2. 테스트 통과 시 코드베이스 정비 완료
 
-### Dynamic Theme Sync (v2.5)
-- Discovered NovelAI uses Styled-Components with no CSS variables. Previous CSS variable approach was fundamentally wrong.
-- Implemented DOM computed style scraping from `.image-gen-page`, `.image-gen-prompt-main`, `.settings-panel`, `textarea`, `input[type="text"]`, `label`, and Generate button.
-- Added `ThemeColors` fields: `fontFamily`, `intensityLow`, `intensityMid`, `intensityHigh`, `warningError`, `headerText`.
-- Created `ThemeProvider` context (`src/contexts/ThemeContext.tsx`) wrapping the app to distribute dynamic theme.
-- Added `MutationObserver` on `document.head` with 300ms debounce for real-time theme sync when user switches themes in NAI settings.
-- Updated all components (`ApplyButton`, `PresetManager`, `CharacterCaptions`, `AutoGeneratePanel`) to use the new theme colors (`warningError` for delete buttons, `green`/`intensityMid` for action buttons).
+## 검증 지시
+N/A
 
-### Textarea Resize
-- Character prompt and Negative prompt textareas changed from `resize: 'none'` to `resize: 'vertical'` with `minHeight` instead of fixed `height`.
+## 참고 파일
+- decision-making/codebase-overhaul/0.md — 메타 결정
+- decision-making/codebase-overhaul/1.md — 1차 탐색 (항목 목록, 접근 방식)
+- decision-making/codebase-overhaul/2.md — 2차 심화 (R4/D2/R1 확정)
+- decision-making/codebase-overhaul/feedback_decision_making.md — 의사결정 프로세스 교정
+- d:/tmp/roundtrip-test.cjs — 라운드트립 검증 스크립트
 
-### Browser Subagent Investigations
-- Two browser subagent sessions deployed to NovelAI to map DOM structure.
-- Identified reliable selectors: `.image-gen-page`, `.image-gen-prompt-main`, `.settings-panel`.
-- Confirmed intensity color classes: `low-intensity-color-*`, `mid-intensity-color-*`, `high-intensity-color-*` on `<span>` elements.
-
-### Tag Weight Highlighting (v2.6)
-- Created `intensityParser.ts` to tokenize NovelAI prompt syntax (`{}`, `[]`, `weight::tag::`) into `high`, `mid`, `low` intensity levels.
-- Created `HighlightedTextarea.tsx`, a custom component that layers a transparent textarea over a `div` holding colored `<span>` elements. 
-- Integrated this new component into `PromptSection`, `NegativePrompt`, and `CharacterCaptions` replacing standard textareas. Tags now highlight with NovelAI Theme colors in real time.
-
-### PNG Metadata Extraction (v2.7 & v2.8)
-- Added direct in-browser PNG `tEXt` chunk parsing (`pngParser.ts`).
-- Supported both Drag & Drop and a mobile-friendly "Load PNG" file input button.
-- Added `ImportModal.tsx` to allow users to selectively import specific fields (Prompt, Negative Prompt, Seed, Settings) instead of blind overwriting.
-- Discovered NovelAI v4's `v4_prompt.caption.char_captions` metadata structure and added granular character-by-character checkbox extraction support.
-
-### Bug Investigation: Generation Consistency Loss (Resolved)
-- **Issue**: Importing an original NAI PNG and generating via bookmarklet produced slightly different images.
-- **Initial Hypothesis**: Missing `v4_prompt` regional structured metadata.
-- **True Cause**: Diffing raw PNG `tEXt` chunks revealed the Tag Builder was hardcoding the `Source` parameter (e.g. `NovelAI Diffusion V4.5 48DE2A9D`). This mismatch caused the NovelAI UI to silently fall back to a different model version (e.g. Curated instead of Full).
-- **Resolution**: Extracted the exact `Source` hash during PNG import and perfectly preserved it during export.
-
-### Bug Investigation: Load PNG Default Settings (Resolved)
-- **Issue**: Clicking "Load PNG" with certain NovelAI generated images populated the editor with default settings rather than the image's metadata.
-- **Cause**: NovelAI occasionally omits the `prompt` or `v4_prompt` property entirely from the `Comment` JSON payload, opting instead to only store it in the base `Description` tEXt chunk. The JSON parsing strategy did not merge this property back, meaning that `translateNovelAiMetadata` saw an undefined `data.prompt`, which caused it to fall back to `DEFAULT_STATE`.
-- **Resolution**: Enhanced `parseNovelAIPng()` to watch for a missing `{ prompt }` or absent `v4_prompt` in the decoded JSON. If missing, we inject the pre-extracted PNG `Description` chunk property directly into `data.prompt` prior to feeding it to the UI Translator.
-
-### AI Model Selection Dropdown (v2.9)
-- Added `models.ts` defining known NovelAI model hashes (Anime V4 Full, Anime V4 Curated, etc.).
-- Integrated a "Model" `<select>` dropdown in `GenerationParams.tsx` for users to directly choose the AI model.
-- Allows "Custom / Imported" fallback to preserve foreign `Source` hashes from unsupported models.
-
----
-
-## Current State
-- Build: success (`dist/nai-tag-builder.js`)
-- Deploy: pushed to `main`, GitHub Pages live
-- Theme sync: working — user confirmed basic theme switching works
-- Git repo: `https://github.com/jn01020304/nai-tag-builder`
-- Bookmarklet: `javascript:void(document.body.appendChild(Object.assign(document.createElement('script'),{src:'https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js?v='+Date.now()})))`
-
----
-
-## What Remains
-
-### Known Weaknesses (Technical Debt)
-- `isVeryDark` heuristic: compares `mainBg` against hardcoded RGB strings. Should switch to luminance calculation.
-- Intensity color extraction uses probe element technique: creates hidden `<span class="{type}-intensity-color-40">`, reads `getComputedStyle().backgroundColor`, removes span. NovelAI defines literal CSS classes `.{low|mid|high}-intensity-color-{0..40}` (NOT hashed Styled-Components). Level 40 = 100% alpha = pure base RGB.
-- Font scraping incomplete: `body.fontFamily` returns one font, but NAI Theme Editor has separate Header Font and Paragraph Font.
-- `document.head` MutationObserver fires on all style changes, not just theme. 300ms debounce mitigates but may cause performance issues under heavy page activity.
-
-### Pre-Refactoring Required
-Before proceeding to Priority 1–2 roadmap features, the following structural issues should be addressed.
-
-#### R1. isVeryDark → Luminance Calculation
-- Current: `isVeryDark` compares `mainBg` against 5 hardcoded RGB strings.
-- Problem: any new theme with an unlisted dark color defaults to light-mode styling. Breaks silently.
-- Fix: parse RGB, calculate luminance: `(0.299*R + 0.587*G + 0.114*B) / 255 < 0.5`.
-- Blocks: nothing directly, but is a ticking reliability issue.
-
-#### R2. Theme Globals → Context Hook Migration
-- Current: 10 components import `theme`, `inputStyle`, `labelStyle`, `smallBtnStyle` as mutable module-level globals from `theme.ts`. These globals are reassigned at runtime by `useDynamicTheme()`.
-- Problem: works by coincidence — React re-render happens to pick up mutated globals. But globals are evaluated once at module load time for static constants like `miniBtn` and `chipStyle` in `AutoGeneratePanel.tsx` and `PresetManager.tsx` (lines 29–32, 94–113). These never update after theme change.
-- Fix: all components should consume theme via `useTheme()` from `ThemeContext`. Remove the global `export let theme` pattern. Move style builders into the component render path or into a `useStyles(theme)` hook.
-- Blocks: design system setup (Priority 1). Any new component would inherit the broken pattern.
-
-#### R3. App.tsx Drag/Resize Logic Extraction
-- Current: `startDrag()` (lines 19–50) and `startResize()` (lines 98–125) are defined inside `AppContent`, attaching raw `mousemove`/`touchmove` listeners to `window`.
-- Problem: mixes window interaction logic with business rendering. Makes App.tsx harder to extend.
-- Fix: extract into `useWindowDrag(ref)` and `useEdgeResize(ref)` custom hooks.
-- Blocks: adding new draggable/resizable panels (e.g. tag weight editor).
-
-#### R4. presetStorage Leaky Abstraction
-- Current: `presetStorage.ts` functions (`loadPresets`, `savePreset`, etc.) directly serialize and deserialize `MetadataState` as JSON strings. `PresetEntry.settings` is `string` (JSON blob).
-- Problem: if `MetadataState` schema changes (R3), all stored presets become incompatible. No migration strategy.
-- Fix: add a `version` field to `PresetEntry`. Write a migration layer that upgrades old schema presets on load.
-- Blocks: MetadataState restructuring (R3), DB schema design (Priority 1).
-
-#### R5. MetadataState Flat Structure
-- Current: `MetadataState` is a flat object with 22 fields, mixing prompt content (`basePrompt`, `characters`) with generation params (`steps`, `scale`, `sampler`) and advanced flags (`smea`, `preferBrownian`).
-- Problem: prompt compiler (Priority 2) needs to operate on prompt data separately from generation params. Current flat structure forces the compiler to cherry-pick fields.
-- Fix: restructure into nested sub-types: `{ prompt: PromptState, params: GenerationParams, advanced: AdvancedFlags }`.
-- Blocks: prompt compiler, tag weight editing UI (Priority 2).
-
-### Roadmap from ARCHITECTURE.md
-Priority 1 — Foundation:
-- DB schema design (`{ id, keyword, category, weight, isEnabled, isNegative }`)
-- Design system setup
-- NovelAI API integration test
-
-Priority 2 — Core Pipeline:
-- Natural language → Danbooru tag conversion AI
-- Tag weight editing UI (bar graph + slider)
-- Prompt compiler (tag object array → NovelAI syntax string)
-- Image generation call and result display
-
-Priority 3 — Management, Authoring, Automation:
-- See ARCHITECTURE.md for full list.
+## 보류
+- 9개 컴포넌트 전체 useTheme() 마이그레이션 — 범위 밖 (코드 품질, 버그 아님)
+- Priority 1 — DB 스키마 설계, 디자인 시스템, NovelAI API 통합 테스트
+- Priority 2 — 자연어→Danbooru 태그 변환, 태그 가중치 편집 UI, 프롬프트 컴파일러
+- Priority 3 — ARCHITECTURE.md 참조

@@ -15,7 +15,8 @@ writing:
 
 ## 자동 생성 루프와 시드 규칙
 
-App.tsx 내부의 executeLoop는 재귀 setTimeout 기반.
+`useAutoGenerator` 훅(src/hooks/useAutoGenerator.ts)이 자동 생성 로직을 캡슐화.
+내부의 `executeLoop`는 재귀 setTimeout 기반 (52줄).
 intervalRef/targetCountRef를 useRef로 읽어 루프 중 실시간 조절 가능.
 
 시드 규칙 4가지:
@@ -27,38 +28,47 @@ intervalRef/targetCountRef를 useRef로 읽어 루프 중 실시간 조절 가�
 
 ## 현재 구조의 문제점
 
-App.tsx가 500줄 이상의 God Component:
-- handleApply 안에 executeLoop가 중첩 정의 (100줄 이상의 비동기 함수)
-- 자동 생성 상태(intervalSec, targetCount, seedRule 등)가 낱개 useState로 흩어져 있음
-- UI 렌더링과 자동 생성 비즈니스 로직이 한 파일에 혼재
+App.tsx 372줄. 자동 생성 로직은 useAutoGenerator로 분리 완료. 남은 문제:
+- `startResize`가 AppContent 내부에 정의 (overlayWidth state 클로저 접근). `startDrag`는 이미 모듈 레벨 함수로 분리됨.
+- UI state 7개(isApplying, isCollapsed, overlayWidth, queue, queueMode, pendingImport, isDragOver)가 AppContent에 집중.
+
+## 메타데이터 라운드트립 데이터 유실
+
+MetadataState는 26필드(prompt 4, params 8, advanced 11, v4 2, meta 1).
+NAI Comment JSON은 44필드이므로 14개 미매핑:
+- 생성에 영향: `deliberate_euler_ancestral_bug`, `explike_fine_detail`, `minimize_sigma_inf`, `dynamic_thresholding_percentile` (0.999), `dynamic_thresholding_mimic_scale` (10)
+- 현재 null: `director_reference_*` (4개), `lora_*` (2개)
+- 프로토콜: `stream`, `signed_hash`, `extra_passthrough_testing`
+
+추가로 `metadataTranslator`가 `v4_prompt.use_coords`/`use_order`를 파싱하지 않아 DEFAULT_STATE 값으로 덮어씀.
 
 ---
 
 # 목표 구조 (To-Be) — 리팩토링 방향
 
-단기적으로 진행해야 할 핵심 리팩토링 목표(기술 부채 해소)는 다음과 같습니다:
-
 ## 1. 전역 Theme 변수 → Context 훅 마이그레이션
-현재 `theme.ts`에서 `export let theme` 형태로 전역 변수를 내보내어 10여 개의 컴포넌트가 직접 참조하고 있습니다. 
-문제는 정적 스타일 객체(static constants)들이 사이드 이펙트로 한 번만 평가되고 런타임 테마 변경 시 업데이트되지 않는 버그가 발생할 수 있다는 점입니다.
-모든 컴포넌트가 `<ThemeContext.Provider>` 하위에서 `useTheme()` 훅을 통해 테마 색상을 구독하도록 전면 수정해야 합니다.
+`theme.ts`에서 `export let theme` 형태로 전역 변수를 내보내어 10개 컴포넌트가 직접 참조.
+모듈 레벨 정적 상수 중 theme을 참조하는 3개(`AutoGeneratePanel:miniBtn`, `AutoGeneratePanel:smallNumInput`, `AdvancedParams:checkboxRowStyle`)는 모듈 로드 시점에 평가되어 런타임 테마 변경 시 갱신 안 됨.
+모든 컴포넌트가 `useTheme()` 훅을 통해 테마를 구독하도록 전면 수정 필요.
 
-## 2. App.tsx 이벤트 로직 분리 (Drag & Resize)
-`startDrag`와 `startResize` 등 창 조절을 담당하는 마우스/터치 이벤트 핸들러가 `AppContent` 컴포넌트 안에 하드코딩되어 있습니다. 
-비즈니스 로직과 UI 렌더링, 윈도우 인터랙션 로직이 혼재되어 있으니, 이를 `useWindowDrag()` 및 `useEdgeResize()` 형태의 외부 훅으로 분리해야 합니다.
+## 2. App.tsx 이벤트 로직 분리 (Resize)
+`startResize`가 AppContent 내부에 overlayWidth state 클로저로 정의되어 있음.
+`useEdgeResize()` 훅으로 분리 필요. `startDrag`는 이미 모듈 레벨 함수로 분리 완료.
 
-## 3. MetadataState 계층 구조화 (Flat Structure 개선)
-현재 `MetadataState`는 프롬프트(`basePrompt`, `characters`)와 생성 파라미터(`steps`, `scale`), 고급 설정(`smea`, `smeaDyn`) 등이 모두 평탄화(Flat)된 하나의 객체로 관리됩니다.
-추후 추가할 핵심 기능인 프롬프트 컴파일러(태그 객체 배열 → NAI 텍스트 변환)가 프롬프트 데이터에만 집중할 수 있도록, `{ prompt: PromptState, params: GenerationParams, advanced: AdvancedFlags }` 형태의 계층적 구조로 재설계해야 합니다.
+## 3. MetadataState 스키마 확장 + 구조 분리
+현재 26필드가 flat 구조. NAI Comment JSON 44필드 중 14개가 미매핑.
+누락 필드를 먼저 MetadataState에 추가한 후, `{ prompt: PromptState, params: GenerationParams, advanced: AdvancedFlags }` 형태의 계층적 구조로 재설계.
+프롬프트 컴파일러가 프롬프트 데이터에만 집중할 수 있도록 분리.
 
 ## 4. presetStorage 하위 호환성 (Migration Layer)
-`presetStorage.ts`가 현재 `MetadataState` 배열 객체를 JSON으로 직렬화해 그대로 저장하고 있습니다. 
-위의 계층 구조화 작업이 진행되면 기존 `localStorage`에 저장된 프리셋 데이터 형식이 깨지게 됩니다. 
-이를 막기 위해 `version` 필드를 도입하고 스키마 이주(Migration) 레이어를 구축해야 합니다.
+`presetStorage.ts`가 MetadataState를 JSON으로 직렬화해 저장.
+스키마 확장/구조 분리 시 기존 localStorage 프리셋이 깨짐.
+`version` 필드 도입 + 스키마 마이그레이션 레이어 필요.
 
 ## 5. 밝기(Luminance) 기반 색상 판독
-현재 `isVeryDark` 플래그는 몇 가지 하드코딩된 RGB 문자열과 직접 비교하여 다크 모드를 판별하고 있습니다.
-화이트리스트에 없는 다크 테마가 추가될 경우 텍스트가 안 보이는 오류가 발생할 수 있으므로, RGB 값을 파싱하여 실제 밝기(Luminance) 수식을 적용하는 방식으로 수정해야 합니다.
+`isVeryDark`가 5개 하드코딩 RGB 문자열과 직접 비교.
+화이트리스트에 없는 다크 테마에서 라이트 모드로 잘못 표시.
+RGB 파싱 + 휘도 수식 `(0.299*R + 0.587*G + 0.114*B) / 255 < 0.5` 적용 필요.
 
 ---
 

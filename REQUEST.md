@@ -1,44 +1,6 @@
 # USER REQUEST
-
-## Session Wrap-up
-Reflect the changes implemented during the session in the notes so that the next session can be handed over in the same context. Perform the following synchronization and report the results.
-
-## Routing Rules — Where Does Each Finding Go?
-Before recording, determine which document it belongs to. A single discovery can appear in two documents if it has both aspects — but each document records only its own concern.
-
-### one-pager.md vs ARCHITECTURE.md
-- **ARCHITECTURE.md** records what we built and why — module structure, platform mechanisms that drove design choices.
-- **one-pager.md** records what we discovered while coding — how platform APIs actually behave, what patterns are safe, what breaks.
-- If a finding explains the design → ARCHITECTURE.md. If it warns you while writing code → one-pager.md.
-- Example: "CSS scoping silently strips external stylesheets" → one-pager.md (coding warning). "We adopted inline styles because of CSS scoping behavior" → ARCHITECTURE.md (design rationale).
-
-### HANDOFF.md vs one-pager.md session log
-- **HANDOFF.md** tracks task state — what was completed, what is blocked, what to do next. Answers "where did we leave off?"
-- **one-pager.md session log** tracks technical findings — API behaviors, error patterns, workarounds. Answers "what did we learn?"
-- A bug's existence and status → HANDOFF.md. The technical insight from investigating that bug → one-pager.md.
-- Example: "Image display broken — unresolved" → HANDOFF.md. "getChatVar returns 'null' string instead of nil" → one-pager.md.
-
-## Synchronization Procedure
-Update in this order (high frequency / narrow scope first). Before recording, check if the content already exists.
-
-### A. one-pager.md
-- **During a phase**: Record bugs and API discoveries in the Session Log.
-- **Phase transition** (version release or user declares new phase): Reset Session Log. Preserve Evergreen Notes.
-- **Promotion**: When a session log finding is verified across multiple sessions, promote to Evergreen Notes. If the finding is about module structure or design rationale, it belongs in ARCHITECTURE.md instead.
-
-### B. HANDOFF.md
-- Overwrite entirely with: what was done this session, what remains, pending verification steps.
-- Each session overwrites the previous contents.
-
-### C. Changelog.md
-- Update only on version release.
-- Keep detailed content for the last 4 versions. Compress older versions to one-line summaries.
-
-### D. ARCHITECTURE.md
-- Update when module structure changes: new components, changed data flow, new design decisions, or newly understood platform mechanisms.
-- Scope: how components connect, why choices were made, platform context that shaped them.
-
-## guide/ Archive Rules
-- When one-pager.md Evergreen Notes grow too large, move confirmed entries to guide/.
-- Files are organized by topic (e.g., guide-lua.md, guide-cbs.md). Append to existing files.
-- If a finding is specific to a particular project, add a cross-reference link to the relevant context.
+1) Google Antigravity의 기본 개념과 주요 기능을 검색하고, 이것이 코딩 자동화나 프롬프트 효율화에 어떻게 기여할 수 있는지 파악해 주세요.
+2) Claude Code의 기본 개념과 기능, 특히 코드 작성 전 계획 승인, 작업 규칙 적용 등 사용자의 프롬프팅을 보조하는 특성에 대해 조사해 주세요.
+3) 사용자가 가장 큰 부담을 느끼는 '정보 탐색(맥락 가공, 탐색, 검증, 통합)' 파이프라인에서, 두 도구가 어떻게 사용자 개입을 줄이고 자동화를 지원할 수 있는지 구체적인 방법론을 찾아보세요.
+4) AI 코딩 자동화 환경에서 코드의 품질 관리, 코드 리펙토링, 테스트, 디버깅을 어떻게 효율적으로 (최소한의 사용자 개입으로) 처리할 수 있는지에 대한 방법론을 찾아보세요.
+5) Google Antigravity를 사용하여 개발 환경을 설정하는 방법이나 모범 사례에 관한 정보가 있는지 찾아보세요.
