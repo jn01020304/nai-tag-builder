@@ -95,8 +95,6 @@ function AppContent() {
           const buffer = await file.arrayBuffer();
           const jsonMeta = parseNovelAIPng(buffer);
           if (jsonMeta && jsonMeta.data) {
-            console.log('[CALLER-DEBUG-DROP] jsonMeta.data keys:', Object.keys(jsonMeta.data).slice(0, 10));
-            console.log('[CALLER-DEBUG-DROP] jsonMeta.data.steps:', jsonMeta.data.steps);
             const newState = translateNovelAiMetadata(jsonMeta.data, jsonMeta.source);
             setPendingImport(newState);
           } else {

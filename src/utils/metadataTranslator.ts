@@ -1,30 +1,22 @@
 import type { MetadataState } from '../types/metadata';
-import { DEFAULT_STATE } from '../model/defaults';
+import { DEFAULT_STATE, DEFAULT_PROMPT, DEFAULT_PARAMS, DEFAULT_ADVANCED } from '../model/defaults';
 
-/**
- * Translates a JSON payload from a NovelAI generated PNG into the local MetadataState.
- * Note: NovelAI prompt format contains all characters compiled into one string.
- * Therefore, we map it entirely to `basePrompt` and clear `characters` to avoid duplications.
- */
 export function translateNovelAiMetadata(data: any, source?: string): MetadataState {
-    console.log('[TRANSLATE-DEBUG] v3 called');
-    const state: MetadataState = { ...DEFAULT_STATE };
+    const state: MetadataState = {
+        prompt: { ...DEFAULT_PROMPT },
+        params: { ...DEFAULT_PARAMS },
+        advanced: { ...DEFAULT_ADVANCED },
+        useCoords: DEFAULT_STATE.useCoords,
+        useOrder: DEFAULT_STATE.useOrder,
+    };
 
-    if (!data) { console.log('[TRANSLATE-DEBUG] data is falsy, returning defaults'); return state; }
+    if (!data) return state;
     if (source) state.source = source;
 
-    // Deep inspect data
-    console.log('[TRANSLATE-DEBUG] data type:', typeof data);
-    console.log('[TRANSLATE-DEBUG] data.prompt type:', typeof data.prompt, 'value:', typeof data.prompt === 'string' ? data.prompt.substring(0, 40) : data.prompt);
-    console.log('[TRANSLATE-DEBUG] data.v4_prompt type:', typeof data.v4_prompt);
-    console.log('[TRANSLATE-DEBUG] data.v4_prompt?.caption:', data.v4_prompt?.caption ? 'EXISTS' : 'MISSING');
-    console.log('[TRANSLATE-DEBUG] data.steps:', data.steps, 'data.seed:', data.seed, 'data.scale:', data.scale);
-
     if (data.v4_prompt?.caption) {
-        console.log('[TRANSLATE-DEBUG] ENTERING v4_prompt branch');
-        state.basePrompt = data.v4_prompt.caption.base_caption || '';
+        state.prompt.basePrompt = data.v4_prompt.caption.base_caption || '';
         const charCaptions = data.v4_prompt.caption.char_captions || [];
-        state.characters = charCaptions.map((c: any, i: number) => ({
+        state.prompt.characters = charCaptions.map((c: any, i: number) => ({
             id: 'char_' + Date.now() + '_' + i,
             caption: c.char_caption || '',
             centerX: c.centers?.[0]?.x ?? 0.5,
@@ -32,19 +24,15 @@ export function translateNovelAiMetadata(data: any, source?: string): MetadataSt
         }));
         if (typeof data.v4_prompt.use_coords === 'boolean') state.useCoords = data.v4_prompt.use_coords;
         if (typeof data.v4_prompt.use_order === 'boolean') state.useOrder = data.v4_prompt.use_order;
-        console.log('[TRANSLATE-DEBUG] v4_prompt basePrompt:', state.basePrompt.substring(0, 60), '| chars:', state.characters.length);
     } else if (typeof data.prompt === 'string') {
-        console.log('[TRANSLATE-DEBUG] ENTERING flat prompt branch');
-        state.basePrompt = data.prompt;
-        state.characters = [];
-    } else {
-        console.log('[TRANSLATE-DEBUG] NO PROMPT BRANCH TAKEN');
+        state.prompt.basePrompt = data.prompt;
+        state.prompt.characters = [];
     }
 
     if (data.v4_negative_prompt?.caption) {
-        state.negativeBase = data.v4_negative_prompt.caption.base_caption || '';
+        state.prompt.negativeBase = data.v4_negative_prompt.caption.base_caption || '';
         const charCaptions = data.v4_negative_prompt.caption.char_captions || [];
-        state.negativeCharacters = charCaptions.map((c: any, i: number) => ({
+        state.prompt.negativeCharacters = charCaptions.map((c: any, i: number) => ({
             id: 'char_neg_' + Date.now() + '_' + i,
             caption: c.char_caption || '',
             centerX: c.centers?.[0]?.x ?? 0.5,
@@ -53,48 +41,46 @@ export function translateNovelAiMetadata(data: any, source?: string): MetadataSt
     } else {
         const neg = data.negative_prompt || data.uc;
         if (typeof neg === 'string') {
-            state.negativeBase = neg;
-            state.negativeCharacters = [];
+            state.prompt.negativeBase = neg;
+            state.prompt.negativeCharacters = [];
         }
     }
 
     // Basic generation params
-    if (typeof data.seed === 'number') state.seed = data.seed;
-    if (typeof data.steps === 'number') state.steps = data.steps;
-    if (typeof data.sampler === 'string') state.sampler = data.sampler;
-    if (typeof data.scale === 'number') state.scale = data.scale;
-    else if (typeof data.guidance === 'number') state.scale = data.guidance;
-    if (typeof data.sm === 'boolean') state.smea = data.sm;
-    if (typeof data.sm_dyn === 'boolean') state.smeaDyn = data.sm_dyn;
-    if (typeof data.noise_schedule === 'string') state.noiseSchedule = data.noise_schedule;
-    if (typeof data.n_samples === 'number') state.nSamples = data.n_samples;
+    if (typeof data.seed === 'number') state.params.seed = data.seed;
+    if (typeof data.steps === 'number') state.params.steps = data.steps;
+    if (typeof data.sampler === 'string') state.params.sampler = data.sampler;
+    if (typeof data.scale === 'number') state.params.scale = data.scale;
+    else if (typeof data.guidance === 'number') state.params.scale = data.guidance;
+    if (typeof data.sm === 'boolean') state.advanced.smea = data.sm;
+    if (typeof data.sm_dyn === 'boolean') state.advanced.smeaDyn = data.sm_dyn;
+    if (typeof data.noise_schedule === 'string') state.params.noiseSchedule = data.noise_schedule;
+    if (typeof data.n_samples === 'number') state.params.nSamples = data.n_samples;
 
     // Advanced params
-    if (typeof data.cfg_rescale === 'number') state.cfgRescale = data.cfg_rescale;
-    if (typeof data.uncond_scale === 'number') state.uncondScale = data.uncond_scale;
-    if (typeof data.dynamic_thresholding === 'boolean') state.dynamicThresholding = data.dynamic_thresholding;
-    if (data.skip_cfg_above_sigma !== undefined) state.skipCfgAboveSigma = data.skip_cfg_above_sigma;
-    if (typeof data.skip_cfg_below_sigma === 'number') state.skipCfgBelowSigma = data.skip_cfg_below_sigma;
-    if (typeof data.prefer_brownian === 'boolean') state.preferBrownian = data.prefer_brownian;
-    if (typeof data.cfg_sched_eligibility === 'string') state.cfgSchedEligibility = data.cfg_sched_eligibility;
-    if (typeof data.uncond_per_vibe === 'boolean') state.uncondPerVibe = data.uncond_per_vibe;
-    if (typeof data.wonky_vibe_correlation === 'boolean') state.wonkyVibeCorrelation = data.wonky_vibe_correlation;
+    if (typeof data.cfg_rescale === 'number') state.advanced.cfgRescale = data.cfg_rescale;
+    if (typeof data.uncond_scale === 'number') state.advanced.uncondScale = data.uncond_scale;
+    if (typeof data.dynamic_thresholding === 'boolean') state.advanced.dynamicThresholding = data.dynamic_thresholding;
+    if (data.skip_cfg_above_sigma !== undefined) state.advanced.skipCfgAboveSigma = data.skip_cfg_above_sigma;
+    if (typeof data.skip_cfg_below_sigma === 'number') state.advanced.skipCfgBelowSigma = data.skip_cfg_below_sigma;
+    if (typeof data.prefer_brownian === 'boolean') state.advanced.preferBrownian = data.prefer_brownian;
+    if (typeof data.cfg_sched_eligibility === 'string') state.advanced.cfgSchedEligibility = data.cfg_sched_eligibility;
+    if (typeof data.uncond_per_vibe === 'boolean') state.advanced.uncondPerVibe = data.uncond_per_vibe;
+    if (typeof data.wonky_vibe_correlation === 'boolean') state.advanced.wonkyVibeCorrelation = data.wonky_vibe_correlation;
 
     // R3: 생성 영향
-    if (typeof data.deliberate_euler_ancestral_bug === 'boolean') state.deliberateEulerAncestralBug = data.deliberate_euler_ancestral_bug;
-    if (typeof data.explike_fine_detail === 'boolean') state.explikeFineDetail = data.explike_fine_detail;
-    if (typeof data.minimize_sigma_inf === 'boolean') state.minimizeSigmaInf = data.minimize_sigma_inf;
-    if (typeof data.dynamic_thresholding_percentile === 'number') state.dynamicThresholdingPercentile = data.dynamic_thresholding_percentile;
-    if (typeof data.dynamic_thresholding_mimic_scale === 'number') state.dynamicThresholdingMimicScale = data.dynamic_thresholding_mimic_scale;
+    if (typeof data.deliberate_euler_ancestral_bug === 'boolean') state.advanced.deliberateEulerAncestralBug = data.deliberate_euler_ancestral_bug;
+    if (typeof data.explike_fine_detail === 'boolean') state.advanced.explikeFineDetail = data.explike_fine_detail;
+    if (typeof data.minimize_sigma_inf === 'boolean') state.advanced.minimizeSigmaInf = data.minimize_sigma_inf;
+    if (typeof data.dynamic_thresholding_percentile === 'number') state.advanced.dynamicThresholdingPercentile = data.dynamic_thresholding_percentile;
+    if (typeof data.dynamic_thresholding_mimic_scale === 'number') state.advanced.dynamicThresholdingMimicScale = data.dynamic_thresholding_mimic_scale;
     // R3: null features
-    if (data.director_reference_strengths !== undefined) state.directorReferenceStrengths = data.director_reference_strengths;
-    if (data.director_reference_descriptions !== undefined) state.directorReferenceDescriptions = data.director_reference_descriptions;
-    if (data.director_reference_information_extracted !== undefined) state.directorReferenceInformationExtracted = data.director_reference_information_extracted;
-    if (data.director_reference_secondary_strengths !== undefined) state.directorReferenceSecondaryStrengths = data.director_reference_secondary_strengths;
-    if (data.lora_unet_weights !== undefined) state.loraUnetWeights = data.lora_unet_weights;
-    if (data.lora_clip_weights !== undefined) state.loraClipWeights = data.lora_clip_weights;
-
-    console.log('[TRANSLATE-DEBUG] Final: prompt=', state.basePrompt.substring(0, 40), '| scale=', state.scale, '| steps=', state.steps, '| seed=', state.seed, '| sampler=', state.sampler, '| size=', state.width, 'x', state.height);
+    if (data.director_reference_strengths !== undefined) state.advanced.directorReferenceStrengths = data.director_reference_strengths;
+    if (data.director_reference_descriptions !== undefined) state.advanced.directorReferenceDescriptions = data.director_reference_descriptions;
+    if (data.director_reference_information_extracted !== undefined) state.advanced.directorReferenceInformationExtracted = data.director_reference_information_extracted;
+    if (data.director_reference_secondary_strengths !== undefined) state.advanced.directorReferenceSecondaryStrengths = data.director_reference_secondary_strengths;
+    if (data.lora_unet_weights !== undefined) state.advanced.loraUnetWeights = data.lora_unet_weights;
+    if (data.lora_clip_weights !== undefined) state.advanced.loraClipWeights = data.lora_clip_weights;
 
     // Dimensions
     if (typeof data.resolution === 'string') {
@@ -103,13 +89,13 @@ export function translateNovelAiMetadata(data: any, source?: string): MetadataSt
             const w = parseInt(parts[0], 10);
             const h = parseInt(parts[1], 10);
             if (!isNaN(w) && !isNaN(h)) {
-                state.width = w;
-                state.height = h;
+                state.params.width = w;
+                state.params.height = h;
             }
         }
     } else if (typeof data.width === 'number' && typeof data.height === 'number') {
-        state.width = data.width;
-        state.height = data.height;
+        state.params.width = data.width;
+        state.params.height = data.height;
     }
 
     return state;
