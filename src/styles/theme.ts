@@ -154,7 +154,11 @@ export function useDynamicTheme() {
 
       const scrapedFont = getComputedStyle(document.body).fontFamily || fallbackTheme.fontFamily;
 
-      const isVeryDark = mainBg === 'rgb(0, 0, 0)' || mainBg === 'rgba(0, 0, 0, 1)' || mainBg === 'rgb(19, 21, 44)' || mainBg === 'rgb(11, 12, 26)' || mainBg === 'rgb(37, 41, 49)';
+      const isVeryDark = (() => {
+        const m = mainBg.match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
+        if (!m) return true;
+        return (0.299 * +m[1] + 0.587 * +m[2] + 0.114 * +m[3]) / 255 < 0.5;
+      })();
 
       const newTheme: ThemeColors = {
         base: mainBg, // Background
