@@ -52,6 +52,20 @@ export interface CommentJson {
   cfg_sched_eligibility: string;
   uncond_per_vibe: boolean;
   wonky_vibe_correlation: boolean;
+  deliberate_euler_ancestral_bug: boolean;
+  explike_fine_detail: boolean;
+  minimize_sigma_inf: boolean;
+  dynamic_thresholding_percentile: number;
+  dynamic_thresholding_mimic_scale: number;
+  director_reference_strengths: unknown | null;
+  director_reference_descriptions: unknown | null;
+  director_reference_information_extracted: unknown | null;
+  director_reference_secondary_strengths: unknown | null;
+  lora_unet_weights: unknown | null;
+  lora_clip_weights: unknown | null;
+  stream: string;
+  signed_hash: string;
+  extra_passthrough_testing: unknown;
   version: number;
   uc: string;
   request_type: string;
@@ -90,6 +104,20 @@ export interface MetadataState {
   cfgSchedEligibility: string;
   uncondPerVibe: boolean;
   wonkyVibeCorrelation: boolean;
+
+  // R3: 생성 영향
+  deliberateEulerAncestralBug: boolean;
+  explikeFineDetail: boolean;
+  minimizeSigmaInf: boolean;
+  dynamicThresholdingPercentile: number;
+  dynamicThresholdingMimicScale: number;
+  // R3: null features
+  directorReferenceStrengths: unknown | null;
+  directorReferenceDescriptions: unknown | null;
+  directorReferenceInformationExtracted: unknown | null;
+  directorReferenceSecondaryStrengths: unknown | null;
+  loraUnetWeights: unknown | null;
+  loraClipWeights: unknown | null;
 
   useCoords: boolean;
   useOrder: boolean;

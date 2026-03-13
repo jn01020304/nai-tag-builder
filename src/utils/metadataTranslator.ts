@@ -30,6 +30,8 @@ export function translateNovelAiMetadata(data: any, source?: string): MetadataSt
             centerX: c.centers?.[0]?.x ?? 0.5,
             centerY: c.centers?.[0]?.y ?? 0.5,
         }));
+        if (typeof data.v4_prompt.use_coords === 'boolean') state.useCoords = data.v4_prompt.use_coords;
+        if (typeof data.v4_prompt.use_order === 'boolean') state.useOrder = data.v4_prompt.use_order;
         console.log('[TRANSLATE-DEBUG] v4_prompt basePrompt:', state.basePrompt.substring(0, 60), '| chars:', state.characters.length);
     } else if (typeof data.prompt === 'string') {
         console.log('[TRANSLATE-DEBUG] ENTERING flat prompt branch');
@@ -77,6 +79,20 @@ export function translateNovelAiMetadata(data: any, source?: string): MetadataSt
     if (typeof data.cfg_sched_eligibility === 'string') state.cfgSchedEligibility = data.cfg_sched_eligibility;
     if (typeof data.uncond_per_vibe === 'boolean') state.uncondPerVibe = data.uncond_per_vibe;
     if (typeof data.wonky_vibe_correlation === 'boolean') state.wonkyVibeCorrelation = data.wonky_vibe_correlation;
+
+    // R3: 생성 영향
+    if (typeof data.deliberate_euler_ancestral_bug === 'boolean') state.deliberateEulerAncestralBug = data.deliberate_euler_ancestral_bug;
+    if (typeof data.explike_fine_detail === 'boolean') state.explikeFineDetail = data.explike_fine_detail;
+    if (typeof data.minimize_sigma_inf === 'boolean') state.minimizeSigmaInf = data.minimize_sigma_inf;
+    if (typeof data.dynamic_thresholding_percentile === 'number') state.dynamicThresholdingPercentile = data.dynamic_thresholding_percentile;
+    if (typeof data.dynamic_thresholding_mimic_scale === 'number') state.dynamicThresholdingMimicScale = data.dynamic_thresholding_mimic_scale;
+    // R3: null features
+    if (data.director_reference_strengths !== undefined) state.directorReferenceStrengths = data.director_reference_strengths;
+    if (data.director_reference_descriptions !== undefined) state.directorReferenceDescriptions = data.director_reference_descriptions;
+    if (data.director_reference_information_extracted !== undefined) state.directorReferenceInformationExtracted = data.director_reference_information_extracted;
+    if (data.director_reference_secondary_strengths !== undefined) state.directorReferenceSecondaryStrengths = data.director_reference_secondary_strengths;
+    if (data.lora_unet_weights !== undefined) state.loraUnetWeights = data.lora_unet_weights;
+    if (data.lora_clip_weights !== undefined) state.loraClipWeights = data.lora_clip_weights;
 
     console.log('[TRANSLATE-DEBUG] Final: prompt=', state.basePrompt.substring(0, 40), '| scale=', state.scale, '| steps=', state.steps, '| seed=', state.seed, '| sampler=', state.sampler, '| size=', state.width, 'x', state.height);
 

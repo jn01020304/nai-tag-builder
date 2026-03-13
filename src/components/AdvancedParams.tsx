@@ -113,6 +113,45 @@ export default function AdvancedParams({ state, dispatch }: Props) {
         Wonky Vibe Correlation
       </label>
 
+      <label style={checkboxRowStyle}>
+        <input type="checkbox" checked={state.deliberateEulerAncestralBug} onChange={e => set('deliberateEulerAncestralBug', e.target.checked)} />
+        Deliberate Euler Ancestral Bug
+      </label>
+      <label style={checkboxRowStyle}>
+        <input type="checkbox" checked={state.explikeFineDetail} onChange={e => set('explikeFineDetail', e.target.checked)} />
+        Explike Fine Detail
+      </label>
+      <label style={checkboxRowStyle}>
+        <input type="checkbox" checked={state.minimizeSigmaInf} onChange={e => set('minimizeSigmaInf', e.target.checked)} />
+        Minimize Sigma Inf
+      </label>
+
+      <div style={numRowStyle}>
+        <div style={numFieldStyle}>
+          <label style={labelStyle}>DynThresh Percentile</label>
+          <input
+            type="number"
+            value={state.dynamicThresholdingPercentile}
+            min={0}
+            max={1}
+            step={0.001}
+            onChange={e => set('dynamicThresholdingPercentile', Number(e.target.value))}
+            style={{ ...inputStyle, width: '100%' }}
+          />
+        </div>
+        <div style={numFieldStyle}>
+          <label style={labelStyle}>DynThresh Mimic Scale</label>
+          <input
+            type="number"
+            value={state.dynamicThresholdingMimicScale}
+            min={0}
+            step={0.5}
+            onChange={e => set('dynamicThresholdingMimicScale', Number(e.target.value))}
+            style={{ ...inputStyle, width: '100%' }}
+          />
+        </div>
+      </div>
+
       <hr style={{ border: 'none', borderTop: `1px solid ${theme.surface0}`, margin: '8px 0' }} />
 
       {/* V4 prompt toggles */}
