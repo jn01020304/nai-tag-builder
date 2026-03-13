@@ -1,6 +1,7 @@
 import { db, type PresetEntry } from './db';
 import type { MetadataState } from '../types/metadata';
 import type { Preset } from '../types/preset';
+import { normalizeMetadataState } from './defaults';
 
 const STORAGE_KEY_OLD = 'nai-tb-presets';
 
@@ -34,7 +35,7 @@ export async function loadPresets(): Promise<Preset[]> {
     return entries.map(e => ({
         id: e.id,
         name: e.name,
-        state: JSON.parse(e.settings) as MetadataState,
+        state: normalizeMetadataState(JSON.parse(e.settings)),
         createdAt: e.createdAt,
     }));
 }
@@ -67,7 +68,7 @@ export async function getPresetById(id: string): Promise<Preset | undefined> {
     return {
         id: e.id,
         name: e.name,
-        state: JSON.parse(e.settings),
+        state: normalizeMetadataState(JSON.parse(e.settings)),
         createdAt: e.createdAt,
     };
 }

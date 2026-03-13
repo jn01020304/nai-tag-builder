@@ -61,6 +61,19 @@ export default function ImportModal({ importedState, onConfirm, onCancel }: Prop
             partial.cfgSchedEligibility = importedState.cfgSchedEligibility;
             partial.uncondPerVibe = importedState.uncondPerVibe;
             partial.wonkyVibeCorrelation = importedState.wonkyVibeCorrelation;
+            partial.deliberateEulerAncestralBug = importedState.deliberateEulerAncestralBug;
+            partial.explikeFineDetail = importedState.explikeFineDetail;
+            partial.minimizeSigmaInf = importedState.minimizeSigmaInf;
+            partial.dynamicThresholdingPercentile = importedState.dynamicThresholdingPercentile;
+            partial.dynamicThresholdingMimicScale = importedState.dynamicThresholdingMimicScale;
+            partial.directorReferenceStrengths = importedState.directorReferenceStrengths;
+            partial.directorReferenceDescriptions = importedState.directorReferenceDescriptions;
+            partial.directorReferenceInformationExtracted = importedState.directorReferenceInformationExtracted;
+            partial.directorReferenceSecondaryStrengths = importedState.directorReferenceSecondaryStrengths;
+            partial.loraUnetWeights = importedState.loraUnetWeights;
+            partial.loraClipWeights = importedState.loraClipWeights;
+            partial.useCoords = importedState.useCoords;
+            partial.useOrder = importedState.useOrder;
         }
 
         // Always import the source model hash. 

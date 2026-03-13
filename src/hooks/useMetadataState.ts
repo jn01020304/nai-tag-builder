@@ -1,6 +1,6 @@
 import { useReducer } from 'react';
 import type { MetadataState, CharacterEntry } from '../types/metadata';
-import { DEFAULT_STATE } from '../model/defaults';
+import { DEFAULT_STATE, normalizeMetadataState } from '../model/defaults';
 
 let nextId = 1;
 function genId(): string {
@@ -81,7 +81,7 @@ export function useMetadataState() {
   useEffect(() => {
     db.appState.get('current').then(entry => {
       if (entry) {
-        dispatch({ type: 'LOAD_PRESET', state: JSON.parse(entry.stateJson) });
+        dispatch({ type: 'LOAD_PRESET', state: normalizeMetadataState(JSON.parse(entry.stateJson)) });
       }
       isInitialized.current = true;
     }).catch(e => {
