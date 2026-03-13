@@ -11,12 +11,12 @@ interface Props {
 export default function ImportModal({ importedState, onConfirm, onCancel }: Props) {
     const [importBasePrompt, setImportBasePrompt] = useState(true);
     const [selectedChars, setSelectedChars] = useState<string[]>(
-        importedState.characters.map(c => c.id)
+        importedState.prompt.characters.map(c => c.id)
     );
 
     const [importNegative, setImportNegative] = useState(true);
     const [selectedNegChars, setSelectedNegChars] = useState<string[]>(
-        importedState.negativeCharacters.map(c => c.id)
+        importedState.prompt.negativeCharacters.map(c => c.id)
     );
 
     const [importSeed, setImportSeed] = useState(true);
@@ -25,59 +25,38 @@ export default function ImportModal({ importedState, onConfirm, onCancel }: Prop
     const handleApply = () => {
         const partial: Partial<MetadataState> = {};
 
+        // prompt 그룹 구성
+        const promptPatch: Partial<MetadataState['prompt']> = {};
         if (importBasePrompt) {
-            partial.basePrompt = importedState.basePrompt;
+            promptPatch.basePrompt = importedState.prompt.basePrompt;
         }
-
-        // Always attach the selected characters list (even if empty, it means we chose 0 characters intentionally)
-        partial.characters = importedState.characters.filter(c => selectedChars.includes(c.id));
-
+        promptPatch.characters = importedState.prompt.characters.filter(c => selectedChars.includes(c.id));
         if (importNegative) {
-            partial.negativeBase = importedState.negativeBase;
+            promptPatch.negativeBase = importedState.prompt.negativeBase;
         }
-
-        partial.negativeCharacters = importedState.negativeCharacters.filter(c => selectedNegChars.includes(c.id));
+        promptPatch.negativeCharacters = importedState.prompt.negativeCharacters.filter(c => selectedNegChars.includes(c.id));
+        partial.prompt = promptPatch as MetadataState['prompt'];
 
         if (importSeed) {
-            partial.seed = importedState.seed;
+            partial.params = { ...importedState.params, seed: importedState.params.seed };
         }
 
         if (importSettings) {
-            partial.steps = importedState.steps;
-            partial.sampler = importedState.sampler;
-            partial.scale = importedState.scale;
-            partial.width = importedState.width;
-            partial.height = importedState.height;
-            partial.smea = importedState.smea;
-            partial.smeaDyn = importedState.smeaDyn;
-            partial.noiseSchedule = importedState.noiseSchedule;
-            partial.nSamples = importedState.nSamples;
-            partial.cfgRescale = importedState.cfgRescale;
-            partial.uncondScale = importedState.uncondScale;
-            partial.dynamicThresholding = importedState.dynamicThresholding;
-            partial.skipCfgAboveSigma = importedState.skipCfgAboveSigma;
-            partial.skipCfgBelowSigma = importedState.skipCfgBelowSigma;
-            partial.preferBrownian = importedState.preferBrownian;
-            partial.cfgSchedEligibility = importedState.cfgSchedEligibility;
-            partial.uncondPerVibe = importedState.uncondPerVibe;
-            partial.wonkyVibeCorrelation = importedState.wonkyVibeCorrelation;
-            partial.deliberateEulerAncestralBug = importedState.deliberateEulerAncestralBug;
-            partial.explikeFineDetail = importedState.explikeFineDetail;
-            partial.minimizeSigmaInf = importedState.minimizeSigmaInf;
-            partial.dynamicThresholdingPercentile = importedState.dynamicThresholdingPercentile;
-            partial.dynamicThresholdingMimicScale = importedState.dynamicThresholdingMimicScale;
-            partial.directorReferenceStrengths = importedState.directorReferenceStrengths;
-            partial.directorReferenceDescriptions = importedState.directorReferenceDescriptions;
-            partial.directorReferenceInformationExtracted = importedState.directorReferenceInformationExtracted;
-            partial.directorReferenceSecondaryStrengths = importedState.directorReferenceSecondaryStrengths;
-            partial.loraUnetWeights = importedState.loraUnetWeights;
-            partial.loraClipWeights = importedState.loraClipWeights;
+            const { seed: _seed, ...paramsWithoutSeed } = importedState.params;
+            partial.params = importSeed
+                ? { ...importedState.params }
+                : paramsWithoutSeed as MetadataState['params'];
+            partial.advanced = { ...importedState.advanced };
             partial.useCoords = importedState.useCoords;
             partial.useOrder = importedState.useOrder;
         }
 
-        // Always import the source model hash. 
-        // A prompt formulated for Anime V4 Full may not work as intended on Curated.
+        // seed만 import (settings 없이)
+        if (importSeed && !importSettings) {
+            partial.params = { seed: importedState.params.seed } as MetadataState['params'];
+        }
+
+        // Always import the source model hash.
         if (importedState.source) {
             partial.source = importedState.source;
         }
@@ -132,9 +111,9 @@ export default function ImportModal({ importedState, onConfirm, onCancel }: Prop
                     메인 프롬프트 (Base Prompt)
                 </label>
 
-                {importedState.characters.length > 0 && (
+                {importedState.prompt.characters.length > 0 && (
                     <div style={{ paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '8px' }}>
-                        {importedState.characters.map((c, idx) => (
+                        {importedState.prompt.characters.map((c, idx) => (
                             <label key={c.id} style={{ ...rowStyle, fontSize: '12px', color: theme.subtext1 }}>
                                 <input
                                     style={{ marginTop: '2px' }}
@@ -156,9 +135,9 @@ export default function ImportModal({ importedState, onConfirm, onCancel }: Prop
                     부정 프롬프트 (Negative Prompt)
                 </label>
 
-                {importedState.negativeCharacters.length > 0 && (
+                {importedState.prompt.negativeCharacters.length > 0 && (
                     <div style={{ paddingLeft: '24px', display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '8px' }}>
-                        {importedState.negativeCharacters.map((c, idx) => (
+                        {importedState.prompt.negativeCharacters.map((c, idx) => (
                             <label key={c.id} style={{ ...rowStyle, fontSize: '12px', color: theme.subtext1 }}>
                                 <input
                                     style={{ marginTop: '2px' }}
