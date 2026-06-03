@@ -33,12 +33,6 @@
   // ── 비트 변환 ──────────────────────────────────────────
 
   // byte → 8비트 배열 (MSB-first)
-  function byteToBits(byte) {
-    const bits = [];
-    for (let i = 7; i >= 0; i--) bits.push((byte >> i) & 1);
-    return bits;
-  }
-
   // Uint8Array → 비트 배열
   function bytesToBits(bytes) {
     const bits = [];

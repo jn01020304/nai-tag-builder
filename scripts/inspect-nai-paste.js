@@ -14,8 +14,10 @@
   console.log('── [1] paste 이벤트 리스너 탐색 ──');
 
   // getEventListeners는 DevTools 전용 API
-  if (typeof getEventListeners === 'function') {
-    const bodyListeners = getEventListeners(document.body);
+  const getDevtoolsEventListeners = globalThis.getEventListeners;
+
+  if (typeof getDevtoolsEventListeners === 'function') {
+    const bodyListeners = getDevtoolsEventListeners(document.body);
     const pasteListeners = bodyListeners.paste || [];
     console.log(`body paste 리스너: ${pasteListeners.length}개`);
     pasteListeners.forEach((l, i) => {
@@ -26,7 +28,7 @@
 
     const pm = document.querySelector('.ProseMirror');
     if (pm) {
-      const pmListeners = getEventListeners(pm);
+      const pmListeners = getDevtoolsEventListeners(pm);
       const pmPaste = pmListeners.paste || [];
       console.log(`\nProseMirror paste 리스너: ${pmPaste.length}개`);
       pmPaste.forEach((l, i) => {

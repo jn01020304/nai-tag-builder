@@ -1,23 +1,24 @@
 import { useState, useRef, useEffect } from 'react';
 import type { MetadataState } from '../types/metadata';
 import type { SeedRule, QueueMode } from '../types/preset';
+import type { ShowFeedback } from '../types/feedback';
 import { getPresetById } from '../model/presetStorage';
-import { buildCommentJson } from '../model/buildCommentJson';
-import { generatePngWithMetadata } from '../encoding/pngEncoder';
-import { dispatchPasteEvent } from '../encoding/pasteDispatch';
+import { createRandomSeed, runApplyPipeline } from '../automation/applyPipeline';
 
 export interface AutoGeneratorConfig {
     state: MetadataState;
     queue: string[];
     queueMode: QueueMode;
+    onFeedback?: ShowFeedback;
 }
 
-export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfig) {
+export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGeneratorConfig) {
     const [autoGenerate, setAutoGenerate] = useState(false);
     const [intervalSec, setIntervalSec] = useState<number | string>(30);
     const [targetCount, setTargetCount] = useState<number | string>(100);
     const [targetMin, setTargetMin] = useState<number | string>(50);
     const [isLooping, setIsLooping] = useState(false);
+    const [loopCount, setLoopCount] = useState(0);
     const [seedRule, setSeedRule] = useState<SeedRule>('none');
     const [adjustStep, setAdjustStep] = useState<number | string>(10);
 
@@ -25,11 +26,13 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
     const queueRef = useRef(queue);
     const queueModeRef = useRef(queueMode);
     const seedRuleRef = useRef(seedRule);
+    const feedbackRef = useRef(onFeedback);
 
     useEffect(() => { stateRef.current = state; }, [state]);
     useEffect(() => { queueRef.current = queue; }, [queue]);
     useEffect(() => { queueModeRef.current = queueMode; }, [queueMode]);
     useEffect(() => { seedRuleRef.current = seedRule; }, [seedRule]);
+    useEffect(() => { feedbackRef.current = onFeedback; }, [onFeedback]);
 
     const loopCountRef = useRef(0);
     const loopTimeoutRef = useRef<number | null>(null);
@@ -43,7 +46,7 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
     useEffect(() => { targetCountRef.current = Number(targetCount); }, [targetCount]);
 
     const stopLoop = () => {
-        if (loopTimeoutRef.current) {
+        if (loopTimeoutRef.current !== null) {
             clearTimeout(loopTimeoutRef.current);
             loopTimeoutRef.current = null;
         }
@@ -73,6 +76,7 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
         stopLoop();
         setIsLooping(true);
         loopCountRef.current = 0;
+        setLoopCount(0);
         queueIndexRef.current = 0;
         let currentLoopSeed = Number(stateRef.current.params.seed);
 
@@ -92,7 +96,7 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
 
             if (currentQueue.length > 0) {
                 if (nextState.params.seed === 0) {
-                    nextSeed = Math.floor(Math.random() * 4294967295);
+                    nextSeed = createRandomSeed();
                 } else {
                     const genBtn = Array.from(document.querySelectorAll('button'))
                         .find(b => b.textContent?.includes('Generate')) as HTMLButtonElement | undefined;
@@ -108,11 +112,11 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
                 } else if (currentSeedRule === 'decrement') {
                     nextSeed = Math.max(0, currentLoopSeed - 1);
                 } else if (currentSeedRule === 'random') {
-                    nextSeed = Math.floor(Math.random() * 4294967295);
+                    nextSeed = createRandomSeed();
                 } else {
                     // 'none' rule
                     if (nextState.params.seed === 0) {
-                        nextSeed = Math.floor(Math.random() * 4294967295);
+                        nextSeed = createRandomSeed();
                     } else {
                         nextSeed = nextState.params.seed;
                     }
@@ -124,11 +128,23 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
                 ...nextState,
                 params: { ...nextState.params, seed: nextSeed },
             };
-            const loopComment = buildCommentJson(loopState);
-            const loopBlob = await generatePngWithMetadata(loopComment, nextState.source);
-            dispatchPasteEvent(loopBlob, true);
+            try {
+                const result = await runApplyPipeline({ state: loopState, autoGenerate: true });
+                if (result.effect.status === 'failed') {
+                    console.error('Auto generate effect failed:', result.effect);
+                    feedbackRef.current?.({ tone: 'error', message: result.effect.message });
+                    stopLoop();
+                    return;
+                }
+            } catch (error) {
+                console.error('Auto generate pipeline failed:', error);
+                feedbackRef.current?.({ tone: 'error', message: '자동 생성 적용 중 오류가 발생했습니다.' });
+                stopLoop();
+                return;
+            }
 
             loopCountRef.current += 1;
+            setLoopCount(loopCountRef.current);
             const nextSec = Math.max(3, intervalRef.current);
             loopTimeoutRef.current = window.setTimeout(executeLoop, nextSec * 1000);
         };
@@ -176,7 +192,7 @@ export function useAutoGenerator({ state, queue, queueMode }: AutoGeneratorConfi
         autoGenerate, setAutoGenerate,
         seedRule, setSeedRule,
         intervalSec, targetCount, targetMin, adjustStep, setAdjustStep,
-        isLooping, loopCount: loopCountRef.current,
+        isLooping, loopCount,
         startLoop, stopLoop,
         handleIntervalChange, handleCountChange, handleMinChange, adjustValue,
     };

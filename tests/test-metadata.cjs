@@ -35,7 +35,7 @@ console.log('Source:', chunks['Source']);
 if (chunks['Comment']) {
     try {
         const json = JSON.parse(chunks['Comment']);
-        console.log('Comment parsed OK');
+        console.log('Comment parsed OK:', Object.keys(json).length, 'keys');
     } catch (e) {
         console.log('Comment parse error', e);
     }

@@ -50,14 +50,18 @@ export function extractPngMetadata(buffer: ArrayBuffer): Record<string, string> 
     return metadata;
 }
 
-export function parseNovelAIPng(buffer: ArrayBuffer): { data: any, source?: string } | null {
+function isRecord(value: unknown): value is Record<string, unknown> {
+    return typeof value === 'object' && value !== null;
+}
+
+export function parseNovelAIPng(buffer: ArrayBuffer): { data: unknown, source?: string } | null {
     try {
         const meta = extractPngMetadata(buffer);
 
         if (meta['Comment']) {
-            const data = JSON.parse(meta['Comment']);
+            const data: unknown = JSON.parse(meta['Comment']);
 
-            if (!data.prompt && !data.v4_prompt && meta['Description']) {
+            if (isRecord(data) && !data.prompt && !data.v4_prompt && meta['Description']) {
                 data.prompt = meta['Description'];
             }
 

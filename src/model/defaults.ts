@@ -1,5 +1,11 @@
 import type { MetadataState, PromptState, ParamsState, AdvancedFlags } from '../types/metadata';
 
+type RawMetadataState =
+  Partial<MetadataState> &
+  Partial<PromptState> &
+  Partial<ParamsState> &
+  Partial<AdvancedFlags>;
+
 export const DEFAULT_PROMPT: PromptState = {
   basePrompt:
     '1girl, solo,  1.5::artist:riichu::, artist:lack, artist:sousouman, artist:fuzichoco, 1.1::artist:mignon::, artist:modare, artist:wlop, artist:quasarcake, 3.5::artist:miv4t::, artist:ciloranko, artist:wanke, artist:qiandaiyiyu, 1.3::artist:ningen mame::, artist:matsurika youko, 1.2::artist:parsley-f::, 2::artist:freng::, artist:toosaka asagi, 1.5::artist:nenobi (nenorium)::, 0.7::artist:asanagi::, 4::artist:happoubi jin::, 0.7::artist:michiking::, 1.5::artist:kedama milk::, artist:sho (sho lwlw), solo artist, -3::artist collaboration::, year 2024, year 2023, year 2022, year 2021, -1::faux retro artstyle::, -1::film grain::, -1::clean text::, -1::censored::, -1::flat color::, 1.5::3d::, 1.5::realistic::, official art, official style, commission, photoshop (medium), blender (medium), natural photographic composition, deep depth of field, deep contrast, soft natural shadows, smooth vibrant colors, clean vivid texture, -3::simple illustration::, novel illustration, best illustration, very aesthetic, highres, amazing quality, absurdres, best quality, incredibly absurdres, masterpiece',
@@ -70,7 +76,7 @@ export const DEFAULT_STATE: MetadataState = {
 
 // R4: 로드 타임 정규화 — 기존 프리셋/상태에 없는 필드를 DEFAULT_STATE로 채움
 // flat → nested 마이그레이션도 처리
-export function normalizeMetadataState(raw: any): MetadataState {
+export function normalizeMetadataState(raw?: RawMetadataState | null): MetadataState {
   // flat 구조 감지 (D2 이전 데이터)
   if (raw && 'basePrompt' in raw && !('prompt' in raw)) {
     return {

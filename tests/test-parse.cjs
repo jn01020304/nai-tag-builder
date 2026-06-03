@@ -1,4 +1,6 @@
-function extractPngMetadata(buffer: ArrayBuffer): Record<string, string> {
+const fs = require("fs");
+
+function extractPngMetadata(buffer) {
     const dataView = new DataView(buffer);
     const uint8View = new Uint8Array(buffer);
 
@@ -11,7 +13,7 @@ function extractPngMetadata(buffer: ArrayBuffer): Record<string, string> {
         }
     }
 
-    const metadata: Record<string, string> = {};
+    const metadata = {};
     let offset = 8;
     const length = uint8View.length;
     const textDecoder = new TextDecoder();
@@ -59,7 +61,7 @@ function extractPngMetadata(buffer: ArrayBuffer): Record<string, string> {
     return metadata;
 }
 
-function parseNovelAIPng(buffer: ArrayBuffer): { data: any, source?: string } | null {
+function parseNovelAIPng(buffer) {
     try {
         const meta = extractPngMetadata(buffer);
 

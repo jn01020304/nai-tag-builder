@@ -42,7 +42,8 @@ export default function ImportModal({ importedState, onConfirm, onCancel }: Prop
         }
 
         if (importSettings) {
-            const { seed: _seed, ...paramsWithoutSeed } = importedState.params;
+            const paramsWithoutSeed: Partial<MetadataState['params']> = { ...importedState.params };
+            delete paramsWithoutSeed.seed;
             partial.params = importSeed
                 ? { ...importedState.params }
                 : paramsWithoutSeed as MetadataState['params'];

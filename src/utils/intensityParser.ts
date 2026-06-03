@@ -28,7 +28,7 @@ export function parsePromptToTokens(prompt: string): Token[] {
     //    Group 5: string starting with { and ending with }
     // 3. Low brackets: [[tag]]
     //    Group 6: string starting with [ and ending with ]
-    const regex = /([-+]?\d*\.?\d+)(::)(.*?)(?:(::)|(?=[,\n]|$))|(\{+[^{}]+\}+)|(\[+[^\[\]]+\]+)/g;
+    const regex = /([-+]?\d*\.?\d+)(::)(.*?)(?:(::)|(?=[,\n]|$))|(\{+[^{}]+\}+)|(\[+[^[\]]+\]+)/g;
 
     let match;
     while ((match = regex.exec(prompt)) !== null) {
