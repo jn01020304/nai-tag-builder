@@ -1,4 +1,3 @@
-const fs = require('fs');
 const { TextDecoder, TextEncoder } = require('util');
 
 // Mock defaults

@@ -4,8 +4,8 @@ export function useEdgeResize(minWidth: number) {
   const [overlayWidth, setOverlayWidth] = useState(minWidth);
 
   const startResize = (clientX: number) => {
-    let startX = clientX;
-    let startWidth = overlayWidth;
+    const startX = clientX;
+    const startWidth = overlayWidth;
 
     const onMM = (e: MouseEvent) => {
       e.preventDefault();

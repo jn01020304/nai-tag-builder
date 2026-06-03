@@ -11,6 +11,11 @@ writing:
   closing_summary: false
 ---
 
+# 상위 기준선
+
+전면 리팩토링과 신규 기능 설계의 상위 기준은 `docs/DELEGATED_AUTOMATION_GUIDE.md`를 따른다.
+이 문서는 현재 구조와 할 일 목록을 기록하고, 위임형 자동화의 계약, 실패 처리, 테스트 기준은 별도 가이드 문서에서 관리한다.
+
 # 현재 구조 (As-Is)
 
 ## 메타데이터 파이프라인

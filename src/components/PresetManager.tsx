@@ -2,6 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import type { MetadataState } from '../types/metadata';
 import type { Preset, QueueMode } from '../types/preset';
 import type { MetadataAction } from '../hooks/useMetadataState';
+import type { ShowFeedback } from '../types/feedback';
 import { loadPresets, savePreset, deletePreset, exportPresets, importPresets } from '../model/presetStorage';
 import { theme, inputStyle, smallBtnStyle } from '../styles/theme';
 import CollapsibleSection from './CollapsibleSection';
@@ -16,9 +17,10 @@ interface Props {
     queueMode: QueueMode;
     setQueueMode: React.Dispatch<React.SetStateAction<QueueMode>>;
     onImportRequest: (state: MetadataState) => void;
+    onFeedback: ShowFeedback;
 }
 
-export default function PresetManager({ state, dispatch, queue, setQueue, queueMode, setQueueMode, onImportRequest }: Props) {
+export default function PresetManager({ state, dispatch, queue, setQueue, queueMode, setQueueMode, onImportRequest, onFeedback }: Props) {
     const [presets, setPresets] = useState<Preset[]>([]);
     const [saveName, setSaveName] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -30,7 +32,17 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
         setPresets(loaded);
     };
 
-    useEffect(() => { refresh(); }, []);
+    useEffect(() => {
+        let isMounted = true;
+
+        loadPresets().then(loaded => {
+            if (isMounted) setPresets(loaded);
+        });
+
+        return () => {
+            isMounted = false;
+        };
+    }, []);
 
     const handleSave = async () => {
         const name = saveName.trim() || `Preset ${presets.length + 1}`;
@@ -58,9 +70,9 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
             try {
                 const count = await importPresets(reader.result as string);
                 await refresh();
-                alert(`${count}개 프리셋 가져옴`);
+                onFeedback({ tone: 'success', message: `${count}개 프리셋을 가져왔습니다.` });
             } catch {
-                alert('잘못된 프리셋 파일입니다.');
+                onFeedback({ tone: 'error', message: '잘못된 프리셋 파일입니다.' });
             }
         };
         reader.readAsText(file);
@@ -77,11 +89,11 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
                 const newState = translateNovelAiMetadata(jsonMeta.data, jsonMeta.source);
                 onImportRequest(newState);
             } else {
-                alert('No NovelAI metadata found in this PNG.');
+                onFeedback({ tone: 'warning', message: 'NovelAI 메타데이터가 없는 PNG입니다.' });
             }
         } catch (err) {
             console.error('Error parsing PNG:', err);
-            alert('Failed to read PNG file.');
+            onFeedback({ tone: 'error', message: 'PNG 파일을 읽지 못했습니다.' });
         }
         e.target.value = '';
     };

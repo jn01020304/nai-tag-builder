@@ -41,7 +41,10 @@ const fieldStyle: React.CSSProperties = {
 };
 
 export default function GenerationParams({ state, dispatch }: Props) {
-  const setP = (field: keyof MetadataState['params'], value: MetadataState['params'][keyof MetadataState['params']]) =>
+  const setP = (
+    field: keyof MetadataState['params'],
+    value: MetadataState['params'][keyof MetadataState['params']] | ''
+  ) =>
     dispatch({ type: 'SET_PARAMS', field, value });
 
   return (
@@ -109,7 +112,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
               value={state.params.steps}
               min={1}
               max={50}
-              onChange={e => setP('steps', e.target.value === '' ? '' as any : Number(e.target.value))}
+              onChange={e => setP('steps', e.target.value === '' ? '' : Number(e.target.value))}
               onBlur={() => setP('steps', Math.max(1, Math.min(50, Number(state.params.steps) || 1)))}
               style={{ ...inputStyle, width: '48px', padding: '2px 4px', textAlign: 'center' }}
             />
@@ -132,7 +135,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
               min={0}
               max={10}
               step={0.1}
-              onChange={e => setP('scale', e.target.value === '' ? '' as any : Number(e.target.value))}
+              onChange={e => setP('scale', e.target.value === '' ? '' : Number(e.target.value))}
               onBlur={() => setP('scale', Math.max(0, Math.min(10, Number(state.params.scale) || 0)))}
               style={{ ...inputStyle, width: '48px', padding: '2px 4px', textAlign: 'center' }}
             />

@@ -144,7 +144,7 @@ export function useDynamicTheme() {
           const bg = getComputedStyle(probe).backgroundColor;
           document.body.removeChild(probe);
           if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return bg;
-        } catch (_) { /* ignore */ }
+        } catch { /* ignore */ }
         return fallback;
       };
 

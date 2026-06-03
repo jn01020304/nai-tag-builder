@@ -1,5 +1,5 @@
 import React, { useRef, useLayoutEffect } from 'react';
-import { useTheme } from '../contexts/ThemeContext';
+import { useTheme } from '../contexts/themeContextCore';
 import { withAlpha } from '../styles/theme';
 import { parsePromptToTokens } from '../utils/intensityParser';
 

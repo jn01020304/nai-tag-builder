@@ -1,7 +1,37 @@
-import type { MetadataState } from '../types/metadata';
+import type { CommentJson, MetadataState, NoiseSchedule, Sampler } from '../types/metadata';
 import { DEFAULT_STATE, DEFAULT_PROMPT, DEFAULT_PARAMS, DEFAULT_ADVANCED } from '../model/defaults';
 
-export function translateNovelAiMetadata(data: any, source?: string): MetadataState {
+type NovelAiMetadata = Partial<CommentJson> & {
+    guidance?: number;
+    negative_prompt?: string;
+    resolution?: string;
+};
+
+const SAMPLERS: readonly Sampler[] = [
+    'k_euler',
+    'k_euler_ancestral',
+    'k_dpmpp_2s_ancestral',
+    'k_dpmpp_2m_sde',
+    'k_dpmpp_2m',
+    'k_dpmpp_sde',
+    'ddim_v3',
+];
+
+const NOISE_SCHEDULES: readonly NoiseSchedule[] = ['karras', 'exponential', 'polyexponential', 'native'];
+
+function isNovelAiMetadata(data: unknown): data is NovelAiMetadata {
+    return typeof data === 'object' && data !== null;
+}
+
+function isSampler(value: unknown): value is Sampler {
+    return typeof value === 'string' && SAMPLERS.includes(value as Sampler);
+}
+
+function isNoiseSchedule(value: unknown): value is NoiseSchedule {
+    return typeof value === 'string' && NOISE_SCHEDULES.includes(value as NoiseSchedule);
+}
+
+export function translateNovelAiMetadata(rawData: unknown, source?: string): MetadataState {
     const state: MetadataState = {
         prompt: { ...DEFAULT_PROMPT },
         params: { ...DEFAULT_PARAMS },
@@ -10,13 +40,14 @@ export function translateNovelAiMetadata(data: any, source?: string): MetadataSt
         useOrder: DEFAULT_STATE.useOrder,
     };
 
-    if (!data) return state;
+    if (!isNovelAiMetadata(rawData)) return state;
+    const data = rawData;
     if (source) state.source = source;
 
     if (data.v4_prompt?.caption) {
         state.prompt.basePrompt = data.v4_prompt.caption.base_caption || '';
         const charCaptions = data.v4_prompt.caption.char_captions || [];
-        state.prompt.characters = charCaptions.map((c: any, i: number) => ({
+        state.prompt.characters = charCaptions.map((c, i) => ({
             id: 'char_' + Date.now() + '_' + i,
             caption: c.char_caption || '',
             centerX: c.centers?.[0]?.x ?? 0.5,
@@ -32,7 +63,7 @@ export function translateNovelAiMetadata(data: any, source?: string): MetadataSt
     if (data.v4_negative_prompt?.caption) {
         state.prompt.negativeBase = data.v4_negative_prompt.caption.base_caption || '';
         const charCaptions = data.v4_negative_prompt.caption.char_captions || [];
-        state.prompt.negativeCharacters = charCaptions.map((c: any, i: number) => ({
+        state.prompt.negativeCharacters = charCaptions.map((c, i) => ({
             id: 'char_neg_' + Date.now() + '_' + i,
             caption: c.char_caption || '',
             centerX: c.centers?.[0]?.x ?? 0.5,
@@ -49,12 +80,12 @@ export function translateNovelAiMetadata(data: any, source?: string): MetadataSt
     // Basic generation params
     if (typeof data.seed === 'number') state.params.seed = data.seed;
     if (typeof data.steps === 'number') state.params.steps = data.steps;
-    if (typeof data.sampler === 'string') state.params.sampler = data.sampler;
+    if (isSampler(data.sampler)) state.params.sampler = data.sampler;
     if (typeof data.scale === 'number') state.params.scale = data.scale;
     else if (typeof data.guidance === 'number') state.params.scale = data.guidance;
     if (typeof data.sm === 'boolean') state.advanced.smea = data.sm;
     if (typeof data.sm_dyn === 'boolean') state.advanced.smeaDyn = data.sm_dyn;
-    if (typeof data.noise_schedule === 'string') state.params.noiseSchedule = data.noise_schedule;
+    if (isNoiseSchedule(data.noise_schedule)) state.params.noiseSchedule = data.noise_schedule;
     if (typeof data.n_samples === 'number') state.params.nSamples = data.n_samples;
 
     // Advanced params

@@ -9,7 +9,7 @@ function genId(): string {
 
 export type MetadataAction =
   | { type: 'SET_PROMPT'; field: keyof PromptState; value: PromptState[keyof PromptState] }
-  | { type: 'SET_PARAMS'; field: keyof ParamsState; value: ParamsState[keyof ParamsState] }
+  | { type: 'SET_PARAMS'; field: keyof ParamsState; value: ParamsState[keyof ParamsState] | '' }
   | { type: 'SET_ADVANCED'; field: keyof AdvancedFlags; value: AdvancedFlags[keyof AdvancedFlags] }
   | { type: 'SET_META'; field: 'useCoords' | 'useOrder' | 'source'; value: boolean | string }
   | { type: 'ADD_CHARACTER' }

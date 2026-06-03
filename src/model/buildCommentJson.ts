@@ -11,10 +11,6 @@ export function buildCommentJson(state: MetadataState): CommentJson {
     centers: [{ x: c.centerX, y: c.centerY }],
   }));
 
-  const seed = state.params.seed === 0
-    ? Math.floor(Math.random() * 2 ** 32)
-    : state.params.seed;
-
   return {
     prompt: state.prompt.basePrompt,
     steps: state.params.steps,
@@ -23,7 +19,7 @@ export function buildCommentJson(state: MetadataState): CommentJson {
     scale: state.params.scale,
     uncond_scale: state.advanced.uncondScale,
     cfg_rescale: state.advanced.cfgRescale,
-    seed,
+    seed: state.params.seed,
     n_samples: state.params.nSamples,
     noise_schedule: state.params.noiseSchedule,
     legacy_v3_extend: false,

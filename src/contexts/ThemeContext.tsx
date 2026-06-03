@@ -1,9 +1,6 @@
-import { createContext, useContext } from 'react';
 import type { ReactNode } from 'react';
-import { useDynamicTheme, theme as fallbackTheme } from '../styles/theme';
-import type { ThemeColors } from '../styles/theme';
-
-const ThemeProviderContext = createContext<ThemeColors>(fallbackTheme);
+import { useDynamicTheme } from '../styles/theme';
+import { ThemeProviderContext } from './themeContextCore';
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
     const theme = useDynamicTheme();
@@ -14,6 +11,3 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     );
 }
 
-export function useTheme() {
-    return useContext(ThemeProviderContext);
-}
