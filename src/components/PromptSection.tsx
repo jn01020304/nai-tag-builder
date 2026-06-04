@@ -3,7 +3,7 @@ import type { MetadataAction } from "../hooks/useMetadataState";
 import type { MetadataState } from "../types/metadata";
 import type { CoreCatalogEntry } from "../prompt/catalog/catalogTypes";
 import { inputStyle } from "../styles/theme";
-import { movePromptTag, toggleCatalogTag } from "../prompt/catalog/promptTagText";
+import { movePromptTag, toggleCatalogTag, toggleCatalogTagWithSelection } from "../prompt/catalog/promptTagText";
 import ComposeCatalogChips from "./ComposeCatalogChips";
 import HighlightedTextarea from "./HighlightedTextarea";
 
@@ -27,6 +27,11 @@ const fieldLabelStyle: React.CSSProperties = {
 
 export default function PromptSection({ state, dispatch }: Props) {
   const [baseSelection, setBaseSelection] = useState<{ start: number; end: number } | null>(null);
+  const [selectionAfterRender, setSelectionAfterRender] = useState<{
+    start: number;
+    end: number;
+    version: number;
+  } | null>(null);
 
   const updateSelection = (target: HTMLTextAreaElement) => {
     setBaseSelection({
@@ -45,11 +50,27 @@ export default function PromptSection({ state, dispatch }: Props) {
       return;
     }
 
+    const result = toggleCatalogTagWithSelection(
+      state.prompt.basePrompt,
+      entry,
+      baseSelection?.start ?? null,
+    );
+
     dispatch({
       type: "SET_PROMPT",
       field: "basePrompt",
-      value: toggleCatalogTag(state.prompt.basePrompt, entry, baseSelection?.start ?? null),
+      value: result.value,
     });
+
+    if (result.nextCursorIndex != null) {
+      const nextSelection = {
+        start: result.nextCursorIndex,
+        end: result.nextCursorIndex,
+        version: Date.now(),
+      };
+      setBaseSelection(nextSelection);
+      setSelectionAfterRender(nextSelection);
+    }
   };
 
   const reorderBasePrompt = (fromIndex: number, toIndex: number) => {
@@ -79,6 +100,7 @@ export default function PromptSection({ state, dispatch }: Props) {
         onSelect={(e) => updateSelection(e.currentTarget)}
         onKeyUp={(e) => updateSelection(e.currentTarget)}
         onFocus={(e) => updateSelection(e.currentTarget)}
+        selectionAfterRender={selectionAfterRender}
         placeholder="base prompt tags..."
         spellCheck={false}
         autoCorrect="off"

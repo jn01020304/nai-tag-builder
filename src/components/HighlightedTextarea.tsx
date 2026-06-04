@@ -5,6 +5,7 @@ import { parsePromptToTokens } from '../utils/intensityParser';
 
 interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
     value: string;
+    selectionAfterRender?: { start: number; end: number; version: number } | null;
 }
 
 export default function HighlightedTextarea(props: Props) {
@@ -17,6 +18,7 @@ export default function HighlightedTextarea(props: Props) {
         onTouchStart,
         onPointerDown,
         onClick,
+        selectionAfterRender,
         ...rest
     } = props;
     const theme = useTheme();
@@ -42,6 +44,15 @@ export default function HighlightedTextarea(props: Props) {
             backdropRef.current.scrollLeft = textareaRef.current.scrollLeft;
         }
     });
+
+    useLayoutEffect(() => {
+        if (!selectionAfterRender || !textareaRef.current) return;
+
+        const start = Math.max(0, Math.min(selectionAfterRender.start, value.length));
+        const end = Math.max(start, Math.min(selectionAfterRender.end, value.length));
+        textareaRef.current.focus();
+        textareaRef.current.setSelectionRange(start, end);
+    }, [selectionAfterRender, value]);
 
     return (
         <div
