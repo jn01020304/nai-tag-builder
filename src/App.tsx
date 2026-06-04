@@ -12,11 +12,12 @@ import GenerationParams from './components/GenerationParams';
 import CharacterCaptions from './components/CharacterCaptions';
 import NegativePrompt from './components/NegativePrompt';
 import AdvancedParams from './components/AdvancedParams';
-import ApplyButton from './components/ApplyButton';
 import PresetManager from './components/PresetManager';
 import AutoGeneratePanel from './components/AutoGeneratePanel';
 import ImportModal from './components/ImportModal';
 import StatusBanner from './components/StatusBanner';
+import OverlayFooter from './components/OverlayFooter';
+import OverlayHeader from './components/OverlayHeader';
 import { parseNovelAIPng } from './utils/pngParser';
 import { translateNovelAiMetadata } from './utils/metadataTranslator';
 import type { StatusFeedback } from './types/feedback';
@@ -247,20 +248,6 @@ function AppContent() {
     }
   };
 
-  const headerBtnStyle: React.CSSProperties = {
-    display: 'inline-flex',
-    alignItems: 'center',
-    justifyContent: 'center',
-    background: 'none',
-    border: 'none',
-    padding: '0 2px',
-    cursor: 'pointer',
-    fontWeight: 'bold',
-    fontSize: '16px',
-    lineHeight: 1,
-  };
-
-
   return (
     <div
       onDragOver={handleDragOver}
@@ -271,14 +258,15 @@ function AppContent() {
         minWidth: '280px',
         maxWidth: 'calc(100vw - 16px)',
         maxHeight: isCollapsed ? 'none' : '80vh',
-        overflowY: isCollapsed ? 'visible' : 'auto',
+        overflow: 'hidden',
         backgroundColor: theme.base,
         color: theme.text,
         borderRadius: '12px',
         boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
         fontFamily: 'sans-serif',
         border: `1px solid ${theme.surface0}`,
-        paddingBottom: isCollapsed ? '0' : '12px',
+        display: 'flex',
+        flexDirection: 'column',
         position: 'relative', // Relative for absolute components like the handle
       }}
     >
@@ -323,69 +311,29 @@ function AppContent() {
         />
       )}
 
-      {/* Header — drag handle */}
-      <div
-        onMouseDown={(e) => {
-          if ((e.target as Element).closest('button')) return;
-          if (e.button === 0) startDrag(e.clientX, e.clientY);
-        }}
-        onTouchStart={(e) => {
-          if ((e.target as Element).closest('button')) return;
-          startDrag(e.touches[0].clientX, e.touches[0].clientY);
-        }}
-        style={{
-          backgroundColor: theme.crust,
-          padding: '10px 16px',
-          fontWeight: 'bold',
-          fontSize: '14px',
-          borderBottom: isCollapsed ? 'none' : `1px solid ${theme.surface0}`,
-          marginBottom: isCollapsed ? '0' : '12px',
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          position: 'sticky',
-          top: 0,
-          zIndex: 1,
-          cursor: 'grab',
-          borderRadius: isCollapsed ? '12px' : '12px 12px 0 0',
-          userSelect: 'none',
-          touchAction: 'none',
-        }}
-      >
-        <span>NAI Tag Builder v2.0</span>
-        <div style={{ display: 'flex', gap: '8px', alignItems: 'center' }}>
-          {isLooping && (
-            <button
-              onClick={stopLoop}
-              title="반복 중지"
-              style={{ ...headerBtnStyle, color: theme.yellow, display: 'flex', alignItems: 'center', gap: '4px' }}
-            >
-              <span style={{ fontSize: '10px' }}>({loopCount}/{targetCount})</span>
-              &#9632;
-            </button>
-          )}
-          {/* Collapse button */}
-          <button
-            onClick={() => setIsCollapsed(c => !c)}
-            title={isCollapsed ? '펼치기' : '접기'}
-            style={{ ...headerBtnStyle, color: theme.subtext0 }}
-          >
-            {isCollapsed ? '▲' : '▼'}
-          </button>
-          {/* Close button */}
-          <button
-            onClick={handleClose}
-            title="닫기"
-            style={{ ...headerBtnStyle, color: theme.red }}
-          >
-            &#10005;
-          </button>
-        </div>
-      </div>
+      <OverlayHeader
+        isCollapsed={isCollapsed}
+        isLooping={isLooping}
+        loopCount={loopCount}
+        targetCount={targetCount}
+        onClose={handleClose}
+        onStopLoop={stopLoop}
+        onToggleCollapsed={() => setIsCollapsed(c => !c)}
+        onStartDrag={startDrag}
+      />
 
       {/* Body */}
       {!isCollapsed && (
-        <div style={{ padding: '0 12px' }}>
+        <div
+          data-testid="overlay-body"
+          style={{
+            flex: '1 1 auto',
+            minHeight: 0,
+            overflowX: 'hidden',
+            overflowY: 'auto',
+            padding: '12px 12px 0',
+          }}
+        >
           <PresetManager
             state={state}
             dispatch={dispatch}
@@ -441,9 +389,19 @@ function AppContent() {
             adjustValue={adjustValue}
             queueLength={queue.length}
           />
-
-          <ApplyButton isApplying={isApplying} onApply={handleApply} />
         </div>
+      )}
+
+      {!isCollapsed && (
+        <OverlayFooter
+          feedback={feedback}
+          isApplying={isApplying}
+          isLooping={isLooping}
+          loopCount={loopCount}
+          targetCount={targetCount}
+          onApply={handleApply}
+          onStopLoop={stopLoop}
+        />
       )}
 
       {pendingImport && (
