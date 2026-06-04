@@ -18,7 +18,8 @@ writing:
 
 ## 기준 문서
 
-- `docs/PRODUCT_ARCHITECTURE_BLUEPRINT.md`: 제품 전체 구조, 도메인 경계, 단계별 버전 방향
+- `docs/MASTER_BLUEPRINT.md`: 최상위 제품 정체성, Mobile Overlay Cockpit 계약, 도메인 경계, Runtime/Offline 경계, Vertical Slice Roadmap
+- `docs/PRODUCT_ARCHITECTURE_BLUEPRINT.md`: 제품 전체 구조, 도메인 경계, 단계별 버전 방향의 보조 설명
 - `docs/MOBILE_OVERLAY_CONTRACT.md`: 모바일 오버레이 셸, 작업 모드, 화면 밀도, Playwright 검수 기준
 - `docs/PRODUCT_CATEGORIES.md`: 커스텀 Product Category와 Core Catalog 데이터 계약
 - `docs/OFFLINE_CATALOG_PIPELINE.md`: 로컬 Danbooru 태그 스냅샷 기반 오프라인 카탈로그 생성 흐름
