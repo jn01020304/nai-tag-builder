@@ -390,6 +390,14 @@ async function main() {
       fullPage: true,
     });
 
+    const applyButton = page.locator("[data-testid='apply-button']");
+    await applyButton.click();
+    assert(await applyButton.isDisabled(), "Apply button was not locked while automation was pending.");
+    await page.locator("[data-testid='status-banner']", { hasText: "IMPORT_BUTTON_TIMEOUT" }).waitFor({
+      timeout: 8000,
+    });
+    assert(!(await applyButton.isDisabled()), "Apply button stayed locked after automation failure.");
+
     console.log("compose smoke passed");
   } finally {
     await browser.close();

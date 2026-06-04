@@ -43,7 +43,7 @@ export default function StatusBanner({ feedback, onDismiss }: Props) {
   };
 
   return (
-    <div style={wrapperStyle} role={feedback.tone === 'error' ? 'alert' : 'status'}>
+    <div data-testid="status-banner" style={wrapperStyle} role={feedback.tone === 'error' ? 'alert' : 'status'}>
       <div style={{ flex: 1, minWidth: 0 }}>
         <div style={{ fontWeight: 700, overflowWrap: 'anywhere' }}>{feedback.message}</div>
         {feedback.detail && (

@@ -8,6 +8,7 @@ interface Props {
 export default function ApplyButton({ isApplying, onApply }: Props) {
   return (
     <button
+      data-testid="apply-button"
       onClick={onApply}
       disabled={isApplying}
       style={{

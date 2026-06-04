@@ -132,7 +132,11 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
                 const result = await runApplyPipeline({ state: loopState, autoGenerate: true });
                 if (result.effect.status === 'failed') {
                     console.error('Auto generate effect failed:', result.effect);
-                    feedbackRef.current?.({ tone: 'error', message: result.effect.message });
+                    feedbackRef.current?.({
+                        tone: 'error',
+                        message: result.effect.message,
+                        detail: [result.effect.code, result.effect.detail].filter(Boolean).join('\n'),
+                    });
                     stopLoop();
                     return;
                 }

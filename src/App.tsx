@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
 import { useMetadataState } from './hooks/useMetadataState';
 import type { MetadataState } from './types/metadata';
 import { runApplyPipeline } from './automation/applyPipeline';
@@ -81,6 +81,7 @@ function AppContent() {
   // Drag and drop state
   const [isDragOver, setIsDragOver] = useState(false);
   const [feedback, setFeedback] = useState<StatusFeedback | null>(null);
+  const applyInFlightRef = useRef(false);
   const [activePromptTarget, setActivePromptTarget] = useState<PromptInsertTarget>({ kind: 'base' });
   const [promptSelections, setPromptSelections] = useState<Record<string, PromptSelection>>({});
   const [selectionAfterRenderByTarget, setSelectionAfterRenderByTarget] = useState<
@@ -225,17 +226,40 @@ function AppContent() {
 
 
   const handleApply = async () => {
+    if (applyInFlightRef.current) {
+      showFeedback({ tone: 'warning', message: '이미 NovelAI 적용이 진행 중입니다.' });
+      return;
+    }
+
+    applyInFlightRef.current = true;
     setIsApplying(true);
-    setFeedback(null);
+    showFeedback({ tone: 'info', message: 'NovelAI 적용을 시작합니다.' });
     try {
-      const result = await runApplyPipeline({ state, autoGenerate });
+      const result = await runApplyPipeline({
+        state,
+        autoGenerate,
+        onPhase: (phase) => {
+          showFeedback({ tone: 'info', message: phase.message, detail: phase.detail });
+        },
+      });
       if (result.effect.status === 'failed') {
         console.error('Apply effect failed:', result.effect);
-        showFeedback({ tone: 'error', message: result.effect.message });
+        showFeedback({
+          tone: 'error',
+          message: result.effect.message,
+          detail: [result.effect.code, result.effect.detail].filter(Boolean).join('\n'),
+        });
         return;
       }
 
-      setIsCollapsed(true);
+      showFeedback({
+        tone: 'success',
+        message: result.effect.message,
+        detail: result.plan.seed.seedWasRandomized
+          ? `Seed 0이 실제 seed ${result.plan.seed.appliedSeed}로 기록되었습니다.`
+          : undefined,
+      });
+      setIsCollapsed(false);
 
       if (autoGenerate && Number(intervalSec) > 0 && Number(targetCount) > 0) {
         startLoop();
@@ -244,6 +268,7 @@ function AppContent() {
       console.error('Error applying preset:', error);
       showFeedback({ tone: 'error', message: '적용 중 오류가 발생했습니다.' });
     } finally {
+      applyInFlightRef.current = false;
       setIsApplying(false);
     }
   };
