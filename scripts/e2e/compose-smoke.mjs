@@ -70,6 +70,10 @@ async function getTextareaValue(page) {
   return page.locator("[data-testid='raw-prompt-textarea']").inputValue();
 }
 
+async function getTextareaSelectionStart(page) {
+  return page.locator("[data-testid='raw-prompt-textarea']").evaluate((element) => element.selectionStart);
+}
+
 async function setTextareaCursor(page, value, cursorIndex) {
   const textarea = page.locator("[data-testid='raw-prompt-textarea']");
   await textarea.fill(value);
@@ -223,6 +227,22 @@ async function main() {
     assert(
       await getTextareaValue(page) === "alpha, omega",
       `Chip removal failed: ${await getTextareaValue(page)}`,
+    );
+
+    await setTextareaCursor(page, "brown hair, blue eyes", "brown hair".length);
+    await page.locator("[data-testid='catalog-chip-tag_1girl']").click();
+    assert(
+      await getTextareaValue(page) === "brown hair, 1girl, blue eyes",
+      `Cursor separator insertion failed: ${await getTextareaValue(page)}`,
+    );
+    assert(
+      await getTextareaSelectionStart(page) === "brown hair, 1girl, ".length,
+      `Cursor was not restored after separator: ${await getTextareaSelectionStart(page)}`,
+    );
+    await page.locator("[data-testid='catalog-chip-tag_solo']").click();
+    assert(
+      await getTextareaValue(page) === "brown hair, 1girl, solo, blue eyes",
+      `Post-separator consecutive insertion failed: ${await getTextareaValue(page)}`,
     );
 
     await textarea.fill("1girl, solo, outdoors");
