@@ -105,15 +105,32 @@ async function checkLayout(page) {
   const result = await page.evaluate(() => {
     const root = document.getElementById("nai-tag-builder-root");
     const overlay = root?.firstElementChild;
+    const header = document.querySelector("[data-testid='overlay-header']");
+    const body = document.querySelector("[data-testid='overlay-body']");
+    const footer = document.querySelector("[data-testid='overlay-footer']");
+    const footerStatus = document.querySelector("[data-testid='overlay-footer-status']");
     const raw = document.querySelector("[data-testid='raw-prompt-textarea']");
     const params = document.querySelector("[data-testid='generation-params']");
-    if (!(overlay instanceof HTMLElement) || !(raw instanceof HTMLElement) || !(params instanceof HTMLElement)) {
+    if (
+      !(overlay instanceof HTMLElement) ||
+      !(header instanceof HTMLElement) ||
+      !(body instanceof HTMLElement) ||
+      !(footer instanceof HTMLElement) ||
+      !(footerStatus instanceof HTMLElement) ||
+      !(raw instanceof HTMLElement) ||
+      !(params instanceof HTMLElement)
+    ) {
       return { ok: false, reason: "required elements missing" };
     }
 
     const overlayRect = overlay.getBoundingClientRect();
+    const headerRect = header.getBoundingClientRect();
+    const bodyRect = body.getBoundingClientRect();
+    const footerRect = footer.getBoundingClientRect();
+    const footerStatusRect = footerStatus.getBoundingClientRect();
     const rawRect = raw.getBoundingClientRect();
     const paramsRect = params.getBoundingClientRect();
+    const bodyStyle = getComputedStyle(body);
     const controls = Array.from(overlay.querySelectorAll("button, input, select, textarea"))
       .filter((element) => element instanceof HTMLElement)
       .filter((element) => !element.closest("[aria-label='Prompt categories']"))
@@ -129,10 +146,23 @@ async function checkLayout(page) {
     return {
       ok:
         overlay.scrollWidth <= overlay.clientWidth + 1 &&
+        headerRect.top >= overlayRect.top - 1 &&
+        bodyRect.top >= headerRect.bottom - 1 &&
+        footerRect.top >= bodyRect.bottom - 1 &&
+        footerRect.bottom <= overlayRect.bottom + 1 &&
+        footerStatusRect.width > 0 &&
+        footerStatusRect.height > 0 &&
+        bodyStyle.overflowY === "auto" &&
         rawRect.bottom + 4 <= paramsRect.top &&
         !overflowingControl,
       overlayScrollWidth: overlay.scrollWidth,
       overlayClientWidth: overlay.clientWidth,
+      bodyOverflowY: bodyStyle.overflowY,
+      headerTop: headerRect.top,
+      bodyTop: bodyRect.top,
+      footerTop: footerRect.top,
+      footerBottom: footerRect.bottom,
+      overlayBottom: overlayRect.bottom,
       rawBottom: rawRect.bottom,
       paramsTop: paramsRect.top,
       overflowingControl: overflowingControl
