@@ -41,6 +41,19 @@ export default function PromptSection({
   onPromptSelection,
   onToggleCatalogEntry,
 }: Props) {
+  const activePromptValue = (() => {
+    switch (activePromptTarget.kind) {
+      case "base":
+        return state.prompt.basePrompt;
+      case "negativeBase":
+        return state.prompt.negativeBase;
+      case "character":
+        return state.prompt.characters.find((character) => character.id === activePromptTarget.id)?.caption ?? "";
+      case "negativeCharacter":
+        return state.prompt.negativeCharacters.find((character) => character.id === activePromptTarget.id)?.caption ?? "";
+    }
+  })();
+
   const updateSelection = (target: HTMLTextAreaElement) => {
     onPromptSelection({ kind: "base" }, {
       start: target.selectionStart,
@@ -59,8 +72,8 @@ export default function PromptSection({
   return (
     <section style={{ marginBottom: "8px" }}>
       <ComposeCatalogChips
-        basePrompt={state.prompt.basePrompt}
-        negativePrompt={state.prompt.negativeBase}
+        activePromptTarget={activePromptTarget}
+        activePromptValue={activePromptValue}
         onToggle={onToggleCatalogEntry}
         onReorderBasePrompt={reorderBasePrompt}
       />

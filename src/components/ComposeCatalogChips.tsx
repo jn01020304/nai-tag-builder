@@ -1,6 +1,8 @@
 import { useMemo, useState } from "react";
 import { coreCatalog } from "../prompt/catalog/coreCatalog.generated";
 import type { CoreCatalogEntry, ProductCategory } from "../prompt/catalog/catalogTypes";
+import type { PromptInsertTarget } from "../prompt/promptInsertTarget";
+import { promptTargetGroup } from "../prompt/promptInsertTarget";
 import { useTheme } from "../contexts/themeContextCore";
 import { hasCatalogTag, splitPromptTags } from "../prompt/catalog/promptTagText";
 
@@ -31,20 +33,15 @@ const CATEGORY_ORDER: ProductCategory[] = [
 ];
 
 interface Props {
-  basePrompt: string;
-  negativePrompt: string;
+  activePromptTarget: PromptInsertTarget;
+  activePromptValue: string;
   onToggle: (entry: CoreCatalogEntry) => void;
   onReorderBasePrompt: (fromIndex: number, toIndex: number) => void;
 }
 
-function isEntryActive(entry: CoreCatalogEntry, basePrompt: string, negativePrompt: string): boolean {
-  const sourceText = entry.target === "negative" ? negativePrompt : basePrompt;
-  return hasCatalogTag(sourceText, entry);
-}
-
 export default function ComposeCatalogChips({
-  basePrompt,
-  negativePrompt,
+  activePromptTarget,
+  activePromptValue,
   onToggle,
   onReorderBasePrompt,
 }: Props) {
@@ -61,7 +58,35 @@ export default function ComposeCatalogChips({
   }, []);
 
   const visibleEntries = entriesByCategory.get(activeCategory) ?? [];
-  const selectedPromptTags = splitPromptTags(basePrompt);
+  const selectedPromptTags = splitPromptTags(activePromptValue);
+  const activeTargetGroup = promptTargetGroup(activePromptTarget);
+  const canReorderSelectedTags = activePromptTarget.kind === "base";
+
+  const activePalettes = {
+    base: {
+      background: "#143d63",
+      border: "#4ea1d3",
+      color: "#ffffff",
+      shadow: "rgba(78, 161, 211, 0.35)",
+    },
+    character: {
+      background: "#4c2f7d",
+      border: "#b19cff",
+      color: "#ffffff",
+      shadow: "rgba(177, 156, 255, 0.35)",
+    },
+    negative: {
+      background: "#673227",
+      border: "#ff9b7b",
+      color: "#ffffff",
+      shadow: "rgba(255, 155, 123, 0.35)",
+    },
+  } satisfies Record<ReturnType<typeof promptTargetGroup>, {
+    background: string;
+    border: string;
+    color: string;
+    shadow: string;
+  }>;
 
   const tabBaseStyle: React.CSSProperties = {
     backgroundColor: "#15172f",
@@ -126,7 +151,8 @@ export default function ComposeCatalogChips({
         }}
       >
         {visibleEntries.map((entry) => {
-          const active = isEntryActive(entry, basePrompt, negativePrompt);
+          const active = hasCatalogTag(activePromptValue, entry);
+          const activePalette = activePalettes[activeTargetGroup];
           return (
             <button
               key={entry.id}
@@ -143,10 +169,11 @@ export default function ComposeCatalogChips({
               aria-pressed={active}
               style={{
                 alignItems: "center",
-                backgroundColor: active ? "#15172f" : "#f5f0a8",
-                border: `1px solid ${active ? "#15172f" : "#e4de8c"}`,
+                backgroundColor: active ? activePalette.background : "#f5f0a8",
+                border: `1px solid ${active ? activePalette.border : "#e4de8c"}`,
                 borderRadius: "6px",
-                color: active ? "#ffffff" : "#111222",
+                boxShadow: active ? `0 0 0 2px ${activePalette.shadow}` : "none",
+                color: active ? activePalette.color : "#111222",
                 cursor: "pointer",
                 display: "flex",
                 fontSize: "12px",
@@ -191,22 +218,24 @@ export default function ComposeCatalogChips({
               data-testid={`selected-tag-${index}`}
               onPointerDown={(e) => {
                 e.stopPropagation();
+                if (!canReorderSelectedTags) return;
                 setDragIndex(index);
               }}
               onPointerUp={(e) => {
                 e.stopPropagation();
-                if (dragIndex != null) {
+                if (canReorderSelectedTags && dragIndex != null) {
                   onReorderBasePrompt(dragIndex, index);
                   setDragIndex(null);
                 }
               }}
               onMouseDown={(e) => {
                 e.stopPropagation();
+                if (!canReorderSelectedTags) return;
                 setDragIndex(index);
               }}
               onMouseUp={(e) => {
                 e.stopPropagation();
-                if (dragIndex != null) {
+                if (canReorderSelectedTags && dragIndex != null) {
                   onReorderBasePrompt(dragIndex, index);
                   setDragIndex(null);
                 }
@@ -217,7 +246,7 @@ export default function ComposeCatalogChips({
                 border: `1px solid ${dragIndex === index ? "#f5f0a8" : "rgba(255, 255, 255, 0.25)"}`,
                 borderRadius: "999px",
                 color: dragIndex === index ? "#111222" : "#ffffff",
-                cursor: "grab",
+                cursor: canReorderSelectedTags ? "grab" : "default",
                 display: "inline-flex",
                 fontSize: "11px",
                 lineHeight: 1.15,
