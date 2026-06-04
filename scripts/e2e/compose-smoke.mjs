@@ -74,6 +74,10 @@ async function getTextareaSelectionStart(page) {
   return page.locator("[data-testid='raw-prompt-textarea']").evaluate((element) => element.selectionStart);
 }
 
+async function getBackgroundColor(locator) {
+  return locator.evaluate((element) => getComputedStyle(element).backgroundColor);
+}
+
 async function setTextareaCursor(page, value, cursorIndex) {
   const textarea = page.locator("[data-testid='raw-prompt-textarea']");
   await textarea.fill(value);
@@ -275,6 +279,10 @@ async function main() {
       await characterTextarea.inputValue() === "brown hair, 1boy, blue eyes",
       `Character target insertion failed: ${await characterTextarea.inputValue()}`,
     );
+    assert(
+      await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']")) === "rgb(76, 47, 125)",
+      `Character active chip color failed: ${await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']"))}`,
+    );
 
     await page.locator("button", { hasText: "Negative Prompt" }).click();
     const negativeTextarea = page.locator("[data-testid='negative-prompt-textarea']");
@@ -283,6 +291,10 @@ async function main() {
     assert(
       await negativeTextarea.inputValue() === "bad anatomy, 1boy, blurry",
       `Negative target insertion failed: ${await negativeTextarea.inputValue()}`,
+    );
+    assert(
+      await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']")) === "rgb(103, 50, 39)",
+      `Negative active chip color failed: ${await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']"))}`,
     );
 
     await textarea.fill("1girl, solo, outdoors");
