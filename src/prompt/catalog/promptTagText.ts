@@ -69,7 +69,7 @@ export function addPromptTagAtCursorWithSelection(
   const suffix = after ? `, ${after.replace(/^,\s*/, "")}` : "";
   return {
     value: `${prefix}${cleanTag}${suffix}`,
-    nextCursorIndex: prefix.length + cleanTag.length,
+    nextCursorIndex: prefix.length + cleanTag.length + (suffix ? 2 : 0),
   };
 }
 
