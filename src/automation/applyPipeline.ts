@@ -1,12 +1,25 @@
 import type { CommentJson, MetadataState } from '../types/metadata';
 import { buildCommentJson } from '../model/buildCommentJson';
 import { generatePngWithMetadata } from '../encoding/pngEncoder';
-import { dispatchPasteEvent } from '../encoding/pasteDispatch';
-import type { PasteDispatchResult } from '../encoding/pasteDispatch';
+import { applyMetadataToNovelAi } from './novelAiAdapter';
+import type { ApplyAutomationPhaseEvent, ApplyAutomationResult } from './automationTypes';
 
 export interface ApplyPipelineOptions {
   state: MetadataState;
   autoGenerate?: boolean;
+  signal?: AbortSignal;
+  onPhase?: (event: ApplyPipelinePhaseEvent) => void;
+}
+
+export type ApplyPipelinePhase =
+  | 'planning'
+  | 'encoding-png'
+  | ApplyAutomationPhaseEvent['phase'];
+
+export interface ApplyPipelinePhaseEvent {
+  phase: ApplyPipelinePhase;
+  message: string;
+  detail?: string;
 }
 
 export interface SeedPlan {
@@ -30,7 +43,7 @@ export interface EncodedApplyPayload {
 }
 
 export interface ApplyPipelineResult extends EncodedApplyPayload {
-  effect: PasteDispatchResult;
+  effect: ApplyAutomationResult;
 }
 
 const MAX_SEED = 4294967295;
@@ -81,13 +94,22 @@ export async function encodeApplyPlan(plan: ApplyPlan): Promise<EncodedApplyPayl
   };
 }
 
-export async function runApplyEffect(payload: EncodedApplyPayload): Promise<PasteDispatchResult> {
-  return dispatchPasteEvent(payload.blob, payload.plan.autoGenerate);
+export async function runApplyEffect(
+  payload: EncodedApplyPayload,
+  options: Pick<ApplyPipelineOptions, 'signal' | 'onPhase'> = {},
+): Promise<ApplyAutomationResult> {
+  return applyMetadataToNovelAi(payload.blob, {
+    mode: payload.plan.autoGenerate ? 'import-and-generate' : 'import-only',
+    signal: options.signal,
+    onPhase: options.onPhase,
+  });
 }
 
 export async function runApplyPipeline(options: ApplyPipelineOptions): Promise<ApplyPipelineResult> {
+  options.onPhase?.({ phase: 'planning', message: 'NovelAI 메타데이터를 준비하는 중' });
   const plan = planApply(options);
+  options.onPhase?.({ phase: 'encoding-png', message: 'NovelAI 호환 PNG 메타데이터를 생성하는 중' });
   const payload = await encodeApplyPlan(plan);
-  const effect = await runApplyEffect(payload);
+  const effect = await runApplyEffect(payload, options);
   return { ...payload, effect };
 }

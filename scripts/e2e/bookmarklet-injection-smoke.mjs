@@ -55,6 +55,8 @@ async function main() {
           <main style="padding: 24px; width: 380px;">
             <h1>NovelAI Mock</h1>
             <textarea class="ProseMirror" style="width: 320px; height: 200px;">1girl, official art</textarea>
+            <button id="mock-import">Import Metadata</button>
+            <button id="mock-generate">Generate 1 Image</button>
           </main>
           <div id="nai-tag-builder-root" style="position: fixed; top: 24px; right: 24px;">
             <div style="width: 320px; padding: 16px; background: #aaa;">
@@ -62,6 +64,16 @@ async function main() {
               <button id="stale-overlay-marker">NovelAI에 적용</button>
             </div>
           </div>
+          <script>
+            document.addEventListener("click", (event) => {
+              if (event.target.id === "mock-import") {
+                window.setTimeout(() => event.target.remove(), 50);
+              }
+              if (event.target.id === "mock-generate") {
+                event.target.dataset.clicked = "true";
+              }
+            });
+          </script>
         </body>
       </html>
     `);
@@ -80,6 +92,13 @@ async function main() {
       rawPromptLabelBox && rawPromptLabelBox.y < 760,
       `Raw Prompt was pushed too far down: ${JSON.stringify(rawPromptLabelBox)}`,
     );
+
+    await page.locator("[data-testid='apply-button']").click();
+    await page.locator("[data-testid='status-banner']", {
+      hasText: "NovelAI 메타데이터 가져오기를 완료했습니다.",
+    }).waitFor({ timeout: 7000 });
+
+    assert(await page.locator("#mock-import").count() === 0, "Mock Import Metadata button was not clicked.");
 
     await mkdir(path.join(ROOT, "test-results"), { recursive: true });
     await page.screenshot({
