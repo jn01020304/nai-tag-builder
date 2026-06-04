@@ -4,6 +4,7 @@ import type { SeedRule, QueueMode } from '../types/preset';
 import type { ShowFeedback } from '../types/feedback';
 import { getPresetById } from '../model/presetStorage';
 import { createRandomSeed, runApplyPipeline } from '../automation/applyPipeline';
+import { formatApplyErrorDetail } from '../automation/applyStatusText';
 
 export interface AutoGeneratorConfig {
     state: MetadataState;
@@ -135,7 +136,7 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
                     feedbackRef.current?.({
                         tone: 'error',
                         message: result.effect.message,
-                        detail: [result.effect.code, result.effect.detail].filter(Boolean).join('\n'),
+                        detail: formatApplyErrorDetail(result.effect.code, result.effect.detail),
                     });
                     stopLoop();
                     return;

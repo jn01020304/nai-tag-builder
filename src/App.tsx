@@ -2,6 +2,8 @@ import { useRef, useState } from 'react';
 import { useMetadataState } from './hooks/useMetadataState';
 import type { MetadataState } from './types/metadata';
 import { runApplyPipeline } from './automation/applyPipeline';
+import type { ApplyPipelinePhase } from './automation/applyPipeline';
+import { formatApplyErrorDetail } from './automation/applyStatusText';
 import { useAutoGenerator } from './hooks/useAutoGenerator';
 import { useEdgeResize } from './hooks/useEdgeResize';
 import type { QueueMode } from './types/preset';
@@ -81,6 +83,7 @@ function AppContent() {
   // Drag and drop state
   const [isDragOver, setIsDragOver] = useState(false);
   const [feedback, setFeedback] = useState<StatusFeedback | null>(null);
+  const [currentApplyPhase, setCurrentApplyPhase] = useState<ApplyPipelinePhase | null>(null);
   const applyInFlightRef = useRef(false);
   const [activePromptTarget, setActivePromptTarget] = useState<PromptInsertTarget>({ kind: 'base' });
   const [promptSelections, setPromptSelections] = useState<Record<string, PromptSelection>>({});
@@ -232,6 +235,7 @@ function AppContent() {
     }
 
     applyInFlightRef.current = true;
+    setCurrentApplyPhase('planning');
     setIsApplying(true);
     showFeedback({ tone: 'info', message: 'NovelAI 적용을 시작합니다.' });
     try {
@@ -239,6 +243,7 @@ function AppContent() {
         state,
         autoGenerate,
         onPhase: (phase) => {
+          setCurrentApplyPhase(phase.phase);
           showFeedback({ tone: 'info', message: phase.message, detail: phase.detail });
         },
       });
@@ -247,7 +252,7 @@ function AppContent() {
         showFeedback({
           tone: 'error',
           message: result.effect.message,
-          detail: [result.effect.code, result.effect.detail].filter(Boolean).join('\n'),
+          detail: formatApplyErrorDetail(result.effect.code, result.effect.detail),
         });
         return;
       }
@@ -269,6 +274,7 @@ function AppContent() {
       showFeedback({ tone: 'error', message: '적용 중 오류가 발생했습니다.' });
     } finally {
       applyInFlightRef.current = false;
+      setCurrentApplyPhase(null);
       setIsApplying(false);
     }
   };
@@ -421,6 +427,7 @@ function AppContent() {
         <OverlayFooter
           feedback={feedback}
           isApplying={isApplying}
+          applyPhase={currentApplyPhase}
           isLooping={isLooping}
           loopCount={loopCount}
           targetCount={targetCount}

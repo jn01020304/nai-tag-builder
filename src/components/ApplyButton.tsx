@@ -2,10 +2,11 @@ import { theme } from '../styles/theme';
 
 interface Props {
   isApplying: boolean;
+  label?: string;
   onApply: () => void;
 }
 
-export default function ApplyButton({ isApplying, onApply }: Props) {
+export default function ApplyButton({ isApplying, label, onApply }: Props) {
   return (
     <button
       data-testid="apply-button"
@@ -23,7 +24,7 @@ export default function ApplyButton({ isApplying, onApply }: Props) {
         fontSize: '14px',
       }}
     >
-      {isApplying ? '...' : 'NovelAI에 적용'}
+      {isApplying ? label ?? '적용 중...' : 'NovelAI에 적용'}
     </button>
   );
 }
