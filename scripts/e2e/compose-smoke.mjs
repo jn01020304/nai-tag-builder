@@ -212,7 +212,14 @@ async function main() {
       `Cursor insertion failed: ${await getTextareaValue(page)}`,
     );
 
+    await page.locator("[data-testid='catalog-chip-tag_solo']").click();
+    assert(
+      await getTextareaValue(page) === "alpha, 1girl, solo, omega",
+      `Consecutive cursor insertion failed: ${await getTextareaValue(page)}`,
+    );
+
     await page.locator("[data-testid='catalog-chip-tag_1girl']").click();
+    await page.locator("[data-testid='catalog-chip-tag_solo']").click();
     assert(
       await getTextareaValue(page) === "alpha, omega",
       `Chip removal failed: ${await getTextareaValue(page)}`,

@@ -42,23 +42,35 @@ export function addPromptTag(value: string, tag: string): string {
 }
 
 export function addPromptTagAtCursor(value: string, tag: string, cursorIndex: number | null): string {
+  return addPromptTagAtCursorWithSelection(value, tag, cursorIndex).value;
+}
+
+export function addPromptTagAtCursorWithSelection(
+  value: string,
+  tag: string,
+  cursorIndex: number | null,
+): { value: string; nextCursorIndex: number | null } {
   const cleanTag = normalizePromptToken(tag);
-  if (!cleanTag) return value;
+  if (!cleanTag) return { value, nextCursorIndex: cursorIndex };
 
   const tags = splitPromptTags(value);
   if (tags.some((token) => normalizePromptToken(token) === cleanTag)) {
-    return value;
+    return { value, nextCursorIndex: cursorIndex };
   }
 
   if (cursorIndex == null || cursorIndex < 0 || cursorIndex > value.length) {
-    return addPromptTag(value, cleanTag);
+    const nextValue = addPromptTag(value, cleanTag);
+    return { value: nextValue, nextCursorIndex: nextValue.length };
   }
 
   const before = value.slice(0, cursorIndex).trimEnd();
   const after = value.slice(cursorIndex).trimStart();
   const prefix = before ? `${before.replace(/,\s*$/, "")}, ` : "";
   const suffix = after ? `, ${after.replace(/^,\s*/, "")}` : "";
-  return `${prefix}${cleanTag}${suffix}`;
+  return {
+    value: `${prefix}${cleanTag}${suffix}`,
+    nextCursorIndex: prefix.length + cleanTag.length,
+  };
 }
 
 export function removeCatalogTag(value: string, entry: CoreCatalogEntry): string {
@@ -75,6 +87,22 @@ export function toggleCatalogTag(
   return hasCatalogTag(value, entry)
     ? removeCatalogTag(value, entry)
     : addPromptTagAtCursor(value, entry.tag, cursorIndex);
+}
+
+export function toggleCatalogTagWithSelection(
+  value: string,
+  entry: CoreCatalogEntry,
+  cursorIndex: number | null = null,
+): { value: string; nextCursorIndex: number | null } {
+  if (hasCatalogTag(value, entry)) {
+    const nextValue = removeCatalogTag(value, entry);
+    return {
+      value: nextValue,
+      nextCursorIndex: Math.min(cursorIndex ?? nextValue.length, nextValue.length),
+    };
+  }
+
+  return addPromptTagAtCursorWithSelection(value, entry.tag, cursorIndex);
 }
 
 export function movePromptTag(value: string, fromIndex: number, toIndex: number): string {
