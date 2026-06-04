@@ -1,10 +1,13 @@
 import { useTheme } from "../contexts/themeContextCore";
+import type { ApplyPipelinePhase } from "../automation/applyPipeline";
+import { getApplyPhaseActionLabel, getApplyPhaseStatusLabel } from "../automation/applyStatusText";
 import type { StatusFeedback } from "../types/feedback";
 import ApplyButton from "./ApplyButton";
 
 interface Props {
   feedback: StatusFeedback | null;
   isApplying: boolean;
+  applyPhase: ApplyPipelinePhase | null;
   isLooping: boolean;
   loopCount: number;
   targetCount: number | string;
@@ -15,6 +18,7 @@ interface Props {
 export default function OverlayFooter({
   feedback,
   isApplying,
+  applyPhase,
   isLooping,
   loopCount,
   targetCount,
@@ -23,8 +27,8 @@ export default function OverlayFooter({
 }: Props) {
   const theme = useTheme();
   const statusText = (() => {
+    if (isApplying) return getApplyPhaseStatusLabel(applyPhase);
     if (feedback) return feedback.message;
-    if (isApplying) return "NovelAI 적용 중";
     if (isLooping) return `생성 중 ${loopCount}/${targetCount}`;
     return "적용 준비됨";
   })();
@@ -83,7 +87,11 @@ export default function OverlayFooter({
           반복 생성 중지
         </button>
       ) : (
-        <ApplyButton isApplying={isApplying} onApply={onApply} />
+        <ApplyButton
+          isApplying={isApplying}
+          label={getApplyPhaseActionLabel(applyPhase)}
+          onApply={onApply}
+        />
       )}
     </div>
   );
