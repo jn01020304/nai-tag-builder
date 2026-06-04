@@ -78,6 +78,10 @@ async function getBackgroundColor(locator) {
   return locator.evaluate((element) => getComputedStyle(element).backgroundColor);
 }
 
+async function hasLocator(locator) {
+  return await locator.count() > 0;
+}
+
 async function setTextareaCursor(page, value, cursorIndex) {
   const textarea = page.locator("[data-testid='raw-prompt-textarea']");
   await textarea.fill(value);
@@ -283,6 +287,10 @@ async function main() {
       await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']")) === "rgb(76, 47, 125)",
       `Character active chip color failed: ${await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']"))}`,
     );
+    assert(
+      await hasLocator(page.locator("[data-testid='catalog-chip-tag_1boy-badge-c1']")),
+      "Character assignment badge c1 is missing.",
+    );
 
     await page.locator("button", { hasText: "Negative Prompt" }).click();
     const negativeTextarea = page.locator("[data-testid='negative-prompt-textarea']");
@@ -295,6 +303,45 @@ async function main() {
     assert(
       await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']")) === "rgb(103, 50, 39)",
       `Negative active chip color failed: ${await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']"))}`,
+    );
+    assert(
+      await hasLocator(page.locator("[data-testid='catalog-chip-tag_1boy-badge-n']")),
+      "Negative assignment badge n is missing.",
+    );
+
+    const negativeCharacterTextarea = page.locator("[data-testid='negative-character-prompt-textarea-0']");
+    await setLocatorCursor(negativeCharacterTextarea, "bad hands, blurry", "bad hands".length);
+    await page.locator("[data-testid='catalog-chip-tag_2boys']").click();
+    assert(
+      await negativeCharacterTextarea.inputValue() === "bad hands, 2boys, blurry",
+      `Negative character target insertion failed: ${await negativeCharacterTextarea.inputValue()}`,
+    );
+    assert(
+      await hasLocator(page.locator("[data-testid='catalog-chip-tag_2boys-badge-nc1']")),
+      "Negative character assignment badge nc1 is missing.",
+    );
+
+    await page.locator("button", { hasText: "+ Add Character" }).click();
+    const secondCharacterTextarea = page.locator("[data-testid='character-prompt-textarea-1']");
+    await setLocatorCursor(secondCharacterTextarea, "green eyes, school uniform", "green eyes".length);
+    await page.locator("[data-testid='catalog-chip-tag_2girls']").click();
+    assert(
+      await secondCharacterTextarea.inputValue() === "green eyes, 2girls, school uniform",
+      `Second character target insertion failed: ${await secondCharacterTextarea.inputValue()}`,
+    );
+    assert(
+      await hasLocator(page.locator("[data-testid='catalog-chip-tag_2girls-badge-c2']")),
+      "Second character assignment badge c2 is missing.",
+    );
+
+    await textarea.click();
+    assert(
+      await hasLocator(page.locator("[data-testid='catalog-chip-tag_1boy-badge-c1']")),
+      "Character badge disappeared after returning to base target.",
+    );
+    assert(
+      await hasLocator(page.locator("[data-testid='catalog-chip-tag_1boy-badge-n']")),
+      "Negative badge disappeared after returning to base target.",
     );
 
     await textarea.fill("1girl, solo, outdoors");

@@ -34,8 +34,12 @@ export function promptTargetLabel(target: PromptInsertTarget): string {
   }
 }
 
-export function promptTargetGroup(target: PromptInsertTarget): "base" | "negative" | "character" {
-  if (target.kind === "negativeBase" || target.kind === "negativeCharacter") {
+export function promptTargetGroup(target: PromptInsertTarget): "base" | "negative" | "character" | "negativeCharacter" {
+  if (target.kind === "negativeCharacter") {
+    return "negativeCharacter";
+  }
+
+  if (target.kind === "negativeBase") {
     return "negative";
   }
 
