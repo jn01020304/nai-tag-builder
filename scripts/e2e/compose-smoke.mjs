@@ -84,6 +84,15 @@ async function setTextareaCursor(page, value, cursorIndex) {
   }, cursorIndex);
 }
 
+async function setLocatorCursor(locator, value, cursorIndex) {
+  await locator.fill(value);
+  await locator.evaluate((element, index) => {
+    element.focus();
+    element.setSelectionRange(index, index);
+    element.dispatchEvent(new Event("select", { bubbles: true }));
+  }, cursorIndex);
+}
+
 async function checkLayout(page) {
   const result = await page.evaluate(() => {
     const root = document.getElementById("nai-tag-builder-root");
@@ -256,6 +265,24 @@ async function main() {
     assert(
       await getTextareaSelectionStart(page) === "brown hair, 2.7::artist:happoubi jin::, 1boy, ".length,
       `Fat-finger cursor was not restored after separator: ${await getTextareaSelectionStart(page)}`,
+    );
+
+    await page.locator("button", { hasText: "Characters" }).click();
+    const characterTextarea = page.locator("[data-testid='character-prompt-textarea-0']");
+    await setLocatorCursor(characterTextarea, "brown hair, blue eyes", "brown hair".length);
+    await page.locator("[data-testid='catalog-chip-tag_1boy']").click();
+    assert(
+      await characterTextarea.inputValue() === "brown hair, 1boy, blue eyes",
+      `Character target insertion failed: ${await characterTextarea.inputValue()}`,
+    );
+
+    await page.locator("button", { hasText: "Negative Prompt" }).click();
+    const negativeTextarea = page.locator("[data-testid='negative-prompt-textarea']");
+    await setLocatorCursor(negativeTextarea, "bad anatomy, blurry", "bad anatomy".length);
+    await page.locator("[data-testid='catalog-chip-tag_1boy']").click();
+    assert(
+      await negativeTextarea.inputValue() === "bad anatomy, 1boy, blurry",
+      `Negative target insertion failed: ${await negativeTextarea.inputValue()}`,
     );
 
     await textarea.fill("1girl, solo, outdoors");

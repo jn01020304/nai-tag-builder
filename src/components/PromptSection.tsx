@@ -1,15 +1,23 @@
-import { useState } from "react";
 import type { MetadataAction } from "../hooks/useMetadataState";
 import type { MetadataState } from "../types/metadata";
 import type { CoreCatalogEntry } from "../prompt/catalog/catalogTypes";
+import type {
+  PromptInsertTarget,
+  PromptSelectionAfterRender,
+} from "../prompt/promptInsertTarget";
+import { promptTargetLabel } from "../prompt/promptInsertTarget";
 import { inputStyle } from "../styles/theme";
-import { movePromptTag, toggleCatalogTag, toggleCatalogTagWithSelection } from "../prompt/catalog/promptTagText";
+import { movePromptTag } from "../prompt/catalog/promptTagText";
 import ComposeCatalogChips from "./ComposeCatalogChips";
 import HighlightedTextarea from "./HighlightedTextarea";
 
 interface Props {
   state: MetadataState;
   dispatch: React.Dispatch<MetadataAction>;
+  activePromptTarget: PromptInsertTarget;
+  selectionAfterRender?: PromptSelectionAfterRender;
+  onPromptSelection: (target: PromptInsertTarget, selection: { start: number; end: number }) => void;
+  onToggleCatalogEntry: (entry: CoreCatalogEntry) => void;
 }
 
 const fieldLabelStyle: React.CSSProperties = {
@@ -25,52 +33,19 @@ const fieldLabelStyle: React.CSSProperties = {
   padding: "4px 7px",
 };
 
-export default function PromptSection({ state, dispatch }: Props) {
-  const [baseSelection, setBaseSelection] = useState<{ start: number; end: number } | null>(null);
-  const [selectionAfterRender, setSelectionAfterRender] = useState<{
-    start: number;
-    end: number;
-    version: number;
-  } | null>(null);
-
+export default function PromptSection({
+  state,
+  dispatch,
+  activePromptTarget,
+  selectionAfterRender,
+  onPromptSelection,
+  onToggleCatalogEntry,
+}: Props) {
   const updateSelection = (target: HTMLTextAreaElement) => {
-    setBaseSelection({
+    onPromptSelection({ kind: "base" }, {
       start: target.selectionStart,
       end: target.selectionEnd,
     });
-  };
-
-  const toggleEntry = (entry: CoreCatalogEntry) => {
-    if (entry.target === "negative") {
-      dispatch({
-        type: "SET_PROMPT",
-        field: "negativeBase",
-        value: toggleCatalogTag(state.prompt.negativeBase, entry),
-      });
-      return;
-    }
-
-    const result = toggleCatalogTagWithSelection(
-      state.prompt.basePrompt,
-      entry,
-      baseSelection?.start ?? null,
-    );
-
-    dispatch({
-      type: "SET_PROMPT",
-      field: "basePrompt",
-      value: result.value,
-    });
-
-    if (result.nextCursorIndex != null) {
-      const nextSelection = {
-        start: result.nextCursorIndex,
-        end: result.nextCursorIndex,
-        version: Date.now(),
-      };
-      setBaseSelection(nextSelection);
-      setSelectionAfterRender(nextSelection);
-    }
   };
 
   const reorderBasePrompt = (fromIndex: number, toIndex: number) => {
@@ -86,9 +61,20 @@ export default function PromptSection({ state, dispatch }: Props) {
       <ComposeCatalogChips
         basePrompt={state.prompt.basePrompt}
         negativePrompt={state.prompt.negativeBase}
-        onToggle={toggleEntry}
+        onToggle={onToggleCatalogEntry}
         onReorderBasePrompt={reorderBasePrompt}
       />
+      <div
+        data-testid="active-prompt-target"
+        style={{
+          color: "#15172f",
+          fontSize: "11px",
+          fontWeight: 700,
+          marginBottom: "6px",
+        }}
+      >
+        Insert target: {promptTargetLabel(activePromptTarget)}
+      </div>
       <label data-testid="raw-prompt-label" style={fieldLabelStyle}>Raw Prompt</label>
       <HighlightedTextarea
         data-testid="raw-prompt-textarea"

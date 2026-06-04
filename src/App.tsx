@@ -20,6 +20,14 @@ import StatusBanner from './components/StatusBanner';
 import { parseNovelAIPng } from './utils/pngParser';
 import { translateNovelAiMetadata } from './utils/metadataTranslator';
 import type { StatusFeedback } from './types/feedback';
+import type {
+  PromptInsertTarget,
+  PromptSelection,
+  PromptSelectionAfterRender,
+} from './prompt/promptInsertTarget';
+import { promptTargetKey } from './prompt/promptInsertTarget';
+import type { CoreCatalogEntry } from './prompt/catalog/catalogTypes';
+import { toggleCatalogTagWithSelection } from './prompt/catalog/promptTagText';
 
 const CONTAINER_ID = 'nai-tag-builder-root';
 function startDrag(clientX: number, clientY: number) {
@@ -72,6 +80,11 @@ function AppContent() {
   // Drag and drop state
   const [isDragOver, setIsDragOver] = useState(false);
   const [feedback, setFeedback] = useState<StatusFeedback | null>(null);
+  const [activePromptTarget, setActivePromptTarget] = useState<PromptInsertTarget>({ kind: 'base' });
+  const [promptSelections, setPromptSelections] = useState<Record<string, PromptSelection>>({});
+  const [selectionAfterRenderByTarget, setSelectionAfterRenderByTarget] = useState<
+    Record<string, PromptSelectionAfterRender | undefined>
+  >({});
 
   const showFeedback = (nextFeedback: StatusFeedback) => {
     setFeedback(nextFeedback);
@@ -133,6 +146,79 @@ function AppContent() {
   const handleClose = () => {
     stopLoop();
     document.getElementById(CONTAINER_ID)?.remove();
+  };
+
+  const recordPromptSelection = (target: PromptInsertTarget, selection: PromptSelection) => {
+    const key = promptTargetKey(target);
+    setActivePromptTarget(target);
+    setPromptSelections((current) => ({
+      ...current,
+      [key]: selection,
+    }));
+  };
+
+  const getTargetPromptValue = (target: PromptInsertTarget): string => {
+    switch (target.kind) {
+      case 'base':
+        return state.prompt.basePrompt;
+      case 'negativeBase':
+        return state.prompt.negativeBase;
+      case 'character':
+        return state.prompt.characters.find((character) => character.id === target.id)?.caption ?? '';
+      case 'negativeCharacter':
+        return state.prompt.negativeCharacters.find((character) => character.id === target.id)?.caption ?? '';
+    }
+  };
+
+  const dispatchPromptTargetValue = (target: PromptInsertTarget, value: string) => {
+    switch (target.kind) {
+      case 'base':
+        dispatch({ type: 'SET_PROMPT', field: 'basePrompt', value });
+        return;
+      case 'negativeBase':
+        dispatch({ type: 'SET_PROMPT', field: 'negativeBase', value });
+        return;
+      case 'character':
+        dispatch({ type: 'UPDATE_CHARACTER', id: target.id, field: 'caption', value });
+        return;
+      case 'negativeCharacter':
+        dispatch({ type: 'UPDATE_NEG_CHARACTER', id: target.id, field: 'caption', value });
+        return;
+    }
+  };
+
+  const resolveCatalogTarget = (entry: CoreCatalogEntry): PromptInsertTarget => {
+    if (entry.target === 'negative' && activePromptTarget.kind === 'base') {
+      return { kind: 'negativeBase' };
+    }
+
+    return activePromptTarget;
+  };
+
+  const handleCatalogToggle = (entry: CoreCatalogEntry) => {
+    const target = resolveCatalogTarget(entry);
+    const targetKey = promptTargetKey(target);
+    const promptValue = getTargetPromptValue(target);
+    const selection = promptSelections[targetKey] ?? { start: promptValue.length, end: promptValue.length };
+    const result = toggleCatalogTagWithSelection(promptValue, entry, selection.start);
+
+    dispatchPromptTargetValue(target, result.value);
+
+    if (result.nextCursorIndex != null) {
+      const nextSelection = {
+        start: result.nextCursorIndex,
+        end: result.nextCursorIndex,
+        version: Date.now(),
+      };
+      setPromptSelections((current) => ({
+        ...current,
+        [targetKey]: nextSelection,
+      }));
+      setSelectionAfterRenderByTarget((current) => ({
+        ...current,
+        [targetKey]: nextSelection,
+      }));
+    }
   };
 
 
@@ -316,10 +402,27 @@ function AppContent() {
               onDismiss={() => setFeedback(null)}
             />
           )}
-          <PromptSection state={state} dispatch={dispatch} />
+          <PromptSection
+            state={state}
+            dispatch={dispatch}
+            activePromptTarget={activePromptTarget}
+            selectionAfterRender={selectionAfterRenderByTarget.base}
+            onPromptSelection={recordPromptSelection}
+            onToggleCatalogEntry={handleCatalogToggle}
+          />
           <GenerationParams state={state} dispatch={dispatch} />
-          <CharacterCaptions characters={state.prompt.characters} dispatch={dispatch} />
-          <NegativePrompt state={state} dispatch={dispatch} />
+          <CharacterCaptions
+            characters={state.prompt.characters}
+            dispatch={dispatch}
+            getSelectionAfterRender={(target) => selectionAfterRenderByTarget[promptTargetKey(target)]}
+            onPromptSelection={recordPromptSelection}
+          />
+          <NegativePrompt
+            state={state}
+            dispatch={dispatch}
+            getSelectionAfterRender={(target) => selectionAfterRenderByTarget[promptTargetKey(target)]}
+            onPromptSelection={recordPromptSelection}
+          />
           <AdvancedParams state={state} dispatch={dispatch} />
 
           <AutoGeneratePanel
