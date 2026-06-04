@@ -1,5 +1,9 @@
 import type { CharacterEntry } from '../types/metadata';
 import type { MetadataAction } from '../hooks/useMetadataState';
+import type {
+  PromptInsertTarget,
+  PromptSelectionAfterRender,
+} from '../prompt/promptInsertTarget';
 import CollapsibleSection from './CollapsibleSection';
 import HighlightedTextarea from './HighlightedTextarea';
 import { theme, inputStyle, labelStyle, smallBtnStyle } from '../styles/theme';
@@ -7,9 +11,23 @@ import { theme, inputStyle, labelStyle, smallBtnStyle } from '../styles/theme';
 interface Props {
   characters: CharacterEntry[];
   dispatch: React.Dispatch<MetadataAction>;
+  getSelectionAfterRender: (target: PromptInsertTarget) => PromptSelectionAfterRender | undefined;
+  onPromptSelection: (target: PromptInsertTarget, selection: { start: number; end: number }) => void;
 }
 
-export default function CharacterCaptions({ characters, dispatch }: Props) {
+export default function CharacterCaptions({
+  characters,
+  dispatch,
+  getSelectionAfterRender,
+  onPromptSelection,
+}: Props) {
+  const updateSelection = (target: PromptInsertTarget, element: HTMLTextAreaElement) => {
+    onPromptSelection(target, {
+      start: element.selectionStart,
+      end: element.selectionEnd,
+    });
+  };
+
   return (
     <CollapsibleSection title={`Characters (${characters.length})`}>
       <button
@@ -41,9 +59,20 @@ export default function CharacterCaptions({ characters, dispatch }: Props) {
           </div>
 
           <HighlightedTextarea
+            data-testid={`character-prompt-textarea-${idx}`}
             value={char.caption}
-            onChange={e => dispatch({ type: 'UPDATE_CHARACTER', id: char.id, field: 'caption', value: e.target.value })}
+            onChange={e => {
+              dispatch({ type: 'UPDATE_CHARACTER', id: char.id, field: 'caption', value: e.target.value });
+              updateSelection({ kind: 'character', id: char.id }, e.target);
+            }}
+            onSelect={e => updateSelection({ kind: 'character', id: char.id }, e.currentTarget)}
+            onKeyUp={e => updateSelection({ kind: 'character', id: char.id }, e.currentTarget)}
+            onFocus={e => updateSelection({ kind: 'character', id: char.id }, e.currentTarget)}
+            selectionAfterRender={getSelectionAfterRender({ kind: 'character', id: char.id })}
             placeholder="character tags..."
+            spellCheck={false}
+            autoCorrect="off"
+            autoCapitalize="off"
             style={{
               ...inputStyle,
               width: '100%',
