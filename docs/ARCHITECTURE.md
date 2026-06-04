@@ -24,6 +24,7 @@ writing:
 - `docs/PRODUCT_CATEGORIES.md`: 커스텀 Product Category와 Core Catalog 데이터 계약
 - `docs/OFFLINE_CATALOG_PIPELINE.md`: 로컬 Danbooru 태그 스냅샷 기반 오프라인 카탈로그 생성 흐름
 - `docs/DELEGATED_AUTOMATION_GUIDE.md`: NovelAI paste/import 위임 자동화, 실패 처리, 적용 파이프라인 기준
+- `docs/V3_QUEUE_ARCHITECTURE.md`: 반복 생성 Queue 세션, tick 계획, stop policy, failure policy, 모바일 Queue 작업면 계약
 - `docs/idea-note-original.md`: 자유 아이디어 주차장. 구현 기준 문서가 아니다.
 
 ## 현재 제품 기준선
@@ -37,7 +38,7 @@ NovelAI 직접 API 호출이 아니라 PNG metadata와 paste/import workflow를 
 
 적용 흐름은 `src/automation/applyPipeline.ts`를 기준으로 계획, 인코딩, 외부 실행을 분리한다.
 단일 Apply와 자동 생성 루프는 같은 `runApplyPipeline()` 경로를 사용한다.
-`dispatchPasteEvent()`는 paste target, import, generate 자동화 결과를 명시적으로 반환해야 한다.
+NovelAI DOM 위임은 `src/automation/novelAiAdapter.ts`가 담당하며 paste target, import, generate 자동화 결과를 명시적으로 반환해야 한다.
 
 ## 상위 모듈 경계
 
@@ -75,6 +76,7 @@ Offline 도구는 Runtime 데이터를 생성할 수 있지만, Runtime 코드�
 
 `useAutoGenerator.ts`는 적용 파이프라인을 공유하지만 아직 세션 FSM은 아니다.
 중지, 실패, 대기, 완료 상태를 명시적인 전이 모델로 고정해야 한다.
+v3 구현은 `docs/V3_QUEUE_ARCHITECTURE.md`의 QueueDraft, QueueSession, QueueTickPlan 계약을 기준으로 진행한다.
 
 `ImportModal`은 `Partial<MetadataState>` 기반 patch를 사용한다.
 선택하지 않은 nested 필드가 덮어써지지 않도록 `MetadataPatch`와 `mergeMetadataPatch()` 계약이 필요하다.

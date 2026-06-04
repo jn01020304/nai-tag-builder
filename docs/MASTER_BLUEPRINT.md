@@ -232,11 +232,11 @@ Runtime 보안 경계와 번들 크기 예산을 침범하면 이 단계로 들�
 
 ## 현재 우선순위
 
-현재 프로젝트는 v1 Compose의 핵심 입력 안정성을 확보하는 중이다.
-이미 Core Catalog, 카테고리 칩, active prompt target, global assignment badge, 커서 복원, token boundary safe insert가 들어갔다.
+현재 프로젝트는 v3 Queue 아키텍처 설계 단계로 이동했다.
+이미 Core Catalog, 카테고리 칩, active prompt target, global assignment badge, 커서 복원, token boundary safe insert, Overlay Shell 분리, v2 Automation reliability, 상태 단계 UI가 들어갔다.
 
-다음 우선순위는 Tune 기본면 정리와 Overlay Shell 분리다.
-그 다음 v2 Automation reliability로 넘어간다.
+다음 우선순위는 `docs/V3_QUEUE_ARCHITECTURE.md`에 따라 QueueDraft, QueueSession, QueueTickPlan, QueueTickResult 계약을 구현하는 것이다.
+반복 생성은 반드시 `runApplyPipeline()` 성공과 실패를 관찰해야 하며 NovelAI DOM selector를 직접 다루면 안 된다.
 
 배지 일괄 해제, 사용자 색상 설정, 고급 catalog personalization은 v1 핵심 계약을 깨지 않는 작은 편의 기능으로 보관한다.
 하지만 지금 우선순위는 아니다.
