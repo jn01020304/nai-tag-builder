@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import type { MetadataState } from '../types/metadata';
-import type { Preset, QueueMode } from '../types/preset';
+import type { Preset } from '../types/preset';
 import type { MetadataAction } from '../hooks/useMetadataState';
 import type { ShowFeedback } from '../types/feedback';
 import { loadPresets, savePreset, deletePreset, exportPresets, importPresets } from '../model/presetStorage';
@@ -14,13 +14,11 @@ interface Props {
     dispatch: React.Dispatch<MetadataAction>;
     queue: string[];
     setQueue: React.Dispatch<React.SetStateAction<string[]>>;
-    queueMode: QueueMode;
-    setQueueMode: React.Dispatch<React.SetStateAction<QueueMode>>;
     onImportRequest: (state: MetadataState) => void;
     onFeedback: ShowFeedback;
 }
 
-export default function PresetManager({ state, dispatch, queue, setQueue, queueMode, setQueueMode, onImportRequest, onFeedback }: Props) {
+export default function PresetManager({ state, dispatch, queue, setQueue, onImportRequest, onFeedback }: Props) {
     const [presets, setPresets] = useState<Preset[]>([]);
     const [saveName, setSaveName] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -254,23 +252,6 @@ export default function PresetManager({ state, dispatch, queue, setQueue, queueM
             {/* Queue section */}
             {queue.length > 0 && (
                 <div style={{ marginTop: '8px' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                        <span style={{ fontSize: '12px', color: theme.subtext0 }}>Queue Mode:</span>
-                        <select
-                            value={queueMode}
-                            onChange={e => setQueueMode(e.target.value as QueueMode)}
-                            style={{
-                                ...inputStyle,
-                                fontSize: '11px',
-                                padding: '2px 4px',
-                                width: 'auto',
-                            }}
-                        >
-                            <option value="progression">Progression (순서대로)</option>
-                            <option value="randomization">Random (랜덤)</option>
-                        </select>
-                    </div>
-
                     <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                         {queuedPresets.map((p, idx) => (
                             <span key={p.id} style={chipStyle}>

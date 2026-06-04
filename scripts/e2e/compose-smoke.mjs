@@ -384,6 +384,25 @@ async function main() {
     await checkLayout(page);
     await checkReadablePromptLabel(page);
 
+    await page.locator("[data-testid='queue-panel']").waitFor({ timeout: 3000 });
+    assert(
+      await page.locator("[data-testid='queue-status']").innerText() === "대기 중",
+      `Queue status label failed: ${await page.locator("[data-testid='queue-status']").innerText()}`,
+    );
+    await page.locator("[data-testid='queue-enable-checkbox']").check();
+    await page.locator("[data-testid='queue-mode-select']").selectOption("randomization");
+    await page.locator("[data-testid='queue-seed-rule-select']").selectOption("increment");
+    await page.locator("[data-testid='queue-interval-input']").fill("7");
+    await page.locator("[data-testid='queue-target-count-input']").fill("3");
+    assert(
+      await page.locator("[data-testid='queue-mode-select']").inputValue() === "randomization",
+      "Queue mode control failed.",
+    );
+    assert(
+      await page.locator("[data-testid='queue-seed-rule-select']").inputValue() === "increment",
+      "Queue seed rule control failed.",
+    );
+
     await mkdir(path.join(ROOT, "test-results"), { recursive: true });
     await page.screenshot({
       path: path.join(ROOT, "test-results", "compose-smoke-mobile.png"),

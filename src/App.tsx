@@ -15,7 +15,7 @@ import CharacterCaptions from './components/CharacterCaptions';
 import NegativePrompt from './components/NegativePrompt';
 import AdvancedParams from './components/AdvancedParams';
 import PresetManager from './components/PresetManager';
-import AutoGeneratePanel from './components/AutoGeneratePanel';
+import QueuePanel from './components/QueuePanel';
 import ImportModal from './components/ImportModal';
 import StatusBanner from './components/StatusBanner';
 import OverlayFooter from './components/OverlayFooter';
@@ -143,7 +143,7 @@ function AppContent() {
     autoGenerate, setAutoGenerate,
     seedRule, setSeedRule,
     intervalSec, targetCount, targetMin, adjustStep, setAdjustStep,
-    isLooping, loopCount,
+    isLooping, loopCount, queueSession,
     startLoop, stopLoop,
     handleIntervalChange, handleCountChange, handleMinChange, adjustValue,
   } = useAutoGenerator({ state, queue, queueMode, onFeedback: showFeedback });
@@ -370,8 +370,6 @@ function AppContent() {
             dispatch={dispatch}
             queue={queue}
             setQueue={setQueue}
-            queueMode={queueMode}
-            setQueueMode={setQueueMode}
             onImportRequest={setPendingImport}
             onFeedback={showFeedback}
           />
@@ -404,7 +402,7 @@ function AppContent() {
           />
           <AdvancedParams state={state} dispatch={dispatch} />
 
-          <AutoGeneratePanel
+          <QueuePanel
             autoGenerate={autoGenerate}
             setAutoGenerate={setAutoGenerate}
             seedRule={seedRule}
@@ -419,6 +417,9 @@ function AppContent() {
             handleMinChange={handleMinChange}
             adjustValue={adjustValue}
             queueLength={queue.length}
+            queueMode={queueMode}
+            setQueueMode={setQueueMode}
+            queueSession={queueSession}
           />
         </div>
       )}

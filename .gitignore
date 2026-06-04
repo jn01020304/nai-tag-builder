@@ -13,6 +13,7 @@ dist-ssr
 *.local
 resource/catalog/generated/
 test-results/
+.spike/
 
 # Editor directories and files
 .vscode/*

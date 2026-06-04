@@ -1,0 +1,286 @@
+import type { QueueSession } from "../queue/queueTypes";
+import type { QueueMode, SeedRule } from "../types/preset";
+import { inputStyle, labelStyle, smallBtnStyle, theme, withAlpha } from "../styles/theme";
+
+interface QueuePanelProps {
+  autoGenerate: boolean;
+  setAutoGenerate: (val: boolean) => void;
+  seedRule: SeedRule;
+  setSeedRule: (val: SeedRule) => void;
+  adjustStep: number | string;
+  setAdjustStep: (val: number | string) => void;
+  intervalSec: number | string;
+  handleIntervalChange: (val: string) => void;
+  targetCount: number | string;
+  handleCountChange: (val: string) => void;
+  targetMin: number | string;
+  handleMinChange: (val: string) => void;
+  adjustValue: (type: "interval" | "count", dir: 1 | -1) => void;
+  queueLength: number;
+  queueMode: QueueMode;
+  setQueueMode: (val: QueueMode) => void;
+  queueSession: QueueSession | null;
+}
+
+function queueStatusLabel(session: QueueSession | null): string {
+  if (!session) return "대기 중";
+
+  switch (session.status) {
+    case "starting":
+      return "시작 준비";
+    case "waiting":
+      return "다음 tick 대기";
+    case "applying":
+      return "NovelAI 적용 중";
+    case "cooldown":
+      return "다음 생성 예약";
+    case "completed":
+      return "완료";
+    case "failed":
+      return "실패";
+    case "stopped":
+      return "중지됨";
+    default:
+      return "대기 중";
+  }
+}
+
+function seedRuleLabel(seedRule: SeedRule, queueLength: number): string {
+  if (queueLength > 0) return "프리셋 seed 사용";
+  if (seedRule === "random") return "매 tick 랜덤";
+  if (seedRule === "increment") return "매 tick +1";
+  if (seedRule === "decrement") return "매 tick -1";
+  return "현재 seed 유지";
+}
+
+export default function QueuePanel({
+  autoGenerate,
+  setAutoGenerate,
+  seedRule,
+  setSeedRule,
+  adjustStep,
+  setAdjustStep,
+  intervalSec,
+  handleIntervalChange,
+  targetCount,
+  handleCountChange,
+  targetMin,
+  handleMinChange,
+  adjustValue,
+  queueLength,
+  queueMode,
+  setQueueMode,
+  queueSession,
+}: QueuePanelProps) {
+  const smallNumInput: React.CSSProperties = {
+    ...inputStyle,
+    flex: "0 0 58px",
+    minWidth: 0,
+    padding: "5px 6px",
+    textAlign: "center",
+  };
+
+  const miniBtn: React.CSSProperties = {
+    ...smallBtnStyle,
+    alignItems: "center",
+    display: "inline-flex",
+    flex: "0 0 28px",
+    height: "28px",
+    justifyContent: "center",
+    padding: 0,
+  };
+
+  const fieldRow: React.CSSProperties = {
+    alignItems: "center",
+    display: "grid",
+    gap: "6px",
+    gridTemplateColumns: "70px 28px minmax(48px, 1fr) 28px auto",
+    minWidth: 0,
+  };
+
+  const statusTone = queueSession?.status === "failed"
+    ? theme.warningError
+    : queueSession?.status === "completed"
+      ? theme.green
+      : theme.blue;
+
+  return (
+    <section
+      aria-label="Queue"
+      data-testid="queue-panel"
+      style={{
+        backgroundColor: withAlpha(theme.surface0, 0.72),
+        border: `1px solid ${theme.surface1}`,
+        borderRadius: "8px",
+        marginBottom: "10px",
+        padding: "9px",
+      }}
+    >
+      <div style={{ alignItems: "center", display: "flex", gap: "8px", marginBottom: "8px" }}>
+        <span style={{ ...labelStyle, marginBottom: 0 }}>Queue</span>
+        <span
+          data-testid="queue-status"
+          style={{
+            backgroundColor: withAlpha(statusTone, 0.18),
+            border: `1px solid ${withAlpha(statusTone, 0.45)}`,
+            borderRadius: "999px",
+            color: theme.text,
+            flex: "0 1 auto",
+            fontSize: "11px",
+            fontWeight: 700,
+            minWidth: 0,
+            overflow: "hidden",
+            padding: "2px 8px",
+            textOverflow: "ellipsis",
+            whiteSpace: "nowrap",
+          }}
+        >
+          {queueStatusLabel(queueSession)}
+        </span>
+      </div>
+
+      <div
+        style={{
+          color: theme.subtext1,
+          display: "grid",
+          fontSize: "11px",
+          gap: "5px",
+          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+          marginBottom: "8px",
+        }}
+      >
+        <span>소스 {queueLength > 0 ? `프리셋 ${queueLength}개` : "현재 프롬프트"}</span>
+        <span>규칙 {seedRuleLabel(seedRule, queueLength)}</span>
+        <span>목표 {targetCount || 0}회</span>
+        <span>간격 {intervalSec || 0}초</span>
+      </div>
+
+      <label
+        style={{
+          alignItems: "center",
+          color: theme.text,
+          cursor: "pointer",
+          display: "flex",
+          fontSize: "12px",
+          gap: "7px",
+          marginBottom: autoGenerate ? "9px" : 0,
+        }}
+      >
+        <input
+          data-testid="queue-enable-checkbox"
+          type="checkbox"
+          checked={autoGenerate}
+          onChange={(e) => setAutoGenerate(e.target.checked)}
+          style={{ accentColor: theme.blue }}
+        />
+        Apply 성공 후 Queue 실행
+      </label>
+
+      {autoGenerate && (
+        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+          <div style={{ display: "grid", gap: "6px", gridTemplateColumns: "70px minmax(0, 1fr)" }}>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>모드</label>
+            <select
+              data-testid="queue-mode-select"
+              value={queueMode}
+              onChange={(e) => setQueueMode(e.target.value as QueueMode)}
+              style={{ ...inputStyle, minWidth: 0, padding: "5px 6px" }}
+            >
+              <option value="progression">Progression</option>
+              <option value="randomization">Random</option>
+            </select>
+          </div>
+
+          {queueLength === 0 && (
+            <div style={{ display: "grid", gap: "6px", gridTemplateColumns: "70px minmax(0, 1fr)" }}>
+              <label style={{ ...labelStyle, marginBottom: 0 }}>Seed</label>
+              <select
+                data-testid="queue-seed-rule-select"
+                value={seedRule}
+                onChange={(e) => setSeedRule(e.target.value as SeedRule)}
+                style={{ ...inputStyle, minWidth: 0, padding: "5px 6px" }}
+              >
+                <option value="none">현재 seed 유지</option>
+                <option value="random">랜덤</option>
+                <option value="increment">+1</option>
+                <option value="decrement">-1</option>
+              </select>
+            </div>
+          )}
+
+          <div style={{ display: "grid", gap: "6px", gridTemplateColumns: "70px minmax(0, 76px) minmax(0, 1fr)" }}>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>단위</label>
+            <input
+              data-testid="queue-adjust-step-input"
+              type="number"
+              value={adjustStep}
+              onChange={(e) => setAdjustStep(e.target.value === "" ? "" : Math.max(1, Number(e.target.value)))}
+              style={{ ...smallNumInput, flex: "unset", width: "100%" }}
+            />
+            <span style={{ alignSelf: "center", color: theme.subtext0, fontSize: "11px", minWidth: 0 }}>
+              +/- 조절폭
+            </span>
+          </div>
+
+          <div style={fieldRow}>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>간격</label>
+            <button type="button" onClick={() => adjustValue("interval", -1)} style={miniBtn}>-</button>
+            <input
+              data-testid="queue-interval-input"
+              type="number"
+              value={intervalSec}
+              onChange={(e) => handleIntervalChange(e.target.value)}
+              style={smallNumInput}
+            />
+            <button type="button" onClick={() => adjustValue("interval", 1)} style={miniBtn}>+</button>
+            <span style={{ color: theme.subtext0, fontSize: "11px" }}>초</span>
+          </div>
+
+          <div style={fieldRow}>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>목표</label>
+            <button type="button" onClick={() => adjustValue("count", -1)} style={miniBtn}>-</button>
+            <input
+              data-testid="queue-target-count-input"
+              type="number"
+              value={targetCount}
+              onChange={(e) => handleCountChange(e.target.value)}
+              style={smallNumInput}
+            />
+            <button type="button" onClick={() => adjustValue("count", 1)} style={miniBtn}>+</button>
+            <span style={{ color: theme.subtext0, fontSize: "11px" }}>회</span>
+          </div>
+
+          <div style={{ display: "grid", gap: "6px", gridTemplateColumns: "70px minmax(0, 76px) auto" }}>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>시간</label>
+            <input
+              data-testid="queue-target-min-input"
+              type="number"
+              step="0.1"
+              value={targetMin}
+              onChange={(e) => handleMinChange(e.target.value)}
+              style={{ ...smallNumInput, flex: "unset", width: "100%" }}
+            />
+            <span style={{ alignSelf: "center", color: theme.subtext0, fontSize: "11px" }}>분</span>
+          </div>
+
+          {queueSession?.lastError && (
+            <div
+              data-testid="queue-last-error"
+              style={{
+                backgroundColor: withAlpha(theme.warningError, 0.14),
+                border: `1px solid ${withAlpha(theme.warningError, 0.45)}`,
+                borderRadius: "6px",
+                color: theme.text,
+                fontSize: "11px",
+                lineHeight: 1.4,
+                padding: "7px",
+              }}
+            >
+              {queueSession.lastError.message}
+            </div>
+          )}
+        </div>
+      )}
+    </section>
+  );
+}

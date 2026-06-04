@@ -1,204 +1,262 @@
-import { useState, useRef, useEffect } from 'react';
-import type { MetadataState } from '../types/metadata';
-import type { SeedRule, QueueMode } from '../types/preset';
-import type { ShowFeedback } from '../types/feedback';
-import { getPresetById } from '../model/presetStorage';
-import { createRandomSeed, runApplyPipeline } from '../automation/applyPipeline';
+import { useEffect, useRef, useState } from 'react';
+import { runApplyPipeline } from '../automation/applyPipeline';
 import { formatApplyErrorDetail } from '../automation/applyStatusText';
+import { getPresetById } from '../model/presetStorage';
+import {
+  createCurrentStateSource,
+  createQueueDraft,
+  createQueuePreflightWarnings,
+  planNextQueueTick,
+} from '../queue/queuePlanner';
+import {
+  markQueueApplying,
+  markQueueStopped,
+  markQueueTickFailure,
+  markQueueTickSuccess,
+  markQueueWaiting,
+  startQueueSession,
+} from '../queue/queueSession';
+import type { QueueSession, QueueSourceSnapshot } from '../queue/queueTypes';
+import type { ShowFeedback } from '../types/feedback';
+import type { MetadataState } from '../types/metadata';
+import type { QueueMode, SeedRule } from '../types/preset';
 
 export interface AutoGeneratorConfig {
-    state: MetadataState;
-    queue: string[];
-    queueMode: QueueMode;
-    onFeedback?: ShowFeedback;
+  state: MetadataState;
+  queue: string[];
+  queueMode: QueueMode;
+  onFeedback?: ShowFeedback;
 }
 
 export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGeneratorConfig) {
-    const [autoGenerate, setAutoGenerate] = useState(false);
-    const [intervalSec, setIntervalSec] = useState<number | string>(30);
-    const [targetCount, setTargetCount] = useState<number | string>(100);
-    const [targetMin, setTargetMin] = useState<number | string>(50);
-    const [isLooping, setIsLooping] = useState(false);
-    const [loopCount, setLoopCount] = useState(0);
-    const [seedRule, setSeedRule] = useState<SeedRule>('none');
-    const [adjustStep, setAdjustStep] = useState<number | string>(10);
+  const [autoGenerate, setAutoGenerate] = useState(false);
+  const [intervalSec, setIntervalSec] = useState<number | string>(30);
+  const [targetCount, setTargetCount] = useState<number | string>(100);
+  const [targetMin, setTargetMin] = useState<number | string>(50);
+  const [isLooping, setIsLooping] = useState(false);
+  const [loopCount, setLoopCount] = useState(0);
+  const [queueSession, setQueueSession] = useState<QueueSession | null>(null);
+  const [seedRule, setSeedRule] = useState<SeedRule>('none');
+  const [adjustStep, setAdjustStep] = useState<number | string>(10);
 
-    const stateRef = useRef(state);
-    const queueRef = useRef(queue);
-    const queueModeRef = useRef(queueMode);
-    const seedRuleRef = useRef(seedRule);
-    const feedbackRef = useRef(onFeedback);
+  const stateRef = useRef(state);
+  const queueRef = useRef(queue);
+  const queueModeRef = useRef(queueMode);
+  const seedRuleRef = useRef(seedRule);
+  const feedbackRef = useRef(onFeedback);
+  const loopCountRef = useRef(0);
+  const loopTimeoutRef = useRef<number | null>(null);
+  const queueIndexRef = useRef(0);
+  const queueSessionRef = useRef<QueueSession | null>(null);
+  const stopRequestedRef = useRef(false);
+  const intervalRef = useRef(Number(intervalSec) || 30);
+  const targetCountRef = useRef(Number(targetCount) || 100);
 
-    useEffect(() => { stateRef.current = state; }, [state]);
-    useEffect(() => { queueRef.current = queue; }, [queue]);
-    useEffect(() => { queueModeRef.current = queueMode; }, [queueMode]);
-    useEffect(() => { seedRuleRef.current = seedRule; }, [seedRule]);
-    useEffect(() => { feedbackRef.current = onFeedback; }, [onFeedback]);
+  useEffect(() => { stateRef.current = state; }, [state]);
+  useEffect(() => { queueRef.current = queue; }, [queue]);
+  useEffect(() => { queueModeRef.current = queueMode; }, [queueMode]);
+  useEffect(() => { seedRuleRef.current = seedRule; }, [seedRule]);
+  useEffect(() => { feedbackRef.current = onFeedback; }, [onFeedback]);
+  useEffect(() => { intervalRef.current = Number(intervalSec); }, [intervalSec]);
+  useEffect(() => { targetCountRef.current = Number(targetCount); }, [targetCount]);
 
-    const loopCountRef = useRef(0);
-    const loopTimeoutRef = useRef<number | null>(null);
-    const queueIndexRef = useRef(0);
+  const updateQueueSession = (nextSession: QueueSession | null) => {
+    queueSessionRef.current = nextSession;
+    setQueueSession(nextSession);
+  };
 
-    // For live loop reading
-    const intervalRef = useRef(Number(intervalSec) || 30);
-    const targetCountRef = useRef(Number(targetCount) || 100);
+  const stopLoop = () => {
+    if (loopTimeoutRef.current !== null) {
+      clearTimeout(loopTimeoutRef.current);
+      loopTimeoutRef.current = null;
+    }
+    stopRequestedRef.current = true;
+    if (
+      queueSessionRef.current &&
+      queueSessionRef.current.status !== 'completed' &&
+      queueSessionRef.current.status !== 'failed' &&
+      queueSessionRef.current.status !== 'stopped'
+    ) {
+      updateQueueSession(markQueueStopped(queueSessionRef.current));
+    }
+    setIsLooping(false);
+  };
 
-    useEffect(() => { intervalRef.current = Number(intervalSec); }, [intervalSec]);
-    useEffect(() => { targetCountRef.current = Number(targetCount); }, [targetCount]);
+  useEffect(() => () => {
+    if (loopTimeoutRef.current) clearTimeout(loopTimeoutRef.current);
+  }, []);
 
-    const stopLoop = () => {
-        if (loopTimeoutRef.current !== null) {
-            clearTimeout(loopTimeoutRef.current);
-            loopTimeoutRef.current = null;
-        }
-        setIsLooping(false);
-    };
+  const getQueuedSources = async (): Promise<QueueSourceSnapshot[]> => {
+    const presets = await Promise.all(queueRef.current.map((id) => getPresetById(id)));
+    return presets
+      .filter((preset): preset is NonNullable<typeof preset> => preset != null)
+      .map((preset) => ({
+        kind: 'preset',
+        id: preset.id,
+        name: preset.name,
+        state: preset.state,
+      }));
+  };
 
-    useEffect(() => () => {
-        if (loopTimeoutRef.current) clearTimeout(loopTimeoutRef.current);
-    }, []);
+  const startLoop = () => {
+    void startQueueLoop();
+  };
 
-    const getNextQueueState = async () => {
-        const currentQueue = queueRef.current;
-        const currentQueueMode = queueModeRef.current;
-        if (currentQueue.length === 0) return null;
-        let idx: number;
-        if (currentQueueMode === 'randomization') {
-            idx = Math.floor(Math.random() * currentQueue.length);
-        } else {
-            idx = queueIndexRef.current % currentQueue.length;
-            queueIndexRef.current = idx + 1;
-        }
-        const preset = await getPresetById(currentQueue[idx]);
-        return preset?.state ?? null;
-    };
+  const startQueueLoop = async () => {
+    stopLoop();
+    stopRequestedRef.current = false;
+    setIsLooping(true);
+    loopCountRef.current = 0;
+    setLoopCount(0);
+    queueIndexRef.current = 0;
 
-    const startLoop = () => {
+    const draft = createQueueDraft({
+      targetCount: targetCountRef.current,
+      intervalSec: intervalRef.current,
+      seedRule: seedRuleRef.current,
+      queueMode: queueModeRef.current,
+      hasPresetQueue: queueRef.current.length > 0,
+    });
+    const initialSession = startQueueSession(draft);
+    updateQueueSession(initialSession);
+
+    const initialSources = await getQueuedSources();
+    const warnings = createQueuePreflightWarnings(
+      draft,
+      initialSources,
+      createCurrentStateSource(stateRef.current),
+    );
+    const firstWarning = warnings.find((warning) => warning.severity === 'warning') ?? warnings[0];
+
+    if (firstWarning) {
+      feedbackRef.current?.({
+        tone: firstWarning.severity,
+        message: firstWarning.message,
+        detail: firstWarning.sourceName
+          ? `${firstWarning.sourceName}: ${firstWarning.hint}`
+          : firstWarning.hint,
+      });
+    }
+
+    const executeLoop = async () => {
+      if (stopRequestedRef.current) return;
+      const currentSession = queueSessionRef.current;
+      if (!currentSession || currentSession.runId !== initialSession.runId) return;
+
+      if (loopCountRef.current >= draft.targetCount) {
         stopLoop();
-        setIsLooping(true);
-        loopCountRef.current = 0;
-        setLoopCount(0);
-        queueIndexRef.current = 0;
-        let currentLoopSeed = Number(stateRef.current.params.seed);
+        return;
+      }
 
-        const executeLoop = async () => {
-            if (loopCountRef.current >= targetCountRef.current) {
-                stopLoop();
-                return;
-            }
+      const queuedSources = await getQueuedSources();
+      const plan = planNextQueueTick({
+        runId: currentSession.runId,
+        draft,
+        currentState: stateRef.current,
+        queuedSources,
+        tickIndex: loopCountRef.current,
+        queueCursor: queueIndexRef.current,
+        scheduledAt: Date.now(),
+      });
 
-            const currentState = stateRef.current;
-            const currentQueue = queueRef.current;
-            const currentSeedRule = seedRuleRef.current;
+      if (!plan) {
+        stopLoop();
+        return;
+      }
 
-            const nextQueueState = currentQueue.length > 0 ? await getNextQueueState() : null;
-            const nextState = nextQueueState ?? currentState;
-            let nextSeed = currentLoopSeed;
+      queueIndexRef.current = plan.nextQueueCursor;
+      updateQueueSession(markQueueWaiting(currentSession, plan));
+      updateQueueSession(markQueueApplying(queueSessionRef.current ?? currentSession, plan));
 
-            if (currentQueue.length > 0) {
-                if (nextState.params.seed === 0) {
-                    nextSeed = createRandomSeed();
-                } else {
-                    const genBtn = Array.from(document.querySelectorAll('button'))
-                        .find(b => b.textContent?.includes('Generate')) as HTMLButtonElement | undefined;
-                    if (genBtn && genBtn.disabled) {
-                        nextSeed = currentLoopSeed + 1;
-                    } else {
-                        nextSeed = nextState.params.seed;
-                    }
-                }
-            } else {
-                if (currentSeedRule === 'increment') {
-                    nextSeed = currentLoopSeed + 1;
-                } else if (currentSeedRule === 'decrement') {
-                    nextSeed = Math.max(0, currentLoopSeed - 1);
-                } else if (currentSeedRule === 'random') {
-                    nextSeed = createRandomSeed();
-                } else {
-                    // 'none' rule
-                    if (nextState.params.seed === 0) {
-                        nextSeed = createRandomSeed();
-                    } else {
-                        nextSeed = nextState.params.seed;
-                    }
-                }
-            }
-
-            currentLoopSeed = nextSeed;
-            const loopState = {
-                ...nextState,
-                params: { ...nextState.params, seed: nextSeed },
-            };
-            try {
-                const result = await runApplyPipeline({ state: loopState, autoGenerate: true });
-                if (result.effect.status === 'failed') {
-                    console.error('Auto generate effect failed:', result.effect);
-                    feedbackRef.current?.({
-                        tone: 'error',
-                        message: result.effect.message,
-                        detail: formatApplyErrorDetail(result.effect.code, result.effect.detail),
-                    });
-                    stopLoop();
-                    return;
-                }
-            } catch (error) {
-                console.error('Auto generate pipeline failed:', error);
-                feedbackRef.current?.({ tone: 'error', message: '자동 생성 적용 중 오류가 발생했습니다.' });
-                stopLoop();
-                return;
-            }
-
-            loopCountRef.current += 1;
-            setLoopCount(loopCountRef.current);
-            const nextSec = Math.max(3, intervalRef.current);
-            loopTimeoutRef.current = window.setTimeout(executeLoop, nextSec * 1000);
-        };
-
-        // Start first loop after a short delay (or immediately)
-        loopTimeoutRef.current = window.setTimeout(executeLoop, Math.max(3, intervalRef.current) * 1000);
-    };
-
-    const handleIntervalChange = (val: string) => {
-        const sec = val === '' ? '' : Math.max(0, Number(val));
-        setIntervalSec(sec);
-        if (typeof sec === 'number' && typeof targetCount === 'number') {
-            setTargetMin(Math.round((sec * targetCount / 60) * 10) / 10);
+      try {
+        const result = await runApplyPipeline({ state: plan.state, autoGenerate: true });
+        if (result.effect.status === 'failed') {
+          console.error('Auto generate effect failed:', result.effect);
+          updateQueueSession(markQueueTickFailure(queueSessionRef.current ?? currentSession, {
+            code: result.effect.code,
+            message: result.effect.message,
+            detail: result.effect.detail,
+            sourceName: plan.source.name,
+            tickIndex: plan.tickIndex,
+          }));
+          feedbackRef.current?.({
+            tone: 'error',
+            message: result.effect.message,
+            detail: formatApplyErrorDetail(result.effect.code, result.effect.detail),
+          });
+          stopLoop();
+          return;
         }
+        updateQueueSession(markQueueTickSuccess(queueSessionRef.current ?? currentSession, plan, result));
+      } catch (error) {
+        console.error('Auto generate pipeline failed:', error);
+        updateQueueSession(markQueueTickFailure(queueSessionRef.current ?? currentSession, {
+          code: 'QUEUE_PLANNING_FAILED',
+          message: '자동 생성 적용 중 오류가 발생했습니다.',
+          detail: error instanceof Error ? error.message : undefined,
+          sourceName: plan.source.name,
+          tickIndex: plan.tickIndex,
+        }));
+        feedbackRef.current?.({ tone: 'error', message: '자동 생성 적용 중 오류가 발생했습니다.' });
+        stopLoop();
+        return;
+      }
+
+      loopCountRef.current += 1;
+      setLoopCount(loopCountRef.current);
+      if (loopCountRef.current >= draft.targetCount) {
+        setIsLooping(false);
+        loopTimeoutRef.current = null;
+        return;
+      }
+      loopTimeoutRef.current = window.setTimeout(executeLoop, draft.intervalSec * 1000);
     };
 
-    const handleCountChange = (val: string) => {
-        const count = val === '' ? '' : Math.max(0, Number(val));
-        setTargetCount(count);
-        if (typeof intervalSec === 'number' && typeof count === 'number') {
-            setTargetMin(Math.round((intervalSec * count / 60) * 10) / 10);
-        }
-    };
+    if (stopRequestedRef.current) return;
+    loopTimeoutRef.current = window.setTimeout(executeLoop, draft.intervalSec * 1000);
+  };
 
-    const handleMinChange = (val: string) => {
-        const min = val === '' ? '' : Math.max(0, Number(val));
-        setTargetMin(min);
-        if (typeof intervalSec === 'number' && typeof min === 'number' && intervalSec > 0) {
-            setTargetCount(Math.round((min * 60) / intervalSec));
-        }
-    };
+  const handleIntervalChange = (val: string) => {
+    const sec = val === '' ? '' : Math.max(0, Number(val));
+    setIntervalSec(sec);
+    if (typeof sec === 'number' && typeof targetCount === 'number') {
+      setTargetMin(Math.round((sec * targetCount / 60) * 10) / 10);
+    }
+  };
 
-    const adjustValue = (type: 'interval' | 'count', dir: 1 | -1) => {
-        const step = Number(adjustStep) || 10;
-        if (type === 'interval') {
-            const val = Math.max(3, Number(intervalSec) + (step * dir));
-            handleIntervalChange(String(val));
-        } else {
-            const val = Math.max(1, Number(targetCount) + (step * dir));
-            handleCountChange(String(val));
-        }
-    };
+  const handleCountChange = (val: string) => {
+    const count = val === '' ? '' : Math.max(0, Number(val));
+    setTargetCount(count);
+    if (typeof intervalSec === 'number' && typeof count === 'number') {
+      setTargetMin(Math.round((intervalSec * count / 60) * 10) / 10);
+    }
+  };
 
-    return {
-        autoGenerate, setAutoGenerate,
-        seedRule, setSeedRule,
-        intervalSec, targetCount, targetMin, adjustStep, setAdjustStep,
-        isLooping, loopCount,
-        startLoop, stopLoop,
-        handleIntervalChange, handleCountChange, handleMinChange, adjustValue,
-    };
+  const handleMinChange = (val: string) => {
+    const min = val === '' ? '' : Math.max(0, Number(val));
+    setTargetMin(min);
+    if (typeof intervalSec === 'number' && typeof min === 'number' && intervalSec > 0) {
+      setTargetCount(Math.round((min * 60) / intervalSec));
+    }
+  };
+
+  const adjustValue = (type: 'interval' | 'count', dir: 1 | -1) => {
+    const step = Number(adjustStep) || 10;
+    if (type === 'interval') {
+      const val = Math.max(3, Number(intervalSec) + (step * dir));
+      handleIntervalChange(String(val));
+    } else {
+      const val = Math.max(1, Number(targetCount) + (step * dir));
+      handleCountChange(String(val));
+    }
+  };
+
+  return {
+    autoGenerate, setAutoGenerate,
+    seedRule, setSeedRule,
+    intervalSec, targetCount, targetMin, adjustStep, setAdjustStep,
+    isLooping, loopCount, queueSession,
+    startLoop, stopLoop,
+    handleIntervalChange, handleCountChange, handleMinChange, adjustValue,
+  };
 }
