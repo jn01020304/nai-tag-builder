@@ -72,6 +72,7 @@ export default function PromptSection({
   return (
     <section style={{ marginBottom: "8px" }}>
       <ComposeCatalogChips
+        prompt={state.prompt}
         activePromptTarget={activePromptTarget}
         activePromptValue={activePromptValue}
         onToggle={onToggleCatalogEntry}

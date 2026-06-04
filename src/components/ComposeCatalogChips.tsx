@@ -3,6 +3,7 @@ import { coreCatalog } from "../prompt/catalog/coreCatalog.generated";
 import type { CoreCatalogEntry, ProductCategory } from "../prompt/catalog/catalogTypes";
 import type { PromptInsertTarget } from "../prompt/promptInsertTarget";
 import { promptTargetGroup } from "../prompt/promptInsertTarget";
+import type { PromptState } from "../types/metadata";
 import { useTheme } from "../contexts/themeContextCore";
 import { hasCatalogTag, splitPromptTags } from "../prompt/catalog/promptTagText";
 
@@ -33,6 +34,7 @@ const CATEGORY_ORDER: ProductCategory[] = [
 ];
 
 interface Props {
+  prompt: PromptState;
   activePromptTarget: PromptInsertTarget;
   activePromptValue: string;
   onToggle: (entry: CoreCatalogEntry) => void;
@@ -40,6 +42,7 @@ interface Props {
 }
 
 export default function ComposeCatalogChips({
+  prompt,
   activePromptTarget,
   activePromptValue,
   onToggle,
@@ -62,6 +65,14 @@ export default function ComposeCatalogChips({
   const activeTargetGroup = promptTargetGroup(activePromptTarget);
   const canReorderSelectedTags = activePromptTarget.kind === "base";
 
+  type TargetGroup = ReturnType<typeof promptTargetGroup>;
+
+  interface TagAssignment {
+    key: string;
+    label: string;
+    group: TargetGroup;
+  }
+
   const activePalettes = {
     base: {
       background: "#143d63",
@@ -81,12 +92,52 @@ export default function ComposeCatalogChips({
       color: "#ffffff",
       shadow: "rgba(255, 155, 123, 0.35)",
     },
-  } satisfies Record<ReturnType<typeof promptTargetGroup>, {
+    negativeCharacter: {
+      background: "#5a254f",
+      border: "#f38bd4",
+      color: "#ffffff",
+      shadow: "rgba(243, 139, 212, 0.35)",
+    },
+  } satisfies Record<TargetGroup, {
     background: string;
     border: string;
     color: string;
     shadow: string;
   }>;
+
+  const getEntryAssignments = (entry: CoreCatalogEntry): TagAssignment[] => {
+    const assignments: TagAssignment[] = [];
+
+    if (hasCatalogTag(prompt.basePrompt, entry)) {
+      assignments.push({ key: "base", label: "m", group: "base" });
+    }
+
+    if (hasCatalogTag(prompt.negativeBase, entry)) {
+      assignments.push({ key: "negativeBase", label: "n", group: "negative" });
+    }
+
+    for (const [index, character] of prompt.characters.entries()) {
+      if (hasCatalogTag(character.caption, entry)) {
+        assignments.push({
+          key: `character:${character.id}`,
+          label: `c${index + 1}`,
+          group: "character",
+        });
+      }
+    }
+
+    for (const [index, character] of prompt.negativeCharacters.entries()) {
+      if (hasCatalogTag(character.caption, entry)) {
+        assignments.push({
+          key: `negativeCharacter:${character.id}`,
+          label: `nc${index + 1}`,
+          group: "negativeCharacter",
+        });
+      }
+    }
+
+    return assignments;
+  };
 
   const tabBaseStyle: React.CSSProperties = {
     backgroundColor: "#15172f",
@@ -151,8 +202,12 @@ export default function ComposeCatalogChips({
         }}
       >
         {visibleEntries.map((entry) => {
-          const active = hasCatalogTag(activePromptValue, entry);
-          const activePalette = activePalettes[activeTargetGroup];
+          const assignments = getEntryAssignments(entry);
+          const active = assignments.length > 0;
+          const activeInCurrentTarget = hasCatalogTag(activePromptValue, entry);
+          const currentAssignmentPalette = activePalettes[activeTargetGroup];
+          const firstAssignmentPalette = assignments[0] ? activePalettes[assignments[0].group] : currentAssignmentPalette;
+          const chipPalette = activeInCurrentTarget ? currentAssignmentPalette : firstAssignmentPalette;
           return (
             <button
               key={entry.id}
@@ -169,11 +224,11 @@ export default function ComposeCatalogChips({
               aria-pressed={active}
               style={{
                 alignItems: "center",
-                backgroundColor: active ? activePalette.background : "#f5f0a8",
-                border: `1px solid ${active ? activePalette.border : "#e4de8c"}`,
+                backgroundColor: active ? chipPalette.background : "#f5f0a8",
+                border: `1px solid ${active ? chipPalette.border : "#e4de8c"}`,
                 borderRadius: "6px",
-                boxShadow: active ? `0 0 0 2px ${activePalette.shadow}` : "none",
-                color: active ? activePalette.color : "#111222",
+                boxShadow: active ? `0 0 0 2px ${chipPalette.shadow}` : "none",
+                color: active ? chipPalette.color : "#111222",
                 cursor: "pointer",
                 display: "flex",
                 fontSize: "12px",
@@ -181,7 +236,8 @@ export default function ComposeCatalogChips({
                 lineHeight: 1.2,
                 minHeight: "34px",
                 overflow: "hidden",
-                padding: "5px 7px",
+                padding: assignments.length > 0 ? "10px 7px 5px" : "5px 7px",
+                position: "relative",
                 textAlign: "center",
                 textOverflow: "ellipsis",
                 touchAction: "manipulation",
@@ -189,6 +245,43 @@ export default function ComposeCatalogChips({
                 wordBreak: "break-word",
               }}
             >
+              {assignments.length > 0 && (
+                <span
+                  aria-hidden="true"
+                  style={{
+                    display: "flex",
+                    gap: "2px",
+                    maxWidth: "calc(100% - 6px)",
+                    overflow: "hidden",
+                    position: "absolute",
+                    right: "3px",
+                    top: "2px",
+                  }}
+                >
+                  {assignments.map((assignment) => {
+                    const palette = activePalettes[assignment.group];
+                    return (
+                      <span
+                        key={assignment.key}
+                        data-testid={`catalog-chip-${entry.id}-badge-${assignment.label}`}
+                        style={{
+                          backgroundColor: palette.border,
+                          borderRadius: "999px",
+                          color: "#101224",
+                          fontSize: "8px",
+                          fontWeight: 800,
+                          lineHeight: 1,
+                          minWidth: assignment.label.length > 1 ? "14px" : "10px",
+                          padding: "1px 3px",
+                          textTransform: "lowercase",
+                        }}
+                      >
+                        {assignment.label}
+                      </span>
+                    );
+                  })}
+                </span>
+              )}
               {entry.tag}
             </button>
           );
