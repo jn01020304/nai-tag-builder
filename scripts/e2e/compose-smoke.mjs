@@ -245,6 +245,19 @@ async function main() {
       `Post-separator consecutive insertion failed: ${await getTextareaValue(page)}`,
     );
 
+    const weightedArtistPrompt = "brown hair, 2.7::artist:happoubi jin::, blue eyes";
+    const fatFingerCursorIndex = weightedArtistPrompt.indexOf("happoubi") + 3;
+    await setTextareaCursor(page, weightedArtistPrompt, fatFingerCursorIndex);
+    await page.locator("[data-testid='catalog-chip-tag_1boy']").click();
+    assert(
+      await getTextareaValue(page) === "brown hair, 2.7::artist:happoubi jin::, 1boy, blue eyes",
+      `Fat-finger token insertion failed: ${await getTextareaValue(page)}`,
+    );
+    assert(
+      await getTextareaSelectionStart(page) === "brown hair, 2.7::artist:happoubi jin::, 1boy, ".length,
+      `Fat-finger cursor was not restored after separator: ${await getTextareaSelectionStart(page)}`,
+    );
+
     await textarea.fill("1girl, solo, outdoors");
     await dragTag(page, "selected-tag-2", "selected-tag-0");
     assert(
