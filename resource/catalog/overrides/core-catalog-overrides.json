@@ -1,0 +1,78 @@
+{
+  "version": 1,
+  "accepted": [
+    { "tag": "1girl", "productCategory": "headcount", "priority": 100, "defaultVisible": true },
+    { "tag": "2girls", "productCategory": "headcount", "priority": 95, "defaultVisible": true },
+    { "tag": "3girls", "productCategory": "headcount", "priority": 90, "defaultVisible": true },
+    { "tag": "1boy", "productCategory": "headcount", "priority": 88, "defaultVisible": true },
+    { "tag": "2boys", "productCategory": "headcount", "priority": 82, "defaultVisible": true },
+    { "tag": "solo", "productCategory": "headcount", "priority": 98, "defaultVisible": true },
+    { "tag": "solo focus", "productCategory": "headcount", "priority": 86, "defaultVisible": true },
+    { "tag": "multiple girls", "productCategory": "headcount", "priority": 72, "defaultVisible": true },
+
+    { "tag": "simple background", "productCategory": "background", "priority": 100, "defaultVisible": true },
+    { "tag": "white background", "productCategory": "background", "priority": 92, "defaultVisible": true },
+    { "tag": "transparent background", "productCategory": "background", "priority": 80, "defaultVisible": true },
+    { "tag": "indoors", "productCategory": "background", "priority": 95, "defaultVisible": true },
+    { "tag": "outdoors", "productCategory": "background", "priority": 94, "defaultVisible": true },
+    { "tag": "classroom", "productCategory": "background", "priority": 84, "defaultVisible": true },
+    { "tag": "bedroom", "productCategory": "background", "priority": 82, "defaultVisible": true },
+    { "tag": "sky", "productCategory": "background", "priority": 78, "defaultVisible": true },
+
+    { "tag": "looking at viewer", "productCategory": "framing", "priority": 100, "defaultVisible": true },
+    { "tag": "looking away", "productCategory": "framing", "priority": 86, "defaultVisible": true },
+    { "tag": "upper body", "productCategory": "framing", "priority": 92, "defaultVisible": true },
+    { "tag": "full body", "productCategory": "framing", "priority": 90, "defaultVisible": true },
+    { "tag": "cowboy shot", "productCategory": "framing", "priority": 88, "defaultVisible": true },
+    { "tag": "close-up", "productCategory": "framing", "priority": 82, "defaultVisible": true },
+    { "tag": "from side", "productCategory": "framing", "priority": 76, "defaultVisible": true },
+
+    { "tag": "standing", "productCategory": "pose", "priority": 100, "defaultVisible": true },
+    { "tag": "sitting", "productCategory": "pose", "priority": 96, "defaultVisible": true },
+    { "tag": "lying", "productCategory": "pose", "priority": 86, "defaultVisible": true },
+    { "tag": "kneeling", "productCategory": "pose", "priority": 80, "defaultVisible": true },
+    { "tag": "arms up", "productCategory": "pose", "priority": 78, "defaultVisible": true },
+    { "tag": "hand on hip", "productCategory": "pose", "priority": 74, "defaultVisible": true },
+
+    { "tag": "smile", "productCategory": "expression", "priority": 100, "defaultVisible": true },
+    { "tag": "open mouth", "productCategory": "expression", "priority": 94, "defaultVisible": true },
+    { "tag": "blush", "productCategory": "expression", "priority": 92, "defaultVisible": true },
+    { "tag": "serious", "productCategory": "expression", "priority": 84, "defaultVisible": true },
+    { "tag": "crying", "productCategory": "expression", "priority": 78, "defaultVisible": true },
+    { "tag": "angry", "productCategory": "expression", "priority": 76, "defaultVisible": true },
+
+    { "tag": "long hair", "productCategory": "appearance", "priority": 100, "defaultVisible": true },
+    { "tag": "short hair", "productCategory": "appearance", "priority": 94, "defaultVisible": true },
+    { "tag": "twintails", "productCategory": "appearance", "priority": 84, "defaultVisible": true },
+    { "tag": "blue eyes", "productCategory": "appearance", "priority": 92, "defaultVisible": true },
+    { "tag": "brown hair", "productCategory": "appearance", "priority": 86, "defaultVisible": true },
+    { "tag": "blonde hair", "productCategory": "appearance", "priority": 84, "defaultVisible": true },
+
+    { "tag": "school uniform", "productCategory": "outfit", "priority": 100, "defaultVisible": true },
+    { "tag": "dress", "productCategory": "outfit", "priority": 92, "defaultVisible": true },
+    { "tag": "shirt", "productCategory": "outfit", "priority": 86, "defaultVisible": true },
+    { "tag": "skirt", "productCategory": "outfit", "priority": 84, "defaultVisible": true },
+    { "tag": "jacket", "productCategory": "outfit", "priority": 78, "defaultVisible": true },
+    { "tag": "hat", "productCategory": "outfit", "priority": 72, "defaultVisible": true },
+
+    { "tag": "best quality", "productCategory": "style_quality", "priority": 100, "defaultVisible": true },
+    { "tag": "masterpiece", "productCategory": "style_quality", "priority": 96, "defaultVisible": true },
+    { "tag": "highres", "productCategory": "style_quality", "priority": 92, "defaultVisible": true },
+    { "tag": "detailed", "productCategory": "style_quality", "priority": 86, "defaultVisible": true },
+
+    { "tag": "lowres", "productCategory": "negative_safety", "priority": 100, "defaultVisible": true, "target": "negative" },
+    { "tag": "bad anatomy", "productCategory": "negative_safety", "priority": 98, "defaultVisible": true, "target": "negative" },
+    { "tag": "bad hands", "productCategory": "negative_safety", "priority": 96, "defaultVisible": true, "target": "negative" },
+    { "tag": "text", "productCategory": "negative_safety", "priority": 88, "defaultVisible": true, "target": "negative" },
+    { "tag": "watermark", "productCategory": "negative_safety", "priority": 86, "defaultVisible": true, "target": "negative" },
+    { "tag": "blurry", "productCategory": "negative_safety", "priority": 84, "defaultVisible": true, "target": "negative" }
+  ],
+  "aliases": [
+    { "alias": "outdoor", "tag": "outdoors" },
+    { "alias": "high resolution", "tag": "highres" },
+    { "alias": "high res", "tag": "highres" },
+    { "alias": "hires", "tag": "highres" }
+  ],
+  "rejected": []
+}
+

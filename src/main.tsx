@@ -5,23 +5,23 @@ import App from './App.tsx';
 
 const CONTAINER_ID = 'nai-tag-builder-root';
 
-if (!document.getElementById(CONTAINER_ID)) {
-  const container = document.createElement('div');
-  container.id = CONTAINER_ID;
+document.getElementById(CONTAINER_ID)?.remove();
 
-  container.style.position = 'fixed';
-  container.style.top = '20px';
-  container.style.right = '20px';
-  container.style.zIndex = '999999';
+const container = document.createElement('div');
+container.id = CONTAINER_ID;
 
-  document.body.appendChild(container);
+container.style.position = 'fixed';
+container.style.top = '8px';
+container.style.right = '8px';
+container.style.zIndex = '999999';
 
-  const root = ReactDOM.createRoot(container);
-  flushSync(() => {
-    root.render(
-      <React.StrictMode>
-        <App />
-      </React.StrictMode>
-    );
-  });
-}
+document.body.appendChild(container);
+
+const root = ReactDOM.createRoot(container);
+flushSync(() => {
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+});

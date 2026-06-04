@@ -8,10 +8,21 @@ interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
 }
 
 export default function HighlightedTextarea(props: Props) {
-    const { value, style, onChange, onScroll, ...rest } = props;
+    const {
+        value,
+        style,
+        onChange,
+        onScroll,
+        onMouseDown,
+        onTouchStart,
+        onPointerDown,
+        onClick,
+        ...rest
+    } = props;
     const theme = useTheme();
     const backdropRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
+    const boxHeight = style?.height ?? style?.minHeight ?? '80px';
 
     const tokens = parsePromptToTokens(value);
 
@@ -33,7 +44,22 @@ export default function HighlightedTextarea(props: Props) {
     });
 
     return (
-        <div style={{ position: 'relative', width: style?.width || '100%', height: style?.height || '100%', marginBottom: style?.marginBottom }}>
+        <div
+            onMouseDown={(e) => e.stopPropagation()}
+            onTouchStart={(e) => e.stopPropagation()}
+            onPointerDown={(e) => e.stopPropagation()}
+            style={{
+                position: 'relative',
+                width: style?.width || '100%',
+                minHeight: boxHeight,
+                height: boxHeight,
+                marginBottom: style?.marginBottom,
+                pointerEvents: 'auto',
+                userSelect: 'text',
+                WebkitUserSelect: 'text',
+                touchAction: 'auto',
+            }}
+        >
             {/* Backdrop (Highlights) */}
             <div
                 ref={backdropRef}
@@ -91,6 +117,10 @@ export default function HighlightedTextarea(props: Props) {
                 .nai-tag-builder-transparent-textarea {
                     background: transparent !important;
                     background-color: transparent !important;
+                    pointer-events: auto !important;
+                    user-select: text !important;
+                    -webkit-user-select: text !important;
+                    touch-action: auto !important;
                 }
             `}</style>
             <textarea
@@ -103,6 +133,7 @@ export default function HighlightedTextarea(props: Props) {
                     ...style,
                     position: 'relative',
                     color: theme.text,
+                    caretColor: theme.text,
                     margin: 0,
                     fontFamily: style?.fontFamily || 'inherit',
                     fontSize: style?.fontSize || 'inherit',
@@ -113,6 +144,29 @@ export default function HighlightedTextarea(props: Props) {
                     width: '100%',
                     height: '100%',
                     boxSizing: 'border-box',
+                    outline: 'none',
+                    pointerEvents: 'auto',
+                    resize: 'none',
+                    userSelect: 'text',
+                    WebkitUserSelect: 'text',
+                    touchAction: 'auto',
+                }}
+                onMouseDown={(e) => {
+                    e.stopPropagation();
+                    onMouseDown?.(e);
+                }}
+                onTouchStart={(e) => {
+                    e.stopPropagation();
+                    onTouchStart?.(e);
+                }}
+                onPointerDown={(e) => {
+                    e.stopPropagation();
+                    onPointerDown?.(e);
+                }}
+                onClick={(e) => {
+                    e.stopPropagation();
+                    textareaRef.current?.focus();
+                    onClick?.(e);
                 }}
                 {...rest}
             />

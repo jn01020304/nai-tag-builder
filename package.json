@@ -6,8 +6,11 @@
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
+    "catalog:build": "node scripts/catalog/build-core-catalog.mjs",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test:e2e:compose": "node scripts/e2e/compose-smoke.mjs",
+    "test:e2e:bookmarklet": "node scripts/e2e/bookmarklet-injection-smoke.mjs"
   },
   "dependencies": {
     "dexie": "^4.3.0",
@@ -28,6 +31,7 @@
     "eslint-plugin-react-hooks": "^7.0.1",
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
+    "playwright-core": "^1.60.0",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
     "vite": "^7.3.1",
