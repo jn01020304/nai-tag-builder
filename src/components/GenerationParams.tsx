@@ -2,7 +2,7 @@ import type { MetadataState, Sampler, NoiseSchedule } from '../types/metadata';
 import type { MetadataAction } from '../hooks/useMetadataState';
 import { KNOWN_MODELS, getModelBySource } from '../model/models';
 import CollapsibleSection from './CollapsibleSection';
-import { theme, inputStyle, labelStyle, smallBtnStyle } from '../styles/theme';
+import { theme, inputStyle, smallBtnStyle } from '../styles/theme';
 
 interface Props {
   state: MetadataState;
@@ -29,15 +29,31 @@ const DIMENSION_PRESETS = [
 
 const rowStyle: React.CSSProperties = {
   display: 'flex',
+  flexWrap: 'wrap',
   gap: '8px',
   marginBottom: '8px',
   alignItems: 'flex-end',
 };
 
 const fieldStyle: React.CSSProperties = {
-  flex: 1,
+  flex: '1 1 110px',
+  minWidth: 0,
   display: 'flex',
   flexDirection: 'column',
+};
+
+const fieldLabelStyle: React.CSSProperties = {
+  alignSelf: 'flex-start',
+  backgroundColor: '#15172f',
+  border: '1px solid rgba(255, 255, 255, 0.25)',
+  borderRadius: '6px',
+  color: '#ffffff',
+  display: 'inline-flex',
+  fontSize: '12px',
+  fontWeight: 700,
+  lineHeight: 1,
+  marginBottom: '6px',
+  padding: '4px 7px',
 };
 
 export default function GenerationParams({ state, dispatch }: Props) {
@@ -50,7 +66,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
   return (
     <CollapsibleSection title="Parameters" defaultOpen>
       {/* Dimension presets */}
-      <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
+      <div data-testid="generation-params" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
         {DIMENSION_PRESETS.map(p => {
           const active = state.params.width === p.w && state.params.height === p.h;
           return (
@@ -72,7 +88,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
       {/* Width x Height */}
       <div style={rowStyle}>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Width</label>
+          <label style={fieldLabelStyle}>Width</label>
           <input
             type="number"
             value={state.params.width}
@@ -90,7 +106,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
           &#8596;
         </button>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Height</label>
+          <label style={fieldLabelStyle}>Height</label>
           <input
             type="number"
             value={state.params.height}
@@ -106,7 +122,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
       <div style={rowStyle}>
         <div style={fieldStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <label style={labelStyle}>Steps</label>
+            <label style={fieldLabelStyle}>Steps</label>
             <input
               type="number"
               value={state.params.steps}
@@ -128,7 +144,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
         </div>
         <div style={fieldStyle}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <label style={labelStyle}>Scale</label>
+            <label style={fieldLabelStyle}>Scale</label>
             <input
               type="number"
               value={state.params.scale}
@@ -155,7 +171,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
       {/* Sampler + Noise Schedule */}
       <div style={rowStyle}>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Sampler</label>
+          <label style={fieldLabelStyle}>Sampler</label>
           <select
             value={state.params.sampler}
             onChange={e => setP('sampler', e.target.value as Sampler)}
@@ -165,7 +181,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
           </select>
         </div>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Noise</label>
+          <label style={fieldLabelStyle}>Noise</label>
           <select
             value={state.params.noiseSchedule}
             onChange={e => setP('noiseSchedule', e.target.value as NoiseSchedule)}
@@ -179,7 +195,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
       {/* Model + Seed */}
       <div style={rowStyle}>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Model</label>
+          <label style={fieldLabelStyle}>Model</label>
           <select
             value={getModelBySource(state.source)?.source || 'custom'}
             onChange={e => {
@@ -194,7 +210,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
           </select>
         </div>
         <div style={fieldStyle}>
-          <label style={labelStyle}>Seed (0 = random)</label>
+          <label style={fieldLabelStyle}>Seed (0 = random)</label>
           <input
             type="number"
             value={state.params.seed}
@@ -207,7 +223,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
 
       {!getModelBySource(state.source) && (
         <div style={{ marginBottom: '4px' }}>
-          <label style={labelStyle}>Custom Model Hash</label>
+          <label style={fieldLabelStyle}>Custom Model Hash</label>
           <input
             type="text"
             value={state.source || ''}

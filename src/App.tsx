@@ -182,8 +182,8 @@ function AppContent() {
       onDrop={handleDrop}
       style={{
         width: `${overlayWidth}px`,
-        minWidth: '320px',
-        maxWidth: '90vw',
+        minWidth: '280px',
+        maxWidth: 'calc(100vw - 16px)',
         maxHeight: isCollapsed ? 'none' : '80vh',
         overflowY: isCollapsed ? 'visible' : 'auto',
         backgroundColor: theme.base,
@@ -226,11 +226,13 @@ function AppContent() {
             position: 'absolute',
             top: 0,
             right: 0,
-            width: '8px',
+            width: '12px',
             height: '100%',
             cursor: 'ew-resize',
             zIndex: 10,
-            touchAction: 'none'
+            touchAction: 'none',
+            borderRight: `3px solid ${theme.surface1}`,
+            opacity: 0.75,
           }}
         />
       )}
@@ -314,7 +316,7 @@ function AppContent() {
               onDismiss={() => setFeedback(null)}
             />
           )}
-          <PromptSection value={state.prompt.basePrompt} dispatch={dispatch} />
+          <PromptSection state={state} dispatch={dispatch} />
           <GenerationParams state={state} dispatch={dispatch} />
           <CharacterCaptions characters={state.prompt.characters} dispatch={dispatch} />
           <NegativePrompt state={state} dispatch={dispatch} />

@@ -11,6 +11,8 @@ node_modules
 dist
 dist-ssr
 *.local
+resource/catalog/generated/
+test-results/
 
 # Editor directories and files
 .vscode/*
