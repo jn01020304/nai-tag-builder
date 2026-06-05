@@ -13,6 +13,12 @@ writing:
 
 # Changelog
 
+## v3.0 (2026-06-05)
+UI/UX 전면 개편 및 Glassmorphism 적용.
+- **Glassmorphism:** App 최상위 레이아웃, 오버레이 헤더/푸터에 반투명 효과 및 블러 적용.
+- **시각적 계층 구조 강화:** Inter 폰트 강제 적용, 커스텀 스크롤바 튜닝.
+- **사용성 개선:** PresetManager 큐 칩 둥근 알약(Pill) 형태로 개선, HighlightedTextarea 포커스 링 추가, 적용 버튼 애니메이션 추가.
+
 ## v2.9 (2026-03-03)
 PNG Import Metadata Validation & UI Polish.
 - **Metadata Validation:** Added `validateMetadata` function to `ImportModal.tsx` to check for missing required fields (Prompt, Negative Prompt, Seed, Sampler, Resolution, Steps, Scale) before importing.

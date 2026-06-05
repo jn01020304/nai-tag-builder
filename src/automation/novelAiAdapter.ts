@@ -8,6 +8,7 @@ import type {
 
 const DEFAULT_TIMEOUT_MS = 5000;
 const POLL_MS = 100;
+const OVERLAY_ROOT_ID = "nai-tag-builder-root";
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -17,11 +18,20 @@ function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
 
-function findButtonByText(patterns: string[]): HTMLButtonElement | undefined {
-  return Array.from(document.querySelectorAll("button")).find((button) => {
+function findButtonsByText(patterns: string[]): HTMLButtonElement[] {
+  return Array.from(document.querySelectorAll("button")).filter((button) => {
+    if (isInsideOverlayRoot(button)) return false;
     const text = button.textContent?.trim() ?? "";
     return patterns.some((pattern) => text.includes(pattern));
-  }) as HTMLButtonElement | undefined;
+  });
+}
+
+function pickBestButton(buttons: HTMLButtonElement[]): HTMLButtonElement | undefined {
+  return buttons.find(isVisibleButton) ?? buttons[0];
+}
+
+function findButtonByText(patterns: string[]): HTMLButtonElement | undefined {
+  return pickBestButton(findButtonsByText(patterns));
 }
 
 function findImportButton(): HTMLButtonElement | undefined {
@@ -30,6 +40,33 @@ function findImportButton(): HTMLButtonElement | undefined {
 
 function findGenerateButton(): HTMLButtonElement | undefined {
   return findButtonByText(["Generate", "생성"]);
+}
+
+function findEnabledGenerateButton(): HTMLButtonElement | undefined {
+  return pickBestButton(
+    findButtonsByText(["Generate", "생성"])
+      .filter((button) => !isDisabledButton(button)),
+  );
+}
+
+function isInsideOverlayRoot(element: Element): boolean {
+  return element.closest(`#${OVERLAY_ROOT_ID}`) !== null;
+}
+
+function isDisabledButton(button: HTMLButtonElement): boolean {
+  return button.disabled
+    || button.getAttribute("aria-disabled") === "true"
+    || button.getAttribute("data-disabled") === "true";
+}
+
+function isVisibleButton(button: HTMLButtonElement): boolean {
+  const rect = button.getBoundingClientRect();
+  const style = window.getComputedStyle(button);
+
+  return rect.width > 0
+    && rect.height > 0
+    && style.display !== "none"
+    && style.visibility !== "hidden";
 }
 
 async function waitFor<T>(
@@ -216,12 +253,16 @@ export async function applyMetadataToNovelAi(
         pasteWasCanceled,
       );
     }
-    if (generateButton.disabled) {
+    const enabledGenerateButton = isDisabledButton(generateButton)
+      ? await waitFor(findEnabledGenerateButton, timeoutMs, options.signal)
+      : generateButton;
+    if (options.signal?.aborted) return abortFailure(phases);
+    if (!enabledGenerateButton) {
       return createFailure(
         "GENERATE_BUTTON_DISABLED",
         "NovelAI Generate 버튼이 비활성화되어 자동 생성을 시작하지 못했습니다.",
         phases,
-        undefined,
+        `Generate 버튼은 발견됐지만 ${timeoutMs}ms 안에 활성화되지 않았습니다.`,
         targetInfo.targetKind,
         pasteWasCanceled,
       );
@@ -229,7 +270,7 @@ export async function applyMetadataToNovelAi(
 
     emitPhase("clicking-generate-button", "NovelAI Generate 버튼을 클릭하는 중");
     try {
-      generateButton.click();
+      enabledGenerateButton.click();
     } catch (error) {
       return createFailure(
         "GENERATE_CLICK_FAILED",

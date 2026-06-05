@@ -96,3 +96,6 @@ edge resize handle
 
 MutationObserver theme detection
 : `document.head`에 `MutationObserver({ childList: true, subtree: true })`. NAI 테마 변경 시 style 태그 다수 주입 감지. 300ms debounce 필요.
+
+Glassmorphism
+: UI 요소에 반투명한 배경과 배경 블러(backdrop-filter)를 적용하여 유리처럼 비치는 효과를 내는 디자인 기법. v3.0 오버레이 창에 적용.
