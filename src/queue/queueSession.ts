@@ -68,6 +68,10 @@ export function markQueueApplying(session: QueueSession, plan: QueueTickPlan, no
   return withLog(session, "applying", "Queue tick 적용을 시작했습니다.", now, plan);
 }
 
+export function markQueueGenerating(session: QueueSession, plan: QueueTickPlan, now = Date.now()): QueueSession {
+  return withLog(session, "generating", "NovelAI 생성 완료를 기다리는 중입니다.", now, plan);
+}
+
 export function markQueueTickSuccess(
   session: QueueSession,
   plan: QueueTickPlan,

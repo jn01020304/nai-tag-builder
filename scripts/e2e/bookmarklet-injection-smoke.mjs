@@ -74,6 +74,21 @@ async function main() {
               }
               if (event.target.id === "mock-generate") {
                 event.target.dataset.clicked = "true";
+                window.mockGenerateClickAt = Date.now();
+                event.target.disabled = true;
+
+                const loader = document.createElement("div");
+                loader.id = "mock-generation-loader";
+                loader.setAttribute("role", "progressbar");
+                loader.textContent = "Generating...";
+                loader.style.cssText = "position: fixed; bottom: 24px; left: 24px; padding: 8px;";
+                document.body.appendChild(loader);
+
+                window.setTimeout(() => {
+                  loader.remove();
+                  event.target.disabled = false;
+                  window.mockGenerateCompleteAt = Date.now();
+                }, 650);
               }
             });
           </script>
@@ -100,13 +115,26 @@ async function main() {
     await page.locator("[data-testid='queue-target-count-input']").fill("1");
     await page.locator("[data-testid='apply-button']").click();
     await page.locator("[data-testid='status-banner']", {
-      hasText: "NovelAI 적용 및 Generate 클릭을 완료했습니다.",
-    }).waitFor({ timeout: 7000 });
+      hasText: "NovelAI 적용 및 이미지 생성 완료를 확인했습니다.",
+    }).waitFor({ timeout: 9000 });
 
     assert(await page.locator("#mock-import").count() === 0, "Mock Import Metadata button was not clicked.");
     assert(
       await page.locator("#mock-generate").evaluate((element) => element.dataset.clicked === "true"),
       "Mock Generate button was not clicked after it became enabled.",
+    );
+    const generationTiming = await page.evaluate(() => ({
+      clickedAt: window.mockGenerateClickAt,
+      completedAt: window.mockGenerateCompleteAt,
+      observedAt: Date.now(),
+    }));
+    assert(
+      generationTiming.completedAt && generationTiming.observedAt >= generationTiming.completedAt,
+      `Apply completed before mock generation finished: ${JSON.stringify(generationTiming)}`,
+    );
+    assert(
+      generationTiming.completedAt - generationTiming.clickedAt >= 600,
+      `Mock generation wait was not exercised: ${JSON.stringify(generationTiming)}`,
     );
 
     await mkdir(path.join(ROOT, "test-results"), { recursive: true });

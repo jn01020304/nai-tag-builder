@@ -32,8 +32,10 @@ function queueStatusLabel(session: QueueSession | null): string {
       return "다음 tick 대기";
     case "applying":
       return "NovelAI 적용 중";
+    case "generating":
+      return "생성 완료 대기";
     case "cooldown":
-      return "다음 생성 예약";
+      return "완료 후 대기";
     case "completed":
       return "완료";
     case "failed":

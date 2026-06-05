@@ -7,6 +7,8 @@ export type ApplyAutomationPhase =
   | "waiting-import-complete"
   | "waiting-generate-button"
   | "clicking-generate-button"
+  | "waiting-generation-start"
+  | "waiting-generation-complete"
   | "completed";
 
 export type ApplyAutomationErrorCode =
@@ -18,6 +20,8 @@ export type ApplyAutomationErrorCode =
   | "GENERATE_BUTTON_TIMEOUT"
   | "GENERATE_BUTTON_DISABLED"
   | "GENERATE_CLICK_FAILED"
+  | "GENERATION_START_TIMEOUT"
+  | "GENERATION_COMPLETE_TIMEOUT"
   | "ABORTED";
 
 export interface ApplyAutomationPhaseEvent {
@@ -50,5 +54,8 @@ export interface ApplyAutomationOptions {
   mode: ApplyAutomationMode;
   signal?: AbortSignal;
   timeoutMs?: number;
+  generationStartTimeoutMs?: number;
+  generationCompleteTimeoutMs?: number;
+  generationIdleStableMs?: number;
   onPhase?: (event: ApplyAutomationPhaseEvent) => void;
 }

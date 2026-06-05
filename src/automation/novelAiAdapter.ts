@@ -7,8 +7,26 @@ import type {
 } from "./automationTypes";
 
 const DEFAULT_TIMEOUT_MS = 5000;
+const DEFAULT_GENERATION_START_TIMEOUT_MS = 10000;
+const DEFAULT_GENERATION_COMPLETE_TIMEOUT_MS = 20 * 60 * 1000;
+const DEFAULT_GENERATION_IDLE_STABLE_MS = 1000;
 const POLL_MS = 100;
 const OVERLAY_ROOT_ID = "nai-tag-builder-root";
+const LOADING_SELECTORS = [
+  "progress",
+  "[role='progressbar']",
+  "[aria-busy='true']",
+  "[data-loading='true']",
+  "[data-testid*='loading' i]",
+  "[data-testid*='spinner' i]",
+  "[class*='loading' i]",
+  "[class*='spinner' i]",
+];
+
+interface GenerationStatus {
+  disabledGenerateButton: boolean;
+  loadingIndicatorCount: number;
+}
 
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -60,13 +78,53 @@ function isDisabledButton(button: HTMLButtonElement): boolean {
 }
 
 function isVisibleButton(button: HTMLButtonElement): boolean {
-  const rect = button.getBoundingClientRect();
-  const style = window.getComputedStyle(button);
+  return isVisibleElement(button);
+}
+
+function isVisibleElement(element: Element): boolean {
+  const rect = element.getBoundingClientRect();
+  const style = window.getComputedStyle(element);
 
   return rect.width > 0
     && rect.height > 0
     && style.display !== "none"
     && style.visibility !== "hidden";
+}
+
+function findLoadingIndicators(): Element[] {
+  const indicators = new Set<Element>();
+
+  for (const selector of LOADING_SELECTORS) {
+    try {
+      document.querySelectorAll(selector).forEach((element) => {
+        if (!isInsideOverlayRoot(element) && isVisibleElement(element)) {
+          indicators.add(element);
+        }
+      });
+    } catch {
+      // selector 호환성 보호
+    }
+  }
+
+  return Array.from(indicators);
+}
+
+function getGenerationStatus(): GenerationStatus {
+  const generateButton = findGenerateButton();
+
+  return {
+    disabledGenerateButton: generateButton ? isDisabledButton(generateButton) : false,
+    loadingIndicatorCount: findLoadingIndicators().length,
+  };
+}
+
+function isGenerationStarted(status: GenerationStatus): boolean {
+  return status.disabledGenerateButton || status.loadingIndicatorCount > 0;
+}
+
+function isGenerationIdle(status: GenerationStatus, observedStrongLoading: boolean): boolean {
+  if (status.loadingIndicatorCount > 0) return false;
+  return observedStrongLoading || !status.disabledGenerateButton;
 }
 
 async function waitFor<T>(
@@ -95,6 +153,47 @@ async function waitUntil(
     if (fn()) return true;
     await delay(POLL_MS);
   }
+  return false;
+}
+
+async function waitForGenerationStart(
+  timeoutMs: number,
+  signal?: AbortSignal,
+): Promise<GenerationStatus | null> {
+  return waitFor(() => {
+    const status = getGenerationStatus();
+    return isGenerationStarted(status) ? status : undefined;
+  }, timeoutMs, signal);
+}
+
+async function waitForGenerationComplete(
+  initialStatus: GenerationStatus,
+  timeoutMs: number,
+  idleStableMs: number,
+  signal?: AbortSignal,
+): Promise<boolean> {
+  const deadline = Date.now() + timeoutMs;
+  let observedStrongLoading = initialStatus.loadingIndicatorCount > 0;
+  let idleSince: number | null = null;
+
+  while (Date.now() < deadline) {
+    if (signal?.aborted) return false;
+
+    const status = getGenerationStatus();
+    if (status.loadingIndicatorCount > 0) {
+      observedStrongLoading = true;
+    }
+
+    if (isGenerationIdle(status, observedStrongLoading)) {
+      idleSince ??= Date.now();
+      if (Date.now() - idleSince >= idleStableMs) return true;
+    } else {
+      idleSince = null;
+    }
+
+    await delay(POLL_MS);
+  }
+
   return false;
 }
 
@@ -141,6 +240,9 @@ export async function applyMetadataToNovelAi(
   options: ApplyAutomationOptions,
 ): Promise<ApplyAutomationResult> {
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const generationStartTimeoutMs = options.generationStartTimeoutMs ?? DEFAULT_GENERATION_START_TIMEOUT_MS;
+  const generationCompleteTimeoutMs = options.generationCompleteTimeoutMs ?? DEFAULT_GENERATION_COMPLETE_TIMEOUT_MS;
+  const generationIdleStableMs = options.generationIdleStableMs ?? DEFAULT_GENERATION_IDLE_STABLE_MS;
   const phases: ApplyAutomationPhaseEvent[] = [];
   const emitPhase = createPhaseEmitter(options, phases);
 
@@ -281,12 +383,45 @@ export async function applyMetadataToNovelAi(
         pasteWasCanceled,
       );
     }
+
+    emitPhase("waiting-generation-start", "NovelAI 생성 시작을 확인하는 중");
+    const generationStart = await waitForGenerationStart(generationStartTimeoutMs, options.signal);
+    if (options.signal?.aborted) return abortFailure(phases);
+    if (!generationStart) {
+      return createFailure(
+        "GENERATION_START_TIMEOUT",
+        "NovelAI 생성 시작을 확인하지 못했습니다.",
+        phases,
+        `Generate 클릭 후 ${generationStartTimeoutMs}ms 안에 생성 중 상태가 감지되지 않았습니다.`,
+        targetInfo.targetKind,
+        pasteWasCanceled,
+      );
+    }
+
+    emitPhase("waiting-generation-complete", "NovelAI 이미지 생성 완료를 기다리는 중");
+    const generationCompleted = await waitForGenerationComplete(
+      generationStart,
+      generationCompleteTimeoutMs,
+      generationIdleStableMs,
+      options.signal,
+    );
+    if (options.signal?.aborted) return abortFailure(phases);
+    if (!generationCompleted) {
+      return createFailure(
+        "GENERATION_COMPLETE_TIMEOUT",
+        "NovelAI 이미지 생성 완료를 확인하지 못했습니다.",
+        phases,
+        `Generate 클릭 후 ${generationCompleteTimeoutMs}ms 안에 idle 상태가 안정적으로 감지되지 않았습니다.`,
+        targetInfo.targetKind,
+        pasteWasCanceled,
+      );
+    }
   } else {
     findGenerateButton()?.scrollIntoView({ behavior: "smooth", block: "nearest" });
   }
 
   const message = options.mode === "import-and-generate"
-    ? "NovelAI 적용 및 Generate 클릭을 완료했습니다."
+    ? "NovelAI 적용 및 이미지 생성 완료를 확인했습니다."
     : "NovelAI 메타데이터 가져오기를 완료했습니다.";
   emitPhase("completed", message);
 
