@@ -10,6 +10,7 @@ import {
 } from '../queue/queuePlanner';
 import {
   markQueueApplying,
+  markQueueGenerating,
   markQueueStopped,
   markQueueTickFailure,
   markQueueTickSuccess,
@@ -46,6 +47,7 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
   const feedbackRef = useRef(onFeedback);
   const loopCountRef = useRef(0);
   const loopTimeoutRef = useRef<number | null>(null);
+  const applyAbortRef = useRef<AbortController | null>(null);
   const queueIndexRef = useRef(0);
   const queueSessionRef = useRef<QueueSession | null>(null);
   const stopRequestedRef = useRef(false);
@@ -70,6 +72,8 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
       clearTimeout(loopTimeoutRef.current);
       loopTimeoutRef.current = null;
     }
+    applyAbortRef.current?.abort();
+    applyAbortRef.current = null;
     stopRequestedRef.current = true;
     if (
       queueSessionRef.current &&
@@ -84,6 +88,7 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
 
   useEffect(() => () => {
     if (loopTimeoutRef.current) clearTimeout(loopTimeoutRef.current);
+    applyAbortRef.current?.abort();
   }, []);
 
   const getQueuedSources = async (): Promise<QueueSourceSnapshot[]> => {
@@ -167,10 +172,25 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
       queueIndexRef.current = plan.nextQueueCursor;
       updateQueueSession(markQueueWaiting(currentSession, plan));
       updateQueueSession(markQueueApplying(queueSessionRef.current ?? currentSession, plan));
+      const applyAbort = new AbortController();
+      applyAbortRef.current = applyAbort;
 
       try {
-        const result = await runApplyPipeline({ state: plan.state, autoGenerate: true });
+        const result = await runApplyPipeline({
+          state: plan.state,
+          autoGenerate: true,
+          signal: applyAbort.signal,
+          onPhase: (event) => {
+            if (event.phase === 'waiting-generation-complete') {
+              updateQueueSession(markQueueGenerating(queueSessionRef.current ?? currentSession, plan));
+            }
+          },
+        });
+        if (applyAbortRef.current === applyAbort) {
+          applyAbortRef.current = null;
+        }
         if (result.effect.status === 'failed') {
+          if (result.effect.code === 'ABORTED' && stopRequestedRef.current) return;
           console.error('Auto generate effect failed:', result.effect);
           updateQueueSession(markQueueTickFailure(queueSessionRef.current ?? currentSession, {
             code: result.effect.code,
@@ -189,6 +209,10 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
         }
         updateQueueSession(markQueueTickSuccess(queueSessionRef.current ?? currentSession, plan, result));
       } catch (error) {
+        if (applyAbortRef.current === applyAbort) {
+          applyAbortRef.current = null;
+        }
+        if (stopRequestedRef.current) return;
         console.error('Auto generate pipeline failed:', error);
         updateQueueSession(markQueueTickFailure(queueSessionRef.current ?? currentSession, {
           code: 'QUEUE_PLANNING_FAILED',

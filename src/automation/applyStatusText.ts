@@ -10,6 +10,8 @@ const APPLY_PHASE_ACTION_LABELS: Record<ApplyPipelinePhase, string> = {
   "waiting-import-complete": "적용 확인 중...",
   "waiting-generate-button": "Generate 버튼 대기 중...",
   "clicking-generate-button": "Generate 클릭 중...",
+  "waiting-generation-start": "생성 시작 확인 중...",
+  "waiting-generation-complete": "생성 완료 대기 중...",
   completed: "완료됨",
 };
 
@@ -22,6 +24,8 @@ const APPLY_PHASE_STATUS_LABELS: Record<ApplyPipelinePhase, string> = {
   "waiting-import-complete": "Import 완료 확인 중",
   "waiting-generate-button": "Generate 버튼 대기 중",
   "clicking-generate-button": "Generate 버튼 클릭 중",
+  "waiting-generation-start": "NovelAI 생성 시작 확인 중",
+  "waiting-generation-complete": "NovelAI 생성 완료 대기 중",
   completed: "적용 완료",
 };
 
@@ -42,6 +46,10 @@ const APPLY_ERROR_RECOVERY_HINTS: Record<ApplyAutomationErrorCode, string> = {
     "NovelAI가 아직 입력을 처리 중이거나 필수 값이 유효하지 않을 수 있습니다. 파라미터와 Anlas 상태를 확인한 뒤 다시 시도해 주세요.",
   GENERATE_CLICK_FAILED:
     "NovelAI UI 위에 다른 팝업이나 오버레이가 있는지 확인하고 다시 시도해 주세요.",
+  GENERATION_START_TIMEOUT:
+    "Generate 클릭 후 NovelAI가 생성 중 상태로 전환되는지 확인하지 못했습니다. 현재 화면에서 생성이 실제로 시작됐는지 확인해 주세요.",
+  GENERATION_COMPLETE_TIMEOUT:
+    "NovelAI 이미지 생성 완료를 제한 시간 안에 확인하지 못했습니다. 생성이 계속 진행 중이면 완료 후 다시 Queue를 시작해 주세요.",
   ABORTED:
     "적용이 중단되었습니다. 현재 NovelAI 화면 상태를 확인한 뒤 다시 적용해 주세요.",
 };

@@ -8,6 +8,7 @@ export type QueueSessionStatus =
   | "starting"
   | "waiting"
   | "applying"
+  | "generating"
   | "cooldown"
   | "stopped"
   | "completed"
