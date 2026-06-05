@@ -37,7 +37,7 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
   const [loopCount, setLoopCount] = useState(0);
   const [queueSession, setQueueSession] = useState<QueueSession | null>(null);
   const [seedRule, setSeedRule] = useState<SeedRule>('none');
-  const [adjustStep, setAdjustStep] = useState<number | string>(10);
+  const [adjustStep, setAdjustStep] = useState<number | string>(3);
 
   const stateRef = useRef(state);
   const queueRef = useRef(queue);
@@ -126,7 +126,7 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
       initialSources,
       createCurrentStateSource(stateRef.current),
     );
-    const firstWarning = warnings.find((warning) => warning.severity === 'warning') ?? warnings[0];
+    const firstWarning = warnings.find((warning) => warning.severity === 'warning');
 
     if (firstWarning) {
       feedbackRef.current?.({
@@ -241,7 +241,7 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
   };
 
   const adjustValue = (type: 'interval' | 'count', dir: 1 | -1) => {
-    const step = Number(adjustStep) || 10;
+    const step = Number(adjustStep) || 3;
     if (type === 'interval') {
       const val = Math.max(3, Number(intervalSec) + (step * dir));
       handleIntervalChange(String(val));

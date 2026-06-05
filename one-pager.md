@@ -49,6 +49,11 @@ writing:
 - Scope: Bookmarklet injects external JS into the NAI page. Chrome mobile cannot run userscripts/extensions — bookmarklet is the only injection method. localhost script injection from HTTPS pages is blocked by Chrome Private Network Access policy — must serve from public HTTPS (GitHub Pages).
 - Implication: DevTools Snippets can run 210KB+ JS; Console cannot (truncation → SyntaxError). Cache-busting `?v='+Date.now()` is mandatory — GitHub Pages default cache headers cause mobile Chrome to serve stale builds even after push.
 
+### GitHub Pages Deployment Freshness
+- Observation: Bookmarklet `?t=${Date.now()}` only bypasses browser/CDN cache for the URL; it cannot fix a GitHub Pages artifact that was built from an older commit.
+- Scope: If mobile still shows an old behavior after a local fix, compare local `dist/nai-tag-builder.js` against `https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js?t=<unique>` by checking for a newly added sentinel string. For the 2026-06-05 Generate-button fix, the sentinels were `Generate 버튼은 발견됐지만` and `data-disabled`.
+- Implication: Treat stale remote JS as a deployment problem, not a bookmarklet problem. Push `main`, wait for `.github/workflows/deploy.yml` to finish, then re-check the remote JS content before diagnosing NovelAI runtime behavior.
+
 ### React Number Input Clamping
 - Observation: Applying min/max clamping inside `onChange` breaks single-digit deletion. `Number("")` → `0` → clamp forces back to min.
 - Scope: Allow empty strings during `onChange`, apply clamping only in `onBlur`. State type: `number | string`.
@@ -124,6 +129,10 @@ writing:
 ---
 
 ## Findings
+
+### 2026-06-05 — Remote Bundle Stale After Generate Button Fix
+- Answers: 자동 생성 실패가 계속 재현된 원인은 북마클릿 코드가 아니라 GitHub Pages가 구버전 `nai-tag-builder.js`를 서빙한 것이었다. 로컬 `dist`에는 `Generate 버튼은 발견됐지만`과 `data-disabled`가 있었지만, 원격 JS에는 없었다. `main` push 후 GitHub Pages 배포가 성공하고 원격 JS sentinel을 다시 확인한 뒤 최신 수정이 적용됐다.
+- Corrections: 북마클릿에 이미 `?t=${Date.now()}`가 있어도 원격 artifact 자체가 낡으면 해결되지 않는다. 재발 시 먼저 원격 JS sentinel 확인 → Actions 배포 상태 확인 → NovelAI DOM/runtime 진단 순서로 진행한다.
 
 ### 2026-06-05 — UI/UX 리뉴얼 및 Glassmorphism
 - Answers: 기존의 딱딱한 패널 구조에서 벗어나 `backdropFilter: 'blur(16px)'` 및 반투명 배경을 적용해 시각적 개방감을 높임. 스크롤바 커스텀 및 컴포넌트 여백 튜닝으로 모바일 터치 사용성 개선.
