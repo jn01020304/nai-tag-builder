@@ -125,6 +125,9 @@ writing:
 
 ## Findings
 
+### 2026-06-05 — UI/UX 리뉴얼 및 Glassmorphism
+- Answers: 기존의 딱딱한 패널 구조에서 벗어나 `backdropFilter: 'blur(16px)'` 및 반투명 배경을 적용해 시각적 개방감을 높임. 스크롤바 커스텀 및 컴포넌트 여백 튜닝으로 모바일 터치 사용성 개선.
+
 ### 2026-03-13 — ImportModal Nested Merge Requirement
 - Answers: `{ ...state, ...partial }` shallow merge replaces nested objects entirely. When ImportModal sends `partial.prompt` (subset of PromptState), the user's existing basePrompt is lost if unchecked. Fix: merge each group separately — `prompt: { ...state.prompt, ...partial.prompt }, params: { ...state.params, ...partial.params }, advanced: { ...state.advanced, ...partial.advanced }`.
 
