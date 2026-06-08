@@ -1,20 +1,32 @@
 import { useState } from "react";
 
-export function useEdgeResize(minWidth: number) {
+type ResizeEdge = "left" | "right";
+
+function clampWidth(width: number, minWidth: number): number {
+  const maxWidth = Math.max(minWidth, window.innerWidth - 16);
+  return Math.min(maxWidth, Math.max(minWidth, width));
+}
+
+export function useEdgeResize(minWidth: number, edge: ResizeEdge = "right") {
   const [overlayWidth, setOverlayWidth] = useState(minWidth);
 
   const startResize = (clientX: number) => {
     const startX = clientX;
     const startWidth = overlayWidth;
 
+    const nextWidth = (currentX: number) => {
+      const delta = edge === "left" ? startX - currentX : currentX - startX;
+      return clampWidth(startWidth + delta, minWidth);
+    };
+
     const onMM = (e: MouseEvent) => {
       e.preventDefault();
-      setOverlayWidth(Math.max(minWidth, startWidth + (e.clientX - startX)));
+      setOverlayWidth(nextWidth(e.clientX));
     };
 
     const onTM = (e: TouchEvent) => {
       e.preventDefault();
-      setOverlayWidth(Math.max(minWidth, startWidth + (e.touches[0].clientX - startX)));
+      setOverlayWidth(nextWidth(e.touches[0].clientX));
     };
 
     const up = () => {

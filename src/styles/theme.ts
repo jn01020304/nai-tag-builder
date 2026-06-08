@@ -25,6 +25,47 @@ export interface ThemeColors {
   headerText: string; // Dimmer text used for headers/labels
 }
 
+export type PromptTone = "base" | "negative" | "character" | "negativeCharacter";
+
+export interface PromptTonePalette {
+  background: string;
+  border: string;
+  color: string;
+  shadow: string;
+  mutedBackground: string;
+}
+
+export const promptTonePalettes: Record<PromptTone, PromptTonePalette> = {
+  base: {
+    background: "#2f5368",
+    border: "#7fa5b7",
+    color: "#ffffff",
+    shadow: "rgba(127, 165, 183, 0.26)",
+    mutedBackground: "#203846",
+  },
+  negative: {
+    background: "#61443b",
+    border: "#b58a7c",
+    color: "#ffffff",
+    shadow: "rgba(181, 138, 124, 0.24)",
+    mutedBackground: "#432f2a",
+  },
+  character: {
+    background: "#504a70",
+    border: "#a9a0ca",
+    color: "#ffffff",
+    shadow: "rgba(169, 160, 202, 0.24)",
+    mutedBackground: "#39354f",
+  },
+  negativeCharacter: {
+    background: "#62465d",
+    border: "#bd94b5",
+    color: "#ffffff",
+    shadow: "rgba(189, 148, 181, 0.24)",
+    mutedBackground: "#453141",
+  },
+};
+
 export function withAlpha(color: string, alpha: number): string {
   const match = color.match(/\d+(\.\d+)?/g);
   if (match && match.length >= 3) {

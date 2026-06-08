@@ -6,38 +6,24 @@ import type {
   PromptSelectionAfterRender,
 } from "../prompt/promptInsertTarget";
 import { promptTargetLabel } from "../prompt/promptInsertTarget";
-import { inputStyle } from "../styles/theme";
 import { movePromptTag } from "../prompt/catalog/promptTagText";
 import ComposeCatalogChips from "./ComposeCatalogChips";
-import HighlightedTextarea from "./HighlightedTextarea";
+import PromptPairTabs from "./PromptPairTabs";
 
 interface Props {
   state: MetadataState;
   dispatch: React.Dispatch<MetadataAction>;
   activePromptTarget: PromptInsertTarget;
-  selectionAfterRender?: PromptSelectionAfterRender;
+  getSelectionAfterRender: (target: PromptInsertTarget) => PromptSelectionAfterRender | undefined;
   onPromptSelection: (target: PromptInsertTarget, selection: { start: number; end: number }) => void;
   onToggleCatalogEntry: (entry: CoreCatalogEntry) => void;
 }
-
-const fieldLabelStyle: React.CSSProperties = {
-  backgroundColor: "#15172f",
-  border: "1px solid rgba(255, 255, 255, 0.25)",
-  borderRadius: "6px",
-  color: "#ffffff",
-  display: "inline-flex",
-  fontSize: "12px",
-  fontWeight: 700,
-  lineHeight: 1,
-  marginBottom: "6px",
-  padding: "4px 7px",
-};
 
 export default function PromptSection({
   state,
   dispatch,
   activePromptTarget,
-  selectionAfterRender,
+  getSelectionAfterRender,
   onPromptSelection,
   onToggleCatalogEntry,
 }: Props) {
@@ -53,13 +39,6 @@ export default function PromptSection({
         return state.prompt.negativeCharacters.find((character) => character.id === activePromptTarget.id)?.caption ?? "";
     }
   })();
-
-  const updateSelection = (target: HTMLTextAreaElement) => {
-    onPromptSelection({ kind: "base" }, {
-      start: target.selectionStart,
-      end: target.selectionEnd,
-    });
-  };
 
   const reorderBasePrompt = (fromIndex: number, toIndex: number) => {
     dispatch({
@@ -89,29 +68,32 @@ export default function PromptSection({
       >
         Insert target: {promptTargetLabel(activePromptTarget)}
       </div>
-      <label data-testid="raw-prompt-label" style={fieldLabelStyle}>Raw Prompt</label>
-      <HighlightedTextarea
-        data-testid="raw-prompt-textarea"
-        value={state.prompt.basePrompt}
-        onChange={(e) => {
-          dispatch({ type: "SET_PROMPT", field: "basePrompt", value: e.target.value });
-          updateSelection(e.target);
-        }}
-        onSelect={(e) => updateSelection(e.currentTarget)}
-        onKeyUp={(e) => updateSelection(e.currentTarget)}
-        onFocus={(e) => updateSelection(e.currentTarget)}
-        selectionAfterRender={selectionAfterRender}
-        placeholder="base prompt tags..."
-        spellCheck={false}
-        autoCorrect="off"
-        autoCapitalize="off"
-        style={{
-          ...inputStyle,
-          width: "100%",
-          boxSizing: "border-box",
+      <PromptPairTabs
+        testIdPrefix="base-prompt"
+        activePromptTarget={activePromptTarget}
+        getSelectionAfterRender={getSelectionAfterRender}
+        onPromptSelection={onPromptSelection}
+        primary={{
+          label: "Main Prompt",
+          tabLabel: "Main Prompt",
+          target: { kind: "base" },
+          value: state.prompt.basePrompt,
+          placeholder: "main prompt tags...",
+          testId: "main-prompt-textarea",
+          labelTestId: "main-prompt-label",
           minHeight: "128px",
-          resize: "none",
-          marginBottom: "8px",
+          onChange: (value) => dispatch({ type: "SET_PROMPT", field: "basePrompt", value }),
+        }}
+        secondary={{
+          label: "Undesired Content",
+          tabLabel: "Undesired Content",
+          target: { kind: "negativeBase" },
+          value: state.prompt.negativeBase,
+          placeholder: "undesired content tags...",
+          testId: "negative-prompt-textarea",
+          labelTestId: "negative-prompt-label",
+          minHeight: "108px",
+          onChange: (value) => dispatch({ type: "SET_PROMPT", field: "negativeBase", value }),
         }}
       />
     </section>

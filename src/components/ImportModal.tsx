@@ -133,7 +133,7 @@ export default function ImportModal({ importedState, onConfirm, onCancel }: Prop
 
                 <label style={rowStyle}>
                     <input style={{ marginTop: '4px' }} type="checkbox" checked={importNegative} onChange={e => setImportNegative(e.target.checked)} />
-                    부정 프롬프트 (Negative Prompt)
+                    Undesired Content
                 </label>
 
                 {importedState.prompt.negativeCharacters.length > 0 && (

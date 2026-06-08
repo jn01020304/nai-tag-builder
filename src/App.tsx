@@ -12,7 +12,6 @@ import { useTheme } from './contexts/themeContextCore';
 import PromptSection from './components/PromptSection';
 import GenerationParams from './components/GenerationParams';
 import CharacterCaptions from './components/CharacterCaptions';
-import NegativePrompt from './components/NegativePrompt';
 import AdvancedParams from './components/AdvancedParams';
 import PresetManager from './components/PresetManager';
 import QueuePanel from './components/QueuePanel';
@@ -71,7 +70,7 @@ function AppContent() {
   const [state, dispatch] = useMetadataState();
   const [isApplying, setIsApplying] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { overlayWidth, startResize } = useEdgeResize(320);
+  const { overlayWidth, startResize } = useEdgeResize(320, "left");
 
   // Preset queue state
   const [queue, setQueue] = useState<string[]>([]);
@@ -192,9 +191,19 @@ function AppContent() {
     }
   };
 
+  const getPairedNegativeCharacterTarget = (characterId: string): PromptInsertTarget | null => {
+    const index = state.prompt.characters.findIndex((character) => character.id === characterId);
+    const negativeCharacter = index >= 0 ? state.prompt.negativeCharacters[index] : undefined;
+    return negativeCharacter ? { kind: 'negativeCharacter', id: negativeCharacter.id } : null;
+  };
+
   const resolveCatalogTarget = (entry: CoreCatalogEntry): PromptInsertTarget => {
     if (entry.target === 'negative' && activePromptTarget.kind === 'base') {
       return { kind: 'negativeBase' };
+    }
+
+    if (entry.target === 'negative' && activePromptTarget.kind === 'character') {
+      return getPairedNegativeCharacterTarget(activePromptTarget.id) ?? activePromptTarget;
     }
 
     return activePromptTarget;
@@ -330,13 +339,13 @@ function AppContent() {
           style={{
             position: 'absolute',
             top: 0,
-            right: 0,
+            left: 0,
             width: '12px',
             height: '100%',
             cursor: 'ew-resize',
             zIndex: 10,
             touchAction: 'none',
-            borderRight: `3px solid ${theme.surface1}`,
+            borderLeft: `3px solid ${theme.surface1}`,
             opacity: 0.75,
           }}
         />
@@ -383,19 +392,15 @@ function AppContent() {
             state={state}
             dispatch={dispatch}
             activePromptTarget={activePromptTarget}
-            selectionAfterRender={selectionAfterRenderByTarget.base}
+            getSelectionAfterRender={(target) => selectionAfterRenderByTarget[promptTargetKey(target)]}
             onPromptSelection={recordPromptSelection}
             onToggleCatalogEntry={handleCatalogToggle}
           />
           <GenerationParams state={state} dispatch={dispatch} />
           <CharacterCaptions
             characters={state.prompt.characters}
-            dispatch={dispatch}
-            getSelectionAfterRender={(target) => selectionAfterRenderByTarget[promptTargetKey(target)]}
-            onPromptSelection={recordPromptSelection}
-          />
-          <NegativePrompt
-            state={state}
+            negativeCharacters={state.prompt.negativeCharacters}
+            activePromptTarget={activePromptTarget}
             dispatch={dispatch}
             getSelectionAfterRender={(target) => selectionAfterRenderByTarget[promptTargetKey(target)]}
             onPromptSelection={recordPromptSelection}

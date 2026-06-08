@@ -67,11 +67,11 @@ async function startServerIfNeeded() {
 }
 
 async function getTextareaValue(page) {
-  return page.locator("[data-testid='raw-prompt-textarea']").inputValue();
+  return page.locator("[data-testid='main-prompt-textarea']").inputValue();
 }
 
 async function getTextareaSelectionStart(page) {
-  return page.locator("[data-testid='raw-prompt-textarea']").evaluate((element) => element.selectionStart);
+  return page.locator("[data-testid='main-prompt-textarea']").evaluate((element) => element.selectionStart);
 }
 
 async function getBackgroundColor(locator) {
@@ -83,7 +83,7 @@ async function hasLocator(locator) {
 }
 
 async function setTextareaCursor(page, value, cursorIndex) {
-  const textarea = page.locator("[data-testid='raw-prompt-textarea']");
+  const textarea = page.locator("[data-testid='main-prompt-textarea']");
   await textarea.fill(value);
   await textarea.evaluate((element, index) => {
     element.focus();
@@ -109,7 +109,7 @@ async function checkLayout(page) {
     const body = document.querySelector("[data-testid='overlay-body']");
     const footer = document.querySelector("[data-testid='overlay-footer']");
     const footerStatus = document.querySelector("[data-testid='overlay-footer-status']");
-    const raw = document.querySelector("[data-testid='raw-prompt-textarea']");
+    const raw = document.querySelector("[data-testid='main-prompt-textarea']");
     const params = document.querySelector("[data-testid='generation-params']");
     if (
       !(overlay instanceof HTMLElement) ||
@@ -181,7 +181,7 @@ async function checkLayout(page) {
 }
 
 async function checkReadablePromptLabel(page) {
-  const result = await page.locator("[data-testid='raw-prompt-label']").evaluate((element) => {
+  const result = await page.locator("[data-testid='main-prompt-label']").evaluate((element) => {
     const parseRgb = (value) => {
       const parts = value.match(/\d+(\.\d+)?/g);
       if (!parts || parts.length < 3) return null;
@@ -251,7 +251,7 @@ async function main() {
     await page.goto(URL, { waitUntil: "networkidle" });
     await page.locator("text=NAI Tag Builder v2.0").waitFor({ timeout: 5000 });
 
-    const textarea = page.locator("[data-testid='raw-prompt-textarea']");
+    const textarea = page.locator("[data-testid='main-prompt-textarea']");
     await textarea.click();
     await textarea.fill("alpha");
     assert(await getTextareaValue(page) === "alpha", "Raw Prompt typing failed.");
@@ -314,7 +314,7 @@ async function main() {
       `Character target insertion failed: ${await characterTextarea.inputValue()}`,
     );
     assert(
-      await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']")) === "rgb(76, 47, 125)",
+      await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']")) === "rgb(80, 74, 112)",
       `Character active chip color failed: ${await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']"))}`,
     );
     assert(
@@ -322,7 +322,7 @@ async function main() {
       "Character assignment badge c1 is missing.",
     );
 
-    await page.locator("button", { hasText: "Negative Prompt" }).click();
+    await page.locator("[data-testid='base-prompt-secondary-tab']").click();
     const negativeTextarea = page.locator("[data-testid='negative-prompt-textarea']");
     await setLocatorCursor(negativeTextarea, "bad anatomy, blurry", "bad anatomy".length);
     await page.locator("[data-testid='catalog-chip-tag_1boy']").click();
@@ -331,7 +331,7 @@ async function main() {
       `Negative target insertion failed: ${await negativeTextarea.inputValue()}`,
     );
     assert(
-      await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']")) === "rgb(103, 50, 39)",
+      await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']")) === "rgb(97, 68, 59)",
       `Negative active chip color failed: ${await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']"))}`,
     );
     assert(
@@ -339,6 +339,7 @@ async function main() {
       "Negative assignment badge n is missing.",
     );
 
+    await page.locator("[data-testid='character-0-secondary-tab']").click();
     const negativeCharacterTextarea = page.locator("[data-testid='negative-character-prompt-textarea-0']");
     await setLocatorCursor(negativeCharacterTextarea, "bad hands, blurry", "bad hands".length);
     await page.locator("[data-testid='catalog-chip-tag_2boys']").click();
@@ -364,6 +365,7 @@ async function main() {
       "Second character assignment badge c2 is missing.",
     );
 
+    await page.locator("[data-testid='base-prompt-primary-tab']").click();
     await textarea.click();
     assert(
       await hasLocator(page.locator("[data-testid='catalog-chip-tag_1boy-badge-c1']")),

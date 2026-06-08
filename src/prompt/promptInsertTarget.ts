@@ -24,13 +24,13 @@ export function promptTargetKey(target: PromptInsertTarget): string {
 export function promptTargetLabel(target: PromptInsertTarget): string {
   switch (target.kind) {
     case "base":
-      return "Base Prompt";
+      return "Main Prompt";
     case "negativeBase":
-      return "Negative Prompt";
+      return "Undesired Content";
     case "character":
       return "Character Prompt";
     case "negativeCharacter":
-      return "Character Negative";
+      return "Character Undesired Content";
   }
 }
 
