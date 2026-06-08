@@ -169,8 +169,11 @@ The user tests on NovelAI through:
 If the user cannot see changes on NovelAI:
 
 - confirm `dist/nai-tag-builder.js` was rebuilt
-- confirm GitHub Pages or deployment picked up the new bundle
-- add a temporary cache-busting query string to the bookmarklet source if needed
+- confirm the local bundle contains a new sentinel string from the change, for example `Main Prompt`
+- confirm the remote bundle also contains that sentinel by fetching `https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js?t=<unique>`
+- confirm GitHub Pages or deployment picked up the new bundle before asking the user to retest NovelAI
+- do not treat bookmarklet `?t=` cache busting as deployment; it only bypasses browser/CDN cache for whatever remote artifact already exists
+- if the user's screenshot still shows old UI text such as `Raw Prompt`, check remote JS freshness before diagnosing NovelAI runtime or browser bookmark contents
 - remind that changing local source alone does not affect the hosted bookmarklet
 
 Do not silently assume the NovelAI page is running the local build.

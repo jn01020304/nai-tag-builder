@@ -8,7 +8,7 @@ import {
   promptTargetGroup,
   promptTargetKey,
 } from "../prompt/promptInsertTarget";
-import { inputStyle, promptTonePalettes, smallBtnStyle, withAlpha } from "../styles/theme";
+import { inputStyle, promptTonePalettes, smallBtnStyle } from "../styles/theme";
 import HighlightedTextarea from "./HighlightedTextarea";
 
 interface PromptPairField {
@@ -115,12 +115,7 @@ export default function PromptPairTabs({
 
     const promptInputStyle: CSSProperties = {
       ...inputStyle,
-      backgroundColor: palette.background,
-      border: `1px solid ${palette.border}`,
-      boxShadow: `inset 0 0 0 999px ${withAlpha(palette.mutedBackground, 0.38)}`,
       boxSizing: "border-box",
-      color: palette.color,
-      caretColor: palette.color,
       fontSize: "13px",
       lineHeight: 1.45,
       marginBottom,

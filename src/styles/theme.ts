@@ -32,37 +32,32 @@ export interface PromptTonePalette {
   border: string;
   color: string;
   shadow: string;
-  mutedBackground: string;
 }
 
 export const promptTonePalettes: Record<PromptTone, PromptTonePalette> = {
   base: {
-    background: "#2f5368",
-    border: "#7fa5b7",
+    background: "#4A6B82",
+    border: "#86A0B2",
     color: "#ffffff",
-    shadow: "rgba(127, 165, 183, 0.26)",
-    mutedBackground: "#203846",
+    shadow: "rgba(74, 107, 130, 0.24)",
   },
   negative: {
-    background: "#61443b",
-    border: "#b58a7c",
+    background: "#8F5955",
+    border: "#BF918D",
     color: "#ffffff",
-    shadow: "rgba(181, 138, 124, 0.24)",
-    mutedBackground: "#432f2a",
+    shadow: "rgba(143, 89, 85, 0.22)",
   },
   character: {
-    background: "#504a70",
-    border: "#a9a0ca",
+    background: "#6B5B82",
+    border: "#A99CB9",
     color: "#ffffff",
-    shadow: "rgba(169, 160, 202, 0.24)",
-    mutedBackground: "#39354f",
+    shadow: "rgba(107, 91, 130, 0.22)",
   },
   negativeCharacter: {
-    background: "#62465d",
-    border: "#bd94b5",
+    background: "#8A5A6D",
+    border: "#BD93A4",
     color: "#ffffff",
-    shadow: "rgba(189, 148, 181, 0.24)",
-    mutedBackground: "#453141",
+    shadow: "rgba(138, 90, 109, 0.22)",
   },
 };
 

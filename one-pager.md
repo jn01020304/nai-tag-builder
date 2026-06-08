@@ -130,6 +130,10 @@ writing:
 
 ## Findings
 
+### 2026-06-08 — Bookmarklet URL Updated But Remote Bundle Still Old
+- Answers: 사용자가 새 cache-busting 북마클릿을 실행했는데도 `Raw Prompt` UI가 계속 보인 원인은 북마클릿 주소가 아니라 GitHub Pages 원격 `nai-tag-builder.js`가 아직 이전 artifact였기 때문이다. 로컬 `dist/nai-tag-builder.js`는 `Main Prompt=true`, `Raw Prompt=false`였지만, 원격 JS는 `Main Prompt=false`, `Raw Prompt=true`였다. `main`에 커밋/푸시한 뒤 원격 JS를 다시 받아 `Main Prompt=true`, `Raw Prompt=false`를 확인하고 나서 최신 UI가 배포됐다.
+- Corrections: 북마클릿 문자열을 바꿨다고 배포가 끝난 것이 아니다. UI 변경 후에는 반드시 `rtk npm run build`, `dist/nai-tag-builder.js` 갱신, 커밋/푸시, 원격 JS sentinel 확인까지 완료해야 한다. 사용자가 오래된 UI 스크린샷을 보내면 먼저 remote bundle freshness를 확인한다.
+
 ### 2026-06-05 — Remote Bundle Stale After Generate Button Fix
 - Answers: 자동 생성 실패가 계속 재현된 원인은 북마클릿 코드가 아니라 GitHub Pages가 구버전 `nai-tag-builder.js`를 서빙한 것이었다. 로컬 `dist`에는 `Generate 버튼은 발견됐지만`과 `data-disabled`가 있었지만, 원격 JS에는 없었다. `main` push 후 GitHub Pages 배포가 성공하고 원격 JS sentinel을 다시 확인한 뒤 최신 수정이 적용됐다.
 - Corrections: 북마클릿에 이미 `?t=${Date.now()}`가 있어도 원격 artifact 자체가 낡으면 해결되지 않는다. 재발 시 먼저 원격 JS sentinel 확인 → Actions 배포 상태 확인 → NovelAI DOM/runtime 진단 순서로 진행한다.
