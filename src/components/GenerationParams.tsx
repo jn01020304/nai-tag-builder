@@ -2,7 +2,7 @@ import type { MetadataState, Sampler, NoiseSchedule } from '../types/metadata';
 import type { MetadataAction } from '../hooks/useMetadataState';
 import { KNOWN_MODELS, getModelBySource } from '../model/models';
 import CollapsibleSection from './CollapsibleSection';
-import { theme, inputStyle, smallBtnStyle } from '../styles/theme';
+import { theme, inputStyle, parameterInputStyle, smallBtnStyle } from '../styles/theme';
 
 interface Props {
   state: MetadataState;
@@ -90,12 +90,13 @@ export default function GenerationParams({ state, dispatch }: Props) {
         <div style={fieldStyle}>
           <label style={fieldLabelStyle}>Width</label>
           <input
+            data-testid="width-input"
             type="number"
             value={state.params.width}
             step={64}
             min={64}
             onChange={e => setP('width', Number(e.target.value))}
-            style={{ ...inputStyle, width: '100%' }}
+            style={{ ...parameterInputStyle, width: '100%' }}
           />
         </div>
         <button
@@ -108,12 +109,13 @@ export default function GenerationParams({ state, dispatch }: Props) {
         <div style={fieldStyle}>
           <label style={fieldLabelStyle}>Height</label>
           <input
+            data-testid="height-input"
             type="number"
             value={state.params.height}
             step={64}
             min={64}
             onChange={e => setP('height', Number(e.target.value))}
-            style={{ ...inputStyle, width: '100%' }}
+            style={{ ...parameterInputStyle, width: '100%' }}
           />
         </div>
       </div>
@@ -124,13 +126,14 @@ export default function GenerationParams({ state, dispatch }: Props) {
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
             <label style={fieldLabelStyle}>Steps</label>
             <input
+              data-testid="steps-input"
               type="number"
               value={state.params.steps}
               min={1}
               max={50}
               onChange={e => setP('steps', e.target.value === '' ? '' : Number(e.target.value))}
               onBlur={() => setP('steps', Math.max(1, Math.min(50, Number(state.params.steps) || 1)))}
-              style={{ ...inputStyle, width: '48px', padding: '2px 4px', textAlign: 'center' }}
+              style={{ ...parameterInputStyle, width: '48px', padding: '2px 4px', textAlign: 'center' }}
             />
           </div>
           <input
@@ -153,7 +156,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
               step={0.1}
               onChange={e => setP('scale', e.target.value === '' ? '' : Number(e.target.value))}
               onBlur={() => setP('scale', Math.max(0, Math.min(10, Number(state.params.scale) || 0)))}
-              style={{ ...inputStyle, width: '48px', padding: '2px 4px', textAlign: 'center' }}
+              style={{ ...parameterInputStyle, width: '48px', padding: '2px 4px', textAlign: 'center' }}
             />
           </div>
           <input
@@ -216,7 +219,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
             value={state.params.seed}
             min={0}
             onChange={e => setP('seed', Number(e.target.value))}
-            style={{ ...inputStyle, width: '100%' }}
+            style={{ ...parameterInputStyle, width: '100%' }}
           />
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { theme } from '../styles/theme';
+import { useTheme } from '../contexts/themeContextCore';
 
 interface Props {
   isApplying: boolean;
@@ -7,6 +7,8 @@ interface Props {
 }
 
 export default function ApplyButton({ isApplying, label, onApply }: Props) {
+  const theme = useTheme();
+
   return (
     <button
       data-testid="apply-button"
@@ -15,8 +17,8 @@ export default function ApplyButton({ isApplying, label, onApply }: Props) {
       style={{
         width: '100%',
         padding: '12px',
-        backgroundColor: isApplying ? theme.surface1 : theme.green,
-        color: isApplying ? theme.subtext0 : '#ffffff', // Usually white text over intensity button
+        backgroundColor: isApplying ? theme.surface1 : theme.actionAccent,
+        color: isApplying ? theme.subtext0 : theme.actionAccentText,
         border: 'none',
         borderRadius: '6px',
         fontWeight: 'bold',
