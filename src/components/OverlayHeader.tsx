@@ -2,22 +2,14 @@ import { useTheme } from "../contexts/themeContextCore";
 
 interface Props {
   isCollapsed: boolean;
-  isLooping: boolean;
-  loopCount: number;
-  targetCount: number | string;
   onClose: () => void;
-  onStopLoop: () => void;
   onToggleCollapsed: () => void;
   onStartDrag: (clientX: number, clientY: number) => void;
 }
 
 export default function OverlayHeader({
   isCollapsed,
-  isLooping,
-  loopCount,
-  targetCount,
   onClose,
-  onStopLoop,
   onToggleCollapsed,
   onStartDrag,
 }: Props) {
@@ -25,15 +17,38 @@ export default function OverlayHeader({
 
   const headerBtnStyle: React.CSSProperties = {
     alignItems: "center",
-    background: "none",
-    border: "none",
+    backgroundColor: theme.surface0,
+    border: `1px solid ${theme.surface1}`,
+    borderRadius: "999px",
     cursor: "pointer",
     display: "inline-flex",
-    fontSize: "16px",
-    fontWeight: "bold",
+    flex: "0 0 28px",
+    height: "28px",
     justifyContent: "center",
     lineHeight: 1,
-    padding: "0 2px",
+    padding: 0,
+    transition: "background-color 120ms ease, border-color 120ms ease, transform 120ms ease",
+    width: "28px",
+  };
+
+  const chevronStyle: React.CSSProperties = {
+    borderBottom: `2px solid ${theme.subtext0}`,
+    borderRight: `2px solid ${theme.subtext0}`,
+    display: "block",
+    height: "8px",
+    transform: isCollapsed ? "rotate(-135deg) translate(-1px, -1px)" : "rotate(45deg) translate(-1px, -1px)",
+    width: "8px",
+  };
+
+  const closeLineStyle: React.CSSProperties = {
+    backgroundColor: theme.red,
+    borderRadius: "999px",
+    display: "block",
+    height: "2px",
+    left: "7px",
+    position: "absolute",
+    top: "13px",
+    width: "14px",
   };
 
   return (
@@ -65,31 +80,33 @@ export default function OverlayHeader({
         zIndex: 2,
       }}
     >
-      <span>NAI Tag Builder v2.0</span>
-      <div style={{ alignItems: "center", display: "flex", gap: "8px" }}>
-        {isLooping && (
-          <button
-            onClick={onStopLoop}
-            title="반복 중지"
-            style={{ ...headerBtnStyle, color: theme.yellow, gap: "4px" }}
-          >
-            <span style={{ fontSize: "10px" }}>({loopCount}/{targetCount})</span>
-            &#9632;
-          </button>
-        )}
+      <span
+        style={{
+          minWidth: 0,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        NAI Tag Builder v2.0
+      </span>
+      <div style={{ alignItems: "center", display: "flex", flex: "0 0 auto", gap: "8px" }}>
         <button
           onClick={onToggleCollapsed}
           title={isCollapsed ? "펼치기" : "접기"}
-          style={{ ...headerBtnStyle, color: theme.subtext0 }}
+          aria-label={isCollapsed ? "펼치기" : "접기"}
+          style={headerBtnStyle}
         >
-          {isCollapsed ? "▲" : "▼"}
+          <span aria-hidden="true" style={chevronStyle} />
         </button>
         <button
           onClick={onClose}
           title="닫기"
-          style={{ ...headerBtnStyle, color: theme.red }}
+          aria-label="닫기"
+          style={{ ...headerBtnStyle, position: "relative" }}
         >
-          &#10005;
+          <span aria-hidden="true" style={{ ...closeLineStyle, transform: "rotate(45deg)" }} />
+          <span aria-hidden="true" style={{ ...closeLineStyle, transform: "rotate(-45deg)" }} />
         </button>
       </div>
     </div>

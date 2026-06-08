@@ -487,11 +487,7 @@ function AppContent() {
       ) : (
         <OverlayHeader
           isCollapsed={isCollapsed}
-          isLooping={isLooping}
-          loopCount={loopCount}
-          targetCount={targetCount}
           onClose={handleClose}
-          onStopLoop={stopLoop}
           onToggleCollapsed={() => setIsCollapsed(c => !c)}
           onStartDrag={startDrag}
         />

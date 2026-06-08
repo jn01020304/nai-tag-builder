@@ -614,8 +614,8 @@ async function main() {
       `Queue summary copy should be hidden: ${queuePanelText}`,
     );
     assert(
-      await page.locator("[data-testid='queue-mode-select']").inputValue() === "off",
-      "Queue mode should default to off.",
+      await page.locator("[data-testid='queue-mode-select']").inputValue() === "on",
+      "Queue automation should default to on.",
     );
     assert(
       await page.locator("[data-testid='queue-seed-rule-select']").inputValue() === "increment",
