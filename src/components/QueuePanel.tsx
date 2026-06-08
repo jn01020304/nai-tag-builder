@@ -114,7 +114,7 @@ export default function QueuePanel({
       : theme.blue;
 
   return (
-    <CollapsiblePanel title="Queue" defaultOpen={false} testId="queue-section">
+    <CollapsiblePanel title="Queue" testId="queue-section">
       <section
         aria-label="Queue"
         data-testid="queue-panel"

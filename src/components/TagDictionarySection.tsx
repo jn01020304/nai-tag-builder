@@ -20,7 +20,7 @@ export default function TagDictionarySection({
   onReorderBasePrompt,
 }: Props) {
   return (
-    <CollapsiblePanel title="Tag Dictionary" testId="tag-dictionary-section">
+    <CollapsiblePanel title="Tag Dictionary" defaultOpen={false} testId="tag-dictionary-section">
       <ComposeCatalogChips
         prompt={prompt}
         activePromptTarget={activePromptTarget}
