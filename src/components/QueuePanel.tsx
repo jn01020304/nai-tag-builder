@@ -71,14 +71,6 @@ export default function QueuePanel({
   queueSession,
 }: QueuePanelProps) {
   const { theme, inputStyle, labelStyle, smallBtnStyle } = useThemeStyles();
-  const smallNumInput: React.CSSProperties = {
-    ...inputStyle,
-    flex: "0 0 58px",
-    minWidth: 0,
-    padding: "5px 6px",
-    textAlign: "center",
-  };
-
   const miniBtn: React.CSSProperties = {
     ...smallBtnStyle,
     alignItems: "center",
@@ -89,13 +81,6 @@ export default function QueuePanel({
     padding: 0,
   };
 
-  const fieldRow: React.CSSProperties = {
-    alignItems: "center",
-    display: "grid",
-    gap: "6px",
-    gridTemplateColumns: "70px 28px minmax(48px, 1fr) 28px auto",
-    minWidth: 0,
-  };
   const pairedRow: React.CSSProperties = {
     display: "grid",
     gap: "8px",
@@ -106,6 +91,20 @@ export default function QueuePanel({
     display: "flex",
     flexDirection: "column",
     minWidth: 0,
+  };
+  const stepperControls: React.CSSProperties = {
+    alignItems: "center",
+    display: "grid",
+    gap: "6px",
+    gridTemplateColumns: "28px minmax(42px, 1fr) 28px auto",
+    minWidth: 0,
+  };
+  const stepperInput: React.CSSProperties = {
+    ...inputStyle,
+    minWidth: 0,
+    padding: "5px 6px",
+    textAlign: "center",
+    width: "100%",
   };
   const queueRunMode: QueueRunMode = autoGenerate ? queueMode : "off";
   const handleQueueRunModeChange = (value: QueueRunMode) => {
@@ -230,32 +229,38 @@ export default function QueuePanel({
           </div>
         </div>
 
-        <div style={fieldRow}>
-          <label style={{ ...labelStyle, marginBottom: 0 }}>간격</label>
-          <button type="button" onClick={() => adjustValue("interval", -1)} style={miniBtn}>-</button>
-          <input
-            data-testid="queue-interval-input"
-            type="number"
-            value={intervalSec}
-            onChange={(e) => handleIntervalChange(e.target.value)}
-            style={smallNumInput}
-          />
-          <button type="button" onClick={() => adjustValue("interval", 1)} style={miniBtn}>+</button>
-          <span style={{ color: theme.subtext0, fontSize: "11px" }}>초</span>
-        </div>
+        <div style={pairedRow}>
+          <div style={stackedField}>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>간격</label>
+            <div style={stepperControls}>
+              <button type="button" onClick={() => adjustValue("interval", -1)} style={miniBtn}>-</button>
+              <input
+                data-testid="queue-interval-input"
+                type="number"
+                value={intervalSec}
+                onChange={(e) => handleIntervalChange(e.target.value)}
+                style={stepperInput}
+              />
+              <button type="button" onClick={() => adjustValue("interval", 1)} style={miniBtn}>+</button>
+              <span style={{ color: theme.subtext0, fontSize: "11px" }}>초</span>
+            </div>
+          </div>
 
-        <div style={fieldRow}>
-          <label style={{ ...labelStyle, marginBottom: 0 }}>목표</label>
-          <button type="button" onClick={() => adjustValue("count", -1)} style={miniBtn}>-</button>
-          <input
-            data-testid="queue-target-count-input"
-            type="number"
-            value={targetCount}
-            onChange={(e) => handleCountChange(e.target.value)}
-            style={smallNumInput}
-          />
-          <button type="button" onClick={() => adjustValue("count", 1)} style={miniBtn}>+</button>
-          <span style={{ color: theme.subtext0, fontSize: "11px" }}>회</span>
+          <div style={stackedField}>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>목표</label>
+            <div style={stepperControls}>
+              <button type="button" onClick={() => adjustValue("count", -1)} style={miniBtn}>-</button>
+              <input
+                data-testid="queue-target-count-input"
+                type="number"
+                value={targetCount}
+                onChange={(e) => handleCountChange(e.target.value)}
+                style={stepperInput}
+              />
+              <button type="button" onClick={() => adjustValue("count", 1)} style={miniBtn}>+</button>
+              <span style={{ color: theme.subtext0, fontSize: "11px" }}>회</span>
+            </div>
+          </div>
         </div>
 
           {queueSession?.lastError && (
