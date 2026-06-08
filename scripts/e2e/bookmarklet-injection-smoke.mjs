@@ -55,8 +55,9 @@ async function main() {
           <main style="padding: 24px; width: 380px;">
             <h1>NovelAI Mock</h1>
             <textarea class="ProseMirror" style="width: 320px; height: 200px;">1girl, official art</textarea>
+            <input id="mock-width" type="number" value="832" style="background: #d8d3c4; border: 1px solid #b9b29f; color: #1b1a16;" />
             <button id="mock-import">Import Metadata</button>
-            <button id="mock-generate" disabled>Generate 1 Image</button>
+            <button id="mock-generate" style="background: #5fbf3f; color: #ffffff;" disabled>Generate 1 Image</button>
           </main>
           <div id="nai-tag-builder-root" style="position: fixed; top: 24px; right: 24px;">
             <div style="width: 320px; padding: 16px; background: #aaa;">
@@ -110,6 +111,30 @@ async function main() {
       mainPromptLabelBox && mainPromptLabelBox.y < 760,
       `Main Prompt was pushed too far down: ${JSON.stringify(mainPromptLabelBox)}`,
     );
+
+    await page.waitForTimeout(500);
+    const syncedTheme = await page.evaluate(() => {
+      const applyButton = document.querySelector("[data-testid='apply-button']");
+      const widthInput = document.querySelector("[data-testid='width-input']");
+      if (!(applyButton instanceof HTMLElement) || !(widthInput instanceof HTMLElement)) {
+        return { ok: false, reason: "theme sync targets missing" };
+      }
+
+      const applyStyle = getComputedStyle(applyButton);
+      const widthStyle = getComputedStyle(widthInput);
+      return {
+        ok:
+          applyStyle.backgroundColor === "rgb(95, 191, 63)" &&
+          applyStyle.color === "rgb(255, 255, 255)" &&
+          widthStyle.backgroundColor === "rgb(216, 211, 196)" &&
+          widthStyle.borderColor === "rgb(185, 178, 159)",
+        applyBackground: applyStyle.backgroundColor,
+        applyColor: applyStyle.color,
+        widthBackground: widthStyle.backgroundColor,
+        widthBorder: widthStyle.borderColor,
+      };
+    });
+    assert(syncedTheme.ok, `Theme sync failed: ${JSON.stringify(syncedTheme)}`);
 
     await page.locator("[data-testid='queue-section-toggle']").click();
     await page.locator("[data-testid='queue-enable-checkbox']").check();

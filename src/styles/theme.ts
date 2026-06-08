@@ -23,6 +23,10 @@ export interface ThemeColors {
   intensityHigh: string; // high-intensity-color-*, > 1.0 weights
   warningError: string; // Error red
   headerText: string; // Dimmer text used for headers/labels
+  parameterInputBg: string; // NovelAI numeric input/sub-panel background
+  parameterInputBorder: string;
+  actionAccent: string; // NovelAI Generate button accent
+  actionAccentText: string;
 }
 
 export type PromptTone = "base" | "negative" | "character" | "negativeCharacter";
@@ -113,6 +117,10 @@ const fallbackTheme: ThemeColors = {
   intensityHigh: 'rgba(184, 55, 0, 0.5)',
   warningError: 'rgb(248, 48, 48)',
   headerText: 'rgba(255, 255, 255, 0.5)',
+  parameterInputBg: '#1c1f3c',
+  parameterInputBorder: '#2f345a',
+  actionAccent: '#f5f3c2',
+  actionAccentText: '#111222',
 };
 
 export const defaultInputStyle = (theme: ThemeColors): React.CSSProperties => ({
@@ -148,11 +156,18 @@ export const defaultSmallBtnStyle = (theme: ThemeColors): React.CSSProperties =>
   cursor: 'pointer',
 });
 
+export const defaultParameterInputStyle = (theme: ThemeColors): React.CSSProperties => ({
+  ...defaultInputStyle(theme),
+  backgroundColor: theme.parameterInputBg,
+  border: `1px solid ${theme.parameterInputBorder}`,
+});
+
 // A global singleton so we don't have to drill props everywhere immediately
 export let theme = fallbackTheme;
 export let inputStyle = defaultInputStyle(theme);
 export let labelStyle = defaultLabelStyle(theme);
 export let smallBtnStyle = defaultSmallBtnStyle(theme);
+export let parameterInputStyle = defaultParameterInputStyle(theme);
 
 // Call this hook at the top level App to sync colors
 export function useDynamicTheme() {
@@ -163,7 +178,8 @@ export function useDynamicTheme() {
       // Since NovelAI uses styled-components without CSS vars, we sample actual DOM elements.
       const getBg = (selectors: string[], fb: string) => {
         for (const sel of selectors) {
-          const el = document.querySelector(sel);
+          const el = Array.from(document.querySelectorAll(sel))
+            .find((candidate) => !candidate.closest('#nai-tag-builder-root'));
           if (el) {
             const bg = getComputedStyle(el).backgroundColor;
             if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return bg;
@@ -174,7 +190,8 @@ export function useDynamicTheme() {
 
       const getFg = (selectors: string[], fb: string) => {
         for (const sel of selectors) {
-          const el = document.querySelector(sel);
+          const el = Array.from(document.querySelectorAll(sel))
+            .find((candidate) => !candidate.closest('#nai-tag-builder-root'));
           if (el) {
             const fg = getComputedStyle(el).color;
             if (fg && fg !== 'rgba(0, 0, 0, 0)' && fg !== 'transparent') return fg;
@@ -183,13 +200,28 @@ export function useDynamicTheme() {
         return fb;
       };
 
+      const getBorder = (selectors: string[], fb: string) => {
+        for (const sel of selectors) {
+          const el = Array.from(document.querySelectorAll(sel))
+            .find((candidate) => !candidate.closest('#nai-tag-builder-root'));
+          if (el) {
+            const border = getComputedStyle(el).borderColor;
+            if (border && border !== 'rgba(0, 0, 0, 0)' && border !== 'transparent') return border;
+          }
+        }
+        return fb;
+      };
+
       // Find the Generate button
-      const generateBtn = Array.from(document.querySelectorAll('button')).find(b => b.textContent && b.textContent.includes('Generate'));
+      const generateBtn = Array.from(document.querySelectorAll('button'))
+        .find(b => !b.closest('#nai-tag-builder-root') && b.textContent && b.textContent.includes('Generate'));
       const accentBg = generateBtn ? getComputedStyle(generateBtn).backgroundColor : fallbackTheme.yellow;
 
       const mainBg = getBg(['.image-gen-page', 'main', '#__next > div > div'], getComputedStyle(document.body).backgroundColor || fallbackTheme.base);
       const panelBg = getBg(['.settings-panel', '.image-gen-prompt-main', 'nav', 'aside'], fallbackTheme.surface0);
       const inputBg = getBg(['textarea', 'input[type="text"]'], fallbackTheme.mantle);
+      const parameterBg = getBg(['input[type="number"]', '.settings-panel input', 'aside input'], inputBg || panelBg);
+      const parameterBorder = getBorder(['input[type="number"]', '.settings-panel input', 'aside input'], fallbackTheme.surface1);
       const textFg = getFg(['.image-gen-page', 'p', 'h1', 'h2', 'span', 'body'], fallbackTheme.text);
       const headerFg = getFg(['label', '.sc-9882ac77-42'], fallbackTheme.headerText);
 
@@ -221,6 +253,9 @@ export function useDynamicTheme() {
         if (!m) return true;
         return (0.299 * +m[1] + 0.587 * +m[2] + 0.114 * +m[3]) / 255 < 0.5;
       })();
+      const accentText = colorLuminance(accentBg) != null && colorLuminance(accentBg)! > 0.58
+        ? '#111222'
+        : '#ffffff';
 
       const newTheme: ThemeColors = {
         base: mainBg, // Background
@@ -245,6 +280,10 @@ export function useDynamicTheme() {
         intensityHigh: highInt,
         warningError: fallbackTheme.warningError,
         headerText: headerFg,
+        parameterInputBg: parameterBg,
+        parameterInputBorder: parameterBorder,
+        actionAccent: accentBg,
+        actionAccentText: accentText,
       };
 
       // Update globals for legacy components
@@ -252,6 +291,7 @@ export function useDynamicTheme() {
       inputStyle = defaultInputStyle(theme);
       labelStyle = defaultLabelStyle(theme);
       smallBtnStyle = defaultSmallBtnStyle(theme);
+      parameterInputStyle = defaultParameterInputStyle(theme);
 
       setCurrentTheme(newTheme);
     };
