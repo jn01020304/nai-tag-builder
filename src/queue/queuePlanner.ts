@@ -107,7 +107,7 @@ function selectQueuedSource(
 export function createQueueDraft(input: CreateQueueDraftInput): QueueDraft {
   return {
     targetCount: normalizePositiveInt(input.targetCount, 1, 1),
-    intervalSec: normalizePositiveNumber(input.intervalSec, 30, 3),
+    intervalSec: normalizePositiveNumber(input.intervalSec, 10, 3),
     seedRule: input.hasPresetQueue ? "none" : input.seedRule,
     queueMode: input.queueMode,
     stopOnFailure: true,
