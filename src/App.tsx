@@ -329,21 +329,72 @@ function AppContent() {
     );
   };
 
+  const renderCollapsedLauncher = () => (
+    <button
+      type="button"
+      data-testid="overlay-collapsed-launcher"
+      title="NAI Tag Builder 펼치기"
+      onClick={() => setIsCollapsed(false)}
+      onMouseDown={(e) => {
+        if (e.button !== 0) return;
+        startDrag(e.clientX, e.clientY);
+      }}
+      onTouchStart={(e) => startDrag(e.touches[0].clientX, e.touches[0].clientY)}
+      style={{
+        alignItems: 'center',
+        backgroundColor: theme.crust,
+        border: `1px solid ${theme.surface1}`,
+        borderRadius: '999px',
+        boxShadow: '0 8px 22px rgba(0,0,0,0.35)',
+        color: theme.text,
+        cursor: 'grab',
+        display: 'flex',
+        flex: '1 1 auto',
+        flexDirection: 'column',
+        fontFamily: theme.fontFamily,
+        fontSize: '11px',
+        fontWeight: 900,
+        height: '100%',
+        justifyContent: 'center',
+        letterSpacing: 0,
+        lineHeight: 1,
+        padding: 0,
+        touchAction: 'none',
+        userSelect: 'none',
+        width: '100%',
+        WebkitUserSelect: 'none',
+      }}
+    >
+      <span
+        aria-hidden="true"
+        style={{
+          color: theme.actionAccent,
+          fontSize: '17px',
+          lineHeight: 1,
+          marginBottom: '3px',
+        }}
+      >
+        N
+      </span>
+      <span style={{ fontSize: '9px', lineHeight: 1 }}>AI</span>
+    </button>
+  );
+
   return (
     <div
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
       style={{
-        width: `${overlayWidth}px`,
-        height: overlayHeight == null || isCollapsed ? undefined : `${overlayHeight}px`,
-        minWidth: '280px',
-        maxWidth: 'calc(100vw - 16px)',
+        width: isCollapsed ? '56px' : `${overlayWidth}px`,
+        height: isCollapsed ? '56px' : overlayHeight == null ? undefined : `${overlayHeight}px`,
+        minWidth: isCollapsed ? '56px' : '280px',
+        maxWidth: isCollapsed ? '56px' : 'calc(100vw - 16px)',
         maxHeight: isCollapsed ? 'none' : overlayHeight == null ? '80vh' : 'calc(100vh - 16px)',
         overflow: 'hidden',
         backgroundColor: theme.base,
         color: theme.text,
-        borderRadius: '12px',
+        borderRadius: isCollapsed ? '999px' : '12px',
         boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
         boxSizing: 'border-box',
         fontFamily: 'sans-serif',
@@ -380,16 +431,20 @@ function AppContent() {
       {renderResizeHandle('top')}
       {renderResizeHandle('bottom')}
 
-      <OverlayHeader
-        isCollapsed={isCollapsed}
-        isLooping={isLooping}
-        loopCount={loopCount}
-        targetCount={targetCount}
-        onClose={handleClose}
-        onStopLoop={stopLoop}
-        onToggleCollapsed={() => setIsCollapsed(c => !c)}
-        onStartDrag={startDrag}
-      />
+      {isCollapsed ? (
+        renderCollapsedLauncher()
+      ) : (
+        <OverlayHeader
+          isCollapsed={isCollapsed}
+          isLooping={isLooping}
+          loopCount={loopCount}
+          targetCount={targetCount}
+          onClose={handleClose}
+          onStopLoop={stopLoop}
+          onToggleCollapsed={() => setIsCollapsed(c => !c)}
+          onStartDrag={startDrag}
+        />
+      )}
 
       {/* Body */}
       {!isCollapsed && (
