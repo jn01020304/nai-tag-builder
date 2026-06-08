@@ -6,6 +6,7 @@ import type { ApplyPipelinePhase } from './automation/applyPipeline';
 import { formatApplyErrorDetail } from './automation/applyStatusText';
 import { useAutoGenerator } from './hooks/useAutoGenerator';
 import { useEdgeResize } from './hooks/useEdgeResize';
+import type { ResizeHandle } from './hooks/useEdgeResize';
 import type { QueueMode } from './types/preset';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { useTheme } from './contexts/themeContextCore';
@@ -291,38 +292,49 @@ function AppContent() {
     }
   };
 
-  const renderResizeHandle = (edge: "left" | "right" | "top" | "bottom") => {
+  const renderResizeHandle = (handle: ResizeHandle) => {
     if (isCollapsed) return null;
-    const isHorizontalEdge = edge === "left" || edge === "right";
+    const pullsLeft = handle.includes('left');
+    const pullsRight = handle.includes('right');
+    const pullsTop = handle.includes('top');
+    const pullsBottom = handle.includes('bottom');
+    const isCorner = handle.includes('-');
+    const isHorizontalEdge = handle === 'left' || handle === 'right';
+    const cursor = (() => {
+      if (handle === 'top-left' || handle === 'bottom-right') return 'nwse-resize';
+      if (handle === 'top-right' || handle === 'bottom-left') return 'nesw-resize';
+      if (isHorizontalEdge) return 'ew-resize';
+      return 'ns-resize';
+    })();
 
     return (
       <div
-        data-testid={`overlay-resize-${edge}`}
+        data-testid={`overlay-resize-${handle}`}
         onMouseDown={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          startResize(edge, e.clientX, e.clientY);
+          startResize(handle, e.clientX, e.clientY);
         }}
         onTouchStart={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          startResize(edge, e.touches[0].clientX, e.touches[0].clientY);
+          startResize(handle, e.touches[0].clientX, e.touches[0].clientY);
         }}
         style={{
           position: 'absolute',
-          top: edge === 'bottom' ? undefined : 0,
-          right: edge === 'left' ? undefined : 0,
-          bottom: edge === 'top' ? undefined : 0,
-          left: edge === 'right' ? undefined : 0,
-          width: isHorizontalEdge ? '12px' : '100%',
-          height: isHorizontalEdge ? '100%' : '12px',
-          cursor: isHorizontalEdge ? 'ew-resize' : 'ns-resize',
-          zIndex: isHorizontalEdge ? 10 : 11,
+          top: pullsBottom ? undefined : 0,
+          right: pullsLeft ? undefined : 0,
+          bottom: pullsTop ? undefined : 0,
+          left: pullsRight ? undefined : 0,
+          width: isCorner ? '16px' : isHorizontalEdge ? '12px' : '100%',
+          height: isCorner ? '16px' : isHorizontalEdge ? '100%' : '12px',
+          cursor,
+          zIndex: isCorner ? 12 : isHorizontalEdge ? 10 : 11,
           touchAction: 'none',
-          borderLeft: edge === 'left' ? `3px solid ${theme.surface1}` : undefined,
-          borderRight: edge === 'right' ? `3px solid ${theme.surface1}` : undefined,
-          borderTop: edge === 'top' ? `3px solid ${theme.surface1}` : undefined,
-          borderBottom: edge === 'bottom' ? `3px solid ${theme.surface1}` : undefined,
+          borderLeft: pullsLeft ? `3px solid ${theme.surface1}` : undefined,
+          borderRight: pullsRight ? `3px solid ${theme.surface1}` : undefined,
+          borderTop: pullsTop ? `3px solid ${theme.surface1}` : undefined,
+          borderBottom: pullsBottom ? `3px solid ${theme.surface1}` : undefined,
           opacity: 0.75,
         }}
       />
@@ -430,6 +442,10 @@ function AppContent() {
       {renderResizeHandle('right')}
       {renderResizeHandle('top')}
       {renderResizeHandle('bottom')}
+      {renderResizeHandle('top-left')}
+      {renderResizeHandle('top-right')}
+      {renderResizeHandle('bottom-left')}
+      {renderResizeHandle('bottom-right')}
 
       {isCollapsed ? (
         renderCollapsedLauncher()

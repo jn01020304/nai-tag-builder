@@ -105,10 +105,35 @@ async function dragResizeHandle(page, testId, targetX, targetY) {
 }
 
 async function checkOverlayResizeBounds(page) {
+  const beforeCornerResize = await page.evaluate(() => {
+    const overlay = document.getElementById("nai-tag-builder-root")?.firstElementChild;
+    if (!(overlay instanceof HTMLElement)) return null;
+    const rect = overlay.getBoundingClientRect();
+    return { width: rect.width, height: rect.height };
+  });
+  assert(beforeCornerResize, "Overlay is missing before corner resize.");
+
+  await dragResizeHandle(page, "overlay-resize-bottom-left", -2000, 900);
+
+  const afterCornerResize = await page.evaluate(() => {
+    const overlay = document.getElementById("nai-tag-builder-root")?.firstElementChild;
+    if (!(overlay instanceof HTMLElement)) return null;
+    const rect = overlay.getBoundingClientRect();
+    return { width: rect.width, height: rect.height };
+  });
+  assert(afterCornerResize, "Overlay is missing after corner resize.");
+  assert(
+    afterCornerResize.width > beforeCornerResize.width + 40 &&
+      afterCornerResize.height > beforeCornerResize.height + 40,
+    `Corner resize did not change both axes: ${JSON.stringify({ beforeCornerResize, afterCornerResize })}`,
+  );
+
   await dragResizeHandle(page, "overlay-resize-left", -2000);
   await dragResizeHandle(page, "overlay-resize-right", 3000);
   await dragResizeHandle(page, "overlay-resize-top", null, -2000);
   await dragResizeHandle(page, "overlay-resize-bottom", null, 3000);
+  await dragResizeHandle(page, "overlay-resize-top-left", -2000, -2000);
+  await dragResizeHandle(page, "overlay-resize-bottom-right", 3000, 3000);
 
   const bounds = await page.evaluate(() => {
     const overlay = document.getElementById("nai-tag-builder-root")?.firstElementChild;
