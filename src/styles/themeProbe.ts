@@ -124,6 +124,58 @@ function readHostStyleColor(
   return fallback;
 }
 
+function contrastRatio(foreground: string, background: string): number | null {
+  const fg = colorLuminance(foreground);
+  const bg = colorLuminance(background);
+  if (fg == null || bg == null) return null;
+
+  const light = Math.max(fg, bg);
+  const dark = Math.min(fg, bg);
+  return (light + 0.05) / (dark + 0.05);
+}
+
+function isVisibleElement(element: Element): boolean {
+  if (!(element instanceof HTMLElement)) return true;
+  const rect = element.getBoundingClientRect();
+  const style = getComputedStyle(element);
+  return rect.width > 0 && rect.height > 0 && style.visibility !== "hidden" && style.display !== "none";
+}
+
+function isInteractiveTextSource(element: Element): boolean {
+  return element.closest("button, input, select, textarea, [role='button'], [contenteditable='true']") !== null;
+}
+
+function readReadableHostTextColor(
+  selectors: string[],
+  background: string,
+  fallback: string,
+  options: { includeInteractive?: boolean } = {},
+): string {
+  let bestColor: string | null = null;
+  let bestRatio = 0;
+
+  for (const element of hostElements(selectors)) {
+    if (!isVisibleElement(element)) continue;
+    if (!options.includeInteractive && isInteractiveTextSource(element)) continue;
+
+    const color = readComputedColor(element, "color");
+    if (!color) continue;
+
+    const ratio = contrastRatio(color, background);
+    if (ratio != null && ratio > bestRatio) {
+      bestColor = color;
+      bestRatio = ratio;
+    }
+  }
+
+  if (bestColor && bestRatio >= 3) return bestColor;
+
+  const fallbackRatio = contrastRatio(fallback, background);
+  if (fallbackRatio != null && fallbackRatio >= 3) return fallback;
+
+  return readableTextColor(background, "#111222", "#ffffff");
+}
+
 function findGenerateButton(): HTMLButtonElement | undefined {
   return Array.from(document.querySelectorAll("button"))
     .find((button) => (
@@ -207,16 +259,6 @@ export function sampleHostTheme(fallbackTheme: ThemeColors): ThemeColors {
     "borderColor",
     fallbackTheme.surface1,
   );
-  const textFg = readHostStyleColor(
-    ["main", "[role='main']", "p", "h1", "h2", "span", "body"],
-    "color",
-    fallbackTheme.text,
-  );
-  const headerFg = readHostStyleColor(
-    ["label", "legend", "small", "button"],
-    "color",
-    fallbackTheme.textMuted,
-  );
 
   const lowInt = probeIntensityColor("low", fallbackTheme.intensityLow);
   const midInt = probeIntensityColor("mid", fallbackTheme.intensityMid);
@@ -229,6 +271,17 @@ export function sampleHostTheme(fallbackTheme: ThemeColors): ThemeColors {
   )) ?? pageBg;
   const mainLuminance = colorLuminance(baseBg);
   const isVeryDark = mainLuminance == null || mainLuminance < 0.5;
+  const textFg = readReadableHostTextColor(
+    ["main", "[role='main']", "p", "h1", "h2", "label", "legend", "body"],
+    baseBg,
+    fallbackTheme.text,
+  );
+  const headerFg = readReadableHostTextColor(
+    ["label", "legend", "small", "p", "span"],
+    panelBg,
+    isVeryDark ? fallbackTheme.textMuted : textFg,
+  );
+  const secondaryText = isVeryDark ? "rgba(255, 255, 255, 0.82)" : textFg;
 
   return {
     base: baseBg,
@@ -240,7 +293,7 @@ export function sampleHostTheme(fallbackTheme: ThemeColors): ThemeColors {
     text: textFg,
     textMuted: headerFg,
     subtext0: headerFg,
-    subtext1: isVeryDark ? "rgba(255, 255, 255, 0.82)" : "rgba(0, 0, 0, 0.78)",
+    subtext1: secondaryText,
     blue: lowInt,
     red: fallbackTheme.warningError,
     green: midInt,
