@@ -216,6 +216,46 @@ async function checkReadablePromptLabel(page) {
   assert(result.ok, `Prompt label contrast failed: ${JSON.stringify(result)}`);
 }
 
+async function checkTextareaThemeHighlightSeparation(page) {
+  const textarea = page.locator("[data-testid='main-prompt-textarea']");
+  await textarea.fill("1girl, 2.5::artist:happoubi jin::, 0.7::flat color::");
+
+  const result = await textarea.evaluate((element) => {
+    const wrapper = element.parentElement;
+    const backdrop = wrapper?.firstElementChild;
+    const label = document.querySelector("[data-testid='main-prompt-label']");
+    if (
+      !(element instanceof HTMLTextAreaElement) ||
+      !(backdrop instanceof HTMLElement) ||
+      !(label instanceof HTMLElement)
+    ) {
+      return { ok: false, reason: "required elements missing" };
+    }
+
+    const labelBackground = getComputedStyle(label).backgroundColor;
+    const textareaBackground = getComputedStyle(element).backgroundColor;
+    const backdropBackground = getComputedStyle(backdrop).backgroundColor;
+    const highlightBackgrounds = Array.from(backdrop.querySelectorAll("span"))
+      .map((span) => getComputedStyle(span).backgroundColor)
+      .filter((color) => color !== "rgba(0, 0, 0, 0)" && color !== "transparent");
+
+    return {
+      ok:
+        labelBackground === "rgb(74, 107, 130)" &&
+        textareaBackground === "rgba(0, 0, 0, 0)" &&
+        backdropBackground !== labelBackground &&
+        highlightBackgrounds.length >= 2 &&
+        highlightBackgrounds.every((color) => color !== labelBackground),
+      labelBackground,
+      textareaBackground,
+      backdropBackground,
+      highlightBackgrounds,
+    };
+  });
+
+  assert(result.ok, `Textarea theme/highlight separation failed: ${JSON.stringify(result)}`);
+}
+
 async function dragTag(page, fromTestId, toTestId) {
   const source = page.locator(`[data-testid='${fromTestId}']`);
   const target = page.locator(`[data-testid='${toTestId}']`);
@@ -254,7 +294,7 @@ async function main() {
     const textarea = page.locator("[data-testid='main-prompt-textarea']");
     await textarea.click();
     await textarea.fill("alpha");
-    assert(await getTextareaValue(page) === "alpha", "Raw Prompt typing failed.");
+    assert(await getTextareaValue(page) === "alpha", "Main Prompt typing failed.");
 
     await setTextareaCursor(page, "alpha, omega", 5);
     await page.locator("[data-testid='catalog-chip-tag_1girl']").click();
@@ -314,7 +354,7 @@ async function main() {
       `Character target insertion failed: ${await characterTextarea.inputValue()}`,
     );
     assert(
-      await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']")) === "rgb(80, 74, 112)",
+      await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']")) === "rgb(107, 91, 130)",
       `Character active chip color failed: ${await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']"))}`,
     );
     assert(
@@ -331,7 +371,7 @@ async function main() {
       `Negative target insertion failed: ${await negativeTextarea.inputValue()}`,
     );
     assert(
-      await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']")) === "rgb(97, 68, 59)",
+      await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']")) === "rgb(143, 89, 85)",
       `Negative active chip color failed: ${await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']"))}`,
     );
     assert(
@@ -385,6 +425,7 @@ async function main() {
 
     await checkLayout(page);
     await checkReadablePromptLabel(page);
+    await checkTextareaThemeHighlightSeparation(page);
 
     await page.locator("[data-testid='queue-panel']").waitFor({ timeout: 3000 });
     assert(
