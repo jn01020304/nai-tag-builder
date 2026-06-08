@@ -31,9 +31,9 @@ export interface AutoGeneratorConfig {
 
 export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGeneratorConfig) {
   const [autoGenerate, setAutoGenerate] = useState(false);
-  const [intervalSec, setIntervalSec] = useState<number | string>(30);
+  const [intervalSec, setIntervalSec] = useState<number | string>(10);
   const [targetCount, setTargetCount] = useState<number | string>(100);
-  const [targetMin, setTargetMin] = useState<number | string>(50);
+  const [targetMin, setTargetMin] = useState<number | string>(16.7);
   const [isLooping, setIsLooping] = useState(false);
   const [loopCount, setLoopCount] = useState(0);
   const [queueSession, setQueueSession] = useState<QueueSession | null>(null);
@@ -51,7 +51,7 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
   const queueIndexRef = useRef(0);
   const queueSessionRef = useRef<QueueSession | null>(null);
   const stopRequestedRef = useRef(false);
-  const intervalRef = useRef(Number(intervalSec) || 30);
+  const intervalRef = useRef(Number(intervalSec) || 10);
   const targetCountRef = useRef(Number(targetCount) || 100);
 
   useEffect(() => { stateRef.current = state; }, [state]);

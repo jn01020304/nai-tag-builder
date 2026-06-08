@@ -605,7 +605,19 @@ async function main() {
       await page.locator("[data-testid='queue-status']").innerText() === "대기 중",
       `Queue status label failed: ${await page.locator("[data-testid='queue-status']").innerText()}`,
     );
+    const queuePanelText = await page.locator("[data-testid='queue-panel']").innerText();
+    assert(
+      !queuePanelText.includes("소스 현재 프롬프트") &&
+        !queuePanelText.includes("규칙 현재 seed 유지") &&
+        !queuePanelText.includes("목표 100회") &&
+        !queuePanelText.includes("간격 10초"),
+      `Queue summary copy should be hidden: ${queuePanelText}`,
+    );
     await page.locator("[data-testid='queue-enable-checkbox']").check();
+    assert(
+      await page.locator("[data-testid='queue-interval-input']").inputValue() === "10",
+      `Queue default interval should be 10 seconds: ${await page.locator("[data-testid='queue-interval-input']").inputValue()}`,
+    );
     await page.locator("[data-testid='queue-mode-select']").selectOption("randomization");
     await page.locator("[data-testid='queue-seed-rule-select']").selectOption("increment");
     await page.locator("[data-testid='queue-interval-input']").fill("7");

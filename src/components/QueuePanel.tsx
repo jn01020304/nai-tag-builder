@@ -49,14 +49,6 @@ function queueStatusLabel(session: QueueSession | null): string {
   }
 }
 
-function seedRuleLabel(seedRule: SeedRule, queueLength: number): string {
-  if (queueLength > 0) return "프리셋 seed 사용";
-  if (seedRule === "random") return "매 tick 랜덤";
-  if (seedRule === "increment") return "매 tick +1";
-  if (seedRule === "decrement") return "매 tick -1";
-  return "현재 seed 유지";
-}
-
 export default function QueuePanel({
   autoGenerate,
   setAutoGenerate,
@@ -143,22 +135,6 @@ export default function QueuePanel({
         >
           {queueStatusLabel(queueSession)}
         </span>
-      </div>
-
-      <div
-        style={{
-          color: theme.subtext1,
-          display: "grid",
-          fontSize: "11px",
-          gap: "5px",
-          gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-          marginBottom: "8px",
-        }}
-      >
-        <span>소스 {queueLength > 0 ? `프리셋 ${queueLength}개` : "현재 프롬프트"}</span>
-        <span>규칙 {seedRuleLabel(seedRule, queueLength)}</span>
-        <span>목표 {targetCount || 0}회</span>
-        <span>간격 {intervalSec || 0}초</span>
       </div>
 
       <label
