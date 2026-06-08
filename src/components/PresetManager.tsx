@@ -4,10 +4,9 @@ import type { Preset } from '../types/preset';
 import type { MetadataAction } from '../hooks/useMetadataState';
 import type { ShowFeedback } from '../types/feedback';
 import { loadPresets, savePreset, deletePreset, exportPresets, importPresets } from '../model/presetStorage';
-import { theme, inputStyle, smallBtnStyle } from '../styles/theme';
+import { useThemeStyles } from '../contexts/themeContextCore';
 import CollapsibleSection from './CollapsibleSection';
-import { parseNovelAIPng } from '../utils/pngParser';
-import { translateNovelAiMetadata } from '../utils/metadataTranslator';
+import { parseNovelAIImageFiles } from '../utils/pngParser';
 
 interface Props {
     state: MetadataState;
@@ -19,6 +18,7 @@ interface Props {
 }
 
 export default function PresetManager({ state, dispatch, queue, setQueue, onImportRequest, onFeedback }: Props) {
+    const { theme, inputStyle, smallBtnStyle } = useThemeStyles();
     const [presets, setPresets] = useState<Preset[]>([]);
     const [saveName, setSaveName] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -78,20 +78,23 @@ export default function PresetManager({ state, dispatch, queue, setQueue, onImpo
     };
 
     const handleImportPng = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
-        if (!file) return;
+        const files = Array.from(e.target.files ?? []);
+        if (files.length === 0) return;
         try {
-            const buffer = await file.arrayBuffer();
-            const jsonMeta = parseNovelAIPng(buffer);
-            if (jsonMeta && jsonMeta.data) {
-                const newState = translateNovelAiMetadata(jsonMeta.data, jsonMeta.source);
-                onImportRequest(newState);
+            const result = await parseNovelAIImageFiles(files);
+            if (result.mergedState) {
+                onImportRequest(result.mergedState);
+                onFeedback({
+                    tone: 'success',
+                    message: `${result.patches.length}개 이미지에서 NovelAI 메타데이터를 찾았습니다.`,
+                    detail: result.failedFiles.length > 0 ? `실패: ${result.failedFiles.join(', ')}` : undefined,
+                });
             } else {
-                onFeedback({ tone: 'warning', message: 'NovelAI 메타데이터가 없는 PNG입니다.' });
+                onFeedback({ tone: 'warning', message: '가져온 이미지에서 NovelAI 메타데이터를 찾지 못했습니다.' });
             }
         } catch (err) {
-            console.error('Error parsing PNG:', err);
-            onFeedback({ tone: 'error', message: 'PNG 파일을 읽지 못했습니다.' });
+            console.error('Error parsing image metadata:', err);
+            onFeedback({ tone: 'error', message: '이미지 메타데이터를 읽지 못했습니다.' });
         }
         e.target.value = '';
     };
@@ -174,7 +177,8 @@ export default function PresetManager({ state, dispatch, queue, setQueue, onImpo
                 <input
                     ref={pngInputRef}
                     type="file"
-                    accept="image/png"
+                    accept="image/png,image/webp,image/*"
+                    multiple
                     onChange={handleImportPng}
                     style={{ display: 'none' }}
                 />
@@ -185,7 +189,7 @@ export default function PresetManager({ state, dispatch, queue, setQueue, onImpo
                     📤 JSON
                 </button>
                 <button onClick={() => pngInputRef.current?.click()} style={{ ...smallBtnStyle, flex: 1, color: theme.text }}>
-                    🖼️ Load PNG
+                    🖼️ Load Image
                 </button>
             </div>
 

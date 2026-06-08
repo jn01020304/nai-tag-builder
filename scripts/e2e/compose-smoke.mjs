@@ -216,6 +216,45 @@ async function checkReadablePromptLabel(page) {
   assert(result.ok, `Prompt label contrast failed: ${JSON.stringify(result)}`);
 }
 
+async function checkFallbackThemeTokens(page) {
+  await page.waitForTimeout(500);
+
+  const result = await page.evaluate(() => {
+    const root = document.getElementById("nai-tag-builder-root");
+    const overlay = root?.firstElementChild;
+    const widthInput = document.querySelector("[data-testid='width-input']");
+    const applyButton = document.querySelector("[data-testid='apply-button']");
+
+    if (
+      !(overlay instanceof HTMLElement) ||
+      !(widthInput instanceof HTMLElement) ||
+      !(applyButton instanceof HTMLElement)
+    ) {
+      return { ok: false, reason: "theme guard targets missing" };
+    }
+
+    const overlayStyle = getComputedStyle(overlay);
+    const widthStyle = getComputedStyle(widthInput);
+    const applyStyle = getComputedStyle(applyButton);
+
+    return {
+      ok:
+        overlayStyle.backgroundColor === "rgb(19, 21, 27)" &&
+        widthStyle.backgroundColor === "rgb(29, 32, 41)" &&
+        widthStyle.borderColor === "rgb(54, 59, 73)" &&
+        applyStyle.backgroundColor === "rgb(212, 163, 71)" &&
+        applyStyle.color === "rgb(19, 21, 27)",
+      overlayBackground: overlayStyle.backgroundColor,
+      widthBackground: widthStyle.backgroundColor,
+      widthBorder: widthStyle.borderColor,
+      applyBackground: applyStyle.backgroundColor,
+      applyColor: applyStyle.color,
+    };
+  });
+
+  assert(result.ok, `Fallback theme token check failed: ${JSON.stringify(result)}`);
+}
+
 async function checkPromptSectionToggles(page) {
   const tagToggle = page.locator("[data-testid='tag-dictionary-section-toggle']");
   const promptToggle = page.locator("[data-testid='main-prompt-section-toggle']");
@@ -466,6 +505,7 @@ async function main() {
 
     await checkLayout(page);
     await checkReadablePromptLabel(page);
+    await checkFallbackThemeTokens(page);
     await checkTextareaThemeHighlightSeparation(page);
 
     await openQueuePanel(page);

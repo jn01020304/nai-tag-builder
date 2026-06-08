@@ -19,8 +19,7 @@ import ImportModal from './components/ImportModal';
 import StatusBanner from './components/StatusBanner';
 import OverlayFooter from './components/OverlayFooter';
 import OverlayHeader from './components/OverlayHeader';
-import { parseNovelAIPng } from './utils/pngParser';
-import { translateNovelAiMetadata } from './utils/metadataTranslator';
+import { parseNovelAIImageFiles } from './utils/pngParser';
 import type { StatusFeedback } from './types/feedback';
 import type {
   PromptInsertTarget,
@@ -116,23 +115,27 @@ function AppContent() {
     setFeedback(null);
 
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-      const file = e.dataTransfer.files[0];
-      if (file.type === 'image/png') {
-        try {
-          const buffer = await file.arrayBuffer();
-          const jsonMeta = parseNovelAIPng(buffer);
-          if (jsonMeta && jsonMeta.data) {
-            const newState = translateNovelAiMetadata(jsonMeta.data, jsonMeta.source);
-            setPendingImport(newState);
-          } else {
-            showFeedback({ tone: 'warning', message: 'NovelAI 메타데이터가 없는 PNG입니다.' });
-          }
-        } catch (err) {
-          console.error('Error parsing PNG:', err);
-          showFeedback({ tone: 'error', message: 'PNG 파일을 읽지 못했습니다.' });
+      const files = Array.from(e.dataTransfer.files).filter((file) => file.type.startsWith('image/'));
+      if (files.length === 0) {
+        showFeedback({ tone: 'warning', message: '이미지 파일만 가져올 수 있습니다.' });
+        return;
+      }
+
+      try {
+        const result = await parseNovelAIImageFiles(files);
+        if (result.mergedState) {
+          setPendingImport(result.mergedState);
+          showFeedback({
+            tone: 'success',
+            message: `${result.patches.length}개 이미지에서 NovelAI 메타데이터를 찾았습니다.`,
+            detail: result.failedFiles.length > 0 ? `실패: ${result.failedFiles.join(', ')}` : undefined,
+          });
+        } else {
+          showFeedback({ tone: 'warning', message: '가져온 이미지에서 NovelAI 메타데이터를 찾지 못했습니다.' });
         }
-      } else {
-        showFeedback({ tone: 'warning', message: 'NovelAI에서 생성한 PNG 파일만 가져올 수 있습니다.' });
+      } catch (err) {
+        console.error('Error parsing image metadata:', err);
+        showFeedback({ tone: 'error', message: '이미지 메타데이터를 읽지 못했습니다.' });
       }
     }
   };

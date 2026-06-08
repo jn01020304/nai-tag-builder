@@ -1,159 +1,98 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
+import { colorLuminance } from "./color";
+import { sampleHostTheme } from "./themeProbe";
 
 export interface ThemeColors {
-  base: string;       // Background
-  mantle: string;     // Slightly lighter background
-  crust: string;      // Very dark background
-  surface0: string;   // Secondary panels
-  surface1: string;   // Hover states, borders
-  surface2: string;   // Active states
-  text: string;       // Primary text
-  subtext0: string;   // Grayed out text
-  subtext1: string;   // Lighter gray text
+  base: string;
+  mantle: string;
+  crust: string;
+  surface0: string;
+  surface1: string;
+  surface2: string;
+  text: string;
+  textMuted: string;
+  subtext0: string;
+  subtext1: string;
   blue: string;
   red: string;
   green: string;
-  yellow: string;     // Accent
-  overlay0: string;   // Dividers
+  yellow: string;
+  overlay0: string;
   tagPositiveBg: string;
   tagNegativeBg: string;
-  fontFamily: string; // NovelAI font
-  intensityLow: string; // low-intensity-color-*, < 1.0 weights
-  intensityMid: string; // mid-intensity-color-*, 1.0 weights
-  intensityHigh: string; // high-intensity-color-*, > 1.0 weights
-  warningError: string; // Error red
-  headerText: string; // Dimmer text used for headers/labels
-  parameterInputBg: string; // NovelAI numeric input/sub-panel background
+  fontFamily: string;
+  intensityLow: string;
+  intensityMid: string;
+  intensityHigh: string;
+  warningError: string;
+  headerText: string;
+  parameterInputBg: string;
   parameterInputBorder: string;
-  actionAccent: string; // NovelAI Generate button accent
+  actionAccent: string;
   actionAccentText: string;
 }
 
-export type PromptTone = "base" | "negative" | "character" | "negativeCharacter";
-
-export interface PromptTonePalette {
-  background: string;
-  border: string;
-  color: string;
-  shadow: string;
-}
-
-export const promptTonePalettes: Record<PromptTone, PromptTonePalette> = {
-  base: {
-    background: "#4A6B82",
-    border: "#86A0B2",
-    color: "#ffffff",
-    shadow: "rgba(74, 107, 130, 0.24)",
-  },
-  negative: {
-    background: "#8F5955",
-    border: "#BF918D",
-    color: "#ffffff",
-    shadow: "rgba(143, 89, 85, 0.22)",
-  },
-  character: {
-    background: "#6B5B82",
-    border: "#A99CB9",
-    color: "#ffffff",
-    shadow: "rgba(107, 91, 130, 0.22)",
-  },
-  negativeCharacter: {
-    background: "#8A5A6D",
-    border: "#BD93A4",
-    color: "#ffffff",
-    shadow: "rgba(138, 90, 109, 0.22)",
-  },
-};
-
-export function withAlpha(color: string, alpha: number): string {
-  const match = color.match(/\d+(\.\d+)?/g);
-  if (match && match.length >= 3) {
-    return `rgba(${match[0]}, ${match[1]}, ${match[2]}, ${alpha})`;
-  }
-  return color;
-}
-
-function colorLuminance(color: string): number | null {
-  const hex = color.trim().match(/^#([0-9a-f]{3}|[0-9a-f]{6})$/i);
-  if (hex) {
-    const raw = hex[1].length === 3
-      ? hex[1].split('').map((part) => part + part).join('')
-      : hex[1];
-    const red = parseInt(raw.slice(0, 2), 16);
-    const green = parseInt(raw.slice(2, 4), 16);
-    const blue = parseInt(raw.slice(4, 6), 16);
-    return (0.299 * red + 0.587 * green + 0.114 * blue) / 255;
-  }
-
-  const match = color.match(/\d+(\.\d+)?/g);
-  if (!match || match.length < 3) return null;
-  const red = Number(match[0]);
-  const green = Number(match[1]);
-  const blue = Number(match[2]);
-  return (0.299 * red + 0.587 * green + 0.114 * blue) / 255;
-}
-
-// Fallback to NovelAI Deep Navy (Ink theme will override these)
-const fallbackTheme: ThemeColors = {
-  base: '#13152c',
-  mantle: '#1c1f3c',
-  crust: '#0b0c1a',
-  surface0: '#22253f',
-  surface1: '#2f345a',
-  surface2: '#3c4273',
-  text: '#ffffff',
-  subtext0: '#a0a0b0',
-  subtext1: '#d0d0e0',
-  blue: '#3b82f6',
-  red: '#ef4444',
-  green: '#10b981',
-  yellow: '#f5f3c2',
-  overlay0: '#4a5078',
-  tagPositiveBg: 'rgba(102, 59, 39, 0.8)',
-  tagNegativeBg: 'rgba(29, 66, 115, 0.8)',
-  fontFamily: 'sans-serif',
-  intensityLow: 'rgba(4, 102, 206, 0.3)',
-  intensityMid: 'rgba(0, 151, 7, 0.5)',
-  intensityHigh: 'rgba(184, 55, 0, 0.5)',
-  warningError: 'rgb(248, 48, 48)',
-  headerText: 'rgba(255, 255, 255, 0.5)',
-  parameterInputBg: '#1c1f3c',
-  parameterInputBorder: '#2f345a',
-  actionAccent: '#f5f3c2',
-  actionAccentText: '#111222',
+export const fallbackTheme: ThemeColors = {
+  base: "#13151B",
+  mantle: "#1D2029",
+  crust: "#0B0D12",
+  surface0: "#252934",
+  surface1: "#363B49",
+  surface2: "#464D5F",
+  text: "#F1F1F1",
+  textMuted: "#9CA3AF",
+  subtext0: "#9CA3AF",
+  subtext1: "#C7CCD5",
+  blue: "#58A6FF",
+  red: "#EF4444",
+  green: "#57AB5A",
+  yellow: "#D4A347",
+  overlay0: "#4B5565",
+  tagPositiveBg: "rgba(102, 59, 39, 0.8)",
+  tagNegativeBg: "rgba(29, 66, 115, 0.8)",
+  fontFamily: "sans-serif",
+  intensityLow: "#58A6FF",
+  intensityMid: "#57AB5A",
+  intensityHigh: "#E5534B",
+  warningError: "rgb(248, 48, 48)",
+  headerText: "#9CA3AF",
+  parameterInputBg: "#1D2029",
+  parameterInputBorder: "#363B49",
+  actionAccent: "#D4A347",
+  actionAccentText: "#13151B",
 };
 
 export const defaultInputStyle = (theme: ThemeColors): React.CSSProperties => ({
   backgroundColor: theme.mantle,
-  color: theme.text,
   border: `1px solid ${theme.surface1}`,
-  borderRadius: '4px',
-  padding: '6px 8px',
-  fontSize: '13px',
-  boxSizing: 'border-box',
+  borderRadius: "4px",
+  boxSizing: "border-box",
+  color: theme.text,
+  fontSize: "13px",
+  padding: "6px 8px",
 });
 
 export const defaultLabelStyle = (theme: ThemeColors): React.CSSProperties => ({
-  fontSize: '12px',
-  color: '#ffffff',
   backgroundColor: colorLuminance(theme.base) != null && colorLuminance(theme.base)! > 0.58
-    ? '#303244'
-    : 'rgba(255, 255, 255, 0.16)',
-  borderRadius: '4px',
+    ? "#303244"
+    : "rgba(255, 255, 255, 0.16)",
+  borderRadius: "4px",
+  color: "#ffffff",
+  display: "inline-block",
+  fontSize: "12px",
   fontWeight: 600,
-  marginBottom: '4px',
-  padding: '1px 5px',
-  display: 'inline-block',
+  marginBottom: "4px",
+  padding: "1px 5px",
 });
 
 export const defaultSmallBtnStyle = (theme: ThemeColors): React.CSSProperties => ({
-  background: 'none',
+  background: "none",
   border: `1px solid ${theme.surface1}`,
+  borderRadius: "4px",
   color: theme.text,
-  borderRadius: '4px',
-  padding: '4px 8px',
-  fontSize: '12px',
-  cursor: 'pointer',
+  cursor: "pointer",
+  fontSize: "12px",
+  padding: "4px 8px",
 });
 
 export const defaultParameterInputStyle = (theme: ThemeColors): React.CSSProperties => ({
@@ -162,154 +101,24 @@ export const defaultParameterInputStyle = (theme: ThemeColors): React.CSSPropert
   border: `1px solid ${theme.parameterInputBorder}`,
 });
 
-// A global singleton so we don't have to drill props everywhere immediately
-export let theme = fallbackTheme;
-export let inputStyle = defaultInputStyle(theme);
-export let labelStyle = defaultLabelStyle(theme);
-export let smallBtnStyle = defaultSmallBtnStyle(theme);
-export let parameterInputStyle = defaultParameterInputStyle(theme);
-
-// Call this hook at the top level App to sync colors
 export function useDynamicTheme() {
   const [currentTheme, setCurrentTheme] = useState<ThemeColors>(fallbackTheme);
 
   useEffect(() => {
     const updateTheme = () => {
-      // Since NovelAI uses styled-components without CSS vars, we sample actual DOM elements.
-      const getBg = (selectors: string[], fb: string) => {
-        for (const sel of selectors) {
-          const el = Array.from(document.querySelectorAll(sel))
-            .find((candidate) => !candidate.closest('#nai-tag-builder-root'));
-          if (el) {
-            const bg = getComputedStyle(el).backgroundColor;
-            if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return bg;
-          }
-        }
-        return fb;
-      };
-
-      const getFg = (selectors: string[], fb: string) => {
-        for (const sel of selectors) {
-          const el = Array.from(document.querySelectorAll(sel))
-            .find((candidate) => !candidate.closest('#nai-tag-builder-root'));
-          if (el) {
-            const fg = getComputedStyle(el).color;
-            if (fg && fg !== 'rgba(0, 0, 0, 0)' && fg !== 'transparent') return fg;
-          }
-        }
-        return fb;
-      };
-
-      const getBorder = (selectors: string[], fb: string) => {
-        for (const sel of selectors) {
-          const el = Array.from(document.querySelectorAll(sel))
-            .find((candidate) => !candidate.closest('#nai-tag-builder-root'));
-          if (el) {
-            const border = getComputedStyle(el).borderColor;
-            if (border && border !== 'rgba(0, 0, 0, 0)' && border !== 'transparent') return border;
-          }
-        }
-        return fb;
-      };
-
-      // Find the Generate button
-      const generateBtn = Array.from(document.querySelectorAll('button'))
-        .find(b => !b.closest('#nai-tag-builder-root') && b.textContent && b.textContent.includes('Generate'));
-      const accentBg = generateBtn ? getComputedStyle(generateBtn).backgroundColor : fallbackTheme.yellow;
-
-      const mainBg = getBg(['.image-gen-page', 'main', '#__next > div > div'], getComputedStyle(document.body).backgroundColor || fallbackTheme.base);
-      const panelBg = getBg(['.settings-panel', '.image-gen-prompt-main', 'nav', 'aside'], fallbackTheme.surface0);
-      const inputBg = getBg(['textarea', 'input[type="text"]'], fallbackTheme.mantle);
-      const parameterBg = getBg(['input[type="number"]', '.settings-panel input', 'aside input'], inputBg || panelBg);
-      const parameterBorder = getBorder(['input[type="number"]', '.settings-panel input', 'aside input'], fallbackTheme.surface1);
-      const textFg = getFg(['.image-gen-page', 'p', 'h1', 'h2', 'span', 'body'], fallbackTheme.text);
-      const headerFg = getFg(['label', '.sc-9882ac77-42'], fallbackTheme.headerText);
-
-      // Intensity Color Extraction via Probe Element
-      // NovelAI defines literal CSS classes: {type}-intensity-color-{0..40}
-      // Level 40 = 100% alpha = pure base RGB color
-      // Creating a temporary span with the class name lets the browser resolve the color
-      const probeIntensityColor = (type: string, fallback: string): string => {
-        try {
-          const probe = document.createElement('span');
-          probe.className = `${type}-intensity-color-40`;
-          probe.style.display = 'none';
-          document.body.appendChild(probe);
-          const bg = getComputedStyle(probe).backgroundColor;
-          document.body.removeChild(probe);
-          if (bg && bg !== 'rgba(0, 0, 0, 0)' && bg !== 'transparent') return bg;
-        } catch { /* ignore */ }
-        return fallback;
-      };
-
-      const lowInt = probeIntensityColor('low', fallbackTheme.intensityLow);
-      const midInt = probeIntensityColor('mid', fallbackTheme.intensityMid);
-      const highInt = probeIntensityColor('high', fallbackTheme.intensityHigh);
-
-      const scrapedFont = getComputedStyle(document.body).fontFamily || fallbackTheme.fontFamily;
-
-      const isVeryDark = (() => {
-        const m = mainBg.match(/(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/);
-        if (!m) return true;
-        return (0.299 * +m[1] + 0.587 * +m[2] + 0.114 * +m[3]) / 255 < 0.5;
-      })();
-      const accentText = colorLuminance(accentBg) != null && colorLuminance(accentBg)! > 0.58
-        ? '#111222'
-        : '#ffffff';
-
-      const newTheme: ThemeColors = {
-        base: mainBg, // Background
-        mantle: inputBg, // Input Background
-        crust: isVeryDark ? '#0b0c1a' : 'rgba(0, 0, 0, 0.25)', // Dark Background
-        surface0: panelBg, // Sidebar / Prompt Main
-        surface1: isVeryDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.05)',
-        surface2: isVeryDark ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
-        text: textFg, // Foreground
-        subtext0: headerFg, // Header / Labels
-        subtext1: isVeryDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.8)',
-        blue: lowInt,
-        red: fallbackTheme.warningError, // Warning/Error
-        green: midInt,
-        yellow: accentBg,
-        overlay0: isVeryDark ? 'rgba(255, 255, 255, 0.1)' : 'rgba(0, 0, 0, 0.1)',
-        tagPositiveBg: fallbackTheme.tagPositiveBg,
-        tagNegativeBg: fallbackTheme.tagNegativeBg,
-        fontFamily: scrapedFont,
-        intensityLow: lowInt,
-        intensityMid: midInt,
-        intensityHigh: highInt,
-        warningError: fallbackTheme.warningError,
-        headerText: headerFg,
-        parameterInputBg: parameterBg,
-        parameterInputBorder: parameterBorder,
-        actionAccent: accentBg,
-        actionAccentText: accentText,
-      };
-
-      // Update globals for legacy components
-      theme = newTheme;
-      inputStyle = defaultInputStyle(theme);
-      labelStyle = defaultLabelStyle(theme);
-      smallBtnStyle = defaultSmallBtnStyle(theme);
-      parameterInputStyle = defaultParameterInputStyle(theme);
-
-      setCurrentTheme(newTheme);
+      setCurrentTheme(sampleHostTheme(fallbackTheme));
     };
 
-    // Initial update
     setTimeout(updateTheme, 100);
 
-    // Listen for changes
     let debounceTimer: ReturnType<typeof setTimeout>;
     const observer = new MutationObserver(() => {
       clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        updateTheme();
-      }, 300); // 300ms debounce allows DOM to settle
+      debounceTimer = setTimeout(updateTheme, 300);
     });
 
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'style', 'data-theme'] });
-    observer.observe(document.body, { attributes: true, attributeFilter: ['class', 'style'] });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "style", "data-theme"] });
+    observer.observe(document.body, { attributes: true, attributeFilter: ["class", "style"] });
     observer.observe(document.head, { childList: true, subtree: true });
 
     return () => {

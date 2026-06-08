@@ -1,6 +1,6 @@
 import React, { useRef, useLayoutEffect, useState } from 'react';
 import { useTheme } from '../contexts/themeContextCore';
-import { withAlpha } from '../styles/theme';
+import { withAlpha } from '../styles/color';
 import { parsePromptToTokens } from '../utils/intensityParser';
 
 interface Props extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {

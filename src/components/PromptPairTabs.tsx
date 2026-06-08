@@ -8,7 +8,8 @@ import {
   promptTargetGroup,
   promptTargetKey,
 } from "../prompt/promptInsertTarget";
-import { inputStyle, promptTonePalettes, smallBtnStyle } from "../styles/theme";
+import { useThemeStyles } from "../contexts/themeContextCore";
+import { promptTonePalettes } from "../styles/promptTonePalettes";
 import HighlightedTextarea from "./HighlightedTextarea";
 
 interface PromptPairField {
@@ -46,6 +47,7 @@ export default function PromptPairTabs({
   getSelectionAfterRender,
   onPromptSelection,
 }: PromptPairTabsProps) {
+  const { inputStyle, smallBtnStyle } = useThemeStyles();
   const [selectedPanel, setSelectedPanel] = useState<ActivePanel>("primary");
   const [isSplit, setIsSplit] = useState(false);
   const targetPanel: ActivePanel | null = targetMatches(activePromptTarget, primary.target)

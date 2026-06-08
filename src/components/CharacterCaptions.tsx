@@ -5,7 +5,7 @@ import type {
   PromptSelectionAfterRender,
 } from '../prompt/promptInsertTarget';
 import CollapsibleSection from './CollapsibleSection';
-import { theme, inputStyle, labelStyle, smallBtnStyle } from '../styles/theme';
+import { useThemeStyles } from '../contexts/themeContextCore';
 import PromptPairTabs from './PromptPairTabs';
 
 interface Props {
@@ -25,6 +25,8 @@ export default function CharacterCaptions({
   getSelectionAfterRender,
   onPromptSelection,
 }: Props) {
+  const { theme, inputStyle, labelStyle, smallBtnStyle } = useThemeStyles();
+
   return (
     <CollapsibleSection title={`Characters (${characters.length})`}>
       <button
