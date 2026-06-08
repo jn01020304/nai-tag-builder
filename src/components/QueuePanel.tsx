@@ -1,10 +1,10 @@
 import type { QueueSession } from "../queue/queueTypes";
-import type { QueueMode, SeedRule } from "../types/preset";
+import type { SeedRule } from "../types/preset";
 import { useThemeStyles } from "../contexts/themeContextCore";
 import { withAlpha } from "../styles/color";
 import CollapsiblePanel from "./CollapsiblePanel";
 
-type QueueRunMode = "off" | QueueMode;
+type QueueAutomationState = "off" | "on";
 
 interface QueuePanelProps {
   autoGenerate: boolean;
@@ -21,8 +21,6 @@ interface QueuePanelProps {
   handleMinChange: (val: string) => void;
   adjustValue: (type: "interval" | "count", dir: 1 | -1) => void;
   queueLength: number;
-  queueMode: QueueMode;
-  setQueueMode: (val: QueueMode) => void;
   queueSession: QueueSession | null;
 }
 
@@ -66,8 +64,6 @@ export default function QueuePanel({
   handleMinChange,
   adjustValue,
   queueLength,
-  queueMode,
-  setQueueMode,
   queueSession,
 }: QueuePanelProps) {
   const { theme, inputStyle, labelStyle, smallBtnStyle } = useThemeStyles();
@@ -106,15 +102,9 @@ export default function QueuePanel({
     textAlign: "center",
     width: "100%",
   };
-  const queueRunMode: QueueRunMode = autoGenerate ? queueMode : "off";
-  const handleQueueRunModeChange = (value: QueueRunMode) => {
-    if (value === "off") {
-      setAutoGenerate(false);
-      return;
-    }
-
-    setAutoGenerate(true);
-    setQueueMode(value);
+  const queueAutomationState: QueueAutomationState = autoGenerate ? "on" : "off";
+  const handleQueueAutomationChange = (value: QueueAutomationState) => {
+    setAutoGenerate(value === "on");
   };
 
   const statusTone = queueSession?.status === "failed"
@@ -162,16 +152,15 @@ export default function QueuePanel({
       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
         <div style={pairedRow}>
           <div style={stackedField}>
-            <label style={{ ...labelStyle, marginBottom: 0 }}>모드</label>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>자동화</label>
             <select
               data-testid="queue-mode-select"
-              value={queueRunMode}
-              onChange={(e) => handleQueueRunModeChange(e.target.value as QueueRunMode)}
+              value={queueAutomationState}
+              onChange={(e) => handleQueueAutomationChange(e.target.value as QueueAutomationState)}
               style={{ ...inputStyle, minWidth: 0, padding: "5px 6px" }}
             >
               <option value="off">끄기</option>
-              <option value="progression">Progression</option>
-              <option value="randomization">Random</option>
+              <option value="on">켜기</option>
             </select>
           </div>
 
