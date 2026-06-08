@@ -68,15 +68,17 @@ Product Category는 앱의 칩 그룹, 검색 필터, 프리셋 조각, 향후 �
 의상과 착용물을 다룬다.
 예시는 `school uniform`, `dress`, `shirt`, `skirt`, `jacket`, `hat`다.
 
-### style_quality
+### custom_main
 
-품질, 해상도, 렌더링 스타일, 이미지 완성도 관련 태그를 다룬다.
-예시는 `best quality`, `highres`, `detailed`, `beautiful`, `masterpiece`다.
+Main Prompt에 넣을 사용자 정의 태그 묶음을 다룬다.
+Danbooru 원천 사전에 없거나, Danbooru 분류와 별도로 관리하고 싶은 NAI용 표현을 포함한다.
+화면 표시명은 `커스텀 메인`이다.
 
-### negative_safety
+### custom_negative
 
-기본 네거티브 프롬프트에 자주 쓰는 품질 방어 태그를 다룬다.
-예시는 `lowres`, `bad anatomy`, `bad hands`, `text`, `watermark`, `blurry`다.
+Negative Prompt에 넣을 사용자 정의 태그 묶음을 다룬다.
+Danbooru 원천 사전에 없거나, Danbooru 분류와 별도로 관리하고 싶은 NAI용 방어 표현을 포함한다.
+화면 표시명은 `커스텀 네거`다.
 
 ### character_scope
 
@@ -111,6 +113,7 @@ Core Catalog 항목은 최소한 다음 의미를 가져야 한다.
 `major_categories`와 `minor_categories`는 1차 힌트다.
 예를 들어 `Headcount & Relationship`은 headcount 후보이고, `Backgrounds`는 background 후보이며, `Pose`는 pose 후보다.
 하지만 최종 판단은 Product Category override가 우선한다.
+Tag Dictionary chunk 생성에서는 `minor_categories`를 큰 major를 나누는 빌드 타임 힌트로만 사용하고, 최종 태그 항목에는 저장하지 않는다.
 
 태그 이름 패턴은 2차 힌트다.
 숫자와 `girl`, `boy` 조합은 headcount 후보로 본다.

@@ -55,17 +55,17 @@
     { "tag": "jacket", "productCategory": "outfit", "priority": 78, "defaultVisible": true },
     { "tag": "hat", "productCategory": "outfit", "priority": 72, "defaultVisible": true },
 
-    { "tag": "best quality", "productCategory": "style_quality", "priority": 100, "defaultVisible": true },
-    { "tag": "masterpiece", "productCategory": "style_quality", "priority": 96, "defaultVisible": true },
-    { "tag": "highres", "productCategory": "style_quality", "priority": 92, "defaultVisible": true },
-    { "tag": "detailed", "productCategory": "style_quality", "priority": 86, "defaultVisible": true },
+    { "tag": "best quality", "productCategory": "custom_main", "priority": 100, "defaultVisible": true },
+    { "tag": "masterpiece", "productCategory": "custom_main", "priority": 96, "defaultVisible": true },
+    { "tag": "highres", "productCategory": "custom_main", "priority": 92, "defaultVisible": true },
+    { "tag": "detailed", "productCategory": "custom_main", "priority": 86, "defaultVisible": true },
 
-    { "tag": "lowres", "productCategory": "negative_safety", "priority": 100, "defaultVisible": true, "target": "negative" },
-    { "tag": "bad anatomy", "productCategory": "negative_safety", "priority": 98, "defaultVisible": true, "target": "negative" },
-    { "tag": "bad hands", "productCategory": "negative_safety", "priority": 96, "defaultVisible": true, "target": "negative" },
-    { "tag": "text", "productCategory": "negative_safety", "priority": 88, "defaultVisible": true, "target": "negative" },
-    { "tag": "watermark", "productCategory": "negative_safety", "priority": 86, "defaultVisible": true, "target": "negative" },
-    { "tag": "blurry", "productCategory": "negative_safety", "priority": 84, "defaultVisible": true, "target": "negative" }
+    { "tag": "lowres", "productCategory": "custom_negative", "priority": 100, "defaultVisible": true, "target": "negative" },
+    { "tag": "bad anatomy", "productCategory": "custom_negative", "priority": 98, "defaultVisible": true, "target": "negative" },
+    { "tag": "bad hands", "productCategory": "custom_negative", "priority": 96, "defaultVisible": true, "target": "negative" },
+    { "tag": "text", "productCategory": "custom_negative", "priority": 88, "defaultVisible": true, "target": "negative" },
+    { "tag": "watermark", "productCategory": "custom_negative", "priority": 86, "defaultVisible": true, "target": "negative" },
+    { "tag": "blurry", "productCategory": "custom_negative", "priority": 84, "defaultVisible": true, "target": "negative" }
   ],
   "aliases": [
     { "alias": "outdoor", "tag": "outdoors" },
@@ -75,4 +75,3 @@
   ],
   "rejected": []
 }
-

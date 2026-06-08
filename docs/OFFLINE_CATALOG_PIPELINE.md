@@ -34,9 +34,47 @@ writing:
 사람이 관리하는 override는 `resource/catalog/overrides/core-catalog-overrides.json`에 둔다.
 앱에 번들링하는 최종 산출물은 `src/prompt/catalog/coreCatalog.generated.ts` 또는 `src/prompt/catalog/coreCatalog.generated.json`에 둔다.
 검색창용 지연 로드 데이터는 추후 `public/catalog/liteAutocompleteIndex.json`로 분리한다.
+Tag Dictionary용 카테고리 chunk는 `resource/catalog/generated/tag-dictionary`에서 먼저 검증하고, 런타임 lazy load가 붙는 시점에 `public/catalog/tag-dictionary`로 내보낸다.
 
 초기에는 Core Catalog만 만든다.
 Lite Autocomplete Index는 Compose MVP가 동작한 뒤 만든다.
+
+## Tag Dictionary Chunk 전략
+
+Tag Dictionary는 Core Catalog와 목적이 다르다.
+Core Catalog는 검수된 작은 칩 목록이고, Tag Dictionary chunk는 원천 데이터의 설명성과 검색성을 최대한 보존하는 카테고리별 사전이다.
+
+`minor_categories`는 최종 산출물 필드가 아니다.
+빌드 타임에 너무 큰 `major_categories`를 쪼개기 위한 힌트로만 사용한다.
+
+현재 분할 규칙은 다음과 같다.
+
+- `Source and Artist` + `Character` → `Character Names`
+- `Source and Artist` + `Artist` → `Artist`
+- `Source and Artist` + `Series` → `Series`
+- `Source and Artist` + `Other` → `Series`
+- `Clothing and Accessories` → `minor_categories`별 chunk
+- `Objects` → `minor_categories`별 chunk
+- `Character` → `minor_categories`별 chunk
+- `Image Composition` → `minor_categories`별 chunk
+- `Adult Content` → `minor_categories`별 chunk
+- 나머지는 기존 `major_categories` 이름을 유지한다.
+
+따라서 Tag Dictionary는 단순한 1단계 카테고리 목록이 아니라 상위 그룹과 하위 chunk를 가진다.
+상위 그룹은 기존 major를 기본으로 하되, `Source and Artist`는 `Names and Sources` 자동완성 그룹으로 바꾼다.
+`Character Names`, `Artist`, `Series`는 선택형 칩 목록이 아니라 자동완성형 대형 사전이다.
+`Objects`는 유지한다.
+
+각 chunk의 태그 항목은 `english_name`, `korean_name`, `description`, `keyword`, `count`를 유지한다.
+`major_categories`와 `minor_categories`는 파일명, manifest, 빌드 규칙으로 표현되므로 항목마다 반복 저장하지 않는다.
+모바일 런타임은 앱 시작 시 `manifest.json`만 읽고, 사용자가 카테고리를 열 때 해당 chunk만 지연 로드한다.
+`Adult Content` 하위 chunk는 `sensitive-select` 모드로 표시한다.
+
+Compose 기본 선택형 UI는 `headcount`, `background`, `framing`, `pose`, `expression`, `appearance`, `outfit` 같은 작업 중심 그룹을 유지한다.
+`outfit`은 `Clothing and Accessories`의 하위 chunk를 이용해 상의, 하의, 속옷/양말, 모자/헤드기어, 신발, 액세서리 같은 소분류 선택으로 확장한다.
+Danbooru에 없는 사용자의 직접 관리 프롬프트 조각은 `커스텀 메인`과 `커스텀 네거`로 분리한다.
+`커스텀 메인`은 Main Prompt에 넣을 사용자 정의 태그 묶음이고, `커스텀 네거`는 Negative Prompt에 넣을 사용자 정의 태그 묶음이다.
+이 둘은 Tag Dictionary 원천 chunk와 별도 데이터로 관리한다.
 
 ## 파이프라인 단계
 

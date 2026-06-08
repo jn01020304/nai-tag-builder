@@ -13,8 +13,8 @@ const PRODUCT_CATEGORIES = new Set([
   "expression",
   "appearance",
   "outfit",
-  "style_quality",
-  "negative_safety",
+  "custom_main",
+  "custom_negative",
   "character_scope",
   "utility",
 ]);
@@ -27,8 +27,8 @@ const CATEGORY_DEFAULT_TARGET = {
   expression: "prompt",
   appearance: "prompt",
   outfit: "prompt",
-  style_quality: "prompt",
-  negative_safety: "negative",
+  custom_main: "prompt",
+  custom_negative: "negative",
   character_scope: "character",
   utility: "any",
 };
@@ -145,7 +145,7 @@ const CATEGORY_RULES = [
     ],
   },
   {
-    category: "style_quality",
+    category: "custom_main",
     major: [/image composition/i],
     minor: [/quality/i, /resolution/i, /style/i],
     tag: [
@@ -158,7 +158,7 @@ const CATEGORY_RULES = [
     ],
   },
   {
-    category: "negative_safety",
+    category: "custom_negative",
     tag: [
       /^lowres$/,
       /bad anatomy/,
