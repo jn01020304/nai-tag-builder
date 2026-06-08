@@ -1,7 +1,7 @@
 import type { CSSProperties } from 'react';
 import type { StatusFeedback } from '../types/feedback';
 import { useTheme } from '../contexts/themeContextCore';
-import { withAlpha } from '../styles/theme';
+import { withAlpha } from '../styles/color';
 
 interface Props {
   feedback: StatusFeedback;

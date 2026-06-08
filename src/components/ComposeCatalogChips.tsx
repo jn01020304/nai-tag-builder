@@ -5,7 +5,7 @@ import type { PromptInsertTarget } from "../prompt/promptInsertTarget";
 import { promptTargetGroup } from "../prompt/promptInsertTarget";
 import type { PromptState } from "../types/metadata";
 import { useTheme } from "../contexts/themeContextCore";
-import { promptTonePalettes } from "../styles/theme";
+import { promptTonePalettes } from "../styles/promptTonePalettes";
 import { hasCatalogTag, splitPromptTags } from "../prompt/catalog/promptTagText";
 
 const CATEGORY_LABELS: Record<ProductCategory, string> = {

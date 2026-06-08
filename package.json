@@ -15,6 +15,7 @@
   "dependencies": {
     "dexie": "^4.3.0",
     "dexie-react-hooks": "^4.2.0",
+    "pako": "^2.1.0",
     "png-chunk-text": "^1.0.0",
     "png-chunks-extract": "^1.0.0",
     "react": "^19.2.0",
@@ -24,6 +25,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.1",
     "@types/node": "^24.10.1",
+    "@types/pako": "^2.0.4",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^5.1.1",

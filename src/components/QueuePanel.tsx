@@ -1,6 +1,7 @@
 import type { QueueSession } from "../queue/queueTypes";
 import type { QueueMode, SeedRule } from "../types/preset";
-import { inputStyle, labelStyle, smallBtnStyle, theme, withAlpha } from "../styles/theme";
+import { useThemeStyles } from "../contexts/themeContextCore";
+import { withAlpha } from "../styles/color";
 import CollapsiblePanel from "./CollapsiblePanel";
 
 interface QueuePanelProps {
@@ -75,6 +76,7 @@ export default function QueuePanel({
   setQueueMode,
   queueSession,
 }: QueuePanelProps) {
+  const { theme, inputStyle, labelStyle, smallBtnStyle } = useThemeStyles();
   const smallNumInput: React.CSSProperties = {
     ...inputStyle,
     flex: "0 0 58px",

@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { MetadataState } from '../types/metadata';
-import { theme, smallBtnStyle } from '../styles/theme';
+import { useThemeStyles } from '../contexts/themeContextCore';
 
 interface Props {
     importedState: MetadataState;
@@ -9,6 +9,7 @@ interface Props {
 }
 
 export default function ImportModal({ importedState, onConfirm, onCancel }: Props) {
+    const { theme, smallBtnStyle } = useThemeStyles();
     const [importBasePrompt, setImportBasePrompt] = useState(true);
     const [selectedChars, setSelectedChars] = useState<string[]>(
         importedState.prompt.characters.map(c => c.id)

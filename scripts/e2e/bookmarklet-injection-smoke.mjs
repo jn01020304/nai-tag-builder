@@ -5,10 +5,11 @@ import { mkdir } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright-core";
+import { gzip } from "pako";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const DIST_SCRIPT = path.join(ROOT, "dist", "nai-tag-builder.js");
-const TEST_TIMEOUT_MS = 30000;
+const TEST_TIMEOUT_MS = 45000;
 const CHROME_PATHS = [
   process.env.PLAYWRIGHT_CHROME_PATH,
   "C:/Program Files/Google/Chrome/Application/chrome.exe",
@@ -28,6 +29,64 @@ function findChromeExecutable() {
     if (candidate && existsSync(candidate)) return candidate;
   }
   throw new Error("Chrome or Edge executable not found. Set PLAYWRIGHT_CHROME_PATH.");
+}
+
+function bytesToBits(bytes) {
+  return bytes.flatMap((byte) => (
+    Array.from({ length: 8 }, (_, index) => (byte >> (7 - index)) & 1)
+  ));
+}
+
+async function dropStealthPng(page, payload) {
+  const signatureBytes = Array.from("stealth_pngcomp", (char) => char.charCodeAt(0));
+  const payloadBytes = Array.from(gzip(new TextEncoder().encode(JSON.stringify(payload))));
+  const length = payloadBytes.length;
+  const lengthBytes = [
+    (length >>> 24) & 255,
+    (length >>> 16) & 255,
+    (length >>> 8) & 255,
+    length & 255,
+  ];
+  const bits = [
+    ...bytesToBits(signatureBytes),
+    ...bytesToBits(lengthBytes),
+    ...bytesToBits(payloadBytes),
+  ];
+
+  await page.evaluate(async (encodedBits) => {
+    const width = 80;
+    const height = Math.ceil(encodedBits.length / width) + 2;
+    const canvas = document.createElement("canvas");
+    canvas.width = width;
+    canvas.height = height;
+    const context = canvas.getContext("2d");
+    const imageData = context.createImageData(width, height);
+
+    for (let index = 0; index < imageData.data.length; index += 4) {
+      imageData.data[index] = 220;
+      imageData.data[index + 1] = 220;
+      imageData.data[index + 2] = 220;
+      imageData.data[index + 3] = 254;
+    }
+
+    let bitIndex = 0;
+    for (let x = 0; x < width; x += 1) {
+      for (let y = 0; y < height; y += 1) {
+        if (bitIndex >= encodedBits.length) break;
+        imageData.data[(y * width + x) * 4 + 3] = 254 | encodedBits[bitIndex];
+        bitIndex += 1;
+      }
+    }
+
+    context.putImageData(imageData, 0, 0);
+    const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/png"));
+    const file = new File([blob], "stealth-test.png", { type: "image/png" });
+    const dataTransfer = new DataTransfer();
+    dataTransfer.items.add(file);
+    const overlay = document.getElementById("nai-tag-builder-root")?.firstElementChild;
+    overlay.dispatchEvent(new DragEvent("dragover", { bubbles: true, cancelable: true, dataTransfer }));
+    overlay.dispatchEvent(new DragEvent("drop", { bubbles: true, cancelable: true, dataTransfer }));
+  }, bits);
 }
 
 async function main() {
@@ -110,6 +169,31 @@ async function main() {
     assert(
       mainPromptLabelBox && mainPromptLabelBox.y < 760,
       `Main Prompt was pushed too far down: ${JSON.stringify(mainPromptLabelBox)}`,
+    );
+
+    await dropStealthPng(page, {
+      Comment: JSON.stringify({
+        prompt: "lsb prompt import test",
+        uc: "lsb negative test",
+        seed: 4242,
+        steps: 11,
+        width: 640,
+        height: 768,
+        scale: 5,
+        sampler: "k_euler",
+        noise_schedule: "native",
+      }),
+      Source: "NovelAI Diffusion Test",
+    });
+    await page.locator("text=선택 항목 가져오기").waitFor({ timeout: 10000 });
+    await page.locator("button", { hasText: "가져오기" }).click();
+    assert(
+      await page.locator("[data-testid='main-prompt-textarea']").inputValue() === "lsb prompt import test",
+      "Stealth LSB prompt was not imported.",
+    );
+    assert(
+      await page.locator("[data-testid='width-input']").inputValue() === "640",
+      "Stealth LSB width was not imported.",
     );
 
     await page.waitForTimeout(500);

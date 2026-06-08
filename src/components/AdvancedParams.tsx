@@ -1,7 +1,7 @@
 import type { MetadataState, AdvancedFlags } from '../types/metadata';
 import type { MetadataAction } from '../hooks/useMetadataState';
 import CollapsibleSection from './CollapsibleSection';
-import { theme, inputStyle, labelStyle } from '../styles/theme';
+import { useThemeStyles } from '../contexts/themeContextCore';
 
 interface Props {
   state: MetadataState;
@@ -21,6 +21,7 @@ const numFieldStyle: React.CSSProperties = {
 };
 
 export default function AdvancedParams({ state, dispatch }: Props) {
+  const { theme, inputStyle, labelStyle } = useThemeStyles();
   const checkboxRowStyle: React.CSSProperties = {
     display: 'flex',
     alignItems: 'center',
