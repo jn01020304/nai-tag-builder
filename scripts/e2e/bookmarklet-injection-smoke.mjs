@@ -89,6 +89,41 @@ async function dropStealthPng(page, payload) {
   }, bits);
 }
 
+async function dragResizeHandle(page, testId, targetX) {
+  const handle = page.locator(`[data-testid='${testId}']`);
+  const box = await handle.boundingBox();
+  assert(box, `${testId} resize handle is missing.`);
+
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+  await page.mouse.down();
+  await page.mouse.move(targetX, box.y + box.height / 2, { steps: 8 });
+  await page.mouse.up();
+}
+
+async function checkOverlayResizeBounds(page) {
+  await dragResizeHandle(page, "overlay-resize-left", -2000);
+  await dragResizeHandle(page, "overlay-resize-right", 3000);
+
+  const bounds = await page.evaluate(() => {
+    const overlay = document.getElementById("nai-tag-builder-root")?.firstElementChild;
+    if (!(overlay instanceof HTMLElement)) return { ok: false, reason: "overlay missing" };
+
+    const rect = overlay.getBoundingClientRect();
+    return {
+      ok:
+        rect.width <= window.innerWidth - 16 + 1 &&
+        rect.left >= 8 - 1 &&
+        rect.right <= window.innerWidth - 8 + 1,
+      left: rect.left,
+      right: rect.right,
+      width: rect.width,
+      viewportWidth: window.innerWidth,
+    };
+  });
+
+  assert(bounds.ok, `Overlay resize escaped viewport: ${JSON.stringify(bounds)}`);
+}
+
 async function main() {
   assert(existsSync(DIST_SCRIPT), "dist/nai-tag-builder.js is missing. Run npm run build first.");
 
@@ -170,6 +205,7 @@ async function main() {
       mainPromptLabelBox && mainPromptLabelBox.y < 760,
       `Main Prompt was pushed too far down: ${JSON.stringify(mainPromptLabelBox)}`,
     );
+    await checkOverlayResizeBounds(page);
 
     await dropStealthPng(page, {
       Comment: JSON.stringify({
