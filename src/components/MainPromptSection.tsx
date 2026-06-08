@@ -5,6 +5,7 @@ import type {
 } from "../prompt/promptInsertTarget";
 import { promptTargetLabel } from "../prompt/promptInsertTarget";
 import type { PromptState } from "../types/metadata";
+import { useTheme } from "../contexts/themeContextCore";
 import CollapsiblePanel from "./CollapsiblePanel";
 import PromptPairTabs from "./PromptPairTabs";
 
@@ -23,12 +24,14 @@ export default function MainPromptSection({
   getSelectionAfterRender,
   onPromptSelection,
 }: Props) {
+  const theme = useTheme();
+
   return (
     <CollapsiblePanel title="Main Prompt" testId="main-prompt-section">
       <div
         data-testid="active-prompt-target"
         style={{
-          color: "#15172f",
+          color: theme.subtext1,
           fontSize: "11px",
           fontWeight: 700,
           marginBottom: "6px",

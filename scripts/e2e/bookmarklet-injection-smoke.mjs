@@ -198,20 +198,28 @@ async function main() {
 
     await page.waitForTimeout(500);
     const syncedTheme = await page.evaluate(() => {
+      const overlay = document.getElementById("nai-tag-builder-root")?.firstElementChild;
       const applyButton = document.querySelector("[data-testid='apply-button']");
       const widthInput = document.querySelector("[data-testid='width-input']");
-      if (!(applyButton instanceof HTMLElement) || !(widthInput instanceof HTMLElement)) {
+      if (
+        !(overlay instanceof HTMLElement) ||
+        !(applyButton instanceof HTMLElement) ||
+        !(widthInput instanceof HTMLElement)
+      ) {
         return { ok: false, reason: "theme sync targets missing" };
       }
 
+      const overlayStyle = getComputedStyle(overlay);
       const applyStyle = getComputedStyle(applyButton);
       const widthStyle = getComputedStyle(widthInput);
       return {
         ok:
+          overlayStyle.backgroundColor === "rgb(243, 240, 230)" &&
           applyStyle.backgroundColor === "rgb(95, 191, 63)" &&
           applyStyle.color === "rgb(255, 255, 255)" &&
           widthStyle.backgroundColor === "rgb(216, 211, 196)" &&
           widthStyle.borderColor === "rgb(185, 178, 159)",
+        overlayBackground: overlayStyle.backgroundColor,
         applyBackground: applyStyle.backgroundColor,
         applyColor: applyStyle.color,
         widthBackground: widthStyle.backgroundColor,
