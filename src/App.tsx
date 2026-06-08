@@ -74,7 +74,7 @@ function AppContent() {
 
   // Preset queue state
   const [queue, setQueue] = useState<string[]>([]);
-  const [queueMode, setQueueMode] = useState<QueueMode>('progression');
+  const queueMode: QueueMode = 'progression';
 
   // Import Modal state
   const [pendingImport, setPendingImport] = useState<MetadataState | null>(null);
@@ -522,8 +522,6 @@ function AppContent() {
             handleMinChange={handleMinChange}
             adjustValue={adjustValue}
             queueLength={queue.length}
-            queueMode={queueMode}
-            setQueueMode={setQueueMode}
             queueSession={queueSession}
           />
         </div>
