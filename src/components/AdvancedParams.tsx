@@ -18,6 +18,7 @@ const numFieldStyle: React.CSSProperties = {
   flex: 1,
   display: 'flex',
   flexDirection: 'column',
+  minWidth: 0,
 };
 
 export default function AdvancedParams({ state, dispatch }: Props) {
@@ -26,16 +27,24 @@ export default function AdvancedParams({ state, dispatch }: Props) {
     display: 'flex',
     alignItems: 'center',
     gap: '6px',
+    justifyContent: 'flex-start',
     marginBottom: '6px',
     fontSize: '13px',
-    color: theme.text,
+    color: theme.subtext1,
+    lineHeight: 1.25,
+    textAlign: 'left',
+  };
+  const checkboxInputStyle: React.CSSProperties = {
+    accentColor: theme.actionAccent,
+    flex: '0 0 auto',
+    margin: 0,
   };
 
   const setA = (field: keyof AdvancedFlags, value: AdvancedFlags[keyof AdvancedFlags]) =>
     dispatch({ type: 'SET_ADVANCED', field, value });
 
   return (
-    <CollapsibleSection title="Advanced">
+    <CollapsibleSection title="Advanced" testId="advanced-section">
       {/* Numeric params */}
       <div style={numRowStyle}>
         <div style={numFieldStyle}>
@@ -90,40 +99,40 @@ export default function AdvancedParams({ state, dispatch }: Props) {
 
       {/* Checkboxes */}
       <label style={checkboxRowStyle}>
-        <input type="checkbox" checked={state.advanced.smea} onChange={e => setA('smea', e.target.checked)} />
+        <input type="checkbox" checked={state.advanced.smea} onChange={e => setA('smea', e.target.checked)} style={checkboxInputStyle} />
         SMEA
       </label>
       <label style={checkboxRowStyle}>
-        <input type="checkbox" checked={state.advanced.smeaDyn} onChange={e => setA('smeaDyn', e.target.checked)} />
+        <input type="checkbox" checked={state.advanced.smeaDyn} onChange={e => setA('smeaDyn', e.target.checked)} style={checkboxInputStyle} />
         SMEA + DYN
       </label>
       <label style={checkboxRowStyle}>
-        <input type="checkbox" checked={state.advanced.dynamicThresholding} onChange={e => setA('dynamicThresholding', e.target.checked)} />
+        <input type="checkbox" checked={state.advanced.dynamicThresholding} onChange={e => setA('dynamicThresholding', e.target.checked)} style={checkboxInputStyle} />
         Dynamic Thresholding
       </label>
       <label style={checkboxRowStyle}>
-        <input type="checkbox" checked={state.advanced.preferBrownian} onChange={e => setA('preferBrownian', e.target.checked)} />
+        <input type="checkbox" checked={state.advanced.preferBrownian} onChange={e => setA('preferBrownian', e.target.checked)} style={checkboxInputStyle} />
         Prefer Brownian
       </label>
       <label style={checkboxRowStyle}>
-        <input type="checkbox" checked={state.advanced.uncondPerVibe} onChange={e => setA('uncondPerVibe', e.target.checked)} />
+        <input type="checkbox" checked={state.advanced.uncondPerVibe} onChange={e => setA('uncondPerVibe', e.target.checked)} style={checkboxInputStyle} />
         Uncond Per Vibe
       </label>
       <label style={checkboxRowStyle}>
-        <input type="checkbox" checked={state.advanced.wonkyVibeCorrelation} onChange={e => setA('wonkyVibeCorrelation', e.target.checked)} />
+        <input type="checkbox" checked={state.advanced.wonkyVibeCorrelation} onChange={e => setA('wonkyVibeCorrelation', e.target.checked)} style={checkboxInputStyle} />
         Wonky Vibe Correlation
       </label>
 
       <label style={checkboxRowStyle}>
-        <input type="checkbox" checked={state.advanced.deliberateEulerAncestralBug} onChange={e => setA('deliberateEulerAncestralBug', e.target.checked)} />
+        <input type="checkbox" checked={state.advanced.deliberateEulerAncestralBug} onChange={e => setA('deliberateEulerAncestralBug', e.target.checked)} style={checkboxInputStyle} />
         Deliberate Euler Ancestral Bug
       </label>
       <label style={checkboxRowStyle}>
-        <input type="checkbox" checked={state.advanced.explikeFineDetail} onChange={e => setA('explikeFineDetail', e.target.checked)} />
+        <input type="checkbox" checked={state.advanced.explikeFineDetail} onChange={e => setA('explikeFineDetail', e.target.checked)} style={checkboxInputStyle} />
         Explike Fine Detail
       </label>
       <label style={checkboxRowStyle}>
-        <input type="checkbox" checked={state.advanced.minimizeSigmaInf} onChange={e => setA('minimizeSigmaInf', e.target.checked)} />
+        <input type="checkbox" checked={state.advanced.minimizeSigmaInf} onChange={e => setA('minimizeSigmaInf', e.target.checked)} style={checkboxInputStyle} />
         Minimize Sigma Inf
       </label>
 
@@ -157,11 +166,11 @@ export default function AdvancedParams({ state, dispatch }: Props) {
 
       {/* V4 prompt toggles */}
       <label style={checkboxRowStyle}>
-        <input type="checkbox" checked={state.useCoords} onChange={e => dispatch({ type: 'SET_META', field: 'useCoords', value: e.target.checked })} />
+        <input type="checkbox" checked={state.useCoords} onChange={e => dispatch({ type: 'SET_META', field: 'useCoords', value: e.target.checked })} style={checkboxInputStyle} />
         Use Coords
       </label>
       <label style={checkboxRowStyle}>
-        <input type="checkbox" checked={state.useOrder} onChange={e => dispatch({ type: 'SET_META', field: 'useOrder', value: e.target.checked })} />
+        <input type="checkbox" checked={state.useOrder} onChange={e => dispatch({ type: 'SET_META', field: 'useOrder', value: e.target.checked })} style={checkboxInputStyle} />
         Use Order
       </label>
     </CollapsibleSection>
