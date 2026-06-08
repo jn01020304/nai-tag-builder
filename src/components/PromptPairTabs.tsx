@@ -14,13 +14,11 @@ import { withAlpha } from "../styles/color";
 import HighlightedTextarea from "./HighlightedTextarea";
 
 interface PromptPairField {
-  label: string;
   tabLabel: string;
   target: PromptInsertTarget;
   value: string;
   placeholder: string;
   testId: string;
-  labelTestId?: string;
   minHeight: string;
   onChange: (value: string) => void;
 }
@@ -98,23 +96,7 @@ export default function PromptPairTabs({
   };
 
   const renderField = (field: PromptPairField, panel: ActivePanel, marginBottom = "8px") => {
-    const tone = promptTargetGroup(field.target);
-    const palette = promptTonePalettes[tone];
     const selectionAfterRender = getSelectionAfterRender(field.target);
-
-    const labelStyle: CSSProperties = {
-      alignSelf: "flex-start",
-      backgroundColor: palette.background,
-      border: `1px solid ${palette.border}`,
-      borderRadius: "6px",
-      color: palette.color,
-      display: "inline-flex",
-      fontSize: "12px",
-      fontWeight: 800,
-      lineHeight: 1,
-      marginBottom: "6px",
-      padding: "4px 7px",
-    };
 
     const promptInputStyle: CSSProperties = {
       ...inputStyle,
@@ -137,9 +119,6 @@ export default function PromptPairTabs({
 
     return (
       <div data-testid={`${field.testId}-panel`} style={{ minWidth: 0 }}>
-        <label data-testid={field.labelTestId} style={labelStyle}>
-          {field.label}
-        </label>
         <HighlightedTextarea
           data-testid={field.testId}
           value={field.value}

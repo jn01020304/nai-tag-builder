@@ -239,17 +239,17 @@ async function main() {
 
     await page.addScriptTag({ path: DIST_SCRIPT });
     await page.locator("[data-testid='catalog-chip-tag_1girl']").waitFor({ timeout: 5000 });
-    await page.locator("[data-testid='main-prompt-label']").waitFor({ timeout: 5000 });
+    await page.locator("[data-testid='main-prompt-textarea']").waitFor({ timeout: 5000 });
 
     const staleMarkerCount = await page.locator("#stale-overlay-marker").count();
     const chipCount = await page.locator("[data-testid^='catalog-chip-']").count();
-    const mainPromptLabelBox = await page.locator("[data-testid='main-prompt-label']").boundingBox();
+    const mainPromptTextareaBox = await page.locator("[data-testid='main-prompt-textarea']").boundingBox();
 
     assert(staleMarkerCount === 0, "Stale overlay was not replaced by the injected bundle.");
     assert(chipCount > 0, "Catalog chips did not render after bundle injection.");
     assert(
-      mainPromptLabelBox && mainPromptLabelBox.y < 760,
-      `Main Prompt was pushed too far down: ${JSON.stringify(mainPromptLabelBox)}`,
+      mainPromptTextareaBox && mainPromptTextareaBox.y < 760,
+      `Main Prompt was pushed too far down: ${JSON.stringify(mainPromptTextareaBox)}`,
     );
     await checkOverlayResizeBounds(page);
     await checkCollapsedLauncher(page);
