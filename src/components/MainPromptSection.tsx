@@ -45,24 +45,20 @@ export default function MainPromptSection({
         getSelectionAfterRender={getSelectionAfterRender}
         onPromptSelection={onPromptSelection}
         primary={{
-          label: "Main Prompt",
           tabLabel: "Main Prompt",
           target: { kind: "base" },
           value: prompt.basePrompt,
           placeholder: "main prompt tags...",
           testId: "main-prompt-textarea",
-          labelTestId: "main-prompt-label",
           minHeight: "128px",
           onChange: (value) => dispatch({ type: "SET_PROMPT", field: "basePrompt", value }),
         }}
         secondary={{
-          label: "Undesired Content",
           tabLabel: "Undesired Content",
           target: { kind: "negativeBase" },
           value: prompt.negativeBase,
           placeholder: "undesired content tags...",
           testId: "negative-prompt-textarea",
-          labelTestId: "negative-prompt-label",
           minHeight: "108px",
           onChange: (value) => dispatch({ type: "SET_PROMPT", field: "negativeBase", value }),
         }}

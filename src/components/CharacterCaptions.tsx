@@ -68,7 +68,6 @@ export default function CharacterCaptions({
                 getSelectionAfterRender={getSelectionAfterRender}
                 onPromptSelection={onPromptSelection}
                 primary={{
-                  label: `Character ${idx + 1} Prompt`,
                   tabLabel: "Prompt",
                   target: { kind: 'character', id: char.id },
                   value: char.caption,
@@ -78,7 +77,6 @@ export default function CharacterCaptions({
                   onChange: (value) => dispatch({ type: 'UPDATE_CHARACTER', id: char.id, field: 'caption', value }),
                 }}
                 secondary={{
-                  label: `Character ${idx + 1} Undesired Content`,
                   tabLabel: "Undesired Content",
                   target: { kind: 'negativeCharacter', id: negativeTargetId },
                   value: negativeChar?.caption ?? "",

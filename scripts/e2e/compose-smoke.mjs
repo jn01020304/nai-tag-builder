@@ -180,8 +180,8 @@ async function checkLayout(page) {
   assert(result.ok, `Layout check failed: ${JSON.stringify(result)}`);
 }
 
-async function checkReadablePromptLabel(page) {
-  const result = await page.locator("[data-testid='main-prompt-label']").evaluate((element) => {
+async function checkReadablePromptTab(page) {
+  const result = await page.locator("[data-testid='base-prompt-primary-tab']").evaluate((element) => {
     const parseRgb = (value) => {
       const parts = value.match(/\d+(\.\d+)?/g);
       if (!parts || parts.length < 3) return null;
@@ -213,7 +213,7 @@ async function checkReadablePromptLabel(page) {
     };
   });
 
-  assert(result.ok, `Prompt label contrast failed: ${JSON.stringify(result)}`);
+  assert(result.ok, `Prompt tab contrast failed: ${JSON.stringify(result)}`);
 }
 
 async function checkFallbackThemeTokens(page) {
@@ -293,16 +293,17 @@ async function checkTextareaThemeHighlightSeparation(page) {
   const result = await textarea.evaluate((element) => {
     const wrapper = element.parentElement;
     const backdrop = wrapper?.firstElementChild;
-    const label = document.querySelector("[data-testid='main-prompt-label']");
+    const primaryTab = document.querySelector("[data-testid='base-prompt-primary-tab']");
+    const promptLabels = document.querySelectorAll("[data-testid='main-prompt-label'], [data-testid='negative-prompt-label']");
     if (
       !(element instanceof HTMLTextAreaElement) ||
       !(backdrop instanceof HTMLElement) ||
-      !(label instanceof HTMLElement)
+      !(primaryTab instanceof HTMLElement)
     ) {
       return { ok: false, reason: "required elements missing" };
     }
 
-    const labelBackground = getComputedStyle(label).backgroundColor;
+    const tabBackground = getComputedStyle(primaryTab).backgroundColor;
     const textareaBackground = getComputedStyle(element).backgroundColor;
     const backdropBackground = getComputedStyle(backdrop).backgroundColor;
     const highlightBackgrounds = Array.from(backdrop.querySelectorAll("span"))
@@ -318,13 +319,15 @@ async function checkTextareaThemeHighlightSeparation(page) {
 
     return {
       ok:
-        labelBackground === "rgb(74, 107, 130)" &&
+        promptLabels.length === 0 &&
+        tabBackground === "rgb(74, 107, 130)" &&
         textareaBackground === "rgba(0, 0, 0, 0)" &&
-        backdropBackground !== labelBackground &&
+        backdropBackground !== tabBackground &&
         highlightBackgrounds.length >= 2 &&
-        highlightBackgrounds.every((color) => color !== labelBackground) &&
+        highlightBackgrounds.every((color) => color !== tabBackground) &&
         highlightedText.includes("2::1girl, 3d, realistic, official art::"),
-      labelBackground,
+      promptLabelCount: promptLabels.length,
+      tabBackground,
       textareaBackground,
       backdropBackground,
       highlightBackgrounds,
@@ -504,7 +507,7 @@ async function main() {
     );
 
     await checkLayout(page);
-    await checkReadablePromptLabel(page);
+    await checkReadablePromptTab(page);
     await checkFallbackThemeTokens(page);
     await checkTextareaThemeHighlightSeparation(page);
 
