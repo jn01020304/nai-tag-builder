@@ -10,6 +10,7 @@ import {
 } from "../prompt/promptInsertTarget";
 import { useThemeStyles } from "../contexts/themeContextCore";
 import { promptTonePalettes } from "../styles/promptTonePalettes";
+import { withAlpha } from "../styles/color";
 import HighlightedTextarea from "./HighlightedTextarea";
 
 interface PromptPairField {
@@ -47,7 +48,7 @@ export default function PromptPairTabs({
   getSelectionAfterRender,
   onPromptSelection,
 }: PromptPairTabsProps) {
-  const { inputStyle, smallBtnStyle } = useThemeStyles();
+  const { theme, inputStyle, smallBtnStyle } = useThemeStyles();
   const [selectedPanel, setSelectedPanel] = useState<ActivePanel>("primary");
   const [isSplit, setIsSplit] = useState(false);
   const targetPanel: ActivePanel | null = targetMatches(activePromptTarget, primary.target)
@@ -78,9 +79,9 @@ export default function PromptPairTabs({
         onClick={() => activateField(panel)}
         style={{
           ...smallBtnStyle,
-          backgroundColor: selected ? palette.background : "rgba(21, 23, 47, 0.72)",
-          borderColor: selected ? palette.border : "rgba(255, 255, 255, 0.18)",
-          color: selected ? palette.color : "#ffffff",
+          backgroundColor: selected ? palette.background : withAlpha(theme.mantle, 0.72),
+          borderColor: selected ? palette.border : theme.surface1,
+          color: selected ? palette.color : theme.text,
           flex: "1 1 0",
           fontWeight: selected ? 800 : 700,
           minHeight: "30px",
@@ -187,9 +188,9 @@ export default function PromptPairTabs({
           onClick={() => setIsSplit((current) => !current)}
           style={{
             ...smallBtnStyle,
-            backgroundColor: isSplit ? "#ece7b8" : "rgba(21, 23, 47, 0.72)",
-            borderColor: isSplit ? "#d6ce85" : "rgba(255, 255, 255, 0.18)",
-            color: isSplit ? "#171827" : "#ffffff",
+            backgroundColor: isSplit ? theme.actionAccent : withAlpha(theme.mantle, 0.72),
+            borderColor: isSplit ? theme.actionAccent : theme.surface1,
+            color: isSplit ? theme.actionAccentText : theme.text,
             fontWeight: 800,
             minHeight: "30px",
             padding: "5px 8px",
@@ -204,7 +205,7 @@ export default function PromptPairTabs({
         <div
           key={promptTargetKey(field.target)}
           style={{
-            borderTop: isSplit && index > 0 ? "1px dashed rgba(255, 255, 255, 0.22)" : "none",
+            borderTop: isSplit && index > 0 ? `1px dashed ${theme.surface1}` : "none",
             paddingTop: isSplit && index > 0 ? "8px" : 0,
           }}
         >

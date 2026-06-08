@@ -329,7 +329,7 @@ function AppContent() {
           border: `2px dashed ${theme.intensityHigh}`,
           color: theme.text,
         }}>
-          <h2 style={{ fontSize: '18px', marginBottom: '8px' }}>Drop PNG Image Here</h2>
+          <h2 style={{ fontSize: '18px', marginBottom: '8px' }}>Drop Image Here</h2>
           <p style={{ fontSize: '12px', color: theme.subtext0 }}>Extract NovelAI metadata into Tag Builder</p>
         </div>
       )}

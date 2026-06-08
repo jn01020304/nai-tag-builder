@@ -6,6 +6,7 @@ import { promptTargetGroup } from "../prompt/promptInsertTarget";
 import type { PromptState } from "../types/metadata";
 import { useTheme } from "../contexts/themeContextCore";
 import { promptTonePalettes } from "../styles/promptTonePalettes";
+import { readableTextColor, withAlpha } from "../styles/color";
 import { hasCatalogTag, splitPromptTags } from "../prompt/catalog/promptTagText";
 
 const CATEGORY_LABELS: Record<ProductCategory, string> = {
@@ -109,10 +110,10 @@ export default function ComposeCatalogChips({
   };
 
   const tabBaseStyle: React.CSSProperties = {
-    backgroundColor: "#15172f",
-    border: "1px solid rgba(255, 255, 255, 0.25)",
+    backgroundColor: withAlpha(theme.mantle, 0.72),
+    border: `1px solid ${theme.surface1}`,
     borderRadius: "999px",
-    color: "#ffffff",
+    color: theme.text,
     cursor: "pointer",
     flex: "0 0 auto",
     fontSize: "12px",
@@ -151,9 +152,9 @@ export default function ComposeCatalogChips({
               onClick={() => setActiveCategory(category)}
               style={{
                 ...tabBaseStyle,
-                backgroundColor: selected ? "#f5f0a8" : "#15172f",
-                borderColor: selected ? "#f5f0a8" : "rgba(255, 255, 255, 0.25)",
-                color: selected ? "#111222" : "#ffffff",
+                backgroundColor: selected ? theme.actionAccent : withAlpha(theme.mantle, 0.72),
+                borderColor: selected ? theme.actionAccent : theme.surface1,
+                color: selected ? theme.actionAccentText : theme.text,
               }}
             >
               {CATEGORY_LABELS[category]} {count}
@@ -304,10 +305,12 @@ export default function ComposeCatalogChips({
               }}
               style={{
                 alignItems: "center",
-                backgroundColor: dragIndex === index ? "#f5f0a8" : "#15172f",
-                border: `1px solid ${dragIndex === index ? "#f5f0a8" : "rgba(255, 255, 255, 0.25)"}`,
+                backgroundColor: dragIndex === index ? theme.actionAccent : withAlpha(theme.mantle, 0.72),
+                border: `1px solid ${dragIndex === index ? theme.actionAccent : theme.surface1}`,
                 borderRadius: "999px",
-                color: dragIndex === index ? "#111222" : "#ffffff",
+                color: dragIndex === index
+                  ? theme.actionAccentText
+                  : readableTextColor(withAlpha(theme.mantle, 0.72), "#111222", theme.text),
                 cursor: canReorderSelectedTags ? "grab" : "default",
                 display: "inline-flex",
                 fontSize: "11px",

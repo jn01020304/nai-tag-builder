@@ -101,28 +101,44 @@ export const defaultParameterInputStyle = (theme: ThemeColors): React.CSSPropert
   border: `1px solid ${theme.parameterInputBorder}`,
 });
 
+function areThemeColorsEqual(a: ThemeColors, b: ThemeColors): boolean {
+  return Object.keys(a).every((key) => (
+    a[key as keyof ThemeColors] === b[key as keyof ThemeColors]
+  ));
+}
+
 export function useDynamicTheme() {
   const [currentTheme, setCurrentTheme] = useState<ThemeColors>(fallbackTheme);
 
   useEffect(() => {
     const updateTheme = () => {
-      setCurrentTheme(sampleHostTheme(fallbackTheme));
+      const nextTheme = sampleHostTheme(fallbackTheme);
+      setCurrentTheme((previousTheme) => (
+        areThemeColorsEqual(previousTheme, nextTheme) ? previousTheme : nextTheme
+      ));
     };
 
-    setTimeout(updateTheme, 100);
+    const initialTimers = [100, 500, 1500, 3000].map((delay) => (
+      setTimeout(updateTheme, delay)
+    ));
 
     let debounceTimer: ReturnType<typeof setTimeout>;
-    const observer = new MutationObserver(() => {
+    const scheduleThemeUpdate = () => {
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(updateTheme, 300);
-    });
+    };
+    const observer = new MutationObserver(scheduleThemeUpdate);
+    const bodyTreeObserver = new MutationObserver(scheduleThemeUpdate);
 
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["class", "style", "data-theme"] });
     observer.observe(document.body, { attributes: true, attributeFilter: ["class", "style"] });
+    bodyTreeObserver.observe(document.body, { childList: true, subtree: true });
     observer.observe(document.head, { childList: true, subtree: true });
 
     return () => {
       observer.disconnect();
+      bodyTreeObserver.disconnect();
+      initialTimers.forEach(clearTimeout);
       clearTimeout(debounceTimer);
     };
   }, []);

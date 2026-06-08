@@ -53,14 +53,54 @@ function isHostCandidate(element: Element): boolean {
 }
 
 function isUsableColor(value: string): boolean {
-  return value !== "" && value !== "rgba(0, 0, 0, 0)" && value !== "transparent";
+  if (value === "" || value === "transparent") return false;
+  const parts = value.match(/\d+(\.\d+)?/g);
+  if (value.startsWith("rgba") && parts && parts.length >= 4) {
+    return Number(parts[3]) > 0.01;
+  }
+  return value !== "rgba(0, 0, 0, 0)";
 }
 
-function firstHostElement(selectors: string[]): Element | null {
+function queryHostElements(selector: string): Element[] {
+  try {
+    return Array.from(document.querySelectorAll(selector))
+      .filter(isHostCandidate);
+  } catch {
+    return [];
+  }
+}
+
+function hostElements(selectors: string[]): Element[] {
+  const seen = new Set<Element>();
+  const elements: Element[] = [];
+
   for (const selector of selectors) {
-    const element = Array.from(document.querySelectorAll(selector))
-      .find(isHostCandidate);
-    if (element) return element;
+    for (const element of queryHostElements(selector)) {
+      if (seen.has(element)) continue;
+      seen.add(element);
+      elements.push(element);
+    }
+  }
+
+  return elements;
+}
+
+function readComputedColor(
+  element: Element,
+  property: "backgroundColor" | "borderColor" | "color",
+): string | null {
+  const value = getComputedStyle(element)[property];
+  return isUsableColor(value) ? value : null;
+}
+
+function readNearestBackground(element: Element): string | null {
+  let current: Element | null = element;
+
+  while (current && current !== document.documentElement) {
+    if (!isHostCandidate(current)) return null;
+    const value = readComputedColor(current, "backgroundColor");
+    if (value) return value;
+    current = current.parentElement;
   }
 
   return null;
@@ -71,11 +111,17 @@ function readHostStyleColor(
   property: "backgroundColor" | "borderColor" | "color",
   fallback: string,
 ): string {
-  const element = firstHostElement(selectors);
-  if (!element) return fallback;
+  for (const element of hostElements(selectors)) {
+    const value = readComputedColor(element, property);
+    if (value) return value;
 
-  const value = getComputedStyle(element)[property];
-  return isUsableColor(value) ? value : fallback;
+    if (property === "backgroundColor") {
+      const nearest = readNearestBackground(element);
+      if (nearest) return nearest;
+    }
+  }
+
+  return fallback;
 }
 
 function findGenerateButton(): HTMLButtonElement | undefined {
@@ -119,28 +165,45 @@ export function sampleHostTheme(fallbackTheme: ThemeColors): ThemeColors {
     : fallbackTheme.yellow;
   const documentBodyBg = canSampleBody ? getComputedStyle(document.body).backgroundColor : "";
 
-  const mainBg = readHostStyleColor(
-    ["main", "[role='main']", "body"],
+  const pageBg = readHostStyleColor(
+    [".image-gen-page", "[class*='image-gen']", "main", "[role='main']", "#__next > div > div", "#__next", "body"],
     "backgroundColor",
     isUsableColor(documentBodyBg) ? documentBodyBg : fallbackTheme.base,
   );
   const panelBg = readHostStyleColor(
-    ["aside", "nav", "section", "main"],
+    [
+      ".settings-panel",
+      ".image-gen-prompt-main",
+      "aside",
+      "nav",
+      "section:has(textarea)",
+      "section:has(input)",
+      "[class*='settings']",
+      "[class*='panel']",
+      "[class*='sidebar']",
+      "main",
+    ],
     "backgroundColor",
     fallbackTheme.surface0,
   );
   const inputBg = readHostStyleColor(
-    ["textarea", "input[type='text']", "input:not([type])"],
+    [
+      ".ProseMirror",
+      "textarea",
+      "input[type='text']",
+      "input:not([type])",
+      "[contenteditable='true']",
+    ],
     "backgroundColor",
     fallbackTheme.mantle,
   );
   const parameterBg = readHostStyleColor(
-    ["input[type='number']", "select", "input"],
+    ["input[type='number']", ".settings-panel input", "aside input", "select", "input"],
     "backgroundColor",
     inputBg || panelBg,
   );
   const parameterBorder = readHostStyleColor(
-    ["input[type='number']", "select", "input"],
+    ["input[type='number']", ".settings-panel input", "aside input", "select", "input"],
     "borderColor",
     fallbackTheme.surface1,
   );
@@ -161,11 +224,14 @@ export function sampleHostTheme(fallbackTheme: ThemeColors): ThemeColors {
   const scrapedFont = canSampleBody
     ? getComputedStyle(document.body).fontFamily || fallbackTheme.fontFamily
     : fallbackTheme.fontFamily;
-  const mainLuminance = colorLuminance(mainBg);
+  const baseBg = [panelBg, inputBg, pageBg].find((color) => (
+    isUsableColor(color) && color !== fallbackTheme.surface0 && color !== fallbackTheme.mantle
+  )) ?? pageBg;
+  const mainLuminance = colorLuminance(baseBg);
   const isVeryDark = mainLuminance == null || mainLuminance < 0.5;
 
   return {
-    base: mainBg,
+    base: baseBg,
     mantle: inputBg,
     crust: isVeryDark ? "#0B0D12" : "rgba(0, 0, 0, 0.25)",
     surface0: panelBg,

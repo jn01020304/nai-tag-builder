@@ -2,6 +2,7 @@ import { useTheme } from "../contexts/themeContextCore";
 import type { ApplyPipelinePhase } from "../automation/applyPipeline";
 import { getApplyPhaseActionLabel, getApplyPhaseStatusLabel } from "../automation/applyStatusText";
 import type { StatusFeedback } from "../types/feedback";
+import { withAlpha } from "../styles/color";
 import ApplyButton from "./ApplyButton";
 
 interface Props {
@@ -49,10 +50,10 @@ export default function OverlayFooter({
         data-testid="overlay-footer-status"
         style={{
           alignItems: "center",
-          backgroundColor: feedback?.tone === "error" ? "rgba(248, 48, 48, 0.16)" : "#15172f",
-          border: `1px solid ${feedback?.tone === "error" ? theme.warningError : "rgba(255, 255, 255, 0.25)"}`,
+          backgroundColor: feedback?.tone === "error" ? withAlpha(theme.warningError, 0.16) : theme.mantle,
+          border: `1px solid ${feedback?.tone === "error" ? theme.warningError : theme.surface1}`,
           borderRadius: "999px",
-          color: feedback?.tone === "error" ? theme.warningError : "#ffffff",
+          color: feedback?.tone === "error" ? theme.warningError : theme.text,
           display: "inline-flex",
           fontSize: "11px",
           fontWeight: 700,
