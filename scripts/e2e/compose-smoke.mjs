@@ -216,6 +216,26 @@ async function checkReadablePromptLabel(page) {
   assert(result.ok, `Prompt label contrast failed: ${JSON.stringify(result)}`);
 }
 
+async function checkPromptSectionToggles(page) {
+  const tagToggle = page.locator("[data-testid='tag-dictionary-section-toggle']");
+  const promptToggle = page.locator("[data-testid='main-prompt-section-toggle']");
+
+  assert(await tagToggle.getAttribute("aria-expanded") === "true", "Tag Dictionary should default open.");
+  assert(await promptToggle.getAttribute("aria-expanded") === "true", "Main Prompt should default open.");
+
+  await tagToggle.click();
+  assert(await tagToggle.getAttribute("aria-expanded") === "false", "Tag Dictionary did not collapse.");
+  assert(!(await hasLocator(page.locator("[data-testid='tag-dictionary-section-body']"))), "Tag Dictionary body stayed mounted.");
+  await tagToggle.click();
+  assert(await hasLocator(page.locator("[data-testid='catalog-chip-tag_1girl']")), "Tag Dictionary did not reopen.");
+
+  await promptToggle.click();
+  assert(await promptToggle.getAttribute("aria-expanded") === "false", "Main Prompt did not collapse.");
+  assert(!(await hasLocator(page.locator("[data-testid='main-prompt-section-body']"))), "Main Prompt body stayed mounted.");
+  await promptToggle.click();
+  assert(await hasLocator(page.locator("[data-testid='main-prompt-textarea']")), "Main Prompt did not reopen.");
+}
+
 async function checkTextareaThemeHighlightSeparation(page) {
   const textarea = page.locator("[data-testid='main-prompt-textarea']");
   await textarea.fill("2::1girl, 3d, realistic, official art::, 0.7::flat color::");
@@ -299,6 +319,7 @@ async function main() {
 
     await page.goto(URL, { waitUntil: "networkidle" });
     await page.locator("text=NAI Tag Builder v2.0").waitFor({ timeout: 5000 });
+    await checkPromptSectionToggles(page);
 
     const textarea = page.locator("[data-testid='main-prompt-textarea']");
     await textarea.click();
