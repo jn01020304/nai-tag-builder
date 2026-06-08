@@ -194,6 +194,36 @@ async function checkCollapsedLauncher(page) {
   await page.locator("[data-testid='overlay-header']").waitFor({ timeout: 3000 });
 }
 
+async function checkCollapsedAutomationCount(page, expectedCount) {
+  await page.locator("button[title='접기']").click();
+  await page.locator("[data-testid='overlay-collapsed-remaining-count']").waitFor({ timeout: 3000 });
+
+  const collapsedCount = await page.locator("[data-testid='overlay-collapsed-remaining-count']").evaluate((element, count) => {
+    const launcher = element.closest("[data-testid='overlay-collapsed-launcher']");
+    if (!(element instanceof HTMLElement) || !(launcher instanceof HTMLElement)) {
+      return { ok: false, reason: "collapsed automation count missing" };
+    }
+
+    const style = getComputedStyle(element);
+    const launcherStyle = getComputedStyle(launcher);
+    return {
+      ok:
+        element.textContent === String(count) &&
+        style.color === launcherStyle.borderColor &&
+        launcher.getAttribute("aria-label")?.includes(`${count}장`),
+      text: element.textContent,
+      color: style.color,
+      borderColor: launcherStyle.borderColor,
+      ariaLabel: launcher.getAttribute("aria-label"),
+    };
+  }, expectedCount);
+
+  assert(collapsedCount.ok, `Collapsed automation count failed: ${JSON.stringify(collapsedCount)}`);
+
+  await page.locator("[data-testid='overlay-collapsed-launcher']").click();
+  await page.locator("[data-testid='overlay-header']").waitFor({ timeout: 3000 });
+}
+
 async function main() {
   assert(existsSync(DIST_SCRIPT), "dist/nai-tag-builder.js is missing. Run npm run build first.");
 
@@ -348,11 +378,12 @@ async function main() {
 
     await page.locator("[data-testid='queue-section-toggle']").click();
     await page.locator("[data-testid='queue-mode-select']").selectOption("on");
-    await page.locator("[data-testid='queue-target-count-input']").fill("1");
+    await page.locator("[data-testid='queue-target-count-input']").fill("2");
     await page.locator("[data-testid='apply-button']").click();
     await page.locator("[data-testid='status-banner']", {
       hasText: "NovelAI 적용 및 이미지 생성 완료를 확인했습니다.",
     }).waitFor({ timeout: 9000 });
+    await checkCollapsedAutomationCount(page, 2);
 
     assert(await page.locator("#mock-import").count() === 0, "Mock Import Metadata button was not clicked.");
     assert(

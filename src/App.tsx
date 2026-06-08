@@ -341,56 +341,91 @@ function AppContent() {
     );
   };
 
-  const renderCollapsedLauncher = () => (
-    <button
-      type="button"
-      data-testid="overlay-collapsed-launcher"
-      title="NAI Tag Builder 펼치기"
-      onClick={() => setIsCollapsed(false)}
-      onMouseDown={(e) => {
-        if (e.button !== 0) return;
-        startDrag(e.clientX, e.clientY);
-      }}
-      onTouchStart={(e) => startDrag(e.touches[0].clientX, e.touches[0].clientY)}
-      style={{
-        alignItems: 'center',
-        backgroundColor: theme.crust,
-        border: `1px solid ${theme.surface1}`,
-        borderRadius: '999px',
-        boxShadow: '0 8px 22px rgba(0,0,0,0.35)',
-        color: theme.text,
-        cursor: 'grab',
-        display: 'flex',
-        flex: '1 1 auto',
-        flexDirection: 'column',
-        fontFamily: theme.fontFamily,
-        fontSize: '11px',
-        fontWeight: 900,
-        height: '100%',
-        justifyContent: 'center',
-        letterSpacing: 0,
-        lineHeight: 1,
-        padding: 0,
-        touchAction: 'none',
-        userSelect: 'none',
-        width: '100%',
-        WebkitUserSelect: 'none',
-      }}
-    >
-      <span
-        aria-hidden="true"
+  const renderCollapsedLauncher = () => {
+    const normalizedTargetCount = Number(targetCount);
+    const remainingCount = Number.isFinite(normalizedTargetCount)
+      ? Math.max(0, Math.ceil(normalizedTargetCount) - loopCount)
+      : null;
+    const remainingText = remainingCount == null ? String(targetCount) : String(remainingCount);
+    const shouldShowRemainingCount = isLooping && remainingText.length > 0;
+    const remainingFontSize = remainingText.length >= 4 ? '15px' : remainingText.length >= 3 ? '18px' : '22px';
+
+    return (
+      <button
+        type="button"
+        data-testid="overlay-collapsed-launcher"
+        title={shouldShowRemainingCount ? `자동화 남은 이미지 ${remainingText}장` : 'NAI Tag Builder 펼치기'}
+        aria-label={shouldShowRemainingCount ? `자동화 남은 이미지 ${remainingText}장` : 'NAI Tag Builder 펼치기'}
+        onClick={() => setIsCollapsed(false)}
+        onMouseDown={(e) => {
+          if (e.button !== 0) return;
+          startDrag(e.clientX, e.clientY);
+        }}
+        onTouchStart={(e) => startDrag(e.touches[0].clientX, e.touches[0].clientY)}
         style={{
-          color: theme.actionAccent,
-          fontSize: '17px',
+          alignItems: 'center',
+          backgroundColor: theme.crust,
+          border: shouldShowRemainingCount
+            ? `2px solid ${theme.actionAccent}`
+            : `1px solid ${theme.surface1}`,
+          borderRadius: '999px',
+          boxShadow: shouldShowRemainingCount
+            ? `0 8px 22px rgba(0,0,0,0.35), 0 0 0 3px ${theme.surface0}`
+            : '0 8px 22px rgba(0,0,0,0.35)',
+          color: shouldShowRemainingCount ? theme.actionAccent : theme.text,
+          cursor: 'grab',
+          display: 'flex',
+          flex: '1 1 auto',
+          flexDirection: 'column',
+          fontFamily: theme.fontFamily,
+          fontSize: '11px',
+          fontWeight: 900,
+          height: '100%',
+          justifyContent: 'center',
+          letterSpacing: 0,
           lineHeight: 1,
-          marginBottom: '3px',
+          padding: 0,
+          textShadow: shouldShowRemainingCount ? `0 1px 0 ${theme.base}` : undefined,
+          touchAction: 'none',
+          userSelect: 'none',
+          width: '100%',
+          WebkitUserSelect: 'none',
         }}
       >
-        N
-      </span>
-      <span style={{ fontSize: '9px', lineHeight: 1 }}>AI</span>
-    </button>
-  );
+        {shouldShowRemainingCount ? (
+          <span
+            data-testid="overlay-collapsed-remaining-count"
+            style={{
+              color: theme.actionAccent,
+              fontSize: remainingFontSize,
+              lineHeight: 1,
+              maxWidth: '46px',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {remainingText}
+          </span>
+        ) : (
+          <>
+            <span
+              aria-hidden="true"
+              style={{
+                color: theme.actionAccent,
+                fontSize: '17px',
+                lineHeight: 1,
+                marginBottom: '3px',
+              }}
+            >
+              N
+            </span>
+            <span style={{ fontSize: '9px', lineHeight: 1 }}>AI</span>
+          </>
+        )}
+      </button>
+    );
+  };
 
   return (
     <div
