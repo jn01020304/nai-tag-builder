@@ -218,7 +218,7 @@ async function checkReadablePromptLabel(page) {
 
 async function checkTextareaThemeHighlightSeparation(page) {
   const textarea = page.locator("[data-testid='main-prompt-textarea']");
-  await textarea.fill("1girl, 2.5::artist:happoubi jin::, 0.7::flat color::");
+  await textarea.fill("2::1girl, 3d, realistic, official art::, 0.7::flat color::");
 
   const result = await textarea.evaluate((element) => {
     const wrapper = element.parentElement;
@@ -238,6 +238,13 @@ async function checkTextareaThemeHighlightSeparation(page) {
     const highlightBackgrounds = Array.from(backdrop.querySelectorAll("span"))
       .map((span) => getComputedStyle(span).backgroundColor)
       .filter((color) => color !== "rgba(0, 0, 0, 0)" && color !== "transparent");
+    const highlightedText = Array.from(backdrop.querySelectorAll("span"))
+      .filter((span) => {
+        const color = getComputedStyle(span).backgroundColor;
+        return color !== "rgba(0, 0, 0, 0)" && color !== "transparent";
+      })
+      .map((span) => span.textContent ?? "")
+      .join("");
 
     return {
       ok:
@@ -245,11 +252,13 @@ async function checkTextareaThemeHighlightSeparation(page) {
         textareaBackground === "rgba(0, 0, 0, 0)" &&
         backdropBackground !== labelBackground &&
         highlightBackgrounds.length >= 2 &&
-        highlightBackgrounds.every((color) => color !== labelBackground),
+        highlightBackgrounds.every((color) => color !== labelBackground) &&
+        highlightedText.includes("2::1girl, 3d, realistic, official art::"),
       labelBackground,
       textareaBackground,
       backdropBackground,
       highlightBackgrounds,
+      highlightedText,
     };
   });
 
