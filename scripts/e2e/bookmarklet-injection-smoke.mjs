@@ -137,6 +137,38 @@ async function checkOverlayResizeBounds(page) {
   assert(bounds.ok, `Overlay resize escaped viewport: ${JSON.stringify(bounds)}`);
 }
 
+async function checkCollapsedLauncher(page) {
+  await page.locator("button[title='접기']").click();
+  await page.locator("[data-testid='overlay-collapsed-launcher']").waitFor({ timeout: 3000 });
+
+  const collapsed = await page.evaluate(() => {
+    const overlay = document.getElementById("nai-tag-builder-root")?.firstElementChild;
+    const launcher = document.querySelector("[data-testid='overlay-collapsed-launcher']");
+    if (!(overlay instanceof HTMLElement) || !(launcher instanceof HTMLElement)) {
+      return { ok: false, reason: "collapsed launcher missing" };
+    }
+
+    const rect = overlay.getBoundingClientRect();
+    const style = getComputedStyle(overlay);
+    return {
+      ok:
+        rect.width === 56 &&
+        rect.height === 56 &&
+        style.borderRadius === "999px" &&
+        !document.querySelector("[data-testid='overlay-header']"),
+      width: rect.width,
+      height: rect.height,
+      borderRadius: style.borderRadius,
+      headerCount: document.querySelectorAll("[data-testid='overlay-header']").length,
+      launcherText: launcher.textContent,
+    };
+  });
+  assert(collapsed.ok, `Collapsed launcher shape failed: ${JSON.stringify(collapsed)}`);
+
+  await page.locator("[data-testid='overlay-collapsed-launcher']").click();
+  await page.locator("[data-testid='overlay-header']").waitFor({ timeout: 3000 });
+}
+
 async function main() {
   assert(existsSync(DIST_SCRIPT), "dist/nai-tag-builder.js is missing. Run npm run build first.");
 
@@ -219,6 +251,7 @@ async function main() {
       `Main Prompt was pushed too far down: ${JSON.stringify(mainPromptLabelBox)}`,
     );
     await checkOverlayResizeBounds(page);
+    await checkCollapsedLauncher(page);
 
     await dropStealthPng(page, {
       Comment: JSON.stringify({
