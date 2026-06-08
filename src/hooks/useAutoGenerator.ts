@@ -30,7 +30,7 @@ export interface AutoGeneratorConfig {
 }
 
 export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGeneratorConfig) {
-  const [autoGenerate, setAutoGenerate] = useState(false);
+  const [autoGenerate, setAutoGenerate] = useState(true);
   const [intervalSec, setIntervalSec] = useState<number | string>(10);
   const [targetCount, setTargetCount] = useState<number | string>(100);
   const [targetMin, setTargetMin] = useState<number | string>(16.7);
