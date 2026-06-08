@@ -69,7 +69,7 @@ function AppContent() {
   const [state, dispatch] = useMetadataState();
   const [isApplying, setIsApplying] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { overlayWidth, startResize } = useEdgeResize(320, "left");
+  const { overlayWidth, startResize } = useEdgeResize(320, CONTAINER_ID);
 
   // Preset queue state
   const [queue, setQueue] = useState<string[]>([]);
@@ -291,6 +291,39 @@ function AppContent() {
     }
   };
 
+  const renderResizeHandle = (edge: "left" | "right") => {
+    if (isCollapsed) return null;
+
+    return (
+      <div
+        data-testid={`overlay-resize-${edge}`}
+        onMouseDown={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          startResize(edge, e.clientX);
+        }}
+        onTouchStart={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          startResize(edge, e.touches[0].clientX);
+        }}
+        style={{
+          position: 'absolute',
+          top: 0,
+          [edge]: 0,
+          width: '12px',
+          height: '100%',
+          cursor: 'ew-resize',
+          zIndex: 10,
+          touchAction: 'none',
+          borderLeft: edge === 'left' ? `3px solid ${theme.surface1}` : undefined,
+          borderRight: edge === 'right' ? `3px solid ${theme.surface1}` : undefined,
+          opacity: 0.75,
+        }}
+      />
+    );
+  };
+
   return (
     <div
       onDragOver={handleDragOver}
@@ -306,6 +339,7 @@ function AppContent() {
         color: theme.text,
         borderRadius: '12px',
         boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+        boxSizing: 'border-box',
         fontFamily: 'sans-serif',
         border: `1px solid ${theme.surface0}`,
         display: 'flex',
@@ -335,24 +369,8 @@ function AppContent() {
       )}
 
       {/* Right Edge Resize Handle */}
-      {!isCollapsed && (
-        <div
-          onMouseDown={(e) => { e.preventDefault(); startResize(e.clientX); }}
-          onTouchStart={(e) => { e.preventDefault(); startResize(e.touches[0].clientX); }}
-          style={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '12px',
-            height: '100%',
-            cursor: 'ew-resize',
-            zIndex: 10,
-            touchAction: 'none',
-            borderLeft: `3px solid ${theme.surface1}`,
-            opacity: 0.75,
-          }}
-        />
-      )}
+      {renderResizeHandle('left')}
+      {renderResizeHandle('right')}
 
       <OverlayHeader
         isCollapsed={isCollapsed}
