@@ -191,8 +191,9 @@ async function main() {
       <!doctype html>
       <html>
         <body style="margin: 0; background: #f3f0e6; color: #0b103a; font-family: sans-serif;">
-          <main style="padding: 24px; width: 380px;">
+          <main style="padding: 24px; width: 380px; color: #ffffff;">
             <h1>NovelAI Mock</h1>
+            <p style="color: #0b103a;">Readable NovelAI text sample</p>
             <textarea class="ProseMirror" style="width: 320px; height: 200px;">1girl, official art</textarea>
             <input id="mock-width" type="number" value="832" style="background: #d8d3c4; border: 1px solid #b9b29f; color: #1b1a16;" />
             <button id="mock-import">Import Metadata</button>
@@ -281,10 +282,14 @@ async function main() {
     await page.waitForTimeout(500);
     const syncedTheme = await page.evaluate(() => {
       const overlay = document.getElementById("nai-tag-builder-root")?.firstElementChild;
+      const overlayBody = document.querySelector("[data-testid='overlay-body']");
+      const tagSectionToggle = document.querySelector("[data-testid='tag-dictionary-section-toggle']");
       const applyButton = document.querySelector("[data-testid='apply-button']");
       const widthInput = document.querySelector("[data-testid='width-input']");
       if (
         !(overlay instanceof HTMLElement) ||
+        !(overlayBody instanceof HTMLElement) ||
+        !(tagSectionToggle instanceof HTMLElement) ||
         !(applyButton instanceof HTMLElement) ||
         !(widthInput instanceof HTMLElement)
       ) {
@@ -292,16 +297,22 @@ async function main() {
       }
 
       const overlayStyle = getComputedStyle(overlay);
+      const overlayBodyStyle = getComputedStyle(overlayBody);
+      const tagSectionStyle = getComputedStyle(tagSectionToggle);
       const applyStyle = getComputedStyle(applyButton);
       const widthStyle = getComputedStyle(widthInput);
       return {
         ok:
           overlayStyle.backgroundColor === "rgb(243, 240, 230)" &&
+          overlayBodyStyle.color === "rgb(11, 16, 58)" &&
+          tagSectionStyle.color === "rgb(11, 16, 58)" &&
           applyStyle.backgroundColor === "rgb(95, 191, 63)" &&
           applyStyle.color === "rgb(255, 255, 255)" &&
           widthStyle.backgroundColor === "rgb(216, 211, 196)" &&
           widthStyle.borderColor === "rgb(185, 178, 159)",
         overlayBackground: overlayStyle.backgroundColor,
+        overlayBodyColor: overlayBodyStyle.color,
+        tagSectionColor: tagSectionStyle.color,
         applyBackground: applyStyle.backgroundColor,
         applyColor: applyStyle.color,
         widthBackground: widthStyle.backgroundColor,
