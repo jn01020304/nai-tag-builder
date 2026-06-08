@@ -552,17 +552,17 @@ function AppContent() {
       )}
 
       {/* Body */}
-      {!isCollapsed && (
-        <div
-          data-testid="overlay-body"
-          style={{
-            flex: '1 1 auto',
-            minHeight: 0,
-            overflowX: 'hidden',
-            overflowY: 'auto',
-            padding: '12px 12px 0',
-          }}
-        >
+      <div
+        data-testid="overlay-body"
+        style={{
+          display: isCollapsed ? 'none' : 'block',
+          flex: '1 1 auto',
+          minHeight: 0,
+          overflowX: 'hidden',
+          overflowY: 'auto',
+          padding: '12px 12px 0',
+        }}
+      >
           <PresetManager
             state={state}
             dispatch={dispatch}
@@ -613,8 +613,7 @@ function AppContent() {
             queueLength={queue.length}
             queueSession={queueSession}
           />
-        </div>
-      )}
+      </div>
 
       {!isCollapsed && (
         <OverlayFooter

@@ -82,6 +82,13 @@ async function hasLocator(locator) {
   return await locator.count() > 0;
 }
 
+async function clickCatalogChip(page, chipId) {
+  await page.locator(`[data-testid='catalog-chip-${chipId}']`).evaluate((element) => {
+    element.scrollIntoView({ block: "center", inline: "center" });
+    element.click();
+  });
+}
+
 async function setTextareaCursor(page, value, cursorIndex) {
   const textarea = page.locator("[data-testid='main-prompt-textarea']");
   await textarea.fill(value);
@@ -258,14 +265,20 @@ async function checkFallbackThemeTokens(page) {
 async function checkPromptSectionToggles(page) {
   const tagToggle = page.locator("[data-testid='tag-dictionary-section-toggle']");
   const promptToggle = page.locator("[data-testid='main-prompt-section-toggle']");
+  const parametersToggle = page.locator("[data-testid='parameters-section-toggle']");
+  const queueToggle = page.locator("[data-testid='queue-section-toggle']");
 
-  assert(await tagToggle.getAttribute("aria-expanded") === "true", "Tag Dictionary should default open.");
   assert(await promptToggle.getAttribute("aria-expanded") === "true", "Main Prompt should default open.");
+  assert(await queueToggle.getAttribute("aria-expanded") === "true", "Queue should default open.");
+  assert(await tagToggle.getAttribute("aria-expanded") === "false", "Tag Dictionary should default collapsed.");
+  assert(await parametersToggle.getAttribute("aria-expanded") === "false", "Parameters should default collapsed.");
+  assert(await hasLocator(page.locator("[data-testid='main-prompt-section-body']")), "Main Prompt body should default mounted.");
+  assert(await hasLocator(page.locator("[data-testid='queue-section-body']")), "Queue body should default mounted.");
+  assert(!(await hasLocator(page.locator("[data-testid='tag-dictionary-section-body']"))), "Tag Dictionary body should default unmounted.");
+  assert(!(await hasLocator(page.locator("[data-testid='parameters-section-body']"))), "Parameters body should default unmounted.");
 
   await tagToggle.click();
-  assert(await tagToggle.getAttribute("aria-expanded") === "false", "Tag Dictionary did not collapse.");
-  assert(!(await hasLocator(page.locator("[data-testid='tag-dictionary-section-body']"))), "Tag Dictionary body stayed mounted.");
-  await tagToggle.click();
+  assert(await tagToggle.getAttribute("aria-expanded") === "true", "Tag Dictionary did not expand.");
   assert(await hasLocator(page.locator("[data-testid='catalog-chip-tag_1girl']")), "Tag Dictionary did not reopen.");
 
   await promptToggle.click();
@@ -273,15 +286,26 @@ async function checkPromptSectionToggles(page) {
   assert(!(await hasLocator(page.locator("[data-testid='main-prompt-section-body']"))), "Main Prompt body stayed mounted.");
   await promptToggle.click();
   assert(await hasLocator(page.locator("[data-testid='main-prompt-textarea']")), "Main Prompt did not reopen.");
+
+  await page.locator("button[title='접기']").click();
+  await page.locator("[data-testid='overlay-collapsed-launcher']").waitFor({ timeout: 3000 });
+  const bodyDisplay = await page.locator("[data-testid='overlay-body']").evaluate((element) => getComputedStyle(element).display);
+  assert(bodyDisplay === "none", `Overlay body should be hidden while collapsed: ${bodyDisplay}`);
+
+  await page.locator("[data-testid='overlay-collapsed-launcher']").click();
+  await page.locator("[data-testid='overlay-header']").waitFor({ timeout: 3000 });
+  assert(await tagToggle.getAttribute("aria-expanded") === "true", "Tag Dictionary state was not preserved.");
+  assert(await promptToggle.getAttribute("aria-expanded") === "true", "Main Prompt state was not preserved.");
+  assert(await parametersToggle.getAttribute("aria-expanded") === "false", "Parameters state was not preserved.");
+  assert(await queueToggle.getAttribute("aria-expanded") === "true", "Queue state was not preserved.");
 }
 
 async function openQueuePanel(page) {
   const queueToggle = page.locator("[data-testid='queue-section-toggle']");
 
-  assert(await queueToggle.getAttribute("aria-expanded") === "false", "Queue should default collapsed.");
-  assert(!(await hasLocator(page.locator("[data-testid='queue-section-body']"))), "Queue body should default unmounted.");
-
-  await queueToggle.click();
+  if (await queueToggle.getAttribute("aria-expanded") === "false") {
+    await queueToggle.click();
+  }
   assert(await queueToggle.getAttribute("aria-expanded") === "true", "Queue did not expand.");
   await page.locator("[data-testid='queue-panel']").waitFor({ timeout: 3000 });
 }
@@ -467,27 +491,27 @@ async function main() {
     assert(await getTextareaValue(page) === "alpha", "Main Prompt typing failed.");
 
     await setTextareaCursor(page, "alpha, omega", 5);
-    await page.locator("[data-testid='catalog-chip-tag_1girl']").click();
+    await clickCatalogChip(page, "tag_1girl");
     assert(
       await getTextareaValue(page) === "alpha, 1girl, omega",
       `Cursor insertion failed: ${await getTextareaValue(page)}`,
     );
 
-    await page.locator("[data-testid='catalog-chip-tag_solo']").click();
+    await clickCatalogChip(page, "tag_solo");
     assert(
       await getTextareaValue(page) === "alpha, 1girl, solo, omega",
       `Consecutive cursor insertion failed: ${await getTextareaValue(page)}`,
     );
 
-    await page.locator("[data-testid='catalog-chip-tag_1girl']").click();
-    await page.locator("[data-testid='catalog-chip-tag_solo']").click();
+    await clickCatalogChip(page, "tag_1girl");
+    await clickCatalogChip(page, "tag_solo");
     assert(
       await getTextareaValue(page) === "alpha, omega",
       `Chip removal failed: ${await getTextareaValue(page)}`,
     );
 
     await setTextareaCursor(page, "brown hair, blue eyes", "brown hair".length);
-    await page.locator("[data-testid='catalog-chip-tag_1girl']").click();
+    await clickCatalogChip(page, "tag_1girl");
     assert(
       await getTextareaValue(page) === "brown hair, 1girl, blue eyes",
       `Cursor separator insertion failed: ${await getTextareaValue(page)}`,
@@ -496,7 +520,7 @@ async function main() {
       await getTextareaSelectionStart(page) === "brown hair, 1girl, ".length,
       `Cursor was not restored after separator: ${await getTextareaSelectionStart(page)}`,
     );
-    await page.locator("[data-testid='catalog-chip-tag_solo']").click();
+    await clickCatalogChip(page, "tag_solo");
     assert(
       await getTextareaValue(page) === "brown hair, 1girl, solo, blue eyes",
       `Post-separator consecutive insertion failed: ${await getTextareaValue(page)}`,
@@ -505,7 +529,7 @@ async function main() {
     const weightedArtistPrompt = "brown hair, 2.7::artist:happoubi jin::, blue eyes";
     const fatFingerCursorIndex = weightedArtistPrompt.indexOf("happoubi") + 3;
     await setTextareaCursor(page, weightedArtistPrompt, fatFingerCursorIndex);
-    await page.locator("[data-testid='catalog-chip-tag_1boy']").click();
+    await clickCatalogChip(page, "tag_1boy");
     assert(
       await getTextareaValue(page) === "brown hair, 2.7::artist:happoubi jin::, 1boy, blue eyes",
       `Fat-finger token insertion failed: ${await getTextareaValue(page)}`,
@@ -518,7 +542,7 @@ async function main() {
     await page.locator("button", { hasText: "Characters" }).click();
     const characterTextarea = page.locator("[data-testid='character-prompt-textarea-0']");
     await setLocatorCursor(characterTextarea, "brown hair, blue eyes", "brown hair".length);
-    await page.locator("[data-testid='catalog-chip-tag_1boy']").click();
+    await clickCatalogChip(page, "tag_1boy");
     assert(
       await characterTextarea.inputValue() === "brown hair, 1boy, blue eyes",
       `Character target insertion failed: ${await characterTextarea.inputValue()}`,
@@ -535,7 +559,7 @@ async function main() {
     await page.locator("[data-testid='base-prompt-secondary-tab']").click();
     const negativeTextarea = page.locator("[data-testid='negative-prompt-textarea']");
     await setLocatorCursor(negativeTextarea, "bad anatomy, blurry", "bad anatomy".length);
-    await page.locator("[data-testid='catalog-chip-tag_1boy']").click();
+    await clickCatalogChip(page, "tag_1boy");
     assert(
       await negativeTextarea.inputValue() === "bad anatomy, 1boy, blurry",
       `Negative target insertion failed: ${await negativeTextarea.inputValue()}`,
@@ -552,7 +576,7 @@ async function main() {
     await page.locator("[data-testid='character-0-secondary-tab']").click();
     const negativeCharacterTextarea = page.locator("[data-testid='negative-character-prompt-textarea-0']");
     await setLocatorCursor(negativeCharacterTextarea, "bad hands, blurry", "bad hands".length);
-    await page.locator("[data-testid='catalog-chip-tag_2boys']").click();
+    await clickCatalogChip(page, "tag_2boys");
     assert(
       await negativeCharacterTextarea.inputValue() === "bad hands, 2boys, blurry",
       `Negative character target insertion failed: ${await negativeCharacterTextarea.inputValue()}`,
@@ -565,7 +589,7 @@ async function main() {
     await page.locator("button", { hasText: "+ Add Character" }).click();
     const secondCharacterTextarea = page.locator("[data-testid='character-prompt-textarea-1']");
     await setLocatorCursor(secondCharacterTextarea, "green eyes, school uniform", "green eyes".length);
-    await page.locator("[data-testid='catalog-chip-tag_2girls']").click();
+    await clickCatalogChip(page, "tag_2girls");
     assert(
       await secondCharacterTextarea.inputValue() === "green eyes, 2girls, school uniform",
       `Second character target insertion failed: ${await secondCharacterTextarea.inputValue()}`,

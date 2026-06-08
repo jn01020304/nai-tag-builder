@@ -293,19 +293,24 @@ async function main() {
     `);
 
     await page.addScriptTag({ path: DIST_SCRIPT });
-    await page.locator("[data-testid='catalog-chip-tag_1girl']").waitFor({ timeout: 5000 });
     await page.locator("[data-testid='main-prompt-textarea']").waitFor({ timeout: 5000 });
 
     const staleMarkerCount = await page.locator("#stale-overlay-marker").count();
-    const chipCount = await page.locator("[data-testid^='catalog-chip-']").count();
+    assert(
+      await page.locator("[data-testid='tag-dictionary-section-toggle']").getAttribute("aria-expanded") === "false",
+      "Tag Dictionary should default collapsed.",
+    );
     const mainPromptTextareaBox = await page.locator("[data-testid='main-prompt-textarea']").boundingBox();
 
     assert(staleMarkerCount === 0, "Stale overlay was not replaced by the injected bundle.");
-    assert(chipCount > 0, "Catalog chips did not render after bundle injection.");
     assert(
       mainPromptTextareaBox && mainPromptTextareaBox.y < 760,
       `Main Prompt was pushed too far down: ${JSON.stringify(mainPromptTextareaBox)}`,
     );
+    await page.locator("[data-testid='tag-dictionary-section-toggle']").click();
+    await page.locator("[data-testid='catalog-chip-tag_1girl']").waitFor({ timeout: 5000 });
+    const chipCount = await page.locator("[data-testid^='catalog-chip-']").count();
+    assert(chipCount > 0, "Catalog chips did not render after Tag Dictionary expanded.");
     await checkOverlayResizeBounds(page);
     await checkCollapsedLauncher(page);
 
@@ -329,6 +334,7 @@ async function main() {
       await page.locator("[data-testid='main-prompt-textarea']").inputValue() === "lsb prompt import test",
       "Stealth LSB prompt was not imported.",
     );
+    await page.locator("[data-testid='parameters-section-toggle']").click();
     assert(
       await page.locator("[data-testid='width-input']").inputValue() === "640",
       "Stealth LSB width was not imported.",
@@ -376,7 +382,9 @@ async function main() {
     });
     assert(syncedTheme.ok, `Theme sync failed: ${JSON.stringify(syncedTheme)}`);
 
-    await page.locator("[data-testid='queue-section-toggle']").click();
+    if (await page.locator("[data-testid='queue-section-toggle']").getAttribute("aria-expanded") === "false") {
+      await page.locator("[data-testid='queue-section-toggle']").click();
+    }
     await page.locator("[data-testid='queue-mode-select']").selectOption("on");
     await page.locator("[data-testid='queue-target-count-input']").fill("2");
     await page.locator("[data-testid='apply-button']").click();
