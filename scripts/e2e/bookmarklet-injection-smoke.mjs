@@ -89,20 +89,26 @@ async function dropStealthPng(page, payload) {
   }, bits);
 }
 
-async function dragResizeHandle(page, testId, targetX) {
+async function dragResizeHandle(page, testId, targetX, targetY) {
   const handle = page.locator(`[data-testid='${testId}']`);
   const box = await handle.boundingBox();
   assert(box, `${testId} resize handle is missing.`);
 
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
   await page.mouse.down();
-  await page.mouse.move(targetX, box.y + box.height / 2, { steps: 8 });
+  await page.mouse.move(
+    targetX ?? box.x + box.width / 2,
+    targetY ?? box.y + box.height / 2,
+    { steps: 8 },
+  );
   await page.mouse.up();
 }
 
 async function checkOverlayResizeBounds(page) {
   await dragResizeHandle(page, "overlay-resize-left", -2000);
   await dragResizeHandle(page, "overlay-resize-right", 3000);
+  await dragResizeHandle(page, "overlay-resize-top", null, -2000);
+  await dragResizeHandle(page, "overlay-resize-bottom", null, 3000);
 
   const bounds = await page.evaluate(() => {
     const overlay = document.getElementById("nai-tag-builder-root")?.firstElementChild;
@@ -112,12 +118,19 @@ async function checkOverlayResizeBounds(page) {
     return {
       ok:
         rect.width <= window.innerWidth - 16 + 1 &&
+        rect.height <= window.innerHeight - 16 + 1 &&
         rect.left >= 8 - 1 &&
-        rect.right <= window.innerWidth - 8 + 1,
+        rect.right <= window.innerWidth - 8 + 1 &&
+        rect.top >= 8 - 1 &&
+        rect.bottom <= window.innerHeight - 8 + 1,
       left: rect.left,
+      top: rect.top,
       right: rect.right,
+      bottom: rect.bottom,
       width: rect.width,
+      height: rect.height,
       viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
     };
   });
 
