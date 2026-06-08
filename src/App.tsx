@@ -69,7 +69,7 @@ function AppContent() {
   const [state, dispatch] = useMetadataState();
   const [isApplying, setIsApplying] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const { overlayWidth, startResize } = useEdgeResize(320, CONTAINER_ID);
+  const { overlayWidth, overlayHeight, startResize } = useEdgeResize(320, CONTAINER_ID);
 
   // Preset queue state
   const [queue, setQueue] = useState<string[]>([]);
@@ -291,8 +291,9 @@ function AppContent() {
     }
   };
 
-  const renderResizeHandle = (edge: "left" | "right") => {
+  const renderResizeHandle = (edge: "left" | "right" | "top" | "bottom") => {
     if (isCollapsed) return null;
+    const isHorizontalEdge = edge === "left" || edge === "right";
 
     return (
       <div
@@ -300,24 +301,28 @@ function AppContent() {
         onMouseDown={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          startResize(edge, e.clientX);
+          startResize(edge, e.clientX, e.clientY);
         }}
         onTouchStart={(e) => {
           e.preventDefault();
           e.stopPropagation();
-          startResize(edge, e.touches[0].clientX);
+          startResize(edge, e.touches[0].clientX, e.touches[0].clientY);
         }}
         style={{
           position: 'absolute',
-          top: 0,
-          [edge]: 0,
-          width: '12px',
-          height: '100%',
-          cursor: 'ew-resize',
-          zIndex: 10,
+          top: edge === 'bottom' ? undefined : 0,
+          right: edge === 'left' ? undefined : 0,
+          bottom: edge === 'top' ? undefined : 0,
+          left: edge === 'right' ? undefined : 0,
+          width: isHorizontalEdge ? '12px' : '100%',
+          height: isHorizontalEdge ? '100%' : '12px',
+          cursor: isHorizontalEdge ? 'ew-resize' : 'ns-resize',
+          zIndex: isHorizontalEdge ? 10 : 11,
           touchAction: 'none',
           borderLeft: edge === 'left' ? `3px solid ${theme.surface1}` : undefined,
           borderRight: edge === 'right' ? `3px solid ${theme.surface1}` : undefined,
+          borderTop: edge === 'top' ? `3px solid ${theme.surface1}` : undefined,
+          borderBottom: edge === 'bottom' ? `3px solid ${theme.surface1}` : undefined,
           opacity: 0.75,
         }}
       />
@@ -331,9 +336,10 @@ function AppContent() {
       onDrop={handleDrop}
       style={{
         width: `${overlayWidth}px`,
+        height: overlayHeight == null || isCollapsed ? undefined : `${overlayHeight}px`,
         minWidth: '280px',
         maxWidth: 'calc(100vw - 16px)',
-        maxHeight: isCollapsed ? 'none' : '80vh',
+        maxHeight: isCollapsed ? 'none' : overlayHeight == null ? '80vh' : 'calc(100vh - 16px)',
         overflow: 'hidden',
         backgroundColor: theme.base,
         color: theme.text,
@@ -371,6 +377,8 @@ function AppContent() {
       {/* Right Edge Resize Handle */}
       {renderResizeHandle('left')}
       {renderResizeHandle('right')}
+      {renderResizeHandle('top')}
+      {renderResizeHandle('bottom')}
 
       <OverlayHeader
         isCollapsed={isCollapsed}
