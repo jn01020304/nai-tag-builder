@@ -396,7 +396,6 @@ function AppContent() {
             onPromptSelection={recordPromptSelection}
             onToggleCatalogEntry={handleCatalogToggle}
           />
-          <GenerationParams state={state} dispatch={dispatch} />
           <CharacterCaptions
             characters={state.prompt.characters}
             negativeCharacters={state.prompt.negativeCharacters}
@@ -405,6 +404,7 @@ function AppContent() {
             getSelectionAfterRender={(target) => selectionAfterRenderByTarget[promptTargetKey(target)]}
             onPromptSelection={recordPromptSelection}
           />
+          <GenerationParams state={state} dispatch={dispatch} />
           <AdvancedParams state={state} dispatch={dispatch} />
 
           <QueuePanel
