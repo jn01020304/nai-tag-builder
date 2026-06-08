@@ -11,50 +11,133 @@ writing:
   asides: false
 ---
 
-# Handoff — 2026-06-05
+# Handoff — 2026-06-08
 
-## 맥락
-NovelAI 이미지 생성 페이지에 주입하는 북마클릿 기반 태그 빌더.
-UI/UX 전면 개편 작업 진행 완료. Glassmorphism 도입 및 시각적 계층 구조 개선 적용 후 빌드 및 스모크 테스트 통과.
+## 현재 상태
 
-## 완료
-- UI/UX 전면 개편 및 Glassmorphism 적용
-  - App.tsx 최상위 레이아웃 및 여백 조절, 반투명 효과 추가
-  - theme.ts 전역 CSS 및 폰트(Inter) 설정 업데이트
-  - index.css 얇은 커스텀 스크롤바 적용
-  - OverlayHeader.tsx, OverlayFooter.tsx 디자인 개선
-  - PresetManager.tsx 큐 칩 알약 모양으로 개선
-  - HighlightedTextarea.tsx 포커스 링 추가
-  - ApplyButton.tsx 호버 시 떠오르는 애니메이션 추가
-- patch.mjs 스크립트를 통한 정밀한 코드 교체 및 npm run build, 테스트 연동 완료
+`nai-tag-builder`는 NovelAI 이미지 생성 페이지에 주입되는 모바일 우선 북마클릿 오버레이다.
 
-## 대화 기록
-User: 지금 이 프로그램이 뭐라고 생각하나요?
-AI: 모바일 환경에서 NovelAI 이미지 생성기의 태그 입력을 극적으로 쾌적하게 만들어주는 북마크릿 기반의 오버레이 UI 도구로 파악.
-User: UI/UX만 개선할거야. 스크린샷 줬으니 진단해줘. 볼드체, 따옴표 강조 금지.
-AI: UI/UX 리뉴얼 계획 제안 및 코드 패치 작성 완료.
-User: 적용 안 된 것 같은데 PlayWright로 확인해줘.
-AI: 빌드 누락 파악 후 npm run build 및 스모크 테스트 실행하여 정상 적용 확인.
-User: 세션을 마칠테니 HANDOFF.md 문서를 작성해줘.
+최근 작업의 중심은 세 가지다.
 
-## 다음
-1. 로드맵 1순위(기초 토대) 2차 심화 논의 및 구현 재개 (이전 세션 보류 항목)
-   - TagEntry category 값 체계 (Danbooru vs 커스텀)
-   - basePrompt ↔ TagEntry[] source of truth 결정
-   - 기존 프리셋 마이그레이션 전략
-   - TagChip 시각 디자인 연동
-   - DOM 자동화 범위 확인
-2. 심화 완료 후 구현 진입
+- EXIF/PNG 청크가 없는 NovelAI 이미지에서도 프롬프트 메타데이터 복원
+- NovelAI 실제 테마와의 색상 동기화 복구
+- 모바일 화면을 덜 잡아먹는 UI 정리
 
-## 검증 지시
-N/A
+현재 `main`은 배포된 GitHub Pages 번들과 동기화되어 있으며, 최신 북마클릿은 원격 `nai-tag-builder.js`를 `?t=Date.now()`로 로드한다.
 
-## 참고 파일
-- walkthrough.md — 이번 세션 UI/UX 개선 내역 요약
-- decision-making/roadmap-p1/1.md — 1차 탐색 (이전 세션)
-- docs/ARCHITECTURE.md — 현행 구조 + 할 일 목록
+## 최근 완료
 
-## 보류
-- 9개 컴포넌트 전체 useTheme() 마이그레이션 — 코드 품질, 버그 아님
-- Priority 2 — 자연어→Danbooru 태그 변환, 태그 가중치 편집 UI, 프롬프트 컴파일러, 이미지 생성 호출
-- Priority 3 — ARCHITECTURE.md 참조
+이미지 Import 파이프라인을 확장했다.
+
+- `Load PNG`를 `Load Image`로 변경
+- PNG뿐 아니라 WebP 등 `image/*` 파일 선택 허용
+- PNG `tEXt`, `iTXt`, `zTXt` 파싱
+- `stealth_pngcomp` alpha LSB 디코더 추가
+- `createImageBitmap()` + canvas pixel decode
+- column-major alpha LSB bit extraction
+- 32-bit big-endian payload length
+- `pako.inflateRaw()` 우선, `ungzip()` fallback
+- 다중 파일 batch parse와 conservative merge 기반 추가
+
+UI/UX를 모바일 기준으로 압축했다.
+
+- Main/Undesired Prompt textarea 위의 작은 중복 라벨 제거
+- Character Prompt / Character Undesired Content 중복 라벨 제거
+- `Insert target: ...` 텍스트 제거
+- 탭이 현재 편집 대상과 색상 식별을 담당
+- 접힘 상태를 긴 바가 아닌 56px 원형 런처로 변경
+- 오버레이 크기 조절을 좌/우/상/하 4방향으로 확장
+- 크기 조절은 viewport 8px padding 안에서 clamp
+
+테마 동기화를 복구했다.
+
+- NovelAI가 CSS variables를 쓰지 않는 전제를 반영
+- Styled Components DOM의 computed style 표본 채취
+- page/panel/input/parameter/generate accent 샘플링
+- 글자색은 첫 후보가 아니라 현재 배경 대비가 좋은 색을 선택
+- interactive 요소의 글자색이 일반 본문색을 오염시키지 않도록 필터링
+- 밝은 NAI 테마에서 흰 글자 오염이 overlay에 전파되는 문제 수정
+
+배포/검증 루틴을 강화했다.
+
+- bookmarklet smoke에 LSB import 검증 포함
+- four-edge resize viewport bound 검증 포함
+- circular collapse launcher 검증 포함
+- theme text matching 검증 포함
+- prompt field subtitle 제거 검증 포함
+
+## 핵심 파일
+
+- `src/utils/stealthLsbDecoder.ts`
+  - alpha LSB `stealth_pngcomp` 복원 로직
+
+- `src/utils/pngParser.ts`
+  - PNG text metadata, stealth fallback, batch image import merge
+
+- `src/styles/themeProbe.ts`
+  - NovelAI DOM/CSS 표본 채취 방식 테마 동기화
+
+- `src/styles/theme.ts`
+  - ThemeColors, fallback tokens, dynamic theme hook
+
+- `src/components/PromptPairTabs.tsx`
+  - Main/Negative 및 Character/Negative Character 공통 탭 UI
+
+- `src/components/MainPromptSection.tsx`
+  - Main Prompt 섹션. 중복 subtitle 제거 완료
+
+- `src/components/CharacterCaptions.tsx`
+  - Character prompt pair 렌더링. 중복 subtitle 제거 완료
+
+- `src/hooks/useEdgeResize.ts`
+  - 4방향 overlay resize
+
+- `scripts/e2e/bookmarklet-injection-smoke.mjs`
+  - 실제 번들 주입 smoke. theme, resize, collapse, LSB import, apply/generate 검증
+
+- `scripts/e2e/compose-smoke.mjs`
+  - 모바일 compose flow, prompt targeting, highlight, queue, apply lock 검증
+
+## 반드시 지킬 것
+
+작업 후에는 빌드된 `dist/nai-tag-builder.js`를 커밋해야 한다.
+
+북마클릿 배포 확인은 로컬 성공만으로 끝내지 않는다. 반드시 원격 JS를 직접 받아 sentinel string을 확인한다.
+
+권장 검증:
+
+```bash
+rtk git diff --check
+rtk npm run lint
+rtk npm run build
+rtk npm run test:e2e:bookmarklet
+rtk npm run test:e2e:compose
+```
+
+원격 확인 예:
+
+```bash
+rtk pwsh -NoProfile -Command '$u = "https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js?t=" + [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds(); $text = (Invoke-WebRequest -UseBasicParsing -Uri $u).Content; [pscustomobject]@{ HasLoadImage=$text.Contains("Load Image"); HasWebp=$text.Contains("image/webp") } | ConvertTo-Json -Compress'
+```
+
+## 주의할 함정
+
+GitHub Pages가 오래된 artifact를 잠깐 서빙할 수 있다. push 직후 원격 sentinel이 false면 5-15초 기다렸다가 다시 확인한다.
+
+NovelAI 테마는 CSS 변수로 읽을 수 없다. `getComputedStyle()` 표본 채취 방식만 믿어야 한다.
+
+글자색은 첫 번째 DOM 후보를 그대로 쓰면 안 된다. 버튼/태그의 흰 글자가 밝은 배경에 잘못 적용될 수 있다.
+
+textarea 하이라이트는 보호 대상이다. textarea 배경을 칠하면 weighted prompt syntax highlighting이 묻힌다.
+
+WebP/LSB 복원은 이미지 변환 과정에서 alpha LSB가 보존된 경우에만 가능하다. 손실 변환은 payload를 깨뜨릴 수 있다.
+
+React-controlled NovelAI input은 직접 DOM 값 변경이 되돌아갈 수 있다. 기본 적용 경로는 metadata import pipeline이다.
+
+## 다음 후보 작업
+
+- Queue 세션의 batch import 기반 random rotation 설계
+- tag dictionary를 더 작은 모바일 작업면으로 재배치
+- prompt tabs의 긴 `Undesired Content` 라벨을 더 짧은 모바일 문구로 바꿀지 검토
+- 실기기 모바일에서 원형 collapse launcher drag/click 충돌 확인
+- 실제 NovelAI theme variants에서 `themeProbe` 표본 후보 추가 검증

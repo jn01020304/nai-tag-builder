@@ -13,148 +13,151 @@ writing:
 
 # One-Pager
 
----
+## Product Shape
 
-## Evergreen
+NAI Tag Builder is a mobile-first bookmarklet overlay for NovelAI image generation.
 
-### NovelAI Metadata Read Path (Paste)
-- Observation: Web frontend reads tEXt chunks on paste. Confirmed by intercepting `1883-***.js` console output.
-- Scope: Import modal trigger requires all 6 tEXt chunks — Title, Description, Software, Source, Generation time, Comment. A subset (e.g. Title + Software only, no Comment) shows the generic Image2Image / Vibe Transfer modal instead.
-- Implication: pngEncoder must produce all 6 chunks. `Comment` key holds the JSON payload; minimum fields: `prompt`, `steps`, `scale`, `width`, `height`, `v4_prompt`. DataTransfer preserves PNG bytes exactly — no browser re-encoding (verified via byte-for-byte comparison with diagnose-paste.js).
+The user stays on NovelAI, opens the bookmarklet, composes prompts in a compact overlay, imports metadata from old images, saves presets, queues runs, and applies the result back into NovelAI through NovelAI's own metadata import path.
 
-### NovelAI Metadata Read Path (File Upload)
-- Observation: File upload also reads tEXt chunks. Same `Comment` JSON format as paste.
-- Scope: Python library (nai_meta.py) uses alpha LSB (stealth_pngcomp), but the web frontend uses tEXt only.
+The current design principle is compact operational UI, not a desktop control panel. Repeated helper text is removed where tabs, color, or section headings already communicate the same state.
 
-### stealth_pngcomp LSB Format
-- Observation: Signature "stealth_pngcomp" (15 UTF-8 bytes = 120 bits) stored in alpha channel LSB.
-- Scope: Layout — [signature 120 bits] [length 32 bits big-endian] [gzip payload]. Pixel order: column-major (x outer, y inner). One bit per pixel alpha LSB.
-- Implication: Web frontend does not use this format for Import detection. Kept in current build as defense-in-depth.
+## Runtime Architecture
 
-### NovelAI V4 Metadata Structure
-- Observation: Real JSON sample captured.
-- Scope: Core structure — `v4_prompt.caption.base_caption` + `char_captions[]` + `v4_negative_prompt`. Wrapper fields (Software, Source, Description, Generation time) are tEXt-only, not in Comment JSON.
+The bookmarklet removes any old loader/root nodes, injects the hosted GitHub Pages bundle, and the bundle mounts a React app into `#nai-tag-builder-root`.
 
-### NovelAI Page Environment
-- Observation: No CSP header — external script injection is not blocked.
-- Scope: body has 3 paste listeners, `div.ProseMirror` has 1. Listeners registered identically under mobile UA. Image page JS chunk: `1883-e81a1cb415362c52.js`.
+React mount uses `flushSync()` because NovelAI's page can prevent normal async React scheduling from flushing reliably.
 
-### React Rendering on NovelAI Page
-- Observation: NovelAI is a React 19 Next.js app. Bundled React's async MessageChannel scheduler does not fire on this page — `createRoot().render()` creates the container but never flushes content.
-- Scope: Wrapping in `flushSync()` forces synchronous rendering. Confirmed working.
-- Implication: React 19 controlled inputs revert values set via DOM manipulation (`nativeInputValueSetter` + synthetic events) — fiber reconciler overwrites immediately. Seed and other NAI input changes are only reliable through the paste pipeline. Direct DOM manipulation is fundamentally impossible.
+The overlay root is fixed-position, draggable, resizable from all four edges, and can collapse into a 56px circular launcher.
 
-### Delivery Path
-- Observation: Mobile OS clipboard has no standard UX for image paste — not viable.
-- Scope: Bookmarklet injects external JS into the NAI page. Chrome mobile cannot run userscripts/extensions — bookmarklet is the only injection method. localhost script injection from HTTPS pages is blocked by Chrome Private Network Access policy — must serve from public HTTPS (GitHub Pages).
-- Implication: DevTools Snippets can run 210KB+ JS; Console cannot (truncation → SyntaxError). Cache-busting `?v='+Date.now()` is mandatory — GitHub Pages default cache headers cause mobile Chrome to serve stale builds even after push.
+## Apply Pipeline
 
-### GitHub Pages Deployment Freshness
-- Observation: Bookmarklet `?t=${Date.now()}` only bypasses browser/CDN cache for the URL; it cannot fix a GitHub Pages artifact that was built from an older commit.
-- Scope: If mobile still shows an old behavior after a local fix, compare local `dist/nai-tag-builder.js` against `https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js?t=<unique>` by checking for a newly added sentinel string. For the 2026-06-05 Generate-button fix, the sentinels were `Generate 버튼은 발견됐지만` and `data-disabled`.
-- Implication: Treat stale remote JS as a deployment problem, not a bookmarklet problem. Push `main`, wait for `.github/workflows/deploy.yml` to finish, then re-check the remote JS content before diagnosing NovelAI runtime behavior.
+The reliable write path into NovelAI is metadata import, not direct DOM mutation.
 
-### React Number Input Clamping
-- Observation: Applying min/max clamping inside `onChange` breaks single-digit deletion. `Number("")` → `0` → clamp forces back to min.
-- Scope: Allow empty strings during `onChange`, apply clamping only in `onBlur`. State type: `number | string`.
-- Implication: Same pattern applies to all numeric inputs (repeat interval, limits, steps, scale).
+Pipeline:
 
-### CSS resize Limitations
-- Observation: `resize: both` only provides a small drag handle at the bottom-right corner.
-- Scope: Browser does not support edge-resize (dragging any border) via CSS alone.
-- Implication: Window-like edge resizing requires a custom invisible `<div>` positioned absolutely on the desired edge with its own mousedown/touchstart drag handlers.
+1. `MetadataState`
+2. `buildCommentJson()`
+3. PNG metadata generation
+4. DataTransfer / paste dispatch
+5. NovelAI Import modal
+6. optional Generate button automation
 
-### CSS fit-content for Parent-Child Sizing
-- Observation: `width: fit-content` on a parent makes it expand to match its largest child's intrinsic width.
-- Scope: Useful when a resizable child (e.g. textarea with `resize: both`) needs to push the parent wider.
-- Implication: Does not allow resizing the parent independently of the child.
+Reason: NovelAI inputs are React-controlled. Native setter tricks can be overwritten by React state reconciliation.
 
-### NovelAI Styled-Components Theming
-- Observation: NovelAI does NOT use CSS custom properties. All theme colors are injected via Styled-Components with hashed class names. Any attempt to read CSS variables fails fundamentally.
-- Scope:
-  - `document.body.backgroundColor` is always `rgb(19, 21, 44)` regardless of theme — unreliable.
-  - Background: `.image-gen-page` (main), `.image-gen-prompt-main` (prompt panel), `.settings-panel` (sidebar).
-  - Text color: `.image-gen-page` computed `color`.
-  - Label/header color: scraped from `label` elements.
-  - Accent color: Generate button `backgroundColor`.
-  - Input background: `textarea`, `input[type="text"]`.
-  - Intensity colors: `<span>` elements with `low-intensity-color-*`, `mid-intensity-color-*`, `high-intensity-color-*` classes. Only exist when prompt contains weighted tags.
-  - Fonts: Theme Editor exposes separate Header Font and Paragraph Font. `body.fontFamily` returns only one.
-- Implication: Theme changes replace `<style>` tags in `<head>`. No class/attribute changes on `<html>`/`<body>`. Detect via `MutationObserver({ childList: true, subtree: true })` on `document.head`. NAI rapidly injects multiple style tags during theme change — 300ms debounce required.
+## Import Pipeline
 
-### NAI Seed Zero Literal
-- Observation: seed=0 in NAI is a literal fixed seed, NOT "use random". User-confirmed.
-- Implication: Random rule must generate `Math.floor(Math.random() * 4294967295)`.
+The Load Image input accepts image files, including PNG and WebP.
 
-### NAI Identical Parameters Block
-- Observation: "Identical parameters to last generation" error is a React state-level block that strictly disables the Generate `<button>`.
-- Scope: Block happens before any network request — cannot be bypassed via `window.fetch` or WebSocket interception.
-- Implication: The only bypass is changing a React state parameter (like Seed) so the button re-enables.
+Single-file parsing tries:
 
-### NAI Mobile DOM Unmounting
-- Observation: NAI responsive design unmounts the right-hand parameter panel (Seed, Steps, Guidance inputs) from the DOM entirely on narrow mobile screens.
-- Implication: `querySelectorAll` and TreeWalker traversal fail 100%. Hidden elements cannot be manipulated.
+- PNG text metadata (`tEXt`, `iTXt`, `zTXt`)
+- pixel-level alpha LSB stealth metadata
 
-### NAI Mobile UI Layout
-- Observation: UI layout varies by viewport width. User-confirmed.
-- Scope:
-  - Narrow (<=375px): bottom-center `▲` toggles the prompt text area, NOT the parameter panel. Bottom-left `⚙️` opens the parameter panel (Steps, Guidance, Seed).
-  - Medium (~850px, sidebar collapsed): `▲` is at the sidebar bottom next to the Sampler dropdown. Clicking expands the full parameter panel including Seed.
-- Implication: The correct button depends entirely on viewport width. Crawler must try both `▲` and `⚙️` buttons.
+Batch parsing returns:
 
-### Automation vs Override Strategy
-- Observation: Global Paste events (how the bookmarklet loads presets) overwrite the entire NAI prompt state.
-- Scope: This violates user autonomy if the user is typing manually in the NAI interface. For autonomous operations like Seed +1/-1, direct DOM manipulation (`findNaiSeedInput`) is used instead.
-- Implication: If DOM manipulation fails (e.g. mobile panel unmounted) and the Generate button is blocked, fallback heuristic searches for the Randomize (🎲) button and clicks it.
+- individual import patches
+- failed filenames
+- merged MetadataState
 
-### Theme Global Mutable Pattern
-- Observation: 9 components import `theme` from styles/theme.ts as a mutable global. `useDynamicTheme()` reassigns the global on every theme change AND triggers Context update, which cascades re-render to all children. Children then read the updated global value inline (e.g. `style={{ color: theme.text }}`). This works correctly. Shared style globals (`inputStyle`, `labelStyle`, `smallBtnStyle`) are also reassigned and work the same way.
-- Scope: Only 3 module-level static constants are actual bugs — they capture theme values at module load time and never update: `miniBtn` (AutoGeneratePanel:29), `smallNumInput` (AutoGeneratePanel:22), `checkboxRowStyle` (AdvancedParams:11).
-- Implication: Fix is moving 3 constants inside component functions. Full 9-component useTheme() migration is code quality improvement, not bug fix.
+Merge behavior is conservative. The first valid scalar settings win, while character prompts can concatenate across files. This prepares the app for future random preset rotation and queue batch generation.
 
-### Textarea Highlight Overlay Technique
-- Observation: Transparent `<textarea>` layered over `<div aria-hidden="true">` with styled `<span>` elements achieves text highlighting without `contenteditable`.
-- Scope: `intensityParser.ts` scores `[]` as negative (-1 per bracket) and `{}` as positive (+1 per bracket). `background-color: transparent !important` required to bypass NAI's aggressive inline CSS injection on textareas.
+## stealth_pngcomp LSB Format
 
-### NAI Comment JSON 44-Field Coverage
-- Observation: NAI Comment JSON contains 44 fields total.
-- Scope: 3 categories — 5 generation-affecting booleans/numbers (deliberate_euler_ancestral_bug, explike_fine_detail, minimize_sigma_inf, dynamic_thresholding_percentile, dynamic_thresholding_mimic_scale); 6 null-feature placeholders (director_reference_* 4, lora_* 2); 3 protocol fields (stream, signed_hash, extra_passthrough_testing).
-- Implication: MetadataState stores 37 fields (generation 5 + null 6 + existing 26). Protocol 3 are hardcoded in buildCommentJson. signed_hash="" is accepted by NAI — no server validation on import.
+Signature:
 
-### Dexie IndexedDB Load-Time Normalization
-- Observation: Dexie `version().stores()` only manages indexes; does not auto-transform existing records. `JSON.parse()` + type assertion enforces nothing at runtime.
-- Scope: When MetadataState schema changes (new fields, structural reorganization), existing records in IndexedDB lack new fields.
-- Implication: `normalizeMetadataState({ ...DEFAULT, ...parsed })` at every load point (presetStorage, appState). No DB version bump needed. Also handles flat→nested migration by detecting `'basePrompt' in raw && !('prompt' in raw)`.
+```text
+stealth_pngcomp
+```
 
----
+Layout:
 
-## Findings
+```text
+[signature 120 bits] [length 32 bits big-endian] [compressed payload bits]
+```
 
-### 2026-06-08 — Bookmarklet URL Updated But Remote Bundle Still Old
-- Answers: 사용자가 새 cache-busting 북마클릿을 실행했는데도 `Raw Prompt` UI가 계속 보인 원인은 북마클릿 주소가 아니라 GitHub Pages 원격 `nai-tag-builder.js`가 아직 이전 artifact였기 때문이다. 로컬 `dist/nai-tag-builder.js`는 `Main Prompt=true`, `Raw Prompt=false`였지만, 원격 JS는 `Main Prompt=false`, `Raw Prompt=true`였다. `main`에 커밋/푸시한 뒤 원격 JS를 다시 받아 `Main Prompt=true`, `Raw Prompt=false`를 확인하고 나서 최신 UI가 배포됐다.
-- Corrections: 북마클릿 문자열을 바꿨다고 배포가 끝난 것이 아니다. UI 변경 후에는 반드시 `rtk npm run build`, `dist/nai-tag-builder.js` 갱신, 커밋/푸시, 원격 JS sentinel 확인까지 완료해야 한다. 사용자가 오래된 UI 스크린샷을 보내면 먼저 remote bundle freshness를 확인한다.
+Pixel order is column-major:
 
-### 2026-06-05 — Remote Bundle Stale After Generate Button Fix
-- Answers: 자동 생성 실패가 계속 재현된 원인은 북마클릿 코드가 아니라 GitHub Pages가 구버전 `nai-tag-builder.js`를 서빙한 것이었다. 로컬 `dist`에는 `Generate 버튼은 발견됐지만`과 `data-disabled`가 있었지만, 원격 JS에는 없었다. `main` push 후 GitHub Pages 배포가 성공하고 원격 JS sentinel을 다시 확인한 뒤 최신 수정이 적용됐다.
-- Corrections: 북마클릿에 이미 `?t=${Date.now()}`가 있어도 원격 artifact 자체가 낡으면 해결되지 않는다. 재발 시 먼저 원격 JS sentinel 확인 → Actions 배포 상태 확인 → NovelAI DOM/runtime 진단 순서로 진행한다.
+```text
+for x
+  for y
+    bit = alpha & 1
+```
 
-### 2026-06-05 — UI/UX 리뉴얼 및 Glassmorphism
-- Answers: 기존의 딱딱한 패널 구조에서 벗어나 `backdropFilter: 'blur(16px)'` 및 반투명 배경을 적용해 시각적 개방감을 높임. 스크롤바 커스텀 및 컴포넌트 여백 튜닝으로 모바일 터치 사용성 개선.
+Payload decompression tries `inflateRaw(data.slice(10, -8))` first, then `ungzip(data)`.
 
-### 2026-03-13 — ImportModal Nested Merge Requirement
-- Answers: `{ ...state, ...partial }` shallow merge replaces nested objects entirely. When ImportModal sends `partial.prompt` (subset of PromptState), the user's existing basePrompt is lost if unchecked. Fix: merge each group separately — `prompt: { ...state.prompt, ...partial.prompt }, params: { ...state.params, ...partial.params }, advanced: { ...state.advanced, ...partial.advanced }`.
+This path is format-agnostic after browser decode. If the browser can decode the image to RGBA and the alpha LSB payload survived conversion, the app can recover NovelAI metadata even without EXIF or PNG chunks.
 
-### 2026-03-13 — Roadmap P1: TagEntry Schema Gap
-- Answers: db.ts defines TagEntry (`keyword, category, weight, isEnabled, isNegative`) but it's never used. Current tags live as comma-separated text in `basePrompt` string with weight syntax (`1.5::tag::`). Missing fields for structured tag management: `order` (prompt position matters for NAI weighting) and `scope` ("base" vs "char_{id}" for character-specific tags). Category value taxonomy is undefined.
+Lossy conversions may destroy the payload.
 
-### 2026-03-01 (legacy) — Queue-driven Auto-generate Design
-- Answers: Queue is `string[]` of preset IDs in React state (`useState`). Queue index tracked via `useRef` (not state) to avoid stale closure issues inside `setInterval`. Each interval tick: if queue non-empty, load next preset by ID, build CommentJson, dispatch paste. If empty, fall back to current editor state.
-- Corrections: `queueIndexRef.current` resets to 0 on each new `handleApply`. Seed bumping uses the next preset's seed setting, not the editor's current seed.
+## Theme Sync
 
-### 2026-03-01 (legacy) — Preset Storage Architecture
-- Answers: Each preset is a full `MetadataState` snapshot (~25 fields including character arrays) serialized as JSON. Stored as a JSON array under a single `localStorage` key (`nai-tb-presets`). ~2-4 KB per preset, well within the 5 MB cap.
-- Corrections: `structuredClone(state)` required on save to break object references — prevents state mutation from affecting stored presets.
+NovelAI does not expose a clean CSS variable theme contract. It uses Styled Components and hashed classes.
 
-### 2026-02-28 (legacy) — Edge Resize Technique
-- Answers: Invisible `<div>` (8px wide, `position: absolute`, `right: 0`, full height) acts as drag handle. `mousedown`/`touchstart` tracks delta and updates `overlayWidth` state. `document.body.style.cursor = 'ew-resize'` during drag for visual feedback even when cursor leaves the handle.
-- Corrections: Minimum width 320px, maximum 90vw. Hidden when overlay is collapsed.
+The app samples computed styles from host DOM elements:
+
+- page background
+- prompt panel background
+- textarea/input background
+- numeric input background and border
+- Generate button accent
+- visible readable text colors
+- weighted prompt intensity colors via temporary class probe elements
+
+Important correction: text color cannot be copied from the first matching `span`, `main`, or `body`. NovelAI pages can contain white button/tag text on light beige surfaces. The sampler now chooses readable text colors by contrast against the sampled background and filters interactive elements where appropriate.
+
+Theme changes are detected by observing:
+
+- `document.head` style changes
+- `document.body` attributes
+- body subtree changes
+
+Updates are debounced.
+
+## UI State
+
+Current compact UI decisions:
+
+- Main/Undesired prompt fields use tabs instead of duplicate field subtitles.
+- Character prompt pairs use the same tab/split pattern.
+- `Insert target: ...` text is removed.
+- Collapsed overlay is a circular launcher, not a horizontal bar.
+- Overlay resize works on left, right, top, and bottom edges.
+- Footer Apply button remains outside body scroll.
+
+## Deployment Freshness
+
+The bookmarklet uses:
+
+```text
+?t=Date.now()
+```
+
+This bypasses browser cache for the request URL, but it does not force GitHub Pages to serve a newly built artifact.
+
+After any change:
+
+1. `rtk npm run build`
+2. commit `dist/nai-tag-builder.js`
+3. push `main`
+4. fetch the remote URL with a unique `?t=`
+5. check for a sentinel string from the change
+
+If the user still sees old UI, check remote bundle freshness before debugging runtime behavior.
+
+## Key Tests
+
+- `rtk npm run lint`
+- `rtk npm run build`
+- `rtk npm run test:e2e:bookmarklet`
+- `rtk npm run test:e2e:compose`
+
+Bookmarklet smoke covers injection, theme sync, four-edge resizing, circular collapse, LSB import, and Generate automation.
+
+Compose smoke covers mobile layout, prompt editing, tab targeting, tag insertion/removal, character prompt targeting, highlight separation, queue controls, and apply lock behavior.
+
+## Open Edges
+
+- Actual NovelAI DOM can shift; selectors and theme probes should remain defensive.
+- WebP stealth recovery depends on alpha LSB preservation.
+- Direct NovelAI input mutation remains a fallback-only tactic.
+- Queue randomization and rotation can build on the batch import merge model but need explicit UX constraints.
