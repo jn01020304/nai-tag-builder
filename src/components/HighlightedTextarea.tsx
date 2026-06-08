@@ -1,4 +1,4 @@
-import React, { useRef, useLayoutEffect } from 'react';
+import React, { useRef, useLayoutEffect, useState } from 'react';
 import { useTheme } from '../contexts/themeContextCore';
 import { withAlpha } from '../styles/theme';
 import { parsePromptToTokens } from '../utils/intensityParser';
@@ -22,9 +22,20 @@ export default function HighlightedTextarea(props: Props) {
         ...rest
     } = props;
     const theme = useTheme();
+    const containerRef = useRef<HTMLDivElement>(null);
     const backdropRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const boxHeight = style?.height ?? style?.minHeight ?? '80px';
+    const resizeMode = style?.resize ?? 'vertical';
+    const minHeight = typeof style?.minHeight === 'number'
+        ? style.minHeight
+        : parseFloat(String(style?.minHeight ?? boxHeight)) || 80;
+    const [boxHeightPx, setBoxHeightPx] = useState(() => {
+        if (typeof style?.height === 'number') return style.height;
+        const parsedHeight = parseFloat(String(style?.height ?? boxHeight));
+        return Number.isFinite(parsedHeight) ? parsedHeight : minHeight;
+    });
+    const canResizeVertically = resizeMode === 'vertical' || resizeMode === 'both';
 
     const tokens = parsePromptToTokens(value);
 
@@ -54,8 +65,44 @@ export default function HighlightedTextarea(props: Props) {
         textareaRef.current.setSelectionRange(start, end);
     }, [selectionAfterRender, value]);
 
+    const startManualResize = (clientY: number) => {
+        if (!canResizeVertically) return;
+
+        const startY = clientY;
+        const startHeight = containerRef.current?.getBoundingClientRect().height ?? boxHeightPx;
+
+        const move = (currentY: number) => {
+            setBoxHeightPx(Math.max(minHeight, startHeight + currentY - startY));
+        };
+
+        const onMM = (event: MouseEvent) => {
+            event.preventDefault();
+            move(event.clientY);
+        };
+
+        const onTM = (event: TouchEvent) => {
+            event.preventDefault();
+            move(event.touches[0].clientY);
+        };
+
+        const up = () => {
+            document.body.style.cursor = "";
+            document.removeEventListener('mousemove', onMM);
+            document.removeEventListener('mouseup', up);
+            document.removeEventListener('touchmove', onTM);
+            document.removeEventListener('touchend', up);
+        };
+
+        document.body.style.cursor = 'ns-resize';
+        document.addEventListener('mousemove', onMM);
+        document.addEventListener('mouseup', up);
+        document.addEventListener('touchmove', onTM, { passive: false });
+        document.addEventListener('touchend', up);
+    };
+
     return (
         <div
+            ref={containerRef}
             onMouseDown={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
@@ -63,8 +110,11 @@ export default function HighlightedTextarea(props: Props) {
                 position: 'relative',
                 width: style?.width || '100%',
                 minHeight: boxHeight,
-                height: boxHeight,
+                height: `${boxHeightPx}px`,
                 marginBottom: style?.marginBottom,
+                maxWidth: '100%',
+                resize: resizeMode,
+                overflow: 'hidden',
                 pointerEvents: 'auto',
                 userSelect: 'text',
                 WebkitUserSelect: 'text',
@@ -143,8 +193,8 @@ export default function HighlightedTextarea(props: Props) {
                 style={{
                     ...style,
                     position: 'relative',
-                    color: theme.text,
-                    caretColor: theme.text,
+                    color: style?.color ?? theme.text,
+                    caretColor: style?.caretColor ?? style?.color ?? theme.text,
                     margin: 0,
                     fontFamily: style?.fontFamily || 'inherit',
                     fontSize: style?.fontSize || 'inherit',
@@ -181,6 +231,45 @@ export default function HighlightedTextarea(props: Props) {
                 }}
                 {...rest}
             />
+            {canResizeVertically && (
+                <div
+                    aria-hidden="true"
+                    onMouseDown={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        startManualResize(e.clientY);
+                    }}
+                    onTouchStart={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        startManualResize(e.touches[0].clientY);
+                    }}
+                    style={{
+                        alignItems: 'center',
+                        bottom: 0,
+                        cursor: 'ns-resize',
+                        display: 'flex',
+                        height: '14px',
+                        justifyContent: 'flex-end',
+                        opacity: 0.7,
+                        paddingRight: '5px',
+                        pointerEvents: 'auto',
+                        position: 'absolute',
+                        right: 0,
+                        width: '42px',
+                        zIndex: 2,
+                    }}
+                >
+                    <span
+                        style={{
+                            borderBottom: `2px solid ${style?.color ?? theme.text}`,
+                            display: 'block',
+                            opacity: 0.72,
+                            width: '24px',
+                        }}
+                    />
+                </div>
+            )}
         </div>
     );
 }

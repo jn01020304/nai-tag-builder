@@ -164,7 +164,7 @@ Avoid:
 
 The user tests on NovelAI through:
 
-- `javascript:void(document.body.appendChild(Object.assign(document.createElement("script"),{src:"https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js"})))`
+- `javascript:(()=>{document.getElementById("nai-tag-builder-loader")?.remove();document.getElementById("nai-tag-builder-root")?.remove();const s=document.createElement("script");s.id="nai-tag-builder-loader";s.src="https://jn01020304.github.io/nai-tag-builder/nai-tag-builder.js?t="+Date.now();document.body.appendChild(s);})()`
 
 If the user cannot see changes on NovelAI:
 

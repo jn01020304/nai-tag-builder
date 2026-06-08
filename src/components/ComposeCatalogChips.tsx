@@ -5,6 +5,7 @@ import type { PromptInsertTarget } from "../prompt/promptInsertTarget";
 import { promptTargetGroup } from "../prompt/promptInsertTarget";
 import type { PromptState } from "../types/metadata";
 import { useTheme } from "../contexts/themeContextCore";
+import { promptTonePalettes } from "../styles/theme";
 import { hasCatalogTag, splitPromptTags } from "../prompt/catalog/promptTagText";
 
 const CATEGORY_LABELS: Record<ProductCategory, string> = {
@@ -72,38 +73,6 @@ export default function ComposeCatalogChips({
     label: string;
     group: TargetGroup;
   }
-
-  const activePalettes = {
-    base: {
-      background: "#143d63",
-      border: "#4ea1d3",
-      color: "#ffffff",
-      shadow: "rgba(78, 161, 211, 0.35)",
-    },
-    character: {
-      background: "#4c2f7d",
-      border: "#b19cff",
-      color: "#ffffff",
-      shadow: "rgba(177, 156, 255, 0.35)",
-    },
-    negative: {
-      background: "#673227",
-      border: "#ff9b7b",
-      color: "#ffffff",
-      shadow: "rgba(255, 155, 123, 0.35)",
-    },
-    negativeCharacter: {
-      background: "#5a254f",
-      border: "#f38bd4",
-      color: "#ffffff",
-      shadow: "rgba(243, 139, 212, 0.35)",
-    },
-  } satisfies Record<TargetGroup, {
-    background: string;
-    border: string;
-    color: string;
-    shadow: string;
-  }>;
 
   const getEntryAssignments = (entry: CoreCatalogEntry): TagAssignment[] => {
     const assignments: TagAssignment[] = [];
@@ -205,8 +174,8 @@ export default function ComposeCatalogChips({
           const assignments = getEntryAssignments(entry);
           const active = assignments.length > 0;
           const activeInCurrentTarget = hasCatalogTag(activePromptValue, entry);
-          const currentAssignmentPalette = activePalettes[activeTargetGroup];
-          const firstAssignmentPalette = assignments[0] ? activePalettes[assignments[0].group] : currentAssignmentPalette;
+          const currentAssignmentPalette = promptTonePalettes[activeTargetGroup];
+          const firstAssignmentPalette = assignments[0] ? promptTonePalettes[assignments[0].group] : currentAssignmentPalette;
           const chipPalette = activeInCurrentTarget ? currentAssignmentPalette : firstAssignmentPalette;
           return (
             <button
@@ -259,7 +228,7 @@ export default function ComposeCatalogChips({
                   }}
                 >
                   {assignments.map((assignment) => {
-                    const palette = activePalettes[assignment.group];
+                    const palette = promptTonePalettes[assignment.group];
                     return (
                       <span
                         key={assignment.key}

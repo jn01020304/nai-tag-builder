@@ -98,17 +98,17 @@ async function main() {
 
     await page.addScriptTag({ path: DIST_SCRIPT });
     await page.locator("[data-testid='catalog-chip-tag_1girl']").waitFor({ timeout: 5000 });
-    await page.locator("[data-testid='raw-prompt-label']").waitFor({ timeout: 5000 });
+    await page.locator("[data-testid='main-prompt-label']").waitFor({ timeout: 5000 });
 
     const staleMarkerCount = await page.locator("#stale-overlay-marker").count();
     const chipCount = await page.locator("[data-testid^='catalog-chip-']").count();
-    const rawPromptLabelBox = await page.locator("[data-testid='raw-prompt-label']").boundingBox();
+    const mainPromptLabelBox = await page.locator("[data-testid='main-prompt-label']").boundingBox();
 
     assert(staleMarkerCount === 0, "Stale overlay was not replaced by the injected bundle.");
     assert(chipCount > 0, "Catalog chips did not render after bundle injection.");
     assert(
-      rawPromptLabelBox && rawPromptLabelBox.y < 760,
-      `Raw Prompt was pushed too far down: ${JSON.stringify(rawPromptLabelBox)}`,
+      mainPromptLabelBox && mainPromptLabelBox.y < 760,
+      `Main Prompt was pushed too far down: ${JSON.stringify(mainPromptLabelBox)}`,
     );
 
     await page.locator("[data-testid='queue-enable-checkbox']").check();
