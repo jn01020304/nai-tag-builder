@@ -44,6 +44,7 @@ UI/UX를 모바일 기준으로 압축했다.
 - Main/Undesired Prompt textarea 위의 작은 중복 라벨 제거
 - Character Prompt / Character Undesired Content 중복 라벨 제거
 - `Insert target: ...` 텍스트 제거
+- prompt tab 라벨을 모바일용 `Main` / `Negative`로 단축
 - 탭이 현재 편집 대상과 색상 식별을 담당
 - 접힘 상태를 긴 바가 아닌 56px 원형 런처로 변경
 - 오버레이 크기 조절을 좌/우/상/하 4방향으로 확장
@@ -138,6 +139,5 @@ React-controlled NovelAI input은 직접 DOM 값 변경이 되돌아갈 수 있�
 
 - Queue 세션의 batch import 기반 random rotation 설계
 - tag dictionary를 더 작은 모바일 작업면으로 재배치
-- prompt tabs의 긴 `Undesired Content` 라벨을 더 짧은 모바일 문구로 바꿀지 검토
 - 실기기 모바일에서 원형 collapse launcher drag/click 충돌 확인
 - 실제 NovelAI theme variants에서 `themeProbe` 표본 후보 추가 검증
