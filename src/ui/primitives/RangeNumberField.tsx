@@ -41,7 +41,11 @@ export default function RangeNumberField({
     fontWeight: 700,
     lineHeight: 1,
     marginBottom: "6px",
+    maxWidth: "100%",
+    overflow: "hidden",
     padding: "4px 7px",
+    textOverflow: "ellipsis",
+    whiteSpace: "nowrap",
   };
 
   return (
@@ -55,7 +59,7 @@ export default function RangeNumberField({
       }}
     >
       <div style={{ alignItems: "center", display: "flex", justifyContent: "space-between" }}>
-        <label style={labelStyle}>{label}</label>
+        <label style={labelStyle} title={label}>{label}</label>
         <input
           {...inputProps}
           data-testid={testId}

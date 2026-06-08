@@ -73,6 +73,7 @@ export const defaultInputStyle = (theme: ThemeColors): React.CSSProperties => ({
 });
 
 export const defaultLabelStyle = (theme: ThemeColors): React.CSSProperties => ({
+  alignSelf: "flex-start",
   backgroundColor: colorLuminance(theme.base) != null && colorLuminance(theme.base)! > 0.58
     ? "#303244"
     : "rgba(255, 255, 255, 0.16)",
@@ -82,7 +83,11 @@ export const defaultLabelStyle = (theme: ThemeColors): React.CSSProperties => ({
   fontSize: "12px",
   fontWeight: 600,
   marginBottom: "4px",
+  maxWidth: "100%",
+  overflow: "hidden",
   padding: "1px 5px",
+  textOverflow: "ellipsis",
+  whiteSpace: "nowrap",
 });
 
 export const defaultSmallBtnStyle = (theme: ThemeColors): React.CSSProperties => ({

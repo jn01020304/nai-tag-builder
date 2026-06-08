@@ -22,6 +22,7 @@ export default function Field({ label, children, style, labelStyle }: FieldProps
       }}
     >
       <label
+        title={label}
         style={{
           alignSelf: "flex-start",
           backgroundColor: theme.crust,
@@ -33,7 +34,11 @@ export default function Field({ label, children, style, labelStyle }: FieldProps
           fontWeight: 700,
           lineHeight: 1,
           marginBottom: "6px",
+          maxWidth: "100%",
+          overflow: "hidden",
           padding: "4px 7px",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
           ...labelStyle,
         }}
       >
