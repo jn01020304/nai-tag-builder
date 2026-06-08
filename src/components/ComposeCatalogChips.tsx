@@ -17,8 +17,8 @@ const CATEGORY_LABELS: Record<ProductCategory, string> = {
   expression: "표정",
   appearance: "외형",
   outfit: "의상",
-  style_quality: "품질",
-  negative_safety: "네거티브",
+  custom_main: "커스텀 메인",
+  custom_negative: "커스텀 네거",
   character_scope: "캐릭터",
   utility: "기타",
 };
@@ -31,8 +31,8 @@ const CATEGORY_ORDER: ProductCategory[] = [
   "expression",
   "appearance",
   "outfit",
-  "style_quality",
-  "negative_safety",
+  "custom_main",
+  "custom_negative",
 ];
 
 interface Props {

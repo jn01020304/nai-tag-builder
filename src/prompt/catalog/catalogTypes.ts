@@ -6,8 +6,8 @@ export type ProductCategory =
   | "expression"
   | "appearance"
   | "outfit"
-  | "style_quality"
-  | "negative_safety"
+  | "custom_main"
+  | "custom_negative"
   | "character_scope"
   | "utility";
 
@@ -34,4 +34,3 @@ export interface CoreCatalogEntry {
   target: CatalogTarget;
   reviewStatus: "accepted";
 }
-
