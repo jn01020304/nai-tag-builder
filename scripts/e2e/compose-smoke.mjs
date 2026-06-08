@@ -236,6 +236,17 @@ async function checkPromptSectionToggles(page) {
   assert(await hasLocator(page.locator("[data-testid='main-prompt-textarea']")), "Main Prompt did not reopen.");
 }
 
+async function openQueuePanel(page) {
+  const queueToggle = page.locator("[data-testid='queue-section-toggle']");
+
+  assert(await queueToggle.getAttribute("aria-expanded") === "false", "Queue should default collapsed.");
+  assert(!(await hasLocator(page.locator("[data-testid='queue-section-body']"))), "Queue body should default unmounted.");
+
+  await queueToggle.click();
+  assert(await queueToggle.getAttribute("aria-expanded") === "true", "Queue did not expand.");
+  await page.locator("[data-testid='queue-panel']").waitFor({ timeout: 3000 });
+}
+
 async function checkTextareaThemeHighlightSeparation(page) {
   const textarea = page.locator("[data-testid='main-prompt-textarea']");
   await textarea.fill("2::1girl, 3d, realistic, official art::, 0.7::flat color::");
@@ -457,7 +468,7 @@ async function main() {
     await checkReadablePromptLabel(page);
     await checkTextareaThemeHighlightSeparation(page);
 
-    await page.locator("[data-testid='queue-panel']").waitFor({ timeout: 3000 });
+    await openQueuePanel(page);
     assert(
       await page.locator("[data-testid='queue-status']").innerText() === "대기 중",
       `Queue status label failed: ${await page.locator("[data-testid='queue-status']").innerText()}`,

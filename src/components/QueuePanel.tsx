@@ -1,6 +1,7 @@
 import type { QueueSession } from "../queue/queueTypes";
 import type { QueueMode, SeedRule } from "../types/preset";
 import { inputStyle, labelStyle, smallBtnStyle, theme, withAlpha } from "../styles/theme";
+import CollapsiblePanel from "./CollapsiblePanel";
 
 interface QueuePanelProps {
   autoGenerate: boolean;
@@ -107,17 +108,18 @@ export default function QueuePanel({
       : theme.blue;
 
   return (
-    <section
-      aria-label="Queue"
-      data-testid="queue-panel"
-      style={{
-        backgroundColor: withAlpha(theme.surface0, 0.72),
-        border: `1px solid ${theme.surface1}`,
-        borderRadius: "8px",
-        marginBottom: "10px",
-        padding: "9px",
-      }}
-    >
+    <CollapsiblePanel title="Queue" defaultOpen={false} testId="queue-section">
+      <section
+        aria-label="Queue"
+        data-testid="queue-panel"
+        style={{
+          backgroundColor: withAlpha(theme.surface0, 0.72),
+          border: `1px solid ${theme.surface1}`,
+          borderRadius: "8px",
+          marginBottom: "10px",
+          padding: "9px",
+        }}
+      >
       <div style={{ alignItems: "center", display: "flex", gap: "8px", marginBottom: "8px" }}>
         <span style={{ ...labelStyle, marginBottom: 0 }}>Queue</span>
         <span
@@ -283,6 +285,7 @@ export default function QueuePanel({
           )}
         </div>
       )}
-    </section>
+      </section>
+    </CollapsiblePanel>
   );
 }
