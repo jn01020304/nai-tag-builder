@@ -149,7 +149,7 @@ export default function PresetManager({ state, dispatch, queue, setQueue, onImpo
     };
 
     return (
-        <CollapsibleSection title="Presets &amp; Queue">
+        <CollapsibleSection title="Presets">
             {/* Save current state as preset */}
             <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
                 <input

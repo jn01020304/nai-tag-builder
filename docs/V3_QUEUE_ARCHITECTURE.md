@@ -160,7 +160,7 @@ applying 상태에서 Stop을 누른 경우, 현재 tick이 끝나는 즉시 다
 ## 모바일 UI 계약
 
 Queue UI는 Body의 독립 작업면이어야 한다.
-Presets & Queue 접힘 영역 안에 모든 설정을 계속 추가하면 Compose 화면이 다시 길어진다.
+Presets 접힘 영역 안에 모든 설정을 계속 추가하면 Compose 화면이 다시 길어진다.
 v3에서는 Queue 작업면을 Compose, Tune과 동급 mode로 승격하는 방향을 기본으로 한다.
 
 Queue 기본 화면은 짧은 요약을 먼저 보여준다.
