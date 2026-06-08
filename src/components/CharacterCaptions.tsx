@@ -77,7 +77,7 @@ export default function CharacterCaptions({
                   onChange: (value) => dispatch({ type: 'UPDATE_CHARACTER', id: char.id, field: 'caption', value }),
                 }}
                 secondary={{
-                  tabLabel: "Undesired Content",
+                  tabLabel: "Negative",
                   target: { kind: 'negativeCharacter', id: negativeTargetId },
                   value: negativeChar?.caption ?? "",
                   placeholder: "per-character undesired tags...",

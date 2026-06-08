@@ -30,7 +30,7 @@ export default function MainPromptSection({
         getSelectionAfterRender={getSelectionAfterRender}
         onPromptSelection={onPromptSelection}
         primary={{
-          tabLabel: "Main Prompt",
+          tabLabel: "Main",
           target: { kind: "base" },
           value: prompt.basePrompt,
           placeholder: "main prompt tags...",
@@ -39,7 +39,7 @@ export default function MainPromptSection({
           onChange: (value) => dispatch({ type: "SET_PROMPT", field: "basePrompt", value }),
         }}
         secondary={{
-          tabLabel: "Undesired Content",
+          tabLabel: "Negative",
           target: { kind: "negativeBase" },
           value: prompt.negativeBase,
           placeholder: "undesired content tags...",

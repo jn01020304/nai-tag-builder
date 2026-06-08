@@ -119,6 +119,7 @@ Current compact UI decisions:
 
 - Main/Undesired prompt fields use tabs instead of duplicate field subtitles.
 - Character prompt pairs use the same tab/split pattern.
+- Mobile tab labels are shortened to `Main` and `Negative`.
 - `Insert target: ...` text is removed.
 - Collapsed overlay is a circular launcher, not a horizontal bar.
 - Overlay resize works on left, right, top, and bottom edges.
