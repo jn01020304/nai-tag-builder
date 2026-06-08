@@ -9,7 +9,7 @@ import { chromium } from "playwright-core";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const URL = process.env.NAI_TAG_BUILDER_E2E_URL || "http://127.0.0.1:5173/";
-const TEST_TIMEOUT_MS = 45000;
+const TEST_TIMEOUT_MS = 70000;
 const CHROME_PATHS = [
   process.env.PLAYWRIGHT_CHROME_PATH,
   "C:/Program Files/Google/Chrome/Application/chrome.exe",
@@ -338,6 +338,74 @@ async function checkTextareaThemeHighlightSeparation(page) {
   assert(result.ok, `Textarea theme/highlight separation failed: ${JSON.stringify(result)}`);
 }
 
+async function checkCharacterSurfaceSeparation(page) {
+  const charactersToggle = page.locator("[data-testid='characters-section-toggle']");
+  if (await charactersToggle.getAttribute("aria-expanded") === "false") {
+    await charactersToggle.click();
+  }
+  await page.locator("[data-testid='character-0-primary-tab']").click();
+
+  const result = await page.locator("[data-testid='character-prompt-textarea-0']").evaluate((element) => {
+    const wrapper = element.parentElement;
+    const card = document.querySelector("[data-testid='character-card-0']");
+    const backdrop = wrapper?.firstElementChild;
+    if (
+      !(element instanceof HTMLTextAreaElement) ||
+      !(backdrop instanceof HTMLElement) ||
+      !(card instanceof HTMLElement)
+    ) {
+      return { ok: false, reason: "required elements missing" };
+    }
+
+    const cardBackground = getComputedStyle(card).backgroundColor;
+    const backdropBackground = getComputedStyle(backdrop).backgroundColor;
+    const textareaBackground = getComputedStyle(element).backgroundColor;
+
+    return {
+      ok:
+        cardBackground !== backdropBackground &&
+        textareaBackground === "rgba(0, 0, 0, 0)",
+      cardBackground,
+      backdropBackground,
+      textareaBackground,
+    };
+  });
+
+  assert(result.ok, `Character surface separation failed: ${JSON.stringify(result)}`);
+}
+
+async function checkAdvancedReadableRows(page) {
+  await page.locator("[data-testid='advanced-section-toggle']").click();
+  await page.locator("[data-testid='advanced-section-body']").waitFor({ timeout: 3000 });
+
+  const result = await page.locator("[data-testid='advanced-section-body']").evaluate((body) => {
+    const label = Array.from(body.querySelectorAll("label"))
+      .find((element) => element.textContent?.includes("Dynamic Thresholding"));
+    if (!(body instanceof HTMLElement) || !(label instanceof HTMLElement)) {
+      return { ok: false, reason: "advanced label missing" };
+    }
+
+    const style = getComputedStyle(label);
+    const input = label.querySelector("input");
+    const labelRect = label.getBoundingClientRect();
+    const inputRect = input?.getBoundingClientRect();
+
+    return {
+      ok:
+        style.textAlign === "left" &&
+        style.color !== "rgb(255, 255, 255)" &&
+        !!inputRect &&
+        inputRect.left < labelRect.left + 24,
+      textAlign: style.textAlign,
+      color: style.color,
+      labelLeft: labelRect.left,
+      inputLeft: inputRect?.left,
+    };
+  });
+
+  assert(result.ok, `Advanced readable rows failed: ${JSON.stringify(result)}`);
+}
+
 async function dragTag(page, fromTestId, toTestId) {
   const source = page.locator(`[data-testid='${fromTestId}']`);
   const target = page.locator(`[data-testid='${toTestId}']`);
@@ -510,6 +578,8 @@ async function main() {
     await checkReadablePromptTab(page);
     await checkFallbackThemeTokens(page);
     await checkTextareaThemeHighlightSeparation(page);
+    await checkCharacterSurfaceSeparation(page);
+    await checkAdvancedReadableRows(page);
 
     await openQueuePanel(page);
     assert(

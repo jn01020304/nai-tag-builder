@@ -28,7 +28,7 @@ export default function CharacterCaptions({
   const { theme, inputStyle, labelStyle, smallBtnStyle } = useThemeStyles();
 
   return (
-    <CollapsibleSection title={`Characters (${characters.length})`}>
+    <CollapsibleSection title={`Characters (${characters.length})`} testId="characters-section">
       <button
         onClick={() => dispatch({ type: 'ADD_CHARACTER' })}
         style={{ ...smallBtnStyle, width: '100%', marginBottom: '8px', color: theme.green }}
@@ -44,10 +44,11 @@ export default function CharacterCaptions({
           return (
             <div
               key={char.id}
+              data-testid={`character-card-${idx}`}
               style={{
                 marginBottom: '8px',
                 padding: '8px',
-                backgroundColor: theme.mantle,
+                backgroundColor: theme.base,
                 borderRadius: '6px',
                 border: `1px solid ${theme.surface0}`,
               }}
