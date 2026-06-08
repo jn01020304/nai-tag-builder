@@ -37,7 +37,7 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
   const [isLooping, setIsLooping] = useState(false);
   const [loopCount, setLoopCount] = useState(0);
   const [queueSession, setQueueSession] = useState<QueueSession | null>(null);
-  const [seedRule, setSeedRule] = useState<SeedRule>('none');
+  const [seedRule, setSeedRule] = useState<SeedRule>('increment');
   const [adjustStep, setAdjustStep] = useState<number | string>(3);
 
   const stateRef = useRef(state);

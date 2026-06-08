@@ -613,13 +613,24 @@ async function main() {
         !queuePanelText.includes("간격 10초"),
       `Queue summary copy should be hidden: ${queuePanelText}`,
     );
-    await page.locator("[data-testid='queue-enable-checkbox']").check();
+    assert(
+      await page.locator("[data-testid='queue-mode-select']").inputValue() === "off",
+      "Queue mode should default to off.",
+    );
+    assert(
+      await page.locator("[data-testid='queue-seed-rule-select']").inputValue() === "increment",
+      "Queue seed rule should default to +1.",
+    );
+    assert(
+      !(await hasLocator(page.locator("[data-testid='queue-enable-checkbox']"))),
+      "Queue enable checkbox should be removed.",
+    );
     assert(
       await page.locator("[data-testid='queue-interval-input']").inputValue() === "10",
       `Queue default interval should be 10 seconds: ${await page.locator("[data-testid='queue-interval-input']").inputValue()}`,
     );
     await page.locator("[data-testid='queue-mode-select']").selectOption("randomization");
-    await page.locator("[data-testid='queue-seed-rule-select']").selectOption("increment");
+    await page.locator("[data-testid='queue-seed-rule-select']").selectOption("decrement");
     await page.locator("[data-testid='queue-interval-input']").fill("7");
     await page.locator("[data-testid='queue-target-count-input']").fill("3");
     assert(
@@ -627,7 +638,7 @@ async function main() {
       "Queue mode control failed.",
     );
     assert(
-      await page.locator("[data-testid='queue-seed-rule-select']").inputValue() === "increment",
+      await page.locator("[data-testid='queue-seed-rule-select']").inputValue() === "decrement",
       "Queue seed rule control failed.",
     );
 
