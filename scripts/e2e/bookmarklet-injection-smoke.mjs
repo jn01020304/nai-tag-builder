@@ -111,6 +111,7 @@ async function main() {
       `Main Prompt was pushed too far down: ${JSON.stringify(mainPromptLabelBox)}`,
     );
 
+    await page.locator("[data-testid='queue-section-toggle']").click();
     await page.locator("[data-testid='queue-enable-checkbox']").check();
     await page.locator("[data-testid='queue-target-count-input']").fill("1");
     await page.locator("[data-testid='apply-button']").click();
