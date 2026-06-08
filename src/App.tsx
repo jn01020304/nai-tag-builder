@@ -32,26 +32,72 @@ import type { CoreCatalogEntry } from './prompt/catalog/catalogTypes';
 import { toggleCatalogTagWithSelection } from './prompt/catalog/promptTagText';
 
 const CONTAINER_ID = 'nai-tag-builder-root';
+
+function clamp(value: number, min: number, max: number): number {
+  return Math.min(max, Math.max(min, value));
+}
+
+function getTouchPoint(touches: { length: number; [index: number]: { clientX: number; clientY: number } }): {
+  clientX: number;
+  clientY: number;
+} {
+  const touchCount = Math.max(1, touches.length);
+  let clientX = 0;
+  let clientY = 0;
+
+  for (let index = 0; index < touchCount; index += 1) {
+    clientX += touches[index].clientX;
+    clientY += touches[index].clientY;
+  }
+
+  return {
+    clientX: clientX / touchCount,
+    clientY: clientY / touchCount,
+  };
+}
+
+function clampOverlayPosition(el: HTMLElement, left: number, top: number): { left: number; top: number } {
+  const rect = el.getBoundingClientRect();
+  const margin = 8;
+  const maxLeft = Math.max(margin, window.innerWidth - rect.width - margin);
+  const maxTop = Math.max(margin, window.innerHeight - rect.height - margin);
+
+  return {
+    left: clamp(left, margin, maxLeft),
+    top: clamp(top, margin, maxTop),
+  };
+}
+
 function startDrag(clientX: number, clientY: number) {
   const el = document.getElementById(CONTAINER_ID) as HTMLElement | null;
   if (!el) return;
 
   const rect = el.getBoundingClientRect();
+  const initialPosition = clampOverlayPosition(el, rect.left, rect.top);
   el.style.right = '';
-  el.style.left = rect.left + 'px';
-  el.style.top = rect.top + 'px';
+  el.style.left = initialPosition.left + 'px';
+  el.style.top = initialPosition.top + 'px';
 
   let lx = clientX, ly = clientY;
 
   const move = (cx: number, cy: number) => {
-    el.style.left = (parseFloat(el.style.left) + cx - lx) + 'px';
-    el.style.top = (parseFloat(el.style.top) + cy - ly) + 'px';
+    const nextPosition = clampOverlayPosition(
+      el,
+      parseFloat(el.style.left) + cx - lx,
+      parseFloat(el.style.top) + cy - ly,
+    );
+    el.style.left = nextPosition.left + 'px';
+    el.style.top = nextPosition.top + 'px';
     lx = cx;
     ly = cy;
   };
 
   const onMM = (e: MouseEvent) => move(e.clientX, e.clientY);
-  const onTM = (e: TouchEvent) => { e.preventDefault(); move(e.touches[0].clientX, e.touches[0].clientY); };
+  const onTM = (e: TouchEvent) => {
+    e.preventDefault();
+    const point = getTouchPoint(e.touches);
+    move(point.clientX, point.clientY);
+  };
   const up = () => {
     document.removeEventListener('mousemove', onMM);
     document.removeEventListener('mouseup', up);
@@ -139,6 +185,15 @@ function AppContent() {
         showFeedback({ tone: 'error', message: '이미지 메타데이터를 읽지 못했습니다.' });
       }
     }
+  };
+
+  const handleTwoFingerDragStart = (e: React.TouchEvent) => {
+    if (e.touches.length < 2) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    const point = getTouchPoint(e.touches);
+    startDrag(point.clientX, point.clientY);
   };
 
   // Auto-generation logic
@@ -432,6 +487,7 @@ function AppContent() {
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
+      onTouchStartCapture={handleTwoFingerDragStart}
       style={{
         width: isCollapsed ? '56px' : `${overlayWidth}px`,
         height: isCollapsed ? '56px' : overlayHeight == null ? undefined : `${overlayHeight}px`,
