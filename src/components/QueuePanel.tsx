@@ -4,6 +4,8 @@ import { useThemeStyles } from "../contexts/themeContextCore";
 import { withAlpha } from "../styles/color";
 import CollapsiblePanel from "./CollapsiblePanel";
 
+type QueueRunMode = "off" | QueueMode;
+
 interface QueuePanelProps {
   autoGenerate: boolean;
   setAutoGenerate: (val: boolean) => void;
@@ -94,6 +96,27 @@ export default function QueuePanel({
     gridTemplateColumns: "70px 28px minmax(48px, 1fr) 28px auto",
     minWidth: 0,
   };
+  const pairedRow: React.CSSProperties = {
+    display: "grid",
+    gap: "8px",
+    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+    minWidth: 0,
+  };
+  const stackedField: React.CSSProperties = {
+    display: "flex",
+    flexDirection: "column",
+    minWidth: 0,
+  };
+  const queueRunMode: QueueRunMode = autoGenerate ? queueMode : "off";
+  const handleQueueRunModeChange = (value: QueueRunMode) => {
+    if (value === "off") {
+      setAutoGenerate(false);
+      return;
+    }
+
+    setAutoGenerate(true);
+    setQueueMode(value);
+  };
 
   const statusTone = queueSession?.status === "failed"
     ? theme.warningError
@@ -137,44 +160,25 @@ export default function QueuePanel({
         </span>
       </div>
 
-      <label
-        style={{
-          alignItems: "center",
-          color: theme.text,
-          cursor: "pointer",
-          display: "flex",
-          fontSize: "12px",
-          gap: "7px",
-          marginBottom: autoGenerate ? "9px" : 0,
-        }}
-      >
-        <input
-          data-testid="queue-enable-checkbox"
-          type="checkbox"
-          checked={autoGenerate}
-          onChange={(e) => setAutoGenerate(e.target.checked)}
-          style={{ accentColor: theme.blue }}
-        />
-        Apply 성공 후 Queue 실행
-      </label>
-
-      {autoGenerate && (
-        <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
-          <div style={{ display: "grid", gap: "6px", gridTemplateColumns: "70px minmax(0, 1fr)" }}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+        <div style={pairedRow}>
+          <div style={stackedField}>
             <label style={{ ...labelStyle, marginBottom: 0 }}>모드</label>
             <select
               data-testid="queue-mode-select"
-              value={queueMode}
-              onChange={(e) => setQueueMode(e.target.value as QueueMode)}
+              value={queueRunMode}
+              onChange={(e) => handleQueueRunModeChange(e.target.value as QueueRunMode)}
               style={{ ...inputStyle, minWidth: 0, padding: "5px 6px" }}
             >
+              <option value="off">끄기</option>
               <option value="progression">Progression</option>
               <option value="randomization">Random</option>
             </select>
           </div>
 
-          {queueLength === 0 && (
-            <div style={{ display: "grid", gap: "6px", gridTemplateColumns: "70px minmax(0, 1fr)" }}>
+          <div style={stackedField}>
+            {queueLength === 0 ? (
+              <>
               <label style={{ ...labelStyle, marginBottom: 0 }}>Seed</label>
               <select
                 data-testid="queue-seed-rule-select"
@@ -182,57 +186,38 @@ export default function QueuePanel({
                 onChange={(e) => setSeedRule(e.target.value as SeedRule)}
                 style={{ ...inputStyle, minWidth: 0, padding: "5px 6px" }}
               >
-                <option value="none">현재 seed 유지</option>
-                <option value="random">랜덤</option>
                 <option value="increment">+1</option>
                 <option value="decrement">-1</option>
+                <option value="random">랜덤</option>
+                <option value="none">현재 seed 유지</option>
               </select>
-            </div>
-          )}
+              </>
+            ) : (
+              <>
+                <label style={{ ...labelStyle, marginBottom: 0 }}>Seed</label>
+                <input
+                  readOnly
+                  value="프리셋 seed"
+                  style={{ ...inputStyle, minWidth: 0, padding: "5px 6px" }}
+                />
+              </>
+            )}
+          </div>
+        </div>
 
-          <div style={{ display: "grid", gap: "6px", gridTemplateColumns: "70px minmax(0, 76px) minmax(0, 1fr)" }}>
+        <div style={pairedRow}>
+          <div style={stackedField}>
             <label style={{ ...labelStyle, marginBottom: 0 }}>단위</label>
             <input
               data-testid="queue-adjust-step-input"
               type="number"
               value={adjustStep}
               onChange={(e) => setAdjustStep(e.target.value === "" ? "" : Math.max(1, Number(e.target.value)))}
-              style={{ ...smallNumInput, flex: "unset", width: "100%" }}
+              style={{ ...inputStyle, minWidth: 0, padding: "5px 6px", textAlign: "center" }}
             />
-            <span style={{ alignSelf: "center", color: theme.subtext0, fontSize: "11px", minWidth: 0 }}>
-              +/- 조절폭
-            </span>
           </div>
 
-          <div style={fieldRow}>
-            <label style={{ ...labelStyle, marginBottom: 0 }}>간격</label>
-            <button type="button" onClick={() => adjustValue("interval", -1)} style={miniBtn}>-</button>
-            <input
-              data-testid="queue-interval-input"
-              type="number"
-              value={intervalSec}
-              onChange={(e) => handleIntervalChange(e.target.value)}
-              style={smallNumInput}
-            />
-            <button type="button" onClick={() => adjustValue("interval", 1)} style={miniBtn}>+</button>
-            <span style={{ color: theme.subtext0, fontSize: "11px" }}>초</span>
-          </div>
-
-          <div style={fieldRow}>
-            <label style={{ ...labelStyle, marginBottom: 0 }}>목표</label>
-            <button type="button" onClick={() => adjustValue("count", -1)} style={miniBtn}>-</button>
-            <input
-              data-testid="queue-target-count-input"
-              type="number"
-              value={targetCount}
-              onChange={(e) => handleCountChange(e.target.value)}
-              style={smallNumInput}
-            />
-            <button type="button" onClick={() => adjustValue("count", 1)} style={miniBtn}>+</button>
-            <span style={{ color: theme.subtext0, fontSize: "11px" }}>회</span>
-          </div>
-
-          <div style={{ display: "grid", gap: "6px", gridTemplateColumns: "70px minmax(0, 76px) auto" }}>
+          <div style={stackedField}>
             <label style={{ ...labelStyle, marginBottom: 0 }}>시간</label>
             <input
               data-testid="queue-target-min-input"
@@ -240,10 +225,38 @@ export default function QueuePanel({
               step="0.1"
               value={targetMin}
               onChange={(e) => handleMinChange(e.target.value)}
-              style={{ ...smallNumInput, flex: "unset", width: "100%" }}
+              style={{ ...inputStyle, minWidth: 0, padding: "5px 6px", textAlign: "center" }}
             />
-            <span style={{ alignSelf: "center", color: theme.subtext0, fontSize: "11px" }}>분</span>
           </div>
+        </div>
+
+        <div style={fieldRow}>
+          <label style={{ ...labelStyle, marginBottom: 0 }}>간격</label>
+          <button type="button" onClick={() => adjustValue("interval", -1)} style={miniBtn}>-</button>
+          <input
+            data-testid="queue-interval-input"
+            type="number"
+            value={intervalSec}
+            onChange={(e) => handleIntervalChange(e.target.value)}
+            style={smallNumInput}
+          />
+          <button type="button" onClick={() => adjustValue("interval", 1)} style={miniBtn}>+</button>
+          <span style={{ color: theme.subtext0, fontSize: "11px" }}>초</span>
+        </div>
+
+        <div style={fieldRow}>
+          <label style={{ ...labelStyle, marginBottom: 0 }}>목표</label>
+          <button type="button" onClick={() => adjustValue("count", -1)} style={miniBtn}>-</button>
+          <input
+            data-testid="queue-target-count-input"
+            type="number"
+            value={targetCount}
+            onChange={(e) => handleCountChange(e.target.value)}
+            style={smallNumInput}
+          />
+          <button type="button" onClick={() => adjustValue("count", 1)} style={miniBtn}>+</button>
+          <span style={{ color: theme.subtext0, fontSize: "11px" }}>회</span>
+        </div>
 
           {queueSession?.lastError && (
             <div
@@ -261,8 +274,7 @@ export default function QueuePanel({
               {queueSession.lastError.message}
             </div>
           )}
-        </div>
-      )}
+      </div>
       </section>
     </CollapsiblePanel>
   );

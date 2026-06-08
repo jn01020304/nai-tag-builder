@@ -347,7 +347,7 @@ async function main() {
     assert(syncedTheme.ok, `Theme sync failed: ${JSON.stringify(syncedTheme)}`);
 
     await page.locator("[data-testid='queue-section-toggle']").click();
-    await page.locator("[data-testid='queue-enable-checkbox']").check();
+    await page.locator("[data-testid='queue-mode-select']").selectOption("progression");
     await page.locator("[data-testid='queue-target-count-input']").fill("1");
     await page.locator("[data-testid='apply-button']").click();
     await page.locator("[data-testid='status-banner']", {
