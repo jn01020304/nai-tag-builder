@@ -5,10 +5,9 @@ import type {
   PromptInsertTarget,
   PromptSelectionAfterRender,
 } from "../prompt/promptInsertTarget";
-import { promptTargetLabel } from "../prompt/promptInsertTarget";
 import { movePromptTag } from "../prompt/catalog/promptTagText";
-import ComposeCatalogChips from "./ComposeCatalogChips";
-import PromptPairTabs from "./PromptPairTabs";
+import MainPromptSection from "./MainPromptSection";
+import TagDictionarySection from "./TagDictionarySection";
 
 interface Props {
   state: MetadataState;
@@ -50,51 +49,19 @@ export default function PromptSection({
 
   return (
     <section style={{ marginBottom: "8px" }}>
-      <ComposeCatalogChips
+      <TagDictionarySection
         prompt={state.prompt}
         activePromptTarget={activePromptTarget}
         activePromptValue={activePromptValue}
         onToggle={onToggleCatalogEntry}
         onReorderBasePrompt={reorderBasePrompt}
       />
-      <div
-        data-testid="active-prompt-target"
-        style={{
-          color: "#15172f",
-          fontSize: "11px",
-          fontWeight: 700,
-          marginBottom: "6px",
-        }}
-      >
-        Insert target: {promptTargetLabel(activePromptTarget)}
-      </div>
-      <PromptPairTabs
-        testIdPrefix="base-prompt"
+      <MainPromptSection
+        prompt={state.prompt}
+        dispatch={dispatch}
         activePromptTarget={activePromptTarget}
         getSelectionAfterRender={getSelectionAfterRender}
         onPromptSelection={onPromptSelection}
-        primary={{
-          label: "Main Prompt",
-          tabLabel: "Main Prompt",
-          target: { kind: "base" },
-          value: state.prompt.basePrompt,
-          placeholder: "main prompt tags...",
-          testId: "main-prompt-textarea",
-          labelTestId: "main-prompt-label",
-          minHeight: "128px",
-          onChange: (value) => dispatch({ type: "SET_PROMPT", field: "basePrompt", value }),
-        }}
-        secondary={{
-          label: "Undesired Content",
-          tabLabel: "Undesired Content",
-          target: { kind: "negativeBase" },
-          value: state.prompt.negativeBase,
-          placeholder: "undesired content tags...",
-          testId: "negative-prompt-textarea",
-          labelTestId: "negative-prompt-label",
-          minHeight: "108px",
-          onChange: (value) => dispatch({ type: "SET_PROMPT", field: "negativeBase", value }),
-        }}
       />
     </section>
   );

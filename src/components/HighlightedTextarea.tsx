@@ -22,6 +22,11 @@ export default function HighlightedTextarea(props: Props) {
         ...rest
     } = props;
     const theme = useTheme();
+    const safeStyle: React.CSSProperties = { ...(style ?? {}) };
+    delete safeStyle.background;
+    delete safeStyle.backgroundColor;
+    delete safeStyle.boxShadow;
+
     const containerRef = useRef<HTMLDivElement>(null);
     const backdropRef = useRef<HTMLDivElement>(null);
     const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -103,6 +108,7 @@ export default function HighlightedTextarea(props: Props) {
     return (
         <div
             ref={containerRef}
+            className="nai-tag-builder-highlight-shell"
             onMouseDown={(e) => e.stopPropagation()}
             onTouchStart={(e) => e.stopPropagation()}
             onPointerDown={(e) => e.stopPropagation()}
@@ -125,7 +131,7 @@ export default function HighlightedTextarea(props: Props) {
             <div
                 ref={backdropRef}
                 style={{
-                    ...style,
+                    ...safeStyle,
                     position: 'absolute',
                     top: 0,
                     left: 0,
@@ -138,7 +144,7 @@ export default function HighlightedTextarea(props: Props) {
                     overflowX: 'hidden',
                     whiteSpace: 'pre-wrap',
                     wordWrap: 'break-word',
-                    backgroundColor: style?.backgroundColor || 'transparent',
+                    backgroundColor: theme.mantle,
                     fontFamily: style?.fontFamily || 'inherit',
                     fontSize: style?.fontSize || 'inherit',
                     lineHeight: style?.lineHeight || 'inherit',
@@ -175,7 +181,7 @@ export default function HighlightedTextarea(props: Props) {
 
             {/* Foreground (Actual Textarea) */}
             <style>{`
-                .nai-tag-builder-transparent-textarea {
+                .nai-tag-builder-highlight-shell > .nai-tag-builder-transparent-textarea {
                     background: transparent !important;
                     background-color: transparent !important;
                     pointer-events: auto !important;
@@ -191,7 +197,7 @@ export default function HighlightedTextarea(props: Props) {
                 onScroll={handleScroll}
                 className={`nai-tag-builder-transparent-textarea ${props.className || ''}`}
                 style={{
-                    ...style,
+                    ...safeStyle,
                     position: 'relative',
                     color: style?.color ?? theme.text,
                     caretColor: style?.caretColor ?? style?.color ?? theme.text,
