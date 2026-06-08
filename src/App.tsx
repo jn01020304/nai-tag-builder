@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { useMetadataState } from './hooks/useMetadataState';
 import type { MetadataState } from './types/metadata';
 import { runApplyPipeline } from './automation/applyPipeline';
@@ -32,6 +32,7 @@ import type { CoreCatalogEntry } from './prompt/catalog/catalogTypes';
 import { toggleCatalogTagWithSelection } from './prompt/catalog/promptTagText';
 
 const CONTAINER_ID = 'nai-tag-builder-root';
+const VIEWPORT_MARGIN = 8;
 
 function clamp(value: number, min: number, max: number): number {
   return Math.min(max, Math.max(min, value));
@@ -58,14 +59,33 @@ function getTouchPoint(touches: { length: number; [index: number]: { clientX: nu
 
 function clampOverlayPosition(el: HTMLElement, left: number, top: number): { left: number; top: number } {
   const rect = el.getBoundingClientRect();
-  const margin = 8;
-  const maxLeft = Math.max(margin, window.innerWidth - rect.width - margin);
-  const maxTop = Math.max(margin, window.innerHeight - rect.height - margin);
+  const viewport = window.visualViewport;
+  const viewportLeft = viewport?.offsetLeft ?? 0;
+  const viewportTop = viewport?.offsetTop ?? 0;
+  const viewportWidth = viewport?.width ?? window.innerWidth;
+  const viewportHeight = viewport?.height ?? window.innerHeight;
+  const minLeft = viewportLeft + VIEWPORT_MARGIN;
+  const minTop = viewportTop + VIEWPORT_MARGIN;
+  const maxLeft = Math.max(minLeft, viewportLeft + viewportWidth - rect.width - VIEWPORT_MARGIN);
+  const maxTop = Math.max(minTop, viewportTop + viewportHeight - rect.height - VIEWPORT_MARGIN);
 
   return {
-    left: clamp(left, margin, maxLeft),
-    top: clamp(top, margin, maxTop),
+    left: clamp(left, minLeft, maxLeft),
+    top: clamp(top, minTop, maxTop),
   };
+}
+
+function keepOverlayInViewport(rootId: string) {
+  const root = document.getElementById(rootId) as HTMLElement | null;
+  const overlay = root?.firstElementChild;
+  if (!root || !(overlay instanceof HTMLElement)) return;
+
+  const rect = overlay.getBoundingClientRect();
+  const nextPosition = clampOverlayPosition(overlay, rect.left, rect.top);
+  root.style.right = '';
+  root.style.bottom = '';
+  root.style.left = `${nextPosition.left}px`;
+  root.style.top = `${nextPosition.top}px`;
 }
 
 function startDrag(clientX: number, clientY: number) {
@@ -135,6 +155,23 @@ function AppContent() {
   const [selectionAfterRenderByTarget, setSelectionAfterRenderByTarget] = useState<
     Record<string, PromptSelectionAfterRender | undefined>
   >({});
+
+  useLayoutEffect(() => {
+    keepOverlayInViewport(CONTAINER_ID);
+  }, [isCollapsed, overlayWidth, overlayHeight]);
+
+  useLayoutEffect(() => {
+    const handleViewportChange = () => keepOverlayInViewport(CONTAINER_ID);
+    window.addEventListener('resize', handleViewportChange);
+    window.visualViewport?.addEventListener('resize', handleViewportChange);
+    window.visualViewport?.addEventListener('scroll', handleViewportChange);
+
+    return () => {
+      window.removeEventListener('resize', handleViewportChange);
+      window.visualViewport?.removeEventListener('resize', handleViewportChange);
+      window.visualViewport?.removeEventListener('scroll', handleViewportChange);
+    };
+  }, []);
 
   const showFeedback = (nextFeedback: StatusFeedback) => {
     setFeedback(nextFeedback);

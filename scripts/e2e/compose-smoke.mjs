@@ -300,6 +300,55 @@ async function checkPromptSectionToggles(page) {
   assert(await queueToggle.getAttribute("aria-expanded") === "true", "Queue state was not preserved.");
 }
 
+async function checkOverlayStaysInViewportAfterExpand(page) {
+  await page.locator("button[title='접기']").click();
+  await page.locator("[data-testid='overlay-collapsed-launcher']").waitFor({ timeout: 3000 });
+
+  await page.evaluate(() => {
+    const root = document.getElementById("nai-tag-builder-root");
+    if (!(root instanceof HTMLElement)) return;
+    root.style.right = "";
+    root.style.bottom = "";
+    root.style.left = `${window.innerWidth - 64}px`;
+    root.style.top = `${window.innerHeight - 64}px`;
+  });
+
+  await page.locator("[data-testid='overlay-collapsed-launcher']").click();
+  await page.locator("[data-testid='overlay-header']").waitFor({ timeout: 3000 });
+  await page.waitForFunction(() => {
+    const overlay = document.getElementById("nai-tag-builder-root")?.firstElementChild;
+    if (!(overlay instanceof HTMLElement)) return false;
+    const rect = overlay.getBoundingClientRect();
+    return (
+      rect.left >= 7 &&
+      rect.top >= 7 &&
+      rect.right <= window.innerWidth - 7 &&
+      rect.bottom <= window.innerHeight - 7
+    );
+  });
+
+  const bounds = await page.evaluate(() => {
+    const overlay = document.getElementById("nai-tag-builder-root")?.firstElementChild;
+    if (!(overlay instanceof HTMLElement)) return { ok: false, reason: "overlay missing" };
+    const rect = overlay.getBoundingClientRect();
+    return {
+      ok:
+        rect.left >= 7 &&
+        rect.top >= 7 &&
+        rect.right <= window.innerWidth - 7 &&
+        rect.bottom <= window.innerHeight - 7,
+      left: rect.left,
+      top: rect.top,
+      right: rect.right,
+      bottom: rect.bottom,
+      viewportWidth: window.innerWidth,
+      viewportHeight: window.innerHeight,
+    };
+  });
+
+  assert(bounds.ok, `Overlay expanded outside viewport: ${JSON.stringify(bounds)}`);
+}
+
 async function openQueuePanel(page) {
   const queueToggle = page.locator("[data-testid='queue-section-toggle']");
 
@@ -484,6 +533,7 @@ async function main() {
     await page.goto(URL, { waitUntil: "networkidle" });
     await page.locator("text=NAI Tag Builder v2.0").waitFor({ timeout: 5000 });
     await checkPromptSectionToggles(page);
+    await checkOverlayStaysInViewportAfterExpand(page);
 
     const textarea = page.locator("[data-testid='main-prompt-textarea']");
     await textarea.click();
