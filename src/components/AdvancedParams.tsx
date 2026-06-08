@@ -2,6 +2,7 @@ import type { MetadataState, AdvancedFlags } from '../types/metadata';
 import type { MetadataAction } from '../hooks/useMetadataState';
 import CollapsibleSection from './CollapsibleSection';
 import { useThemeStyles } from '../contexts/themeContextCore';
+import NumberField from '../ui/primitives/NumberField';
 
 interface Props {
   state: MetadataState;
@@ -10,22 +11,16 @@ interface Props {
 
 const numRowStyle: React.CSSProperties = {
   display: 'flex',
+  flexWrap: 'wrap',
   gap: '8px',
   marginBottom: '8px',
 };
 
-const numFieldStyle: React.CSSProperties = {
-  flex: 1,
-  display: 'flex',
-  flexDirection: 'column',
-  minWidth: 0,
-};
-
 export default function AdvancedParams({ state, dispatch }: Props) {
-  const { theme, inputStyle, labelStyle } = useThemeStyles();
+  const { theme } = useThemeStyles();
   const checkboxGridStyle: React.CSSProperties = {
     display: 'grid',
-    gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+    gridTemplateColumns: 'repeat(auto-fit, minmax(136px, 1fr))',
     gap: '6px 8px',
     margin: '8px 0',
     minWidth: 0,
@@ -78,54 +73,38 @@ export default function AdvancedParams({ state, dispatch }: Props) {
     <CollapsibleSection title="Advanced" testId="advanced-section">
       {/* Numeric params */}
       <div style={numRowStyle}>
-        <div style={numFieldStyle}>
-          <label style={labelStyle}>CFG Rescale</label>
-          <input
-            type="number"
-            value={state.advanced.cfgRescale}
-            min={0}
-            max={1}
-            step={0.01}
-            onChange={e => setA('cfgRescale', Number(e.target.value))}
-            style={{ ...inputStyle, width: '100%' }}
-          />
-        </div>
-        <div style={numFieldStyle}>
-          <label style={labelStyle}>Uncond Scale</label>
-          <input
-            type="number"
-            value={state.advanced.uncondScale}
-            min={0}
-            max={1.5}
-            step={0.1}
-            onChange={e => setA('uncondScale', Number(e.target.value))}
-            style={{ ...inputStyle, width: '100%' }}
-          />
-        </div>
+        <NumberField
+          label="CFG Rescale"
+          value={state.advanced.cfgRescale}
+          min={0}
+          max={1}
+          step={0.01}
+          onChange={e => setA('cfgRescale', Number(e.target.value))}
+        />
+        <NumberField
+          label="Uncond Scale"
+          value={state.advanced.uncondScale}
+          min={0}
+          max={1.5}
+          step={0.1}
+          onChange={e => setA('uncondScale', Number(e.target.value))}
+        />
       </div>
 
       <div style={numRowStyle}>
-        <div style={numFieldStyle}>
-          <label style={labelStyle}>Skip CFG Above Sigma</label>
-          <input
-            type="number"
-            value={state.advanced.skipCfgAboveSigma ?? ''}
-            placeholder="null"
-            onChange={e => setA('skipCfgAboveSigma', e.target.value === '' ? null : Number(e.target.value))}
-            style={{ ...inputStyle, width: '100%' }}
-          />
-        </div>
-        <div style={numFieldStyle}>
-          <label style={labelStyle}>Skip CFG Below Sigma</label>
-          <input
-            type="number"
-            value={state.advanced.skipCfgBelowSigma}
-            min={0}
-            step={0.1}
-            onChange={e => setA('skipCfgBelowSigma', Number(e.target.value))}
-            style={{ ...inputStyle, width: '100%' }}
-          />
-        </div>
+        <NumberField
+          label="Skip CFG Above Sigma"
+          value={state.advanced.skipCfgAboveSigma ?? ''}
+          placeholder="null"
+          onChange={e => setA('skipCfgAboveSigma', e.target.value === '' ? null : Number(e.target.value))}
+        />
+        <NumberField
+          label="Skip CFG Below Sigma"
+          value={state.advanced.skipCfgBelowSigma}
+          min={0}
+          step={0.1}
+          onChange={e => setA('skipCfgBelowSigma', Number(e.target.value))}
+        />
       </div>
 
       {/* Checkboxes */}
@@ -142,29 +121,21 @@ export default function AdvancedParams({ state, dispatch }: Props) {
       </div>
 
       <div style={numRowStyle}>
-        <div style={numFieldStyle}>
-          <label style={labelStyle}>DynThresh Percentile</label>
-          <input
-            type="number"
-            value={state.advanced.dynamicThresholdingPercentile}
-            min={0}
-            max={1}
-            step={0.001}
-            onChange={e => setA('dynamicThresholdingPercentile', Number(e.target.value))}
-            style={{ ...inputStyle, width: '100%' }}
-          />
-        </div>
-        <div style={numFieldStyle}>
-          <label style={labelStyle}>DynThresh Mimic Scale</label>
-          <input
-            type="number"
-            value={state.advanced.dynamicThresholdingMimicScale}
-            min={0}
-            step={0.5}
-            onChange={e => setA('dynamicThresholdingMimicScale', Number(e.target.value))}
-            style={{ ...inputStyle, width: '100%' }}
-          />
-        </div>
+        <NumberField
+          label="DynThresh Percentile"
+          value={state.advanced.dynamicThresholdingPercentile}
+          min={0}
+          max={1}
+          step={0.001}
+          onChange={e => setA('dynamicThresholdingPercentile', Number(e.target.value))}
+        />
+        <NumberField
+          label="DynThresh Mimic Scale"
+          value={state.advanced.dynamicThresholdingMimicScale}
+          min={0}
+          step={0.5}
+          onChange={e => setA('dynamicThresholdingMimicScale', Number(e.target.value))}
+        />
       </div>
 
       <hr style={{ border: 'none', borderTop: `1px solid ${theme.surface0}`, margin: '8px 0' }} />

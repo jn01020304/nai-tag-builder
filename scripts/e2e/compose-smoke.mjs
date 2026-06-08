@@ -379,27 +379,46 @@ async function checkAdvancedReadableRows(page) {
   await page.locator("[data-testid='advanced-section-body']").waitFor({ timeout: 3000 });
 
   const result = await page.locator("[data-testid='advanced-section-body']").evaluate((body) => {
-    const label = Array.from(body.querySelectorAll("label"))
+    const checkboxLabel = Array.from(body.querySelectorAll("label"))
       .find((element) => element.textContent?.includes("Dynamic Thresholding"));
-    if (!(body instanceof HTMLElement) || !(label instanceof HTMLElement)) {
+    const numberLabel = Array.from(body.querySelectorAll("label"))
+      .find((element) => element.textContent?.trim() === "CFG Rescale");
+    if (
+      !(body instanceof HTMLElement) ||
+      !(checkboxLabel instanceof HTMLElement) ||
+      !(numberLabel instanceof HTMLElement)
+    ) {
       return { ok: false, reason: "advanced label missing" };
     }
 
-    const style = getComputedStyle(label);
-    const input = label.querySelector("input");
-    const labelRect = label.getBoundingClientRect();
+    const style = getComputedStyle(checkboxLabel);
+    const input = checkboxLabel.querySelector("input");
+    const labelRect = checkboxLabel.getBoundingClientRect();
     const inputRect = input?.getBoundingClientRect();
+    const numberStyle = getComputedStyle(numberLabel);
+    const numberLabelRect = numberLabel.getBoundingClientRect();
+    const numberFieldRect = numberLabel.parentElement?.getBoundingClientRect();
 
     return {
       ok:
         style.textAlign === "left" &&
         style.color !== "rgb(255, 255, 255)" &&
         !!inputRect &&
-        inputRect.left < labelRect.left + 24,
+        inputRect.left < labelRect.left + 24 &&
+        numberStyle.alignSelf === "flex-start" &&
+        numberStyle.whiteSpace === "nowrap" &&
+        !!numberFieldRect &&
+        numberLabelRect.width < numberFieldRect.width * 0.85 &&
+        numberLabelRect.height < 28,
       textAlign: style.textAlign,
       color: style.color,
       labelLeft: labelRect.left,
       inputLeft: inputRect?.left,
+      numberAlignSelf: numberStyle.alignSelf,
+      numberWhiteSpace: numberStyle.whiteSpace,
+      numberLabelHeight: numberLabelRect.height,
+      numberLabelWidth: numberLabelRect.width,
+      numberFieldWidth: numberFieldRect?.width,
     };
   });
 
