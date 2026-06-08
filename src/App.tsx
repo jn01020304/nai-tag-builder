@@ -189,6 +189,7 @@ function AppContent() {
 
   const handleTwoFingerDragStart = (e: React.TouchEvent) => {
     if (e.touches.length < 2) return;
+    if ((e.target as Element).closest("[data-overlay-resize-handle='true']")) return;
 
     e.preventDefault();
     e.stopPropagation();
@@ -365,6 +366,7 @@ function AppContent() {
     return (
       <div
         data-testid={`overlay-resize-${handle}`}
+        data-overlay-resize-handle="true"
         onMouseDown={(e) => {
           e.preventDefault();
           e.stopPropagation();
