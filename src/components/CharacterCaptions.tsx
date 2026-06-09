@@ -30,7 +30,7 @@ export default function CharacterCaptions({
   const { theme, inputStyle, labelStyle, smallBtnStyle } = useThemeStyles();
 
   return (
-    <CollapsibleSection title={`Characters (${characters.length})`} testId="characters-section">
+    <CollapsibleSection title={`Character Prompt (${characters.length})`} testId="characters-section">
       <button
         onClick={() => dispatch({ type: 'ADD_CHARACTER' })}
         style={{ ...smallBtnStyle, width: '100%', marginBottom: '8px', color: theme.green }}
