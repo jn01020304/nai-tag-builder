@@ -11,19 +11,33 @@ writing:
   asides: false
 ---
 
-# Handoff — 2026-06-08
+# Handoff — 2026-06-09
 
 ## 현재 상태
 
 `nai-tag-builder`는 NovelAI 이미지 생성 페이지에 주입되는 모바일 우선 북마클릿 오버레이다.
 
-최근 작업의 중심은 세 가지다.
+최근 작업의 중심은 네 가지다.
 
 - EXIF/PNG 청크가 없는 NovelAI 이미지에서도 프롬프트 메타데이터 복원
 - NovelAI 실제 테마와의 색상 동기화 복구
 - 모바일 화면을 덜 잡아먹는 UI 정리
+- 모바일 오버레이가 접힘, 펼침, 드래그, 리사이즈, viewport 변화 속에서도 화면 안에 남도록 하는 셸 안정화
 
 현재 `main`은 배포된 GitHub Pages 번들과 동기화되어 있으며, 최신 북마클릿은 원격 `nai-tag-builder.js`를 `?t=Date.now()`로 로드한다.
+
+최신 주요 커밋 흐름은 다음과 같다.
+
+- `498a43c Refine header controls and automation default`
+  - 헤더 컨트롤과 자동화 기본값 기준점
+- `c663084 Add two finger overlay drag`
+  - 모바일에서 두 손가락 드래그로 오버레이를 끌어오는 기능
+- `c1db0f8 Preserve resize handles during two finger drag`
+  - 두 손가락 드래그가 4면/4모서리 리사이즈 핸들을 침범하지 않도록 보정
+- `e48ef10 Preserve panel state across overlay collapse`
+  - 접었다 펼쳐도 섹션 펼침 상태가 유지되도록 overlay body를 숨김 처리로 전환
+- `3b672a1 Keep overlay inside mobile viewport`
+  - 펼침, 리사이즈, viewport 변화 후 오버레이가 모바일 화면 밖으로 잘리지 않도록 위치 clamp
 
 ## 최근 완료
 
@@ -49,6 +63,12 @@ UI/UX를 모바일 기준으로 압축했다.
 - 접힘 상태를 긴 바가 아닌 56px 원형 런처로 변경
 - 오버레이 크기 조절을 좌/우/상/하 4방향으로 확장
 - 크기 조절은 viewport 8px padding 안에서 clamp
+- 오버레이를 접었을 때도 내부 body DOM은 제거하지 않고 숨김 처리
+- 접었다 펼칠 때 Tag Dictionary, Main Prompt, Parameters, Queue의 개별 펼침 상태 보존
+- 최초 실행 기본 펼침 상태는 Main Prompt와 Queue만 open
+- Tag Dictionary와 Parameters는 최초 실행 시 collapsed
+- 접힌 원형 런처가 화면 구석에 있어도 펼칠 때 전체 패널을 viewport 안쪽으로 자동 보정
+- 모바일 visual viewport resize/scroll 이벤트를 감지해 주소창, 가상 키보드, 회전 등으로 viewport가 바뀔 때 위치 재보정
 
 테마 동기화를 복구했다.
 
@@ -93,11 +113,18 @@ UI/UX를 모바일 기준으로 압축했다.
 - `src/hooks/useEdgeResize.ts`
   - 4방향 overlay resize
 
+- `src/App.tsx`
+  - overlay shell 조립
+  - two-finger drag 시작점
+  - collapse launcher
+  - viewport guard
+  - section state preservation을 위한 body visibility 전환
+
 - `scripts/e2e/bookmarklet-injection-smoke.mjs`
   - 실제 번들 주입 smoke. theme, resize, collapse, LSB import, apply/generate 검증
 
 - `scripts/e2e/compose-smoke.mjs`
-  - 모바일 compose flow, prompt targeting, highlight, queue, apply lock 검증
+  - 모바일 compose flow, prompt targeting, highlight, queue, apply lock, section default state, collapse state preservation, viewport guard 검증
 
 ## 반드시 지킬 것
 
@@ -125,6 +152,14 @@ rtk pwsh -NoProfile -Command '$u = "https://jn01020304.github.io/nai-tag-builder
 
 GitHub Pages가 오래된 artifact를 잠깐 서빙할 수 있다. push 직후 원격 sentinel이 false면 5-15초 기다렸다가 다시 확인한다.
 
+모바일 오버레이 셸은 단순한 레이아웃 장식이 아니라 제품의 핵심 런타임 계약이다. 드래그, 리사이즈, 접힘, 펼침 중 하나를 고칠 때 나머지 셋을 깨뜨리기 쉽다.
+
+오버레이를 접을 때 body를 unmount하면 섹션별 펼침 상태가 초기화된다. 현재는 `display: none`으로 숨겨 내부 `Panel` state를 보존한다.
+
+오버레이 위치 보정은 `window.innerWidth/innerHeight`만 보지 않고 가능하면 `window.visualViewport`를 함께 본다. 모바일 주소창, 확대, OSK, 화면 회전에서는 layout viewport와 visual viewport가 다를 수 있다.
+
+리사이즈 핸들은 4면과 4모서리를 모두 유지해야 한다. 두 손가락 드래그를 수정할 때 `[data-overlay-resize-handle='true']` 예외를 제거하면 안 된다.
+
 NovelAI 테마는 CSS 변수로 읽을 수 없다. `getComputedStyle()` 표본 채취 방식만 믿어야 한다.
 
 글자색은 첫 번째 DOM 후보를 그대로 쓰면 안 된다. 버튼/태그의 흰 글자가 밝은 배경에 잘못 적용될 수 있다.
@@ -140,4 +175,5 @@ React-controlled NovelAI input은 직접 DOM 값 변경이 되돌아갈 수 있�
 - Queue 세션의 batch import 기반 random rotation 설계
 - tag dictionary를 더 작은 모바일 작업면으로 재배치
 - 실기기 모바일에서 원형 collapse launcher drag/click 충돌 확인
+- 실기기 모바일에서 visual viewport 보정이 OSK, 주소창 접힘, 화면 회전 상황에서도 충분한지 확인
 - 실제 NovelAI theme variants에서 `themeProbe` 표본 후보 추가 검증
