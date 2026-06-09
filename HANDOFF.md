@@ -129,6 +129,11 @@ Batched Queue 1단계를 구현했다.
 - `src/hooks/useEdgeResize.ts`
   - 4방향 overlay resize
 
+- `src/styles/themeProbe.ts`
+  - Host theme extraction (Light/Dark mode)
+  - DOM probe elements for intensity colors
+  - Color contrast logic for readable text
+
 - `src/App.tsx`
   - overlay shell 조립
   - two-finger drag 시작점
@@ -140,7 +145,11 @@ Batched Queue 1단계를 구현했다.
   - 실제 번들 주입 smoke. theme, resize, collapse, LSB import, apply/generate 검증
 
 - `scripts/e2e/compose-smoke.mjs`
-  - 모바일 compose flow, prompt targeting, highlight, queue, apply lock, section default state, collapse state preservation, viewport guard 검증
+  - React 렌더링 주기 및 상태 동기화 검증
+  - Playwright 기반의 통합 연동 테스트 (UI 마운트 확인)
+
+- `scripts/e2e/theme-probe-smoke.mjs`
+  - 실제 NovelAI Light/Dark 테마 HTML 구조 기반의 테마 추출 로직 검증
   - Queue Images fixture import, Queue seed 기본값 random, batched/randomized mode 컨트롤 검증
 
 - `src/queue/queuePlanner.ts`
@@ -198,4 +207,4 @@ React-controlled NovelAI input은 직접 DOM 값 변경이 되돌아갈 수 있�
 
 ## 다음 후보 작업
 
-- Theme Probe Validation (실제 NovelAI theme variants에서 표본 추가 검증)
+(현재 정의된 즉각적인 후보 작업 없음 - 세션 마무리 가능)
