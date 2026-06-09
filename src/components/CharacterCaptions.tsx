@@ -15,6 +15,7 @@ interface Props {
   dispatch: React.Dispatch<MetadataAction>;
   getSelectionAfterRender: (target: PromptInsertTarget) => PromptSelectionAfterRender | undefined;
   onPromptSelection: (target: PromptInsertTarget, selection: { start: number; end: number }) => void;
+  onRemoveCharacter: (id: string) => void;
 }
 
 export default function CharacterCaptions({
@@ -24,6 +25,7 @@ export default function CharacterCaptions({
   dispatch,
   getSelectionAfterRender,
   onPromptSelection,
+  onRemoveCharacter,
 }: Props) {
   const { theme, inputStyle, labelStyle, smallBtnStyle } = useThemeStyles();
 
@@ -56,7 +58,7 @@ export default function CharacterCaptions({
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
                 <label style={{ ...labelStyle, marginBottom: 0 }}>Character {idx + 1}</label>
                 <button
-                  onClick={() => dispatch({ type: 'REMOVE_CHARACTER', id: char.id })}
+                  onClick={() => onRemoveCharacter(char.id)}
                   style={{ background: 'none', border: 'none', color: theme.warningError, cursor: 'pointer', fontSize: '14px', padding: '0 2px' }}
                 >
                   &#10005;

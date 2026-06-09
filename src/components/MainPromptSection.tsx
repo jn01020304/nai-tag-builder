@@ -4,10 +4,8 @@ import type {
   PromptSelectionAfterRender,
 } from "../prompt/promptInsertTarget";
 import type { PromptState } from "../types/metadata";
-import type { CoreCatalogEntry } from "../prompt/catalog/catalogTypes";
 import CollapsiblePanel from "./CollapsiblePanel";
 import PromptPairTabs from "./PromptPairTabs";
-import ComposeCatalogChips from "./ComposeCatalogChips";
 
 interface Props {
   prompt: PromptState;
@@ -15,8 +13,6 @@ interface Props {
   activePromptTarget: PromptInsertTarget;
   getSelectionAfterRender: (target: PromptInsertTarget) => PromptSelectionAfterRender | undefined;
   onPromptSelection: (target: PromptInsertTarget, selection: { start: number; end: number }) => void;
-  onToggleCatalogEntry: (entry: CoreCatalogEntry) => void;
-  onReorderBasePrompt: (fromIndex: number, toIndex: number) => void;
 }
 
 export default function MainPromptSection({
@@ -25,31 +21,9 @@ export default function MainPromptSection({
   activePromptTarget,
   getSelectionAfterRender,
   onPromptSelection,
-  onToggleCatalogEntry,
-  onReorderBasePrompt,
 }: Props) {
-  const activePromptValue = (() => {
-    switch (activePromptTarget.kind) {
-      case "base":
-        return prompt.basePrompt;
-      case "negativeBase":
-        return prompt.negativeBase;
-      case "character":
-        return prompt.characters.find((character) => character.id === activePromptTarget.id)?.caption ?? "";
-      case "negativeCharacter":
-        return prompt.negativeCharacters.find((character) => character.id === activePromptTarget.id)?.caption ?? "";
-    }
-  })();
-
   return (
     <CollapsiblePanel title="Main Prompt" testId="main-prompt-section">
-      <ComposeCatalogChips
-        prompt={prompt}
-        activePromptTarget={activePromptTarget}
-        activePromptValue={activePromptValue}
-        onToggle={onToggleCatalogEntry}
-        onReorderBasePrompt={onReorderBasePrompt}
-      />
       <PromptPairTabs
         testIdPrefix="base-prompt"
         activePromptTarget={activePromptTarget}

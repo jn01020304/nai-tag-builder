@@ -10,7 +10,8 @@ import type { ResizeHandle } from './hooks/useEdgeResize';
 import type { QueueMode } from './types/preset';
 import { ThemeProvider } from './contexts/ThemeContext';
 import { useTheme } from './contexts/themeContextCore';
-import PromptSection from './components/PromptSection';
+import MainPromptSection from './components/MainPromptSection';
+import TagDictionarySection from './components/TagDictionarySection';
 import GenerationParams from './components/GenerationParams';
 import CharacterCaptions from './components/CharacterCaptions';
 import AdvancedParams from './components/AdvancedParams';
@@ -29,7 +30,7 @@ import type {
 } from './prompt/promptInsertTarget';
 import { promptTargetKey } from './prompt/promptInsertTarget';
 import type { CoreCatalogEntry } from './prompt/catalog/catalogTypes';
-import { toggleCatalogTagWithSelection } from './prompt/catalog/promptTagText';
+import { movePromptTag, toggleCatalogTagWithSelection } from './prompt/catalog/promptTagText';
 
 const CONTAINER_ID = 'nai-tag-builder-root';
 const VIEWPORT_MARGIN = 8;
@@ -343,6 +344,28 @@ function AppContent() {
     }
   };
 
+  const handleReorderBasePrompt = (fromIndex: number, toIndex: number) => {
+    dispatch({
+      type: "SET_PROMPT",
+      field: "basePrompt",
+      value: movePromptTag(state.prompt.basePrompt, fromIndex, toIndex),
+    });
+  };
+
+  const handleRemoveCharacter = (id: string) => {
+    if (activePromptTarget.kind === 'character' && activePromptTarget.id === id) {
+      setActivePromptTarget({ kind: 'base' });
+    }
+    const index = state.prompt.characters.findIndex(c => c.id === id);
+    if (index >= 0) {
+      const negChar = state.prompt.negativeCharacters[index];
+      if (activePromptTarget.kind === 'negativeCharacter' && activePromptTarget.id === (negChar?.id ?? id)) {
+        setActivePromptTarget({ kind: 'base' });
+      }
+    }
+    dispatch({ type: 'REMOVE_CHARACTER', id });
+  };
+
 
 
   const handleApply = async () => {
@@ -640,13 +663,12 @@ function AppContent() {
               onDismiss={() => setFeedback(null)}
             />
           )}
-          <PromptSection
-            state={state}
+          <MainPromptSection
+            prompt={state.prompt}
             dispatch={dispatch}
             activePromptTarget={activePromptTarget}
             getSelectionAfterRender={(target) => selectionAfterRenderByTarget[promptTargetKey(target)]}
             onPromptSelection={recordPromptSelection}
-            onToggleCatalogEntry={handleCatalogToggle}
           />
           <CharacterCaptions
             characters={state.prompt.characters}
@@ -655,6 +677,13 @@ function AppContent() {
             dispatch={dispatch}
             getSelectionAfterRender={(target) => selectionAfterRenderByTarget[promptTargetKey(target)]}
             onPromptSelection={recordPromptSelection}
+            onRemoveCharacter={handleRemoveCharacter}
+          />
+          <TagDictionarySection
+            prompt={state.prompt}
+            activePromptTarget={activePromptTarget}
+            onToggleCatalogEntry={handleCatalogToggle}
+            onReorderBasePrompt={handleReorderBasePrompt}
           />
           <GenerationParams state={state} dispatch={dispatch} />
           <AdvancedParams state={state} dispatch={dispatch} />
