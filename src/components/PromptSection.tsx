@@ -7,7 +7,6 @@ import type {
 } from "../prompt/promptInsertTarget";
 import { movePromptTag } from "../prompt/catalog/promptTagText";
 import MainPromptSection from "./MainPromptSection";
-import TagDictionarySection from "./TagDictionarySection";
 
 interface Props {
   state: MetadataState;
@@ -26,18 +25,7 @@ export default function PromptSection({
   onPromptSelection,
   onToggleCatalogEntry,
 }: Props) {
-  const activePromptValue = (() => {
-    switch (activePromptTarget.kind) {
-      case "base":
-        return state.prompt.basePrompt;
-      case "negativeBase":
-        return state.prompt.negativeBase;
-      case "character":
-        return state.prompt.characters.find((character) => character.id === activePromptTarget.id)?.caption ?? "";
-      case "negativeCharacter":
-        return state.prompt.negativeCharacters.find((character) => character.id === activePromptTarget.id)?.caption ?? "";
-    }
-  })();
+
 
   const reorderBasePrompt = (fromIndex: number, toIndex: number) => {
     dispatch({
@@ -49,19 +37,14 @@ export default function PromptSection({
 
   return (
     <section style={{ marginBottom: "8px" }}>
-      <TagDictionarySection
-        prompt={state.prompt}
-        activePromptTarget={activePromptTarget}
-        activePromptValue={activePromptValue}
-        onToggle={onToggleCatalogEntry}
-        onReorderBasePrompt={reorderBasePrompt}
-      />
       <MainPromptSection
         prompt={state.prompt}
         dispatch={dispatch}
         activePromptTarget={activePromptTarget}
         getSelectionAfterRender={getSelectionAfterRender}
         onPromptSelection={onPromptSelection}
+        onToggleCatalogEntry={onToggleCatalogEntry}
+        onReorderBasePrompt={reorderBasePrompt}
       />
     </section>
   );

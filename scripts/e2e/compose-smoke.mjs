@@ -145,7 +145,9 @@ async function setTextareaCursor(page, value, cursorIndex) {
     element.focus();
     element.setSelectionRange(index, index);
     element.dispatchEvent(new Event("select", { bubbles: true }));
+    element.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, key: "ArrowLeft" }));
   }, cursorIndex);
+  await page.waitForTimeout(50);
 }
 
 async function setLocatorCursor(locator, value, cursorIndex) {
@@ -154,7 +156,9 @@ async function setLocatorCursor(locator, value, cursorIndex) {
     element.focus();
     element.setSelectionRange(index, index);
     element.dispatchEvent(new Event("select", { bubbles: true }));
+    element.dispatchEvent(new KeyboardEvent("keyup", { bubbles: true, key: "ArrowLeft" }));
   }, cursorIndex);
+  await locator.page().waitForTimeout(50);
 }
 
 async function checkLayout(page) {
@@ -312,23 +316,18 @@ async function checkFallbackThemeTokens(page) {
 }
 
 async function checkPromptSectionToggles(page) {
-  const tagToggle = page.locator("[data-testid='tag-dictionary-section-toggle']");
   const promptToggle = page.locator("[data-testid='main-prompt-section-toggle']");
   const parametersToggle = page.locator("[data-testid='parameters-section-toggle']");
   const queueToggle = page.locator("[data-testid='queue-section-toggle']");
 
   assert(await promptToggle.getAttribute("aria-expanded") === "true", "Main Prompt should default open.");
   assert(await queueToggle.getAttribute("aria-expanded") === "true", "Queue should default open.");
-  assert(await tagToggle.getAttribute("aria-expanded") === "false", "Tag Dictionary should default collapsed.");
   assert(await parametersToggle.getAttribute("aria-expanded") === "false", "Parameters should default collapsed.");
   assert(await hasLocator(page.locator("[data-testid='main-prompt-section-body']")), "Main Prompt body should default mounted.");
   assert(await hasLocator(page.locator("[data-testid='queue-section-body']")), "Queue body should default mounted.");
-  assert(!(await hasLocator(page.locator("[data-testid='tag-dictionary-section-body']"))), "Tag Dictionary body should default unmounted.");
   assert(!(await hasLocator(page.locator("[data-testid='parameters-section-body']"))), "Parameters body should default unmounted.");
 
-  await tagToggle.click();
-  assert(await tagToggle.getAttribute("aria-expanded") === "true", "Tag Dictionary did not expand.");
-  assert(await hasLocator(page.locator("[data-testid='catalog-chip-tag_1girl']")), "Tag Dictionary did not reopen.");
+
 
   await promptToggle.click();
   assert(await promptToggle.getAttribute("aria-expanded") === "false", "Main Prompt did not collapse.");
@@ -343,7 +342,6 @@ async function checkPromptSectionToggles(page) {
 
   await page.locator("[data-testid='overlay-collapsed-launcher']").click();
   await page.locator("[data-testid='overlay-header']").waitFor({ timeout: 3000 });
-  assert(await tagToggle.getAttribute("aria-expanded") === "true", "Tag Dictionary state was not preserved.");
   assert(await promptToggle.getAttribute("aria-expanded") === "true", "Main Prompt state was not preserved.");
   assert(await parametersToggle.getAttribute("aria-expanded") === "false", "Parameters state was not preserved.");
   assert(await queueToggle.getAttribute("aria-expanded") === "true", "Queue state was not preserved.");
@@ -764,6 +762,7 @@ async function main() {
       `Drag reorder failed: ${await getTextareaValue(page)}`,
     );
 
+    await page.locator("[data-testid='parameters-section-toggle']").click();
     await checkLayout(page);
     await checkReadablePromptTab(page);
     await checkFallbackThemeTokens(page);

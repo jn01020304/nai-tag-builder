@@ -38,7 +38,7 @@ NovelAI는 CSS 변수를 사용하지 않고 Styled Components 기반의 해시 
 
 - Prompt 계층: Compose 화면 및 태그 입력/컴파일을 담당한다. 이 계층의 절대적인 진실의 원천(Source of Truth)은 구조화된 객체나 칩 상태가 아닌 **`raw prompt string`**이다. 이 계층은 NovelAI DOM selector나 Import Pipeline 구현을 절대 알면 안 된다.
 - Tune 계층: 생성 조건(seed, size, steps 등)을 다루며, Advanced flags를 기본 조작면에서 엄격히 격리한다.
-- Queue 계층: 보류된 기술 부채가 아닌 독립된 핵심 도메인이다. `QueueDraft`, `QueueSession`, `QueueTickPlan` 등 명확한 데이터 계약을 소유하며 작업 지시를 관장한다. Automation 계층의 DOM 셀렉터를 알지 못하며 결과만 관찰한다. 특히 무한 재시도를 막기 위해 **실패 시 중단(Stop on failure)**을 기본 정책으로 강제한다.
+- Queue 계층: 보류된 기술 부채가 아닌 독립된 핵심 도메인이다. `QueueDraft`, `QueueSession`, `QueueTickPlan` 등 명확한 데이터 계약을 소유하며 작업 지시를 관장한다. Batched Queue의 실행 단위는 기존 Preset이며, 이미지 batch import는 Preset 생성 후 Queue에 추가되는 입력 경로로 취급한다. Automation 계층의 DOM 셀렉터를 알지 못하며 결과만 관찰한다. 특히 무한 재시도를 막기 위해 **실패 시 중단(Stop on failure)**을 기본 정책으로 강제한다.
 - Review / Asset 계층: 결과물의 보관, 폐기, 보류 상태와 메타데이터의 연결을 담당한다. 런타임 환경에서 무거운 이미지 처리를 수행하는 대신, PC 편집 환경으로 안전하게 이관(Handoff)하기 위한 Manifest 생성 및 관리에 집중한다.
 - Metadata 계층: `MetadataState` 및 Comment JSON 규격을 관리한다. 태그의 카테고리 기원이나 UI 렌더링 로직을 알면 안 된다.
 - Automation 계층: NovelAI 웹 UI에 대한 paste/import/generate 위임만을 전담한다. prompt 편집 UX나 Queue의 내부 로직을 알면 안 된다.
