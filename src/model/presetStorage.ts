@@ -5,6 +5,10 @@ import { normalizeMetadataState } from './defaults';
 
 const STORAGE_KEY_OLD = 'nai-tb-presets';
 
+function createPresetId(): string {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 8);
+}
+
 export async function migrateOldLocalStorage() {
     try {
         const raw = localStorage.getItem(STORAGE_KEY_OLD);
@@ -42,7 +46,7 @@ export async function loadPresets(): Promise<Preset[]> {
 
 export async function savePreset(name: string, state: MetadataState): Promise<Preset> {
     const newPreset: PresetEntry = {
-        id: Date.now().toString(36) + Math.random().toString(36).slice(2, 8),
+        id: createPresetId(),
         name,
         settings: JSON.stringify(state),
         queueOrder: await db.presets.count(),
@@ -56,6 +60,29 @@ export async function savePreset(name: string, state: MetadataState): Promise<Pr
         state,
         createdAt: newPreset.createdAt,
     };
+}
+
+export async function savePresetsBatch(items: Array<{ name: string; state: MetadataState }>): Promise<Preset[]> {
+    if (items.length === 0) return [];
+
+    const currentCount = await db.presets.count();
+    const now = Date.now();
+    const entries: PresetEntry[] = items.map((item, index) => ({
+        id: createPresetId(),
+        name: item.name,
+        settings: JSON.stringify(item.state),
+        queueOrder: currentCount + index,
+        createdAt: now + index,
+    }));
+
+    await db.presets.bulkAdd(entries);
+
+    return entries.map((entry, index) => ({
+        id: entry.id,
+        name: entry.name,
+        state: items[index].state,
+        createdAt: entry.createdAt,
+    }));
 }
 
 export async function deletePreset(id: string): Promise<void> {

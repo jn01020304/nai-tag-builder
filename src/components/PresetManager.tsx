@@ -3,7 +3,7 @@ import type { MetadataState } from '../types/metadata';
 import type { Preset } from '../types/preset';
 import type { MetadataAction } from '../hooks/useMetadataState';
 import type { ShowFeedback } from '../types/feedback';
-import { loadPresets, savePreset, deletePreset, exportPresets, importPresets } from '../model/presetStorage';
+import { loadPresets, savePreset, savePresetsBatch, deletePreset, exportPresets, importPresets } from '../model/presetStorage';
 import { useThemeStyles } from '../contexts/themeContextCore';
 import CollapsibleSection from './CollapsibleSection';
 import { parseNovelAIImageFiles } from '../utils/pngParser';
@@ -23,6 +23,7 @@ export default function PresetManager({ state, dispatch, queue, setQueue, onImpo
     const [saveName, setSaveName] = useState('');
     const fileInputRef = useRef<HTMLInputElement>(null);
     const pngInputRef = useRef<HTMLInputElement>(null);
+    const queueImageInputRef = useRef<HTMLInputElement>(null);
 
     // Reload presets from IndexedDB
     const refresh = async () => {
@@ -99,6 +100,56 @@ export default function PresetManager({ state, dispatch, queue, setQueue, onImpo
         e.target.value = '';
     };
 
+    const createUniquePresetNames = (fileNames: string[]): string[] => {
+        const usedNames = new Set(presets.map(preset => preset.name));
+
+        return fileNames.map((fileName) => {
+            const baseName = fileName.replace(/\.[^/.]+$/, '').trim() || 'Imported image';
+            let candidate = baseName;
+            let suffix = 2;
+
+            while (usedNames.has(candidate)) {
+                candidate = `${baseName} (${suffix})`;
+                suffix += 1;
+            }
+
+            usedNames.add(candidate);
+            return candidate;
+        });
+    };
+
+    const handleAddImagesToQueue = async (e: React.ChangeEvent<HTMLInputElement>) => {
+        const files = Array.from(e.target.files ?? []);
+        if (files.length === 0) return;
+
+        try {
+            const result = await parseNovelAIImageFiles(files);
+            if (result.patches.length === 0) {
+                onFeedback({ tone: 'warning', message: '가져온 이미지에서 NovelAI 메타데이터를 찾지 못했습니다.' });
+                return;
+            }
+
+            const names = createUniquePresetNames(result.patches.map(patch => patch.fileName));
+            const createdPresets = await savePresetsBatch(result.patches.map((patch, index) => ({
+                name: names[index],
+                state: patch.state,
+            })));
+
+            setQueue(current => [...current, ...createdPresets.map(preset => preset.id)]);
+            await refresh();
+            onFeedback({
+                tone: 'success',
+                message: `${createdPresets.length}개 이미지에서 프리셋을 만들고 Queue에 추가했습니다.`,
+                detail: result.failedFiles.length > 0 ? `실패: ${result.failedFiles.join(', ')}` : undefined,
+            });
+        } catch (err) {
+            console.error('Error adding image metadata to queue:', err);
+            onFeedback({ tone: 'error', message: '이미지를 Queue 프리셋으로 추가하지 못했습니다.' });
+        }
+
+        e.target.value = '';
+    };
+
     const handleDelete = async (id: string) => {
         await deletePreset(id);
         setQueue(q => q.filter(qid => qid !== id));
@@ -149,7 +200,7 @@ export default function PresetManager({ state, dispatch, queue, setQueue, onImpo
     };
 
     return (
-        <CollapsibleSection title="Presets">
+        <CollapsibleSection title="Presets" testId="presets-section">
             {/* Save current state as preset */}
             <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
                 <input
@@ -166,7 +217,7 @@ export default function PresetManager({ state, dispatch, queue, setQueue, onImpo
             </div>
 
             {/* Import / Export */}
-            <div style={{ display: 'flex', gap: '4px', marginBottom: '8px' }}>
+            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px', marginBottom: '8px' }}>
                 <input
                     ref={fileInputRef}
                     type="file"
@@ -176,20 +227,41 @@ export default function PresetManager({ state, dispatch, queue, setQueue, onImpo
                 />
                 <input
                     ref={pngInputRef}
+                    data-testid="load-image-input"
                     type="file"
                     accept="image/png,image/webp,image/*"
                     multiple
                     onChange={handleImportPng}
                     style={{ display: 'none' }}
                 />
-                <button onClick={() => fileInputRef.current?.click()} style={{ ...smallBtnStyle, flex: 1, color: theme.blue }}>
+                <input
+                    ref={queueImageInputRef}
+                    data-testid="queue-images-input"
+                    type="file"
+                    accept="image/png,image/webp,image/*"
+                    multiple
+                    onChange={handleAddImagesToQueue}
+                    style={{ display: 'none' }}
+                />
+                <button onClick={() => fileInputRef.current?.click()} style={{ ...smallBtnStyle, flex: '1 1 42%', color: theme.blue }}>
                     📥 JSON
                 </button>
-                <button onClick={handleExport} style={{ ...smallBtnStyle, flex: 1, color: theme.yellow }}>
+                <button onClick={handleExport} style={{ ...smallBtnStyle, flex: '1 1 42%', color: theme.yellow }}>
                     📤 JSON
                 </button>
-                <button onClick={() => pngInputRef.current?.click()} style={{ ...smallBtnStyle, flex: 1, color: theme.text }}>
+                <button
+                    data-testid="load-image-button"
+                    onClick={() => pngInputRef.current?.click()}
+                    style={{ ...smallBtnStyle, flex: '1 1 42%', color: theme.text }}
+                >
                     🖼️ Load Image
+                </button>
+                <button
+                    data-testid="queue-images-button"
+                    onClick={() => queueImageInputRef.current?.click()}
+                    style={{ ...smallBtnStyle, flex: '1 1 42%', color: theme.green }}
+                >
+                    Queue Images
                 </button>
             </div>
 
@@ -256,9 +328,9 @@ export default function PresetManager({ state, dispatch, queue, setQueue, onImpo
             {/* Queue section */}
             {queue.length > 0 && (
                 <div style={{ marginTop: '8px' }}>
-                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
+                    <div data-testid="queued-presets-list" style={{ display: 'flex', flexWrap: 'wrap', gap: '4px' }}>
                         {queuedPresets.map((p, idx) => (
-                            <span key={p.id} style={chipStyle}>
+                            <span key={p.id} data-testid={`queued-preset-${idx}`} style={chipStyle}>
                                 <span style={{ color: theme.overlay0, fontSize: '10px' }}>{idx + 1}.</span>
                                 {p.name}
                                 <button onClick={() => moveInQueue(p.id, -1)} style={tinyBtn} title="Move up">▲</button>

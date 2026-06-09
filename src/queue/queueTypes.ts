@@ -23,6 +23,7 @@ export interface QueueDraft {
   intervalSec: number;
   seedRule: SeedRule;
   queueMode: QueueMode;
+  runsPerPreset: number;
   stopOnFailure: boolean;
 }
 
@@ -39,6 +40,7 @@ export interface QueueTickPlan {
   source: QueueSourceSnapshot;
   state: MetadataState;
   seedRule: SeedRule;
+  sourceIterationIndex: number;
   scheduledAt: number;
   displayLabel: string;
   nextQueueCursor: number;
