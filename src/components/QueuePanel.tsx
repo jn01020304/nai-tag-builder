@@ -122,19 +122,19 @@ export default function QueuePanel({
       : theme.blue;
 
   return (
-    <CollapsiblePanel title="Queue" testId="queue-section">
+    <CollapsiblePanel title="Auto-Queue" testId="queue-section">
       <section
         aria-label="Queue"
         data-testid="queue-panel"
         style={{
-          backgroundColor: withAlpha(theme.surface0, 0.72),
-          border: `1px solid ${theme.surface1}`,
+          backgroundColor: withAlpha(theme.surface0, 0.4), // Border diet (more transparent)
+          border: 'none', // Border diet
           borderRadius: "8px",
-          marginBottom: "10px",
-          padding: "9px",
+          marginBottom: "12px",
+          padding: "12px",
         }}
       >
-      <div style={{ alignItems: "center", display: "flex", gap: "8px", marginBottom: "8px" }}>
+      <div style={{ alignItems: "center", display: "flex", gap: "12px", marginBottom: "12px" }}>
         <span style={{ ...labelStyle, marginBottom: 0 }}>Queue</span>
         <span
           data-testid="queue-status"

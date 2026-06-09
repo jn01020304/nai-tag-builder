@@ -38,11 +38,13 @@ export default function OverlayFooter({
     <div
       data-testid="overlay-footer"
       style={{
-        backgroundColor: theme.base,
-        borderTop: `1px solid ${theme.surface0}`,
-        boxShadow: "0 -6px 14px rgba(0, 0, 0, 0.12)",
+        backgroundColor: withAlpha(theme.base, 0.85),
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        borderTop: "none",
+        boxShadow: "0 -8px 24px rgba(0, 0, 0, 0.15)",
         flex: "0 0 auto",
-        padding: "8px 12px 10px",
+        padding: "12px 16px 16px",
         zIndex: 2,
       }}
     >

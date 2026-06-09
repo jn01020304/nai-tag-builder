@@ -26,7 +26,7 @@ export default function ApplyButton({ isApplying, label, onApply }: Props) {
         fontSize: '14px',
       }}
     >
-      {isApplying ? label ?? '적용 중...' : 'NovelAI에 적용'}
+      {isApplying ? label ?? 'Applying...' : 'Load to Canvas'}
     </button>
   );
 }

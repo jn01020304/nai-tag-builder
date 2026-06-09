@@ -1,4 +1,5 @@
 import { useTheme } from "../contexts/themeContextCore";
+import { withAlpha } from "../styles/color";
 
 interface Props {
   isCollapsed: boolean;
@@ -64,8 +65,10 @@ export default function OverlayHeader({
       }}
       style={{
         alignItems: "center",
-        backgroundColor: theme.crust,
-        borderBottom: isCollapsed ? "none" : `1px solid ${theme.surface0}`,
+        backgroundColor: withAlpha(theme.crust, 0.85),
+        backdropFilter: "blur(12px)",
+        WebkitBackdropFilter: "blur(12px)",
+        borderBottom: "none",
         borderRadius: isCollapsed ? "12px" : "12px 12px 0 0",
         cursor: "grab",
         display: "flex",
@@ -88,7 +91,7 @@ export default function OverlayHeader({
           whiteSpace: "nowrap",
         }}
       >
-        NAI Tag Builder v2.0
+        Easy-to Studio v1.0
       </span>
       <div style={{ alignItems: "center", display: "flex", flex: "0 0 auto", gap: "8px" }}>
         <button

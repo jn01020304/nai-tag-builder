@@ -70,7 +70,7 @@ export default function AdvancedParams({ state, dispatch }: Props) {
   );
 
   return (
-    <CollapsibleSection title="Advanced" testId="advanced-section">
+    <CollapsibleSection title="Advanced Settings" testId="advanced-section">
       {/* Numeric params */}
       <div style={numRowStyle}>
         <NumberField

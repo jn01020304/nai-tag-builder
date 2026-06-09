@@ -33,7 +33,7 @@ export default function Panel({
     <section
       data-testid={testId}
       style={{
-        marginBottom: isPanel ? "10px" : "8px",
+        marginBottom: isPanel ? "16px" : "12px",
         minWidth: 0,
       }}
     >
@@ -54,11 +54,11 @@ export default function Panel({
           display: "flex",
           fontSize: "13px",
           fontWeight: isPanel ? 800 : "bold",
-          gap: "6px",
+          gap: "10px",
           lineHeight: 1.2,
-          margin: isPanel ? "0 0 7px" : 0,
+          margin: isPanel ? "0 0 10px" : 0,
           minHeight: isPanel ? "26px" : undefined,
-          padding: isPanel ? 0 : "6px 0",
+          padding: isPanel ? 0 : "10px 0",
           textAlign: "left",
           width: "100%",
         }}
@@ -91,7 +91,7 @@ export default function Panel({
           data-testid={testId ? `${testId}-body` : undefined}
           style={{
             minWidth: 0,
-            padding: isPanel ? 0 : "4px 0 0",
+            padding: isPanel ? 0 : "8px 0 0",
           }}
         >
           {children}

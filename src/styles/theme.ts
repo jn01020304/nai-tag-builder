@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { colorLuminance } from "./color";
 import { sampleHostTheme } from "./themeProbe";
 
 export interface ThemeColors {
@@ -64,46 +63,45 @@ export const fallbackTheme: ThemeColors = {
 
 export const defaultInputStyle = (theme: ThemeColors): React.CSSProperties => ({
   backgroundColor: theme.mantle,
-  border: `1px solid ${theme.surface1}`,
-  borderRadius: "4px",
+  border: "none", // Border diet
+  borderRadius: "6px",
   boxSizing: "border-box",
   color: theme.text,
   fontSize: "13px",
-  padding: "6px 8px",
+  padding: "8px 12px", // Increased padding
+  outline: "none",
 });
 
 export const defaultLabelStyle = (theme: ThemeColors): React.CSSProperties => ({
   alignSelf: "flex-start",
-  backgroundColor: colorLuminance(theme.base) != null && colorLuminance(theme.base)! > 0.58
-    ? "#303244"
-    : "rgba(255, 255, 255, 0.16)",
-  borderRadius: "4px",
-  color: "#ffffff",
+  backgroundColor: "transparent", // Removing background block for lighter feel
+  color: theme.subtext0, // Differentiate opacity/color from main text
   display: "inline-block",
   fontSize: "12px",
   fontWeight: 600,
-  marginBottom: "4px",
+  marginBottom: "6px",
   maxWidth: "100%",
   overflow: "hidden",
-  padding: "1px 5px",
+  padding: "0 2px",
   textOverflow: "ellipsis",
   whiteSpace: "nowrap",
 });
 
 export const defaultSmallBtnStyle = (theme: ThemeColors): React.CSSProperties => ({
   background: "none",
-  border: `1px solid ${theme.surface1}`,
-  borderRadius: "4px",
-  color: theme.text,
+  border: "none", // Ghost button style default
+  borderRadius: "6px",
+  color: theme.subtext1,
   cursor: "pointer",
   fontSize: "12px",
-  padding: "4px 8px",
+  padding: "6px 10px", // Increased padding
+  transition: "all 0.2s ease",
 });
 
 export const defaultParameterInputStyle = (theme: ThemeColors): React.CSSProperties => ({
   ...defaultInputStyle(theme),
   backgroundColor: theme.parameterInputBg,
-  border: `1px solid ${theme.parameterInputBorder}`,
+  border: `1px solid ${theme.surface0}`, // Keep a subtle border here if needed, or remove
 });
 
 function areThemeColorsEqual(a: ThemeColors, b: ThemeColors): boolean {
