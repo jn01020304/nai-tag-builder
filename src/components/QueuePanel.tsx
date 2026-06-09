@@ -155,6 +155,28 @@ export default function QueuePanel({
         >
           {queueStatusLabel(queueSession)}
         </span>
+        
+        {queueSession && queueSession.status !== "idle" && queueSession.status !== "stopped" && queueSession.status !== "failed" && (
+          <div
+            data-testid="queue-progress"
+            style={{
+              color: theme.subtext0,
+              fontSize: "11px",
+              marginLeft: "auto",
+              textAlign: "right",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              whiteSpace: "nowrap",
+              maxWidth: "140px",
+            }}
+          >
+            {queueSession.currentPlan?.source.name && (
+              <span style={{ marginRight: "4px" }}>{queueSession.currentPlan.source.name}</span>
+            )}
+            <span style={{ fontWeight: 600 }}>{queueSession.completedCount}</span>
+            <span style={{ color: theme.subtext1 }}> / {queueSession.targetCount}</span>
+          </div>
+        )}
       </div>
 
       <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>

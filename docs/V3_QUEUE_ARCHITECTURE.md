@@ -28,7 +28,7 @@ v3 Queue는 모바일 자투리 시간의 반자동 생성 흐름을 담당한�
 초기 Queue는 세 가지 명령을 우선한다.
 하나는 현재 프롬프트 또는 선택한 프리셋으로 N장을 반복 생성하는 것이다.
 둘째는 seed를 고정, 증가, 감소, 랜덤 중 하나로 적용하는 것이다.
-셋째는 프리셋 또는 캐릭터 프리셋을 순차 적용하는 것이다.
+셋째는 프리셋 또는 이미지에서 생성한 프리셋을 Batched Queue로 묶음 실행하거나 랜덤 실행하는 것이다.
 
 복잡한 workflow builder, 조건 분기, 실패 후 자동 복구, 이미지 분석 기반 재시도는 v3 범위가 아니다.
 v3는 가볍고 예측 가능한 반복 실행을 만드는 단계다.
@@ -42,7 +42,8 @@ v3는 가볍고 예측 가능한 반복 실행을 만드는 단계다.
 Queue 정책과 세션 상태, UI draft, Automation 실행이 같은 hook 안에 섞이면 실패 상태를 설명하기 어렵고, 향후 character preset 순환이나 Review handoff를 붙일 때 강결합이 커진다.
 
 `src/components/PresetManager.tsx`도 preset 관리와 queue 편집을 함께 맡고 있다.
-초기에는 허용되지만, v3 구현에서는 Preset 저장소와 Queue 작업 지시서 편집을 분리해야 한다.
+초기 구현에서는 `Queue Images`가 여러 이미지의 NovelAI 메타데이터를 각각 Preset으로 저장한 뒤 기존 Queue 뒤에 추가한다.
+장기적으로는 Preset 저장소와 Queue 작업 지시서 편집을 분리해야 한다.
 
 ## 책임 경계
 
@@ -68,9 +69,13 @@ Queue 작업 지시서는 런타임에서 가벼운 plain object로 다룬다.
 source는 현재 상태 또는 preset queue를 가리킨다.
 targetCount는 생성 목표 횟수다.
 intervalSec는 tick 사이 대기 시간이다.
-seedRule은 preserve, random, increment, decrement 중 하나다.
-preserve는 사용자에게 고정 seed로 보이는 규칙이며 source state의 seed를 세션 동안 보존한다.
-queueMode는 progression 또는 randomization이다.
+seedRule은 none, random, increment, decrement 중 하나다.
+none은 사용자에게 프리셋 seed 유지로 보이는 규칙이며 source state의 seed를 그대로 보존한다.
+Queue seed 기본값은 항상 random이다.
+queueMode는 batched 또는 randomized다.
+batched는 `runsPerPreset`만큼 같은 preset을 실행한 뒤 다음 preset으로 이동한다.
+`runsPerPreset` 기본값은 1이며, 이 값이 기존 progression과 같은 의미다.
+randomized는 매 tick마다 queued preset 중 하나를 무작위로 고르고 `runsPerPreset`을 사용하지 않는다.
 stopOnFailure는 초기값 true다.
 
 `QueueSession`은 실행 중인 세션 상태다.
@@ -82,7 +87,7 @@ targetCount는 세션 시작 시 snapshot으로 고정한다.
 startedAt, updatedAt, lastError, lastAppliedSeed를 가진다.
 
 `QueueTickPlan`은 다음 한 번의 Apply를 위한 계획이다.
-tickIndex, sourcePresetId, sourcePresetName, state, seedIntent, scheduledAt를 가진다.
+tickIndex, sourcePresetId, sourcePresetName, state, seedIntent, sourceIterationIndex, scheduledAt를 가진다.
 이 plan은 Automation selector를 포함하지 않는다.
 
 `QueueTickResult`는 한 tick이 닫힌 결과다.
@@ -121,14 +126,15 @@ Queue는 한 번에 하나의 tick만 계획하고 실행한다.
 이 규칙은 v2 Automation 신뢰성 계약을 보존하기 위한 핵심이다.
 
 preset queue가 비어 있으면 현재 `MetadataState` snapshot을 source로 사용한다.
-preset queue가 있으면 queueMode에 따라 다음 preset을 고른다.
-progression은 배열 순서대로 순환한다.
-randomization은 매 tick마다 무작위 preset을 고르되, v3 MVP에서는 중복 방지를 보장하지 않는다.
+preset queue가 있으면 세션 시작 시점의 queued preset source snapshot을 고정하고, 이후 실행 중 Queue 편집은 현재 세션에 반영하지 않는다.
+batched는 `preset1 x runsPerPreset -> preset2 x runsPerPreset` 순서로 순환한다.
+randomized는 매 tick마다 무작위 preset을 고르되, v3 MVP에서는 중복 방지를 보장하지 않는다.
 
-seedRule이 preserve이면 세션 시작 시점의 source seed를 모든 tick에 그대로 사용한다.
+seedRule이 none이면 source seed를 그대로 사용한다.
 seedRule이 random이면 매 tick마다 `createRandomSeed()`를 사용한다.
-seedRule이 increment이면 첫 seed에서 tickIndex만큼 더한다.
-seedRule이 decrement이면 첫 seed에서 tickIndex만큼 빼되 0 아래로 내려가지 않는다.
+seedRule이 increment이면 source seed에서 현재 preset 내부 반복 index만큼 더한다.
+seedRule이 decrement이면 source seed에서 현재 preset 내부 반복 index만큼 빼되 0 아래로 내려가지 않는다.
+예를 들어 `runsPerPreset = 3`, preset1 seed 100, preset2 seed 500이면 increment는 `101, 102, 103 -> 501, 502, 503`이다.
 
 seed 0은 random seed 요청으로 해석하지 않는다.
 random은 seedRule로만 표현한다.
@@ -195,7 +201,7 @@ v3 구현은 새 `src/queue/` 폴더를 기준으로 시작한다.
 
 첫 단계는 타입과 순수 planner를 만든다.
 이 단계에서는 UI를 거의 바꾸지 않는다.
-현재 `queue`, `queueMode`, `seedRule`, `intervalSec`, `targetCount`를 `QueueDraft`로 표현할 수 있게 만든다.
+현재 `queue`, `queueMode`, `runsPerPreset`, `seedRule`, `intervalSec`, `targetCount`를 `QueueDraft`로 표현할 수 있게 만든다.
 
 둘째 단계는 `planNextQueueTick()`을 만든다.
 현재 state, preset id 배열, preset lookup 결과, seed rule, current index를 입력받아 다음 `QueueTickPlan`을 반환한다.
@@ -218,7 +224,7 @@ start, tick success, tick failure, stop, complete 이벤트를 받아 다음 `Qu
 ## 검증 계약
 
 Queue planner는 단위 테스트가 필요하다.
-progression이 순서대로 preset을 고르는지, randomization이 허용 범위 안의 preset을 고르는지, seed increment와 decrement가 기대값을 만드는지 검증한다.
+batched가 `runsPerPreset` 단위로 preset을 고르는지, randomized가 허용 범위 안의 preset을 고르는지, seed increment와 decrement가 preset 내부 반복 index 기준으로 기대값을 만드는지 검증한다.
 
 Queue session은 상태 전이 테스트가 필요하다.
 start 이후 waiting 또는 applying으로 가는지, success가 completed 또는 cooldown으로 가는지, failure가 failed로 가는지, stop이 timeout 예약을 남기지 않는지 검증한다.
@@ -226,12 +232,12 @@ start 이후 waiting 또는 applying으로 가는지, success가 completed 또�
 E2E는 mock NovelAI fixture에서 검증한다.
 성공한 tick 뒤에만 다음 tick이 예약되는지, 실패 tick 뒤에는 다음 tick이 실행되지 않는지, Stop을 누르면 target count가 남아 있어도 다음 tick이 실행되지 않는지 확인한다.
 
-모바일 layout은 기존 Compose smoke test에 Queue mode를 추가해 확인한다.
+모바일 layout은 기존 Compose smoke test에 Queue mode와 Queue Images import를 추가해 확인한다.
 320px 폭에서 Queue summary, target count, interval, Stop 버튼이 부모 폭 밖으로 나가면 안 된다.
 
 ## v3 MVP 범위
 
-v3 MVP에 포함되는 것은 현재 상태 반복, preset queue progression, preset queue randomization, seed preserve, random, increment, decrement, target count, interval, stop on failure, manual stop, footer status, status banner failure hint다.
+v3 MVP에 포함되는 것은 현재 상태 반복, preset queue batched, preset queue randomized, Queue Images 기반 preset 생성과 queue append, seed none, random, increment, decrement, target count, interval, stop on failure, manual stop, footer status, status banner failure hint다.
 
 v3 MVP에 포함되지 않는 것은 조건 분기, 이미지 결과 기반 다음 작업 선택, 자동 retry, 실패 후 fallback preset, per-preset 개별 target count, nested queue, LLM prompt rewrite, vision AI 검수, 직접 NovelAI API 호출이다.
 

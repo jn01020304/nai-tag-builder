@@ -23,6 +23,7 @@ writing:
 - NovelAI 실제 테마와의 색상 동기화 복구
 - 모바일 화면을 덜 잡아먹는 UI 정리
 - 모바일 오버레이가 접힘, 펼침, 드래그, 리사이즈, viewport 변화 속에서도 화면 안에 남도록 하는 셸 안정화
+- Batched Queue 기반의 이미지 batch import → Preset 생성 → Queue append 흐름 추가
 
 현재 `main`은 배포된 GitHub Pages 번들과 동기화되어 있으며, 최신 북마클릿은 원격 `nai-tag-builder.js`를 `?t=Date.now()`로 로드한다.
 
@@ -57,6 +58,7 @@ UI/UX를 모바일 기준으로 압축했다.
 
 - Main/Undesired Prompt textarea 위의 작은 중복 라벨 제거
 - Character Prompt / Character Undesired Content 중복 라벨 제거
+- Tag Dictionary를 MainPromptSection 내부로 통합하여 더 가볍고 응집력 있는 도구로 변경
 - `Insert target: ...` 텍스트 제거
 - prompt tab 라벨을 모바일용 `Main` / `Negative`로 단축
 - 탭이 현재 편집 대상과 색상 식별을 담당
@@ -86,6 +88,20 @@ UI/UX를 모바일 기준으로 압축했다.
 - circular collapse launcher 검증 포함
 - theme text matching 검증 포함
 - prompt field subtitle 제거 검증 포함
+
+Batched Queue 1단계를 구현했다.
+
+- `Queue Images`로 여러 이미지 파일을 선택하면 각 이미지의 NovelAI 메타데이터를 Preset으로 저장하고 기존 Queue 뒤에 추가
+- 폴더 선택은 모바일 기준 1단계에서 지원하지 않음
+- Queue mode는 `batched`와 `randomized`
+- 기존 progression은 `batched + runsPerPreset = 1`로 흡수
+- `runsPerPreset`은 batched에서 프리셋당 반복 수로 사용
+- Queue seed 기본값은 항상 `random`
+- `+1`/`-1` seed는 프리셋 내부 반복 index 기준으로 적용
+- Queue 실행 중 preset source 목록은 세션 시작 시 snapshot으로 고정
+- Queue 실행 루프는 `src/queue/useQueueRunner.ts`로 분리하고 `useAutoGenerator.ts`는 UI 설정 adapter로 축소
+- compose smoke에서 PNG metadata fixture 2개를 Queue Images로 주입해 Preset 생성과 Queue chip 추가를 검증
+- Queue 실행 중 현재 preset 이름과 batch 진행률을 Queue panel에 작게 표시하도록 UI 개선
 
 ## 핵심 파일
 
@@ -125,6 +141,16 @@ UI/UX를 모바일 기준으로 압축했다.
 
 - `scripts/e2e/compose-smoke.mjs`
   - 모바일 compose flow, prompt targeting, highlight, queue, apply lock, section default state, collapse state preservation, viewport guard 검증
+  - Queue Images fixture import, Queue seed 기본값 random, batched/randomized mode 컨트롤 검증
+
+- `src/queue/queuePlanner.ts`
+  - Batched Queue source 선택, randomized 선택, preset 내부 반복 index 기준 seed rule 계산
+
+- `src/queue/useQueueRunner.ts`
+  - Queue timeout 예약, `runApplyPipeline()` 호출, stop/failure/completion 상태 전이 연결
+
+- `src/components/PresetManager.tsx`
+  - Load Image와 Queue Images 진입점 분리. Queue Images는 이미지별 Preset 생성 후 Queue append
 
 ## 반드시 지킬 것
 
@@ -172,8 +198,6 @@ React-controlled NovelAI input은 직접 DOM 값 변경이 되돌아갈 수 있�
 
 ## 다음 후보 작업
 
-- Queue 세션의 batch import 기반 random rotation 설계
-- tag dictionary를 더 작은 모바일 작업면으로 재배치
-- 실기기 모바일에서 원형 collapse launcher drag/click 충돌 확인
-- 실기기 모바일에서 visual viewport 보정이 OSK, 주소창 접힘, 화면 회전 상황에서도 충분한지 확인
-- 실제 NovelAI theme variants에서 `themeProbe` 표본 후보 추가 검증
+- 모바일 Launch Launcher UI/UX (Circular collapse launcher drag/click 충돌 점검)
+- Viewport Stability Verification (OSK, URL bar hiding, screen rotation 상황 점검)
+- Theme Probe Validation (실제 NovelAI theme variants에서 표본 추가 검증)
