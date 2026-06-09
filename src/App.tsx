@@ -459,8 +459,8 @@ function AppContent() {
       <button
         type="button"
         data-testid="overlay-collapsed-launcher"
-        title={shouldShowRemainingCount ? `자동화 남은 이미지 ${remainingText}장` : 'NAI Tag Builder 펼치기'}
-        aria-label={shouldShowRemainingCount ? `자동화 남은 이미지 ${remainingText}장` : 'NAI Tag Builder 펼치기'}
+        title={shouldShowRemainingCount ? `자동화 남은 이미지 ${remainingText}장` : 'Easy-to Studio 펼치기'}
+        aria-label={shouldShowRemainingCount ? `자동화 남은 이미지 ${remainingText}장` : 'Easy-to Studio 펼치기'}
         onClick={(e) => {
           if (isLauncherDragged.current) {
             e.preventDefault();
@@ -562,11 +562,11 @@ function AppContent() {
         overflow: 'hidden',
         backgroundColor: theme.base,
         color: theme.text,
-        borderRadius: isCollapsed ? '999px' : '12px',
-        boxShadow: '0 10px 30px rgba(0,0,0,0.6)',
+        borderRadius: isCollapsed ? '999px' : '16px', // Slightly larger border-radius
+        boxShadow: '0 24px 48px rgba(0,0,0,0.5), 0 12px 24px rgba(0,0,0,0.4)', // Deeper shadow for premium feel
         boxSizing: 'border-box',
         fontFamily: 'sans-serif',
-        border: `1px solid ${theme.surface0}`,
+        border: 'none', // Remove solid border, let shadow do the work
         display: 'flex',
         flexDirection: 'column',
         position: 'relative', // Relative for absolute components like the handle

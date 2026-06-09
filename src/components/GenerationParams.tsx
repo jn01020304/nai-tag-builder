@@ -52,7 +52,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
     dispatch({ type: "SET_PARAMS", field, value });
 
   return (
-    <CollapsibleSection title="Parameters" testId="parameters-section">
+    <CollapsibleSection title="Drawing Settings" testId="parameters-section">
       <div data-testid="generation-params" style={{ display: "flex", flexWrap: "wrap", gap: "4px", marginBottom: "8px" }}>
         {DIMENSION_PRESETS.map((preset) => {
           const active = state.params.width === preset.w && state.params.height === preset.h;

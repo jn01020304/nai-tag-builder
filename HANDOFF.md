@@ -62,6 +62,10 @@ UI/UX를 모바일 기준으로 압축했다.
 - `Insert target: ...` 텍스트 제거
 - prompt tab 라벨을 모바일용 `Main` / `Negative`로 단축
 - 탭이 현재 편집 대상과 색상 식별을 담당
+- 용어 변경 및 다듬기 (NAI Tag Studio -> Easy-to Studio v1.0, Parameters -> Drawing Settings, Advanced -> Advanced Settings, Queue -> Auto-Queue)
+- 전체적인 간격(gap/margin/padding)을 1.5배 상향 조정하여 모바일에서의 터치 및 시각적 피로도 개선
+- 테두리(border)를 제거하고 그림자(box-shadow)와 유리 효과(glassmorphism, backdrop-filter)를 통해 컴포넌트 계층(Depth) 부여
+- 보조 버튼은 Ghost 스타일(테두리/배경 없음)로, 주요 액션은 강조된 색상으로 처리해 중요도 시각화
 - 접힘 상태를 긴 바가 아닌 56px 원형 런처로 변경
 - 오버레이 크기 조절을 좌/우/상/하 4방향으로 확장
 - 크기 조절은 viewport 8px padding 안에서 clamp
