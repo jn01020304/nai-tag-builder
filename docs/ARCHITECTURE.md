@@ -32,6 +32,9 @@ writing:
 현재 제품은 React, TypeScript, Vite 기반 단일 IIFE 북마크릿 오버레이다.
 NovelAI 직접 API 호출이 아니라 PNG metadata와 paste/import workflow를 통해 NovelAI 웹 UI에 상태 적용을 위임한다.
 
+런타임 오버레이는 모바일 화면에서 쓰는 작은 조종석이다.
+따라서 기능 구현은 데스크톱 패널 기준이 아니라 작은 visual viewport 안에서 접기, 펼치기, 이동, 크기 조절, 스크롤이 동시에 살아남는지를 기준으로 판단한다.
+
 핵심 상태는 nested `MetadataState`다.
 `MetadataState`는 prompt, params, advanced, useCoords, useOrder, source를 포함하며, NovelAI Comment JSON 생성의 내부 계약이다.
 기존 IndexedDB 프리셋은 로드 시 `normalizeMetadataState()`를 거쳐 정규화한다.
@@ -39,6 +42,18 @@ NovelAI 직접 API 호출이 아니라 PNG metadata와 paste/import workflow를 
 적용 흐름은 `src/automation/applyPipeline.ts`를 기준으로 계획, 인코딩, 외부 실행을 분리한다.
 단일 Apply와 자동 생성 루프는 같은 `runApplyPipeline()` 경로를 사용한다.
 NovelAI DOM 위임은 `src/automation/novelAiAdapter.ts`가 담당하며 paste target, import, generate 자동화 결과를 명시적으로 반환해야 한다.
+
+Overlay Shell은 현재 `src/App.tsx`에 남아 있다.
+오버레이 셸은 다음 계약을 지켜야 한다.
+
+- 최초 실행 시 Main Prompt와 Queue만 펼친다.
+- Tag Dictionary와 Parameters는 최초 실행 시 접힌다.
+- 오버레이를 접었다 펼칠 때는 접기 직전의 섹션별 open state를 보존한다.
+- 이를 위해 overlay body는 collapsed 상태에서도 unmount하지 않고 숨긴다.
+- 56px 원형 collapsed launcher는 드래그 가능한 런처이자 자동화 중 남은 장수 표시 surface다.
+- 펼침, 접힘, 드래그, 리사이즈, viewport resize/scroll 뒤에는 오버레이가 visual viewport 8px margin 안에 남아야 한다.
+- 4면과 4모서리 리사이즈 핸들은 유지한다.
+- 두 손가락 드래그는 리사이즈 핸들에서 시작한 touch를 가로채면 안 된다.
 
 ## 상위 모듈 경계
 
@@ -62,17 +77,25 @@ Queue 계층은 짧은 모바일 작업 지시서를 담당한다.
 Asset 계층은 결과 이미지 후보, 선택 상태, metadata 보존, PC handoff manifest를 담당한다.
 초기 목표는 무거운 이미지 처리보다 선별 이력과 메타데이터 패키징이다.
 
+Overlay Shell 계층은 런타임 UI의 외피를 담당한다.
+이 계층은 위치, 크기, 접힘 런처, sticky footer, viewport guard, resize handle, drag gesture를 다룬다.
+Prompt, Queue, Import, Theme 세부 로직을 직접 소유해서는 안 되지만, 이들을 모바일 viewport 안에서 안전하게 배치하는 책임은 가진다.
+
 ## 의존성 방향
 
 UI는 도메인 서비스를 호출할 수 있지만, 도메인 서비스는 UI 컴포넌트를 import하면 안 된다.
 Prompt는 Metadata로 값을 넘길 수 있지만, Metadata는 Prompt UI나 Product Category를 알면 안 된다.
 Metadata는 Automation에 전달할 payload를 만들 수 있지만, Automation selector가 Metadata 안으로 들어오면 안 된다.
 Offline 도구는 Runtime 데이터를 생성할 수 있지만, Runtime 코드가 Offline 도구를 import하면 안 된다.
+Overlay Shell은 자식 컴포넌트의 내부 도메인 상태를 몰라야 한다.
+반대로 자식 컴포넌트는 root overlay 위치나 viewport clamp를 직접 조작하면 안 된다.
 
 ## 현재 기술 부채
 
 `App.tsx`는 여전히 overlay 조립, apply 상태, import modal, queue, feedback을 많이 알고 있다.
 다음 UI 리팩토링에서는 Overlay Shell, mode tabs, sticky footer, apply controller, import patch 병합을 분리해야 한다.
+다만 Overlay Shell을 분리할 때 현재 동작 계약을 잃으면 안 된다.
+특히 section state preservation, viewport guard, 4면/4모서리 resize, two-finger drag 예외 처리는 regression test와 함께 옮겨야 한다.
 
 `useAutoGenerator.ts`는 적용 파이프라인을 공유하지만 아직 세션 FSM은 아니다.
 중지, 실패, 대기, 완료 상태를 명시적인 전이 모델로 고정해야 한다.
@@ -85,6 +108,9 @@ applied seed는 코드 레벨에서 추적되지만 아직 사용자 UI에 충�
 seed 0은 NovelAI에서 literal fixed seed이므로, random seed 요청은 별도 seed rule에서만 발생해야 한다.
 
 전역 mutable theme import는 동작하지만 장기적으로 `useTheme()` 기반으로 정리해야 한다.
+
+`useEdgeResize.ts`는 viewport bound를 일부 책임지고, `App.tsx`의 viewport guard도 위치 보정을 수행한다.
+장기적으로는 `useOverlayViewportGuard` 같은 단일 hook으로 합쳐 resize와 position clamp의 책임을 더 명확히 해야 한다.
 
 ## 실행 로드맵
 
@@ -113,6 +139,8 @@ seed 0은 NovelAI에서 literal fixed seed이므로, random seed 요청은 별�
 - Advanced flags는 접힌 전문가 영역으로 격리한다.
 - Apply 전 `MetadataState` 검증과 applied seed 표시를 추가한다.
 - paste/import 실패가 상태 배너와 footer 상태에 명시적으로 반영된다.
+- 모바일 viewport guard와 sticky footer는 적용 중에도 유지한다.
+- 자동화 중 collapsed launcher는 남은 생성 장수를 NovelAI 테마에 맞춰 표시한다.
 
 ### Phase 4: Queue
 
@@ -134,6 +162,7 @@ seed 0은 NovelAI에서 literal fixed seed이므로, random seed 요청은 별�
 ## 금지할 방향
 
 - `App.tsx`에 새 실행 로직을 계속 추가하는 것
+- Overlay Shell을 수정하면서 section open state, resize handles, viewport clamp를 테스트 없이 바꾸는 것
 - Runtime에 전체 Danbooru DB나 LLM 의존성을 직접 넣는 것
 - 북마크릿 환경에서 API key나 인증 토큰을 직접 저장하는 것
 - paste/import 실패를 성공처럼 처리하는 것
