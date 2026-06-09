@@ -5,9 +5,10 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "npm run dictionary:sync && tsc -b && vite build",
     "catalog:build": "node scripts/catalog/build-core-catalog.mjs",
     "dictionary:split": "node scripts/catalog/build-tag-dictionary-chunks.mjs",
+    "dictionary:sync": "node scripts/catalog/sync-tag-dictionary-to-public.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test:e2e:compose": "node scripts/e2e/compose-smoke.mjs",

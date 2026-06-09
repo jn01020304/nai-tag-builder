@@ -212,7 +212,7 @@ export default function QueuePanel({
 
         <div style={pairedRow}>
           <div style={stackedField}>
-            <label style={{ ...labelStyle, marginBottom: 0 }}>실행 방식</label>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>대기열 처리</label>
             <select
               data-testid="queue-run-mode-select"
               value={queueMode}

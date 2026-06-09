@@ -4,6 +4,7 @@ import type { PromptInsertTarget } from "../prompt/promptInsertTarget";
 import type { CoreCatalogEntry } from "../prompt/catalog/catalogTypes";
 import CollapsibleSection from "./CollapsibleSection";
 import ComposeCatalogChips from "./ComposeCatalogChips";
+import { TagDictionaryBrowser } from "./TagDictionaryBrowser";
 import { useThemeStyles } from "../contexts/themeContextCore";
 import { withAlpha } from "../styles/color";
 
@@ -12,6 +13,7 @@ interface Props {
   activePromptTarget: PromptInsertTarget;
   onToggleCatalogEntry: (entry: CoreCatalogEntry) => void;
   onReorderBasePrompt: (fromIndex: number, toIndex: number) => void;
+  onInsertDictionaryTag: (tag: string, target: "prompt" | "negative") => void;
 }
 
 export default function TagDictionarySection({
@@ -19,6 +21,7 @@ export default function TagDictionarySection({
   activePromptTarget,
   onToggleCatalogEntry,
   onReorderBasePrompt,
+  onInsertDictionaryTag,
 }: Props) {
   const { theme } = useThemeStyles();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -59,6 +62,35 @@ export default function TagDictionarySection({
     }
 
     setToastMessage(`+ ${entry.tag} → ${targetName}`);
+    if (toastTimerRef.current) {
+      clearTimeout(toastTimerRef.current);
+    }
+    toastTimerRef.current = setTimeout(() => {
+      setToastMessage(null);
+    }, 900);
+  };
+
+  const handleInsertDictionaryTag = (tag: string, dictTarget: "prompt" | "negative") => {
+    onInsertDictionaryTag(tag, dictTarget);
+
+    let targetName = "Main Prompt";
+    if (dictTarget === 'negative' && activePromptTarget.kind === 'base') {
+      targetName = "Negative Prompt";
+    } else if (activePromptTarget.kind === 'character') {
+      const idx = prompt.characters.findIndex((c) => c.id === activePromptTarget.id);
+      if (dictTarget === 'negative') {
+        targetName = `Character ${idx + 1} Negative`;
+      } else {
+        targetName = `Character ${idx + 1} Prompt`;
+      }
+    } else if (activePromptTarget.kind === 'negativeBase') {
+      targetName = "Negative Prompt";
+    } else if (activePromptTarget.kind === 'negativeCharacter') {
+      const idx = prompt.negativeCharacters.findIndex((c) => c.id === activePromptTarget.id);
+      targetName = `Character ${idx + 1} Negative`;
+    }
+
+    setToastMessage(`+ ${tag} → ${targetName}`);
     if (toastTimerRef.current) {
       clearTimeout(toastTimerRef.current);
     }
@@ -120,6 +152,8 @@ export default function TagDictionarySection({
           onToggle={handleToggle}
           onReorderBasePrompt={onReorderBasePrompt}
         />
+
+        <TagDictionaryBrowser onInsertTag={handleInsertDictionaryTag} />
         
         {toastMessage && (
           <div style={{

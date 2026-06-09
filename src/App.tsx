@@ -344,6 +344,40 @@ function AppContent() {
     }
   };
 
+  const handleInsertDictionaryTag = (tag: string, dictTarget: "prompt" | "negative") => {
+    let target = activePromptTarget;
+    if (dictTarget === 'negative' && activePromptTarget.kind === 'base') {
+      target = { kind: 'negativeBase' };
+    } else if (dictTarget === 'negative' && activePromptTarget.kind === 'character') {
+      target = getPairedNegativeCharacterTarget(activePromptTarget.id) ?? activePromptTarget;
+    }
+
+    const targetKey = promptTargetKey(target);
+    const promptValue = getTargetPromptValue(target);
+    const selection = promptSelections[targetKey] ?? { start: promptValue.length, end: promptValue.length };
+
+    const fakeEntry = { tag } as CoreCatalogEntry;
+    const result = toggleCatalogTagWithSelection(promptValue, fakeEntry, selection.start);
+
+    dispatchPromptTargetValue(target, result.value);
+
+    if (result.nextCursorIndex != null) {
+      const nextSelection = {
+        start: result.nextCursorIndex,
+        end: result.nextCursorIndex,
+        version: Date.now(),
+      };
+      setPromptSelections((current) => ({
+        ...current,
+        [targetKey]: nextSelection,
+      }));
+      setSelectionAfterRenderByTarget((current) => ({
+        ...current,
+        [targetKey]: nextSelection,
+      }));
+    }
+  };
+
   const handleReorderBasePrompt = (fromIndex: number, toIndex: number) => {
     dispatch({
       type: "SET_PROMPT",
@@ -684,6 +718,7 @@ function AppContent() {
             activePromptTarget={activePromptTarget}
             onToggleCatalogEntry={handleCatalogToggle}
             onReorderBasePrompt={handleReorderBasePrompt}
+            onInsertDictionaryTag={handleInsertDictionaryTag}
           />
           <GenerationParams state={state} dispatch={dispatch} />
           <AdvancedParams state={state} dispatch={dispatch} />
