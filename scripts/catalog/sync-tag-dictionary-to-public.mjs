@@ -10,11 +10,6 @@ const SOURCE_DIR = path.join(ROOT_DIR, 'resource/catalog/generated/tag-dictionar
 const DEST_DIR = path.join(ROOT_DIR, 'public/catalog/tag-dictionary');
 
 function copyDirRecursiveSync(src, dest) {
-  if (!fs.existsSync(src)) {
-    console.error(`Source directory not found: ${src}`);
-    return;
-  }
-
   if (!fs.existsSync(dest)) {
     fs.mkdirSync(dest, { recursive: true });
   }
@@ -38,7 +33,17 @@ console.log(`Source: ${SOURCE_DIR}`);
 console.log(`Destination: ${DEST_DIR}`);
 
 try {
-  // Clear destination if it exists to prevent stale files
+  if (!fs.existsSync(SOURCE_DIR)) {
+    const existingManifest = path.join(DEST_DIR, 'manifest.json');
+    if (fs.existsSync(existingManifest)) {
+      console.log(`Source directory not found; keeping existing public catalog: ${DEST_DIR}`);
+      process.exit(0);
+    }
+
+    console.error(`Source directory not found: ${SOURCE_DIR}`);
+    process.exit(1);
+  }
+
   if (fs.existsSync(DEST_DIR)) {
     fs.rmSync(DEST_DIR, { recursive: true, force: true });
   }
