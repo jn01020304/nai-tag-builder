@@ -11,7 +11,8 @@
     "lint": "eslint .",
     "preview": "vite preview",
     "test:e2e:compose": "node scripts/e2e/compose-smoke.mjs",
-    "test:e2e:bookmarklet": "node scripts/e2e/bookmarklet-injection-smoke.mjs"
+    "test:e2e:bookmarklet": "node scripts/e2e/bookmarklet-injection-smoke.mjs",
+    "test:e2e:theme": "node scripts/e2e/theme-probe-smoke.mjs"
   },
   "dependencies": {
     "dexie": "^4.3.0",
