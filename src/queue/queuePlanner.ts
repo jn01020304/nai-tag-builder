@@ -18,7 +18,7 @@ export interface CreateQueueDraftInput {
   intervalSec: number | string;
   seedRule: SeedRule;
   queueMode: QueueMode;
-  hasPresetQueue: boolean;
+  runsPerPreset: number | string;
 }
 
 export interface PlanNextQueueTickInput {
@@ -61,7 +61,7 @@ function cloneStateWithSeed(state: MetadataState, seed: number): MetadataState {
 function applySeedRule(
   state: MetadataState,
   seedRule: SeedRule,
-  tickIndex: number,
+  seedOffsetIndex: number,
   random: () => number,
 ): MetadataState {
   const baseSeed = Number(state.params.seed) || 0;
@@ -71,11 +71,11 @@ function applySeedRule(
   }
 
   if (seedRule === "increment") {
-    return cloneStateWithSeed(state, Math.min(MAX_SEED, Math.max(1, baseSeed) + tickIndex + 1));
+    return cloneStateWithSeed(state, Math.min(MAX_SEED, Math.max(1, baseSeed) + seedOffsetIndex + 1));
   }
 
   if (seedRule === "decrement") {
-    return cloneStateWithSeed(state, Math.max(0, baseSeed - tickIndex - 1));
+    return cloneStateWithSeed(state, Math.max(0, baseSeed - seedOffsetIndex - 1));
   }
 
   return state;
@@ -85,22 +85,27 @@ function selectQueuedSource(
   mode: QueueMode,
   sources: QueueSourceSnapshot[],
   queueCursor: number,
+  tickIndex: number,
+  runsPerPreset: number,
   random: () => number,
-): { source: QueueSourceSnapshot; nextQueueCursor: number } | null {
+): { source: QueueSourceSnapshot; nextQueueCursor: number; sourceIterationIndex: number } | null {
   if (sources.length === 0) return null;
 
-  if (mode === "randomization") {
+  if (mode === "randomized") {
     const index = Math.floor(random() * sources.length);
     return {
       source: sources[index],
       nextQueueCursor: queueCursor,
+      sourceIterationIndex: tickIndex,
     };
   }
 
-  const index = queueCursor % sources.length;
+  const safeRunsPerPreset = Math.max(1, runsPerPreset);
+  const index = Math.floor(tickIndex / safeRunsPerPreset) % sources.length;
   return {
     source: sources[index],
-    nextQueueCursor: index + 1,
+    nextQueueCursor: index,
+    sourceIterationIndex: tickIndex % safeRunsPerPreset,
   };
 }
 
@@ -108,8 +113,9 @@ export function createQueueDraft(input: CreateQueueDraftInput): QueueDraft {
   return {
     targetCount: normalizePositiveInt(input.targetCount, 1, 1),
     intervalSec: normalizePositiveNumber(input.intervalSec, 10, 3),
-    seedRule: input.hasPresetQueue ? "none" : input.seedRule,
+    seedRule: input.seedRule,
     queueMode: input.queueMode,
+    runsPerPreset: normalizePositiveInt(input.runsPerPreset, 1, 1),
     stopOnFailure: true,
   };
 }
@@ -130,11 +136,14 @@ export function planNextQueueTick(input: PlanNextQueueTickInput): QueueTickPlan 
     input.draft.queueMode,
     input.queuedSources,
     input.queueCursor,
+    input.tickIndex,
+    input.draft.runsPerPreset,
     random,
   );
   const source = queued?.source ?? createCurrentStateSource(input.currentState);
   const nextQueueCursor = queued?.nextQueueCursor ?? input.queueCursor;
-  const state = applySeedRule(source.state, input.draft.seedRule, input.tickIndex, random);
+  const sourceIterationIndex = queued?.sourceIterationIndex ?? input.tickIndex;
+  const state = applySeedRule(source.state, input.draft.seedRule, sourceIterationIndex, random);
 
   return {
     runId: input.runId,
@@ -142,6 +151,7 @@ export function planNextQueueTick(input: PlanNextQueueTickInput): QueueTickPlan 
     source,
     state,
     seedRule: input.draft.seedRule,
+    sourceIterationIndex,
     scheduledAt: input.scheduledAt,
     displayLabel: `${source.name} · ${input.tickIndex + 1}/${input.draft.targetCount}`,
     nextQueueCursor,
@@ -174,7 +184,7 @@ export function createQueuePreflightWarnings(
     });
   }
 
-  if (sources.length === 0 && draft.queueMode === "randomization") {
+  if (sources.length === 0 && draft.queueMode === "randomized") {
     warnings.push({
       code: "EMPTY_PRESET_QUEUE",
       severity: "info",

@@ -8,4 +8,4 @@ export interface Preset {
 }
 
 export type SeedRule = 'none' | 'random' | 'decrement' | 'increment';
-export type QueueMode = 'progression' | 'randomization';
+export type QueueMode = 'batched' | 'randomized';

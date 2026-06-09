@@ -140,7 +140,7 @@ function AppContent() {
 
   // Preset queue state
   const [queue, setQueue] = useState<string[]>([]);
-  const queueMode: QueueMode = 'progression';
+  const [queueMode, setQueueMode] = useState<QueueMode>('batched');
 
   // Import Modal state
   const [pendingImport, setPendingImport] = useState<MetadataState | null>(null);
@@ -238,6 +238,7 @@ function AppContent() {
   const {
     autoGenerate, setAutoGenerate,
     seedRule, setSeedRule,
+    runsPerPreset, setRunsPerPreset,
     intervalSec, targetCount, targetMin, adjustStep, setAdjustStep,
     isLooping, loopCount, queueSession,
     startLoop, stopLoop,
@@ -638,6 +639,10 @@ function AppContent() {
             setAutoGenerate={setAutoGenerate}
             seedRule={seedRule}
             setSeedRule={setSeedRule}
+            queueMode={queueMode}
+            setQueueMode={setQueueMode}
+            runsPerPreset={runsPerPreset}
+            setRunsPerPreset={setRunsPerPreset}
             adjustStep={adjustStep}
             setAdjustStep={setAdjustStep}
             intervalSec={intervalSec}

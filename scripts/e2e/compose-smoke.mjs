@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { spawn } from "node:child_process";
-import { mkdir } from "node:fs/promises";
+import { mkdir, writeFile } from "node:fs/promises";
 import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
@@ -18,10 +18,59 @@ const CHROME_PATHS = [
   "C:/Program Files/Microsoft/Edge/Application/msedge.exe",
 ].filter(Boolean);
 
+const BASE_PNG = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/p9sAAAAASUVORK5CYII=",
+  "base64",
+);
+
+const crcTable = new Uint32Array(256);
+for (let i = 0; i < crcTable.length; i += 1) {
+  let value = i;
+  for (let bit = 0; bit < 8; bit += 1) {
+    value = (value & 1) ? (0xEDB88320 ^ (value >>> 1)) : (value >>> 1);
+  }
+  crcTable[i] = value;
+}
+
 function assert(condition, message) {
   if (!condition) {
     throw new Error(message);
   }
+}
+
+function crc32(buffer) {
+  let value = 0xFFFFFFFF;
+  for (const byte of buffer) {
+    value = crcTable[(value ^ byte) & 0xFF] ^ (value >>> 8);
+  }
+  return (value ^ 0xFFFFFFFF) >>> 0;
+}
+
+function createTextChunk(key, textValue) {
+  const type = Buffer.from("tEXt", "ascii");
+  const data = Buffer.concat([
+    Buffer.from(`${key}\0`, "utf8"),
+    Buffer.from(textValue, "utf8"),
+  ]);
+  const length = Buffer.alloc(4);
+  length.writeUInt32BE(data.length, 0);
+  const crc = Buffer.alloc(4);
+  crc.writeUInt32BE(crc32(Buffer.concat([type, data])), 0);
+  return Buffer.concat([length, type, data, crc]);
+}
+
+function createNovelAiPngFixture(comment, source = "NovelAI Diffusion Test") {
+  const insertOffset = 33;
+  const chunks = [
+    createTextChunk("Source", source),
+    createTextChunk("Comment", JSON.stringify(comment)),
+  ];
+
+  return Buffer.concat([
+    BASE_PNG.subarray(0, insertOffset),
+    ...chunks,
+    BASE_PNG.subarray(insertOffset),
+  ]);
 }
 
 async function canReach(url) {
@@ -359,6 +408,54 @@ async function openQueuePanel(page) {
   await page.locator("[data-testid='queue-panel']").waitFor({ timeout: 3000 });
 }
 
+async function checkQueueImagesImport(page) {
+  const fixturesDir = path.join(ROOT, "test-results", "fixtures");
+  await mkdir(fixturesDir, { recursive: true });
+
+  const firstPath = path.join(fixturesDir, "queue-alpha.png");
+  const secondPath = path.join(fixturesDir, "queue-beta.png");
+  await writeFile(firstPath, createNovelAiPngFixture({
+    prompt: "queue alpha prompt",
+    uc: "queue alpha negative",
+    seed: 100,
+    steps: 11,
+    width: 640,
+    height: 768,
+    scale: 5,
+    sampler: "k_euler",
+    noise_schedule: "native",
+  }));
+  await writeFile(secondPath, createNovelAiPngFixture({
+    prompt: "queue beta prompt",
+    uc: "queue beta negative",
+    seed: 500,
+    steps: 12,
+    width: 704,
+    height: 832,
+    scale: 6,
+    sampler: "k_euler_ancestral",
+    noise_schedule: "karras",
+  }));
+
+  const presetsToggle = page.locator("[data-testid='presets-section-toggle']");
+  if (await presetsToggle.getAttribute("aria-expanded") === "false") {
+    await presetsToggle.click();
+  }
+
+  await page.locator("[data-testid='queue-images-input']").setInputFiles([firstPath, secondPath]);
+  await page.locator("[data-testid='status-banner']", {
+    hasText: "2개 이미지에서 프리셋을 만들고 Queue에 추가했습니다.",
+  }).waitFor({ timeout: 5000 });
+
+  await page.locator("[data-testid='queued-preset-0']", { hasText: "queue-alpha" }).waitFor({ timeout: 5000 });
+  await page.locator("[data-testid='queued-preset-1']", { hasText: "queue-beta" }).waitFor({ timeout: 5000 });
+
+  assert(
+    await page.locator("[data-testid='queue-runs-per-preset-input']").isEnabled(),
+    "Runs per preset should be enabled after queued image presets are added.",
+  );
+}
+
 async function checkTextareaThemeHighlightSeparation(page) {
   const textarea = page.locator("[data-testid='main-prompt-textarea']");
   await textarea.fill("2::1girl, 3d, realistic, official art::, 0.7::flat color::");
@@ -692,8 +789,16 @@ async function main() {
       "Queue automation should default to on.",
     );
     assert(
-      await page.locator("[data-testid='queue-seed-rule-select']").inputValue() === "increment",
-      "Queue seed rule should default to +1.",
+      await page.locator("[data-testid='queue-seed-rule-select']").inputValue() === "random",
+      "Queue seed rule should default to random.",
+    );
+    assert(
+      await page.locator("[data-testid='queue-run-mode-select']").inputValue() === "batched",
+      "Queue run mode should default to batched.",
+    );
+    assert(
+      await page.locator("[data-testid='queue-runs-per-preset-input']").inputValue() === "1",
+      "Queue runs per preset should default to 1.",
     );
     assert(
       !(await hasLocator(page.locator("[data-testid='queue-enable-checkbox']"))),
@@ -703,8 +808,10 @@ async function main() {
       await page.locator("[data-testid='queue-interval-input']").inputValue() === "10",
       `Queue default interval should be 10 seconds: ${await page.locator("[data-testid='queue-interval-input']").inputValue()}`,
     );
+    await checkQueueImagesImport(page);
     await page.locator("[data-testid='queue-mode-select']").selectOption("on");
     await page.locator("[data-testid='queue-seed-rule-select']").selectOption("decrement");
+    await page.locator("[data-testid='queue-run-mode-select']").selectOption("randomized");
     await page.locator("[data-testid='queue-interval-input']").fill("7");
     await page.locator("[data-testid='queue-target-count-input']").fill("3");
     assert(
@@ -714,6 +821,10 @@ async function main() {
     assert(
       await page.locator("[data-testid='queue-seed-rule-select']").inputValue() === "decrement",
       "Queue seed rule control failed.",
+    );
+    assert(
+      await page.locator("[data-testid='queue-run-mode-select']").inputValue() === "randomized",
+      "Queue run mode control failed.",
     );
 
     await mkdir(path.join(ROOT, "test-results"), { recursive: true });

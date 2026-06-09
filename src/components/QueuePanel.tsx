@@ -1,5 +1,5 @@
 import type { QueueSession } from "../queue/queueTypes";
-import type { SeedRule } from "../types/preset";
+import type { QueueMode, SeedRule } from "../types/preset";
 import { useThemeStyles } from "../contexts/themeContextCore";
 import { withAlpha } from "../styles/color";
 import CollapsiblePanel from "./CollapsiblePanel";
@@ -11,6 +11,10 @@ interface QueuePanelProps {
   setAutoGenerate: (val: boolean) => void;
   seedRule: SeedRule;
   setSeedRule: (val: SeedRule) => void;
+  queueMode: QueueMode;
+  setQueueMode: (val: QueueMode) => void;
+  runsPerPreset: number | string;
+  setRunsPerPreset: (val: number | string) => void;
   adjustStep: number | string;
   setAdjustStep: (val: number | string) => void;
   intervalSec: number | string;
@@ -54,6 +58,10 @@ export default function QueuePanel({
   setAutoGenerate,
   seedRule,
   setSeedRule,
+  queueMode,
+  setQueueMode,
+  runsPerPreset,
+  setRunsPerPreset,
   adjustStep,
   setAdjustStep,
   intervalSec,
@@ -165,31 +173,46 @@ export default function QueuePanel({
           </div>
 
           <div style={stackedField}>
-            {queueLength === 0 ? (
-              <>
-              <label style={{ ...labelStyle, marginBottom: 0 }}>Seed</label>
-              <select
-                data-testid="queue-seed-rule-select"
-                value={seedRule}
-                onChange={(e) => setSeedRule(e.target.value as SeedRule)}
-                style={{ ...inputStyle, minWidth: 0, padding: "5px 6px" }}
-              >
-                <option value="increment">+1</option>
-                <option value="decrement">-1</option>
-                <option value="random">랜덤</option>
-                <option value="none">현재 seed 유지</option>
-              </select>
-              </>
-            ) : (
-              <>
-                <label style={{ ...labelStyle, marginBottom: 0 }}>Seed</label>
-                <input
-                  readOnly
-                  value="프리셋 seed"
-                  style={{ ...inputStyle, minWidth: 0, padding: "5px 6px" }}
-                />
-              </>
-            )}
+            <label style={{ ...labelStyle, marginBottom: 0 }}>Seed</label>
+            <select
+              data-testid="queue-seed-rule-select"
+              value={seedRule}
+              onChange={(e) => setSeedRule(e.target.value as SeedRule)}
+              style={{ ...inputStyle, minWidth: 0, padding: "5px 6px" }}
+            >
+              <option value="random">랜덤</option>
+              <option value="increment">+1</option>
+              <option value="decrement">-1</option>
+              <option value="none">프리셋 seed 유지</option>
+            </select>
+          </div>
+        </div>
+
+        <div style={pairedRow}>
+          <div style={stackedField}>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>실행 방식</label>
+            <select
+              data-testid="queue-run-mode-select"
+              value={queueMode}
+              onChange={(e) => setQueueMode(e.target.value as QueueMode)}
+              style={{ ...inputStyle, minWidth: 0, padding: "5px 6px" }}
+            >
+              <option value="batched">묶음</option>
+              <option value="randomized">랜덤</option>
+            </select>
+          </div>
+
+          <div style={stackedField}>
+            <label style={{ ...labelStyle, marginBottom: 0 }}>프리셋당</label>
+            <input
+              data-testid="queue-runs-per-preset-input"
+              type="number"
+              min="1"
+              disabled={queueMode === "randomized" || queueLength === 0}
+              value={runsPerPreset}
+              onChange={(e) => setRunsPerPreset(e.target.value === "" ? "" : Math.max(1, Number(e.target.value)))}
+              style={{ ...inputStyle, minWidth: 0, padding: "5px 6px", textAlign: "center" }}
+            />
           </div>
         </div>
 

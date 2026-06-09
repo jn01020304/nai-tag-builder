@@ -37,8 +37,9 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
   const [isLooping, setIsLooping] = useState(false);
   const [loopCount, setLoopCount] = useState(0);
   const [queueSession, setQueueSession] = useState<QueueSession | null>(null);
-  const [seedRule, setSeedRule] = useState<SeedRule>('increment');
+  const [seedRule, setSeedRule] = useState<SeedRule>('random');
   const [adjustStep, setAdjustStep] = useState<number | string>(3);
+  const [runsPerPreset, setRunsPerPreset] = useState<number | string>(1);
 
   const stateRef = useRef(state);
   const queueRef = useRef(queue);
@@ -53,6 +54,7 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
   const stopRequestedRef = useRef(false);
   const intervalRef = useRef(Number(intervalSec) || 10);
   const targetCountRef = useRef(Number(targetCount) || 100);
+  const runsPerPresetRef = useRef(Number(runsPerPreset) || 1);
 
   useEffect(() => { stateRef.current = state; }, [state]);
   useEffect(() => { queueRef.current = queue; }, [queue]);
@@ -61,6 +63,7 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
   useEffect(() => { feedbackRef.current = onFeedback; }, [onFeedback]);
   useEffect(() => { intervalRef.current = Number(intervalSec); }, [intervalSec]);
   useEffect(() => { targetCountRef.current = Number(targetCount); }, [targetCount]);
+  useEffect(() => { runsPerPresetRef.current = Number(runsPerPreset); }, [runsPerPreset]);
 
   const updateQueueSession = (nextSession: QueueSession | null) => {
     queueSessionRef.current = nextSession;
@@ -120,7 +123,7 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
       intervalSec: intervalRef.current,
       seedRule: seedRuleRef.current,
       queueMode: queueModeRef.current,
-      hasPresetQueue: queueRef.current.length > 0,
+      runsPerPreset: runsPerPresetRef.current,
     });
     const initialSession = startQueueSession(draft);
     updateQueueSession(initialSession);
@@ -153,12 +156,11 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
         return;
       }
 
-      const queuedSources = await getQueuedSources();
       const plan = planNextQueueTick({
         runId: currentSession.runId,
         draft,
         currentState: stateRef.current,
-        queuedSources,
+        queuedSources: initialSources,
         tickIndex: loopCountRef.current,
         queueCursor: queueIndexRef.current,
         scheduledAt: Date.now(),
@@ -278,6 +280,7 @@ export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGe
   return {
     autoGenerate, setAutoGenerate,
     seedRule, setSeedRule,
+    runsPerPreset, setRunsPerPreset,
     intervalSec, targetCount, targetMin, adjustStep, setAdjustStep,
     isLooping, loopCount, queueSession,
     startLoop, stopLoop,
