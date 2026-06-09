@@ -17,7 +17,7 @@ export class TagDictionaryLoader {
     try {
       const response = await fetch(manifestUrl);
       if (!response.ok) {
-        throw new Error(`Failed to load manifest: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to load manifest from ${manifestUrl}: ${response.status} ${response.statusText}`);
       }
       this.manifest = await response.json();
       return this.manifest!;
@@ -49,7 +49,7 @@ export class TagDictionaryLoader {
     try {
       const response = await fetch(chunkUrl);
       if (!response.ok) {
-        throw new Error(`Failed to load chunk ${categoryId}: ${response.status} ${response.statusText}`);
+        throw new Error(`Failed to load chunk ${categoryId} from ${chunkUrl}: ${response.status} ${response.statusText}`);
       }
       
       const chunkData: TagDictionaryChunkData = await response.json();
