@@ -88,7 +88,7 @@ function keepOverlayInViewport(rootId: string) {
   root.style.top = `${nextPosition.top}px`;
 }
 
-function startDrag(clientX: number, clientY: number) {
+function startDrag(clientX: number, clientY: number, onActualDrag?: () => void) {
   const el = document.getElementById(CONTAINER_ID) as HTMLElement | null;
   if (!el) return;
 
@@ -99,8 +99,13 @@ function startDrag(clientX: number, clientY: number) {
   el.style.top = initialPosition.top + 'px';
 
   let lx = clientX, ly = clientY;
+  let hasDragged = false;
 
   const move = (cx: number, cy: number) => {
+    if (!hasDragged && Math.hypot(cx - clientX, cy - clientY) > 5) {
+      hasDragged = true;
+      if (onActualDrag) onActualDrag();
+    }
     const nextPosition = clampOverlayPosition(
       el,
       parseFloat(el.style.left) + cx - lx,
@@ -137,6 +142,7 @@ function AppContent() {
   const [isApplying, setIsApplying] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { overlayWidth, overlayHeight, startResize } = useEdgeResize(320, CONTAINER_ID);
+  const isLauncherDragged = useRef(false);
 
   // Preset queue state
   const [queue, setQueue] = useState<string[]>([]);
@@ -451,12 +457,27 @@ function AppContent() {
         data-testid="overlay-collapsed-launcher"
         title={shouldShowRemainingCount ? `자동화 남은 이미지 ${remainingText}장` : 'NAI Tag Builder 펼치기'}
         aria-label={shouldShowRemainingCount ? `자동화 남은 이미지 ${remainingText}장` : 'NAI Tag Builder 펼치기'}
-        onClick={() => setIsCollapsed(false)}
+        onClick={(e) => {
+          if (isLauncherDragged.current) {
+            e.preventDefault();
+            e.stopPropagation();
+            return;
+          }
+          setIsCollapsed(false);
+        }}
         onMouseDown={(e) => {
           if (e.button !== 0) return;
-          startDrag(e.clientX, e.clientY);
+          isLauncherDragged.current = false;
+          startDrag(e.clientX, e.clientY, () => {
+            isLauncherDragged.current = true;
+          });
         }}
-        onTouchStart={(e) => startDrag(e.touches[0].clientX, e.touches[0].clientY)}
+        onTouchStart={(e) => {
+          isLauncherDragged.current = false;
+          startDrag(e.touches[0].clientX, e.touches[0].clientY, () => {
+            isLauncherDragged.current = true;
+          });
+        }}
         style={{
           alignItems: 'center',
           backgroundColor: theme.crust,
