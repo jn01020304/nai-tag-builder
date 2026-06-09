@@ -132,7 +132,7 @@ Batched Queue 1단계를 구현했다.
 - `src/App.tsx`
   - overlay shell 조립
   - two-finger drag 시작점
-  - collapse launcher
+  - collapse launcher (드래그와 클릭 충돌 방지를 위한 drag threshold 적용 및 click 무시 로직 추가)
   - viewport guard
   - section state preservation을 위한 body visibility 전환
 
@@ -198,6 +198,5 @@ React-controlled NovelAI input은 직접 DOM 값 변경이 되돌아갈 수 있�
 
 ## 다음 후보 작업
 
-- 모바일 Launch Launcher UI/UX (Circular collapse launcher drag/click 충돌 점검)
 - Viewport Stability Verification (OSK, URL bar hiding, screen rotation 상황 점검)
 - Theme Probe Validation (실제 NovelAI theme variants에서 표본 추가 검증)
