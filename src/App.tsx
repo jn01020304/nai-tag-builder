@@ -143,6 +143,7 @@ function AppContent() {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const { overlayWidth, overlayHeight, startResize } = useEdgeResize(320, CONTAINER_ID);
   const isLauncherDragged = useRef(false);
+  const [viewportHeight, setViewportHeight] = useState(() => window.visualViewport?.height ?? window.innerHeight);
 
   // Preset queue state
   const [queue, setQueue] = useState<string[]>([]);
@@ -164,10 +165,13 @@ function AppContent() {
 
   useLayoutEffect(() => {
     keepOverlayInViewport(CONTAINER_ID);
-  }, [isCollapsed, overlayWidth, overlayHeight]);
+  }, [isCollapsed, overlayWidth, overlayHeight, viewportHeight]);
 
   useLayoutEffect(() => {
-    const handleViewportChange = () => keepOverlayInViewport(CONTAINER_ID);
+    const handleViewportChange = () => {
+      setViewportHeight(window.visualViewport?.height ?? window.innerHeight);
+      keepOverlayInViewport(CONTAINER_ID);
+    };
     window.addEventListener('resize', handleViewportChange);
     window.visualViewport?.addEventListener('resize', handleViewportChange);
     window.visualViewport?.addEventListener('scroll', handleViewportChange);
@@ -554,7 +558,7 @@ function AppContent() {
         height: isCollapsed ? '56px' : overlayHeight == null ? undefined : `${overlayHeight}px`,
         minWidth: isCollapsed ? '56px' : '280px',
         maxWidth: isCollapsed ? '56px' : 'calc(100vw - 16px)',
-        maxHeight: isCollapsed ? 'none' : overlayHeight == null ? '80vh' : 'calc(100vh - 16px)',
+        maxHeight: isCollapsed ? 'none' : overlayHeight == null ? `${Math.floor(viewportHeight * 0.8)}px` : `${Math.max(200, viewportHeight - 16)}px`,
         overflow: 'hidden',
         backgroundColor: theme.base,
         color: theme.text,
