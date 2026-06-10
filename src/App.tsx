@@ -707,7 +707,7 @@ function AppContent() {
                 transition: 'all 0.2s ease',
               }}
             >
-              Auto-Queue
+              Presets & Queue
             </button>
           </div>
         </div>
@@ -735,14 +735,7 @@ function AppContent() {
 
           {appMode === 'compose' ? (
             <>
-              <PresetManager
-                state={state}
-                dispatch={dispatch}
-                queue={queue}
-                setQueue={setQueue}
-                onImportRequest={setPendingImport}
-                onFeedback={showFeedback}
-              />
+
               <MainPromptSection
                 prompt={state.prompt}
                 dispatch={dispatch}
