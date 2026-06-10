@@ -725,14 +725,7 @@ function AppContent() {
           padding: '16px 16px 0',
         }}
       >
-          <PresetManager
-            state={state}
-            dispatch={dispatch}
-            queue={queue}
-            setQueue={setQueue}
-            onImportRequest={setPendingImport}
-            onFeedback={showFeedback}
-          />
+
           {feedback && (
             <StatusBanner
               feedback={feedback}
