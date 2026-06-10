@@ -122,23 +122,23 @@ export default function TagDictionarySection({
   const isNegativeTarget = activePromptTarget.kind === 'negativeBase' || activePromptTarget.kind === 'negativeCharacter';
 
   return (
-    <CollapsibleSection title="Tag Dictionary" testId="tag-dictionary-section" defaultOpen={true}>
-      <div style={{ marginBottom: '12px', display: 'flex', flexDirection: 'column', gap: '4px' }}>
+    <CollapsibleSection title="Tag Dictionary" testId="tag-dictionary-section" defaultOpen={false}>
+      <div style={{ marginBottom: '16px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
         <div style={{ 
-          fontSize: '11px', 
+          fontSize: '12px', 
           color: theme.subtext1, 
           display: 'flex', 
           alignItems: 'center', 
-          gap: '6px',
-          padding: '6px 10px',
+          gap: '8px',
+          padding: '8px 12px',
           backgroundColor: withAlpha(isNegativeTarget ? theme.tagNegativeBg : theme.tagPositiveBg, 0.4),
-          borderRadius: '6px',
+          borderRadius: '8px',
           border: `1px solid ${withAlpha(theme.surface0, 0.5)}`
         }}>
           <span style={{ fontWeight: 'bold' }}>활성 입력:</span> {badgeText}
         </div>
         {activePromptTarget.kind !== 'negativeBase' && activePromptTarget.kind !== 'negativeCharacter' && (
-          <div style={{ fontSize: '10px', color: theme.subtext0, paddingLeft: '4px' }}>
+          <div style={{ fontSize: '11px', color: theme.subtext0, paddingLeft: '4px', lineHeight: 1.4 }}>
             * Negative 계열 태그 클릭 시 자동으로 해당 타겟의 Negative로 이동합니다.
           </div>
         )}
