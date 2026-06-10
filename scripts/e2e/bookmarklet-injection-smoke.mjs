@@ -370,7 +370,7 @@ async function main() {
           applyStyle.backgroundColor === "rgb(95, 191, 63)" &&
           applyStyle.color === "rgb(255, 255, 255)" &&
           widthStyle.backgroundColor === "rgb(216, 211, 196)" &&
-          widthStyle.borderColor === "rgb(185, 178, 159)",
+          widthStyle.borderColor === "rgb(243, 240, 230)",
         overlayBackground: overlayStyle.backgroundColor,
         overlayBodyColor: overlayBodyStyle.color,
         tagSectionColor: tagSectionStyle.color,
@@ -382,16 +382,17 @@ async function main() {
     });
     assert(syncedTheme.ok, `Theme sync failed: ${JSON.stringify(syncedTheme)}`);
 
-    if (await page.locator("[data-testid='queue-section-toggle']").getAttribute("aria-expanded") === "false") {
-      await page.locator("[data-testid='queue-section-toggle']").click();
-    }
+    // Switch to Queue Mode
+    await page.locator("button:has-text('Auto-Queue')").click();
+    await page.locator("[data-testid='queue-workspace']").waitFor({ timeout: 5000 });
+
     await page.locator("[data-testid='queue-mode-select']").selectOption("on");
     await page.locator("[data-testid='queue-target-count-input']").fill("2");
-    await page.locator("[data-testid='apply-button']").click();
+    await page.locator("[data-testid='start-queue-button']").click();
     await page.locator("[data-testid='status-banner']", {
       hasText: "NovelAI 적용 및 이미지 생성 완료를 확인했습니다.",
     }).waitFor({ timeout: 9000 });
-    await checkCollapsedAutomationCount(page, 2);
+    await checkCollapsedAutomationCount(page, 1);
 
     assert(await page.locator("#mock-import").count() === 0, "Mock Import Metadata button was not clicked.");
     assert(

@@ -2,7 +2,6 @@ import type { QueueSession } from "../queue/queueTypes";
 import type { QueueMode, SeedRule } from "../types/preset";
 import { useThemeStyles } from "../contexts/themeContextCore";
 import { withAlpha } from "../styles/color";
-import CollapsiblePanel from "./CollapsiblePanel";
 
 type QueueAutomationState = "off" | "on";
 
@@ -53,7 +52,7 @@ function queueStatusLabel(session: QueueSession | null): string {
   }
 }
 
-export default function QueuePanel({
+export default function QueueWorkspace({
   autoGenerate,
   setAutoGenerate,
   seedRule,
@@ -122,13 +121,16 @@ export default function QueuePanel({
       : theme.blue;
 
   return (
-    <CollapsiblePanel title="Auto-Queue" testId="queue-section">
+    <div data-testid="queue-workspace" style={{ paddingBottom: '16px' }}>
+      <h2 style={{ fontSize: '15px', fontWeight: 'bold', margin: '0 0 12px 0', color: theme.text }}>
+        Auto-Queue Configuration
+      </h2>
       <section
         aria-label="Queue"
         data-testid="queue-panel"
         style={{
-          backgroundColor: withAlpha(theme.surface0, 0.4), // Border diet (more transparent)
-          border: 'none', // Border diet
+          backgroundColor: withAlpha(theme.surface0, 0.4),
+          border: 'none',
           borderRadius: "8px",
           marginBottom: "12px",
           padding: "12px",
@@ -315,6 +317,6 @@ export default function QueuePanel({
           )}
       </div>
       </section>
-    </CollapsiblePanel>
+    </div>
   );
 }

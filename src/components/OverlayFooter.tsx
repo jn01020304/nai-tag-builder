@@ -6,6 +6,7 @@ import { withAlpha } from "../styles/color";
 import ApplyButton from "./ApplyButton";
 
 interface Props {
+  appMode?: 'compose' | 'queue';
   feedback: StatusFeedback | null;
   isApplying: boolean;
   applyPhase: ApplyPipelinePhase | null;
@@ -13,10 +14,12 @@ interface Props {
   loopCount: number;
   targetCount: number | string;
   onApply: () => void;
+  onStartLoop?: () => void;
   onStopLoop: () => void;
 }
 
 export default function OverlayFooter({
+  appMode = 'compose',
   feedback,
   isApplying,
   applyPhase,
@@ -24,6 +27,7 @@ export default function OverlayFooter({
   loopCount,
   targetCount,
   onApply,
+  onStartLoop,
   onStopLoop,
 }: Props) {
   const theme = useTheme();
@@ -71,28 +75,52 @@ export default function OverlayFooter({
         {statusText}
       </div>
 
-      {isLooping ? (
-        <button
-          type="button"
-          onClick={onStopLoop}
-          style={{
-            backgroundColor: theme.warningError,
-            border: "none",
-            borderRadius: "6px",
-            color: "#ffffff",
-            cursor: "pointer",
-            fontSize: "14px",
-            fontWeight: "bold",
-            padding: "12px",
-            width: "100%",
-          }}
-        >
-          반복 생성 중지
-        </button>
+      {appMode === 'queue' ? (
+        isLooping ? (
+          <button
+            type="button"
+            data-testid="stop-queue-button"
+            onClick={onStopLoop}
+            style={{
+              backgroundColor: theme.warningError,
+              border: "none",
+              borderRadius: "6px",
+              color: "#ffffff",
+              cursor: "pointer",
+              fontSize: "14px",
+              fontWeight: "bold",
+              padding: "12px",
+              width: "100%",
+            }}
+          >
+            반복 생성 중지
+          </button>
+        ) : (
+          <button
+            type="button"
+            data-testid="start-queue-button"
+            onClick={onStartLoop}
+            disabled={isApplying}
+            style={{
+              backgroundColor: theme.actionAccent,
+              border: "none",
+              borderRadius: "6px",
+              color: "#ffffff",
+              cursor: isApplying ? "not-allowed" : "pointer",
+              fontSize: "14px",
+              fontWeight: "bold",
+              padding: "12px",
+              width: "100%",
+              opacity: isApplying ? 0.7 : 1,
+            }}
+          >
+            자동 생성 시작 (Auto-Queue)
+          </button>
+        )
       ) : (
         <ApplyButton
           isApplying={isApplying}
-          label={getApplyPhaseActionLabel(applyPhase)}
+          label={getApplyPhaseActionLabel(applyPhase) || "Load to Canvas"}
           onApply={onApply}
         />
       )}

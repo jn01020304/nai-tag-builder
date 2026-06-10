@@ -220,6 +220,10 @@ export function useQueueRunner({
           return;
         }
         updateQueueSession(markQueueTickSuccess(queueSessionRef.current ?? currentSession, plan, result));
+        feedbackRef.current?.({
+          tone: "success",
+          message: result.effect.message,
+        });
       } catch (error) {
         if (applyAbortRef.current === applyAbort) {
           applyAbortRef.current = null;
@@ -249,7 +253,7 @@ export function useQueueRunner({
     };
 
     if (stopRequestedRef.current) return;
-    loopTimeoutRef.current = window.setTimeout(executeLoop, draft.intervalSec * 1000);
+    void executeLoop();
   };
 
   const startLoop = () => {

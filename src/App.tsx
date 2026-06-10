@@ -4,7 +4,7 @@ import type { MetadataState } from './types/metadata';
 import { runApplyPipeline } from './automation/applyPipeline';
 import type { ApplyPipelinePhase } from './automation/applyPipeline';
 import { formatApplyErrorDetail } from './automation/applyStatusText';
-import { useAutoGenerator } from './hooks/useAutoGenerator';
+import { useQueueDraftControls } from './hooks/useQueueDraftControls';
 import { useEdgeResize } from './hooks/useEdgeResize';
 import type { ResizeHandle } from './hooks/useEdgeResize';
 import type { QueueMode } from './types/preset';
@@ -16,7 +16,7 @@ import GenerationParams from './components/GenerationParams';
 import CharacterCaptions from './components/CharacterCaptions';
 import AdvancedParams from './components/AdvancedParams';
 import PresetManager from './components/PresetManager';
-import QueuePanel from './components/QueuePanel';
+import QueueWorkspace from './components/QueueWorkspace';
 import ImportModal from './components/ImportModal';
 import StatusBanner from './components/StatusBanner';
 import OverlayFooter from './components/OverlayFooter';
@@ -31,6 +31,8 @@ import type {
 import { promptTargetKey } from './prompt/promptInsertTarget';
 import type { CoreCatalogEntry } from './prompt/catalog/catalogTypes';
 import { movePromptTag, toggleCatalogTagWithSelection } from './prompt/catalog/promptTagText';
+
+export type AppMode = 'compose' | 'queue';
 
 const CONTAINER_ID = 'nai-tag-builder-root';
 const VIEWPORT_MARGIN = 8;
@@ -142,6 +144,7 @@ function AppContent() {
   const [state, dispatch] = useMetadataState();
   const [isApplying, setIsApplying] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [appMode, setAppMode] = useState<AppMode>('compose');
   const { overlayWidth, overlayHeight, startResize } = useEdgeResize(320, CONTAINER_ID);
   const isLauncherDragged = useRef(false);
   const [viewportHeight, setViewportHeight] = useState(() => window.visualViewport?.height ?? window.innerHeight);
@@ -254,7 +257,7 @@ function AppContent() {
     isLooping, loopCount, queueSession,
     startLoop, stopLoop,
     handleIntervalChange, handleCountChange, handleMinChange, adjustValue,
-  } = useAutoGenerator({ state, queue, queueMode, onFeedback: showFeedback });
+  } = useQueueDraftControls({ state, queue, queueMode, onFeedback: showFeedback });
 
   const handleClose = () => {
     stopLoop();
@@ -439,10 +442,6 @@ function AppContent() {
           : undefined,
       });
       setIsCollapsed(false);
-
-      if (autoGenerate && Number(intervalSec) > 0 && Number(targetCount) > 0) {
-        startLoop();
-      }
     } catch (error) {
       console.error('Error applying preset:', error);
       showFeedback({ tone: 'error', message: '적용 중 오류가 발생했습니다.' });
@@ -663,12 +662,55 @@ function AppContent() {
       {isCollapsed ? (
         renderCollapsedLauncher()
       ) : (
-        <OverlayHeader
-          isCollapsed={isCollapsed}
-          onClose={handleClose}
-          onToggleCollapsed={() => setIsCollapsed(c => !c)}
-          onStartDrag={startDrag}
-        />
+        <div style={{ display: 'flex', flexDirection: 'column', flex: '0 0 auto' }}>
+          <OverlayHeader
+            isCollapsed={isCollapsed}
+            onClose={handleClose}
+            onToggleCollapsed={() => setIsCollapsed(c => !c)}
+            onStartDrag={startDrag}
+          />
+          <div
+            data-testid="mode-tabs"
+            style={{
+              display: 'flex',
+              borderBottom: `1px solid ${theme.surface1}`,
+              backgroundColor: theme.mantle,
+            }}
+          >
+            <button
+              onClick={() => setAppMode('compose')}
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderBottom: appMode === 'compose' ? `2px solid ${theme.actionAccent}` : '2px solid transparent',
+                color: appMode === 'compose' ? theme.actionAccent : theme.subtext0,
+                fontWeight: appMode === 'compose' ? 'bold' : 'normal',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              Compose
+            </button>
+            <button
+              onClick={() => setAppMode('queue')}
+              style={{
+                flex: 1,
+                padding: '10px 0',
+                backgroundColor: 'transparent',
+                border: 'none',
+                borderBottom: appMode === 'queue' ? `2px solid ${theme.actionAccent}` : '2px solid transparent',
+                color: appMode === 'queue' ? theme.actionAccent : theme.subtext0,
+                fontWeight: appMode === 'queue' ? 'bold' : 'normal',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+              }}
+            >
+              Auto-Queue
+            </button>
+          </div>
+        </div>
       )}
 
       {/* Body */}
@@ -697,57 +739,82 @@ function AppContent() {
               onDismiss={() => setFeedback(null)}
             />
           )}
-          <MainPromptSection
-            prompt={state.prompt}
-            dispatch={dispatch}
-            activePromptTarget={activePromptTarget}
-            getSelectionAfterRender={(target) => selectionAfterRenderByTarget[promptTargetKey(target)]}
-            onPromptSelection={recordPromptSelection}
-          />
-          <CharacterCaptions
-            characters={state.prompt.characters}
-            negativeCharacters={state.prompt.negativeCharacters}
-            activePromptTarget={activePromptTarget}
-            dispatch={dispatch}
-            getSelectionAfterRender={(target) => selectionAfterRenderByTarget[promptTargetKey(target)]}
-            onPromptSelection={recordPromptSelection}
-            onRemoveCharacter={handleRemoveCharacter}
-          />
-          <TagDictionarySection
-            prompt={state.prompt}
-            activePromptTarget={activePromptTarget}
-            onToggleCatalogEntry={handleCatalogToggle}
-            onReorderBasePrompt={handleReorderBasePrompt}
-            onInsertDictionaryTag={handleInsertDictionaryTag}
-          />
-          <GenerationParams state={state} dispatch={dispatch} />
-          <AdvancedParams state={state} dispatch={dispatch} />
 
-          <QueuePanel
-            autoGenerate={autoGenerate}
-            setAutoGenerate={setAutoGenerate}
-            seedRule={seedRule}
-            setSeedRule={setSeedRule}
-            queueMode={queueMode}
-            setQueueMode={setQueueMode}
-            runsPerPreset={runsPerPreset}
-            setRunsPerPreset={setRunsPerPreset}
-            adjustStep={adjustStep}
-            setAdjustStep={setAdjustStep}
-            intervalSec={intervalSec}
-            handleIntervalChange={handleIntervalChange}
-            targetCount={targetCount}
-            handleCountChange={handleCountChange}
-            targetMin={targetMin}
-            handleMinChange={handleMinChange}
-            adjustValue={adjustValue}
-            queueLength={queue.length}
-            queueSession={queueSession}
-          />
+          {appMode === 'compose' ? (
+            <>
+              <PresetManager
+                state={state}
+                dispatch={dispatch}
+                queue={queue}
+                setQueue={setQueue}
+                onImportRequest={setPendingImport}
+                onFeedback={showFeedback}
+              />
+              <MainPromptSection
+                prompt={state.prompt}
+                dispatch={dispatch}
+                activePromptTarget={activePromptTarget}
+                getSelectionAfterRender={(target) => selectionAfterRenderByTarget[promptTargetKey(target)]}
+                onPromptSelection={recordPromptSelection}
+              />
+              <CharacterCaptions
+                characters={state.prompt.characters}
+                negativeCharacters={state.prompt.negativeCharacters}
+                activePromptTarget={activePromptTarget}
+                dispatch={dispatch}
+                getSelectionAfterRender={(target) => selectionAfterRenderByTarget[promptTargetKey(target)]}
+                onPromptSelection={recordPromptSelection}
+                onRemoveCharacter={handleRemoveCharacter}
+              />
+              <TagDictionarySection
+                prompt={state.prompt}
+                activePromptTarget={activePromptTarget}
+                onToggleCatalogEntry={handleCatalogToggle}
+                onReorderBasePrompt={handleReorderBasePrompt}
+                onInsertDictionaryTag={handleInsertDictionaryTag}
+              />
+              <GenerationParams state={state} dispatch={dispatch} />
+              <AdvancedParams state={state} dispatch={dispatch} />
+            </>
+          ) : (
+            <>
+              {/* PresetManager will temporarily be here or inside QueueWorkspace in Step 5 */}
+              <PresetManager
+                state={state}
+                dispatch={dispatch}
+                queue={queue}
+                setQueue={setQueue}
+                onImportRequest={setPendingImport}
+                onFeedback={showFeedback}
+              />
+              <QueueWorkspace
+                autoGenerate={autoGenerate}
+                setAutoGenerate={setAutoGenerate}
+                seedRule={seedRule}
+                setSeedRule={setSeedRule}
+                queueMode={queueMode}
+                setQueueMode={setQueueMode}
+                runsPerPreset={runsPerPreset}
+                setRunsPerPreset={setRunsPerPreset}
+                adjustStep={adjustStep}
+                setAdjustStep={setAdjustStep}
+                intervalSec={intervalSec}
+                handleIntervalChange={handleIntervalChange}
+                targetCount={targetCount}
+                handleCountChange={handleCountChange}
+                targetMin={targetMin}
+                handleMinChange={handleMinChange}
+                adjustValue={adjustValue}
+                queueLength={queue.length}
+                queueSession={queueSession}
+              />
+            </>
+          )}
       </div>
 
       {!isCollapsed && (
         <OverlayFooter
+          appMode={appMode}
           feedback={feedback}
           isApplying={isApplying}
           applyPhase={currentApplyPhase}
@@ -755,6 +822,7 @@ function AppContent() {
           loopCount={loopCount}
           targetCount={targetCount}
           onApply={handleApply}
+          onStartLoop={startLoop}
           onStopLoop={stopLoop}
         />
       )}
