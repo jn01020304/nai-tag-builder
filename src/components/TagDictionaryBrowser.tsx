@@ -14,13 +14,9 @@ const BrowserContainer = styled.div`
 
 const GroupTabs = styled.div`
   display: flex;
-  overflow-x: auto;
+  flex-wrap: wrap;
   gap: 10px;
   padding-bottom: 6px;
-  scrollbar-width: none;
-  &::-webkit-scrollbar {
-    display: none;
-  }
 `;
 
 const TabButton = styled.button<{ $active: boolean }>`

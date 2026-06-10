@@ -145,15 +145,17 @@ export default function TagDictionarySection({
       </div>
 
       <div style={{ position: 'relative' }}>
-        <ComposeCatalogChips
-          prompt={prompt}
-          activePromptTarget={activePromptTarget}
-          activePromptValue={activePromptValue}
-          onToggle={handleToggle}
-          onReorderBasePrompt={onReorderBasePrompt}
-        />
-
         <TagDictionaryBrowser onInsertTag={handleInsertDictionaryTag} />
+        
+        <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--ntb-border, rgba(255, 255, 255, 0.1))' }}>
+          <ComposeCatalogChips
+            prompt={prompt}
+            activePromptTarget={activePromptTarget}
+            activePromptValue={activePromptValue}
+            onToggle={handleToggle}
+            onReorderBasePrompt={onReorderBasePrompt}
+          />
+        </div>
         
         {toastMessage && (
           <div style={{
