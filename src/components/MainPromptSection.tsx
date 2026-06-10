@@ -4,7 +4,7 @@ import type {
   PromptSelectionAfterRender,
 } from "../prompt/promptInsertTarget";
 import type { PromptState } from "../types/metadata";
-import CollapsiblePanel from "./CollapsiblePanel";
+import CollapsibleSection from "./CollapsibleSection";
 import PromptPairTabs from "./PromptPairTabs";
 
 interface Props {
@@ -23,7 +23,7 @@ export default function MainPromptSection({
   onPromptSelection,
 }: Props) {
   return (
-    <CollapsiblePanel title="Main Prompt" testId="main-prompt-section">
+    <CollapsibleSection title="Main Prompt" testId="main-prompt-section">
       <PromptPairTabs
         testIdPrefix="base-prompt"
         activePromptTarget={activePromptTarget}
@@ -48,6 +48,6 @@ export default function MainPromptSection({
           onChange: (value) => dispatch({ type: "SET_PROMPT", field: "negativeBase", value }),
         }}
       />
-    </CollapsiblePanel>
+    </CollapsibleSection>
   );
 }
