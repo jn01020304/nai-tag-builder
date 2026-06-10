@@ -680,7 +680,7 @@ function AppContent() {
           minHeight: 0,
           overflowX: 'hidden',
           overflowY: 'auto',
-          padding: '12px 12px 0',
+          padding: '16px 16px 0',
         }}
       >
           <PresetManager

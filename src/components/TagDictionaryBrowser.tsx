@@ -6,7 +6,7 @@ import type { TagDictionaryEntry } from '../catalog/tagDictionaryTypes';
 const BrowserContainer = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
   margin-top: 16px;
   padding-top: 16px;
   border-top: 1px solid var(--ntb-border, rgba(255, 255, 255, 0.1));
@@ -15,8 +15,8 @@ const BrowserContainer = styled.div`
 const GroupTabs = styled.div`
   display: flex;
   overflow-x: auto;
-  gap: 8px;
-  padding-bottom: 4px;
+  gap: 10px;
+  padding-bottom: 6px;
   scrollbar-width: none;
   &::-webkit-scrollbar {
     display: none;
@@ -25,12 +25,13 @@ const GroupTabs = styled.div`
 
 const TabButton = styled.button<{ $active: boolean }>`
   flex-shrink: 0;
-  padding: 6px 12px;
-  border-radius: 16px;
+  padding: 8px 14px;
+  border-radius: 20px;
   border: 1px solid ${props => props.$active ? 'var(--ntb-primary, #646cff)' : 'transparent'};
   background: ${props => props.$active ? 'rgba(100, 108, 255, 0.1)' : 'var(--ntb-surface, rgba(255, 255, 255, 0.05))'};
   color: ${props => props.$active ? 'var(--ntb-primary, #646cff)' : 'inherit'};
-  font-size: 13px;
+  font-size: 14px;
+  font-weight: ${props => props.$active ? 'bold' : 'normal'};
   cursor: pointer;
   white-space: nowrap;
 `;
@@ -38,39 +39,40 @@ const TabButton = styled.button<{ $active: boolean }>`
 const CategoryGrid = styled.div`
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
+  gap: 10px;
 `;
 
 const CategoryChip = styled.button<{ $active: boolean }>`
-  padding: 4px 10px;
-  border-radius: 4px;
+  padding: 6px 12px;
+  border-radius: 6px;
   border: 1px solid ${props => props.$active ? 'var(--ntb-text, #fff)' : 'var(--ntb-border, rgba(255, 255, 255, 0.2))'};
-  background: ${props => props.$active ? 'var(--ntb-text, #fff)' : 'transparent'};
+  background: ${props => props.$active ? 'var(--ntb-text, #fff)' : 'var(--ntb-surface, rgba(255, 255, 255, 0.05))'};
   color: ${props => props.$active ? 'var(--ntb-bg, #1a1a1a)' : 'inherit'};
-  font-size: 12px;
+  font-size: 13px;
   cursor: pointer;
 `;
 
 const TagGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 8px;
-  margin-top: 8px;
+  gap: 10px;
+  margin-top: 10px;
 `;
 
 const TagChip = styled.button`
   text-align: left;
-  padding: 6px 8px;
+  padding: 8px 10px;
   background: var(--ntb-surface, rgba(255, 255, 255, 0.05));
-  border: 1px solid var(--ntb-border, rgba(255, 255, 255, 0.1));
-  border-radius: 4px;
+  border: 1px solid var(--ntb-border, rgba(255, 255, 255, 0.15));
+  border-radius: 6px;
   cursor: pointer;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
   
   &:hover {
     border-color: var(--ntb-primary, #646cff);
+    background: rgba(255, 255, 255, 0.08);
   }
 `;
 

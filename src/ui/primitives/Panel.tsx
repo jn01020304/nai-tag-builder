@@ -1,6 +1,7 @@
 import { useState } from "react";
 import type { ReactNode, SyntheticEvent } from "react";
 import { useTheme } from "../../contexts/themeContextCore";
+import { withAlpha } from "../../styles/color";
 
 type PanelVariant = "panel" | "section";
 
@@ -33,7 +34,11 @@ export default function Panel({
     <section
       data-testid={testId}
       style={{
-        marginBottom: isPanel ? "16px" : "12px",
+        marginBottom: isPanel ? "16px" : "16px",
+        backgroundColor: isPanel ? "transparent" : withAlpha(theme.surface0, 0.4),
+        border: isPanel ? "none" : `1px solid ${withAlpha(theme.surface1, 0.6)}`,
+        borderRadius: isPanel ? "0" : "12px",
+        padding: isPanel ? "0" : "12px 16px",
         minWidth: 0,
       }}
     >
@@ -52,13 +57,13 @@ export default function Panel({
           color: theme.subtext1,
           cursor: "pointer",
           display: "flex",
-          fontSize: "13px",
-          fontWeight: isPanel ? 800 : "bold",
+          fontSize: "14px",
+          fontWeight: "bold",
           gap: "10px",
-          lineHeight: 1.2,
-          margin: isPanel ? "0 0 10px" : 0,
-          minHeight: isPanel ? "26px" : undefined,
-          padding: isPanel ? 0 : "10px 0",
+          lineHeight: 1.4,
+          margin: isPanel ? "0 0 12px" : 0,
+          minHeight: isPanel ? "28px" : undefined,
+          padding: isPanel ? 0 : "4px 0 12px 0",
           textAlign: "left",
           width: "100%",
         }}
@@ -91,7 +96,10 @@ export default function Panel({
           data-testid={testId ? `${testId}-body` : undefined}
           style={{
             minWidth: 0,
-            padding: isPanel ? 0 : "8px 0 0",
+            padding: isPanel ? 0 : "4px 0 0",
+            borderTop: isPanel ? "none" : `1px solid ${withAlpha(theme.surface1, 0.4)}`,
+            marginTop: isPanel ? 0 : "4px",
+            paddingTop: isPanel ? 0 : "12px",
           }}
         >
           {children}
