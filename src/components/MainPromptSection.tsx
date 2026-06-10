@@ -23,7 +23,7 @@ export default function MainPromptSection({
   onPromptSelection,
 }: Props) {
   return (
-    <CollapsibleSection title="Main Prompt" testId="main-prompt-section">
+    <CollapsibleSection title="Main Prompt" testId="main-prompt-section" defaultOpen={true}>
       <PromptPairTabs
         testIdPrefix="base-prompt"
         activePromptTarget={activePromptTarget}

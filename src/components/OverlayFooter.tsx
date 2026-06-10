@@ -7,6 +7,7 @@ import ApplyButton from "./ApplyButton";
 
 interface Props {
   appMode?: 'compose' | 'queue';
+  queueEnabled?: boolean;
   feedback: StatusFeedback | null;
   isApplying: boolean;
   applyPhase: ApplyPipelinePhase | null;
@@ -20,6 +21,7 @@ interface Props {
 
 export default function OverlayFooter({
   appMode = 'compose',
+  queueEnabled,
   feedback,
   isApplying,
   applyPhase,
@@ -31,10 +33,14 @@ export default function OverlayFooter({
   onStopLoop,
 }: Props) {
   const theme = useTheme();
+  const canStartQueue = appMode === "queue" && queueEnabled !== false && !isApplying;
+
   const statusText = (() => {
     if (isApplying) return getApplyPhaseStatusLabel(applyPhase);
     if (feedback) return feedback.message;
     if (isLooping) return `생성 중 ${loopCount}/${targetCount}`;
+    if (appMode === "queue" && queueEnabled === false) return "Auto-Queue 꺼짐";
+    if (appMode === "queue") return "Queue 준비됨";
     return "적용 준비됨";
   })();
 
@@ -99,22 +105,22 @@ export default function OverlayFooter({
           <button
             type="button"
             data-testid="start-queue-button"
-            onClick={onStartLoop}
-            disabled={isApplying}
+            onClick={canStartQueue ? onStartLoop : undefined}
+            disabled={!canStartQueue}
             style={{
               backgroundColor: theme.actionAccent,
               border: "none",
               borderRadius: "6px",
               color: "#ffffff",
-              cursor: isApplying ? "not-allowed" : "pointer",
+              cursor: canStartQueue ? "pointer" : "not-allowed",
               fontSize: "14px",
               fontWeight: "bold",
               padding: "12px",
               width: "100%",
-              opacity: isApplying ? 0.7 : 1,
+              opacity: canStartQueue ? 1 : 0.55,
             }}
           >
-            자동 생성 시작 (Auto-Queue)
+            {queueEnabled === false ? "Auto-Queue 꺼짐" : "자동 생성 시작 (Auto-Queue)"}
           </button>
         )
       ) : (

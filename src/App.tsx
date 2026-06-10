@@ -250,13 +250,26 @@ function AppContent() {
 
   // Auto-generation logic
   const {
-    autoGenerate, setAutoGenerate,
-    seedRule, setSeedRule,
-    runsPerPreset, setRunsPerPreset,
-    intervalSec, targetCount, targetMin, adjustStep, setAdjustStep,
-    isLooping, loopCount, queueSession,
-    startLoop, stopLoop,
-    handleIntervalChange, handleCountChange, handleMinChange, adjustValue,
+    queueEnabled,
+    setQueueEnabled,
+    seedRule,
+    setSeedRule,
+    runsPerPreset,
+    setRunsPerPreset,
+    intervalSec,
+    targetCount,
+    targetMin,
+    adjustStep,
+    setAdjustStep,
+    isLooping,
+    loopCount,
+    queueSession,
+    startLoop,
+    stopLoop,
+    handleIntervalChange,
+    handleCountChange,
+    handleMinChange,
+    adjustValue,
   } = useQueueDraftControls({ state, queue, queueMode, onFeedback: showFeedback });
 
   const handleClose = () => {
@@ -418,7 +431,7 @@ function AppContent() {
     try {
       const result = await runApplyPipeline({
         state,
-        autoGenerate,
+        autoGenerate: false,
         onPhase: (phase) => {
           setCurrentApplyPhase(phase.phase);
           showFeedback({ tone: 'info', message: phase.message, detail: phase.detail });
@@ -450,6 +463,20 @@ function AppContent() {
       setCurrentApplyPhase(null);
       setIsApplying(false);
     }
+  };
+
+  const handleStartQueue = () => {
+    if (!queueEnabled) {
+      showFeedback({
+        tone: "warning",
+        message: "Auto-Queue가 꺼져 있습니다.",
+        detail: "Queue 모드에서 자동화를 켜고 다시 시작하세요.",
+      });
+      setAppMode("queue");
+      return;
+    }
+  
+    startLoop();
   };
 
   const renderResizeHandle = (handle: ResizeHandle) => {
@@ -678,6 +705,9 @@ function AppContent() {
             }}
           >
             <button
+              type="button"
+              data-testid="mode-tab-compose"
+              aria-pressed={appMode === "compose"}
               onClick={() => setAppMode('compose')}
               style={{
                 flex: 1,
@@ -694,6 +724,9 @@ function AppContent() {
               Compose
             </button>
             <button
+              type="button"
+              data-testid="mode-tab-queue"
+              aria-pressed={appMode === "queue"}
               onClick={() => setAppMode('queue')}
               style={{
                 flex: 1,
@@ -733,6 +766,15 @@ function AppContent() {
             />
           )}
 
+          <PresetManager
+            state={state}
+            dispatch={dispatch}
+            queue={queue}
+            setQueue={setQueue}
+            onImportRequest={setPendingImport}
+            onFeedback={showFeedback}
+          />
+
           {appMode === 'compose' ? (
             <>
 
@@ -764,18 +806,9 @@ function AppContent() {
             </>
           ) : (
             <>
-              {/* PresetManager will temporarily be here or inside QueueWorkspace in Step 5 */}
-              <PresetManager
-                state={state}
-                dispatch={dispatch}
-                queue={queue}
-                setQueue={setQueue}
-                onImportRequest={setPendingImport}
-                onFeedback={showFeedback}
-              />
               <QueueWorkspace
-                autoGenerate={autoGenerate}
-                setAutoGenerate={setAutoGenerate}
+                queueEnabled={queueEnabled}
+                setQueueEnabled={setQueueEnabled}
                 seedRule={seedRule}
                 setSeedRule={setSeedRule}
                 queueMode={queueMode}
@@ -801,6 +834,7 @@ function AppContent() {
       {!isCollapsed && (
         <OverlayFooter
           appMode={appMode}
+          queueEnabled={queueEnabled}
           feedback={feedback}
           isApplying={isApplying}
           applyPhase={currentApplyPhase}
@@ -808,7 +842,7 @@ function AppContent() {
           loopCount={loopCount}
           targetCount={targetCount}
           onApply={handleApply}
-          onStartLoop={startLoop}
+          onStartLoop={handleStartQueue}
           onStopLoop={stopLoop}
         />
       )}

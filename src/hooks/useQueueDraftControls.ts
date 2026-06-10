@@ -12,7 +12,7 @@ export interface QueueDraftControlsConfig {
 }
 
 export function useQueueDraftControls({ state, queue, queueMode, onFeedback }: QueueDraftControlsConfig) {
-  const [autoGenerate, setAutoGenerate] = useState(true);
+  const [queueEnabled, setQueueEnabled] = useState(true);
   const [intervalSec, setIntervalSec] = useState<number | string>(10);
   const [targetCount, setTargetCount] = useState<number | string>(100);
   const [targetMin, setTargetMin] = useState<number | string>(16.7);
@@ -73,7 +73,7 @@ export function useQueueDraftControls({ state, queue, queueMode, onFeedback }: Q
   };
 
   return {
-    autoGenerate, setAutoGenerate,
+    queueEnabled, setQueueEnabled,
     seedRule, setSeedRule,
     runsPerPreset, setRunsPerPreset,
     intervalSec, targetCount, targetMin, adjustStep, setAdjustStep,

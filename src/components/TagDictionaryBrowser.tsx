@@ -178,7 +178,7 @@ export const TagDictionaryBrowser: React.FC<TagDictionaryBrowserProps> = ({ onIn
   return (
     <BrowserContainer>
       {/* 1. Group Navigation */}
-      <GroupTabs>
+      <GroupTabs className="dictionary-groups-scroll">
         {groups.map(group => (
           <TabButton
             key={group.groupId}

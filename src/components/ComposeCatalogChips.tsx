@@ -129,11 +129,10 @@ export default function ComposeCatalogChips({
         aria-label="Prompt categories"
         style={{
           display: "flex",
+          flexWrap: "wrap",
           gap: "8px",
           marginBottom: "12px",
-          overflowX: "auto",
           paddingBottom: "2px",
-          scrollbarWidth: "thin",
         }}
       >
         {CATEGORY_ORDER.map((category) => {
