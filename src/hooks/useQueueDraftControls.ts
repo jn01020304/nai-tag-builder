@@ -4,14 +4,14 @@ import type { ShowFeedback } from '../types/feedback';
 import type { MetadataState } from '../types/metadata';
 import type { QueueMode, SeedRule } from '../types/preset';
 
-export interface AutoGeneratorConfig {
+export interface QueueDraftControlsConfig {
   state: MetadataState;
   queue: string[];
   queueMode: QueueMode;
   onFeedback?: ShowFeedback;
 }
 
-export function useAutoGenerator({ state, queue, queueMode, onFeedback }: AutoGeneratorConfig) {
+export function useQueueDraftControls({ state, queue, queueMode, onFeedback }: QueueDraftControlsConfig) {
   const [autoGenerate, setAutoGenerate] = useState(true);
   const [intervalSec, setIntervalSec] = useState<number | string>(10);
   const [targetCount, setTargetCount] = useState<number | string>(100);
