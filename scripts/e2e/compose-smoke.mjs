@@ -194,6 +194,8 @@ async function checkLayout(page) {
     const controls = Array.from(overlay.querySelectorAll("button, input, select, textarea"))
       .filter((element) => element instanceof HTMLElement)
       .filter((element) => !element.closest("[aria-label='Prompt categories']"))
+      .filter((element) => !element.closest(".dictionary-groups-scroll"))
+      .filter((element) => !element.closest(".catalog-chips-scroll"))
       .map((element) => element.getBoundingClientRect());
 
     const overflowingControl = controls.find((rect) =>
@@ -301,7 +303,7 @@ async function checkFallbackThemeTokens(page) {
       ok:
         overlayStyle.backgroundColor === "rgb(19, 21, 27)" &&
         widthStyle.backgroundColor === "rgb(29, 32, 41)" &&
-        widthStyle.borderColor === "rgb(54, 59, 73)" &&
+        widthStyle.borderColor === "rgb(37, 41, 52)" &&
         applyStyle.backgroundColor === "rgb(212, 163, 71)" &&
         applyStyle.color === "rgb(19, 21, 27)",
       overlayBackground: overlayStyle.backgroundColor,
@@ -318,13 +320,15 @@ async function checkFallbackThemeTokens(page) {
 async function checkPromptSectionToggles(page) {
   const promptToggle = page.locator("[data-testid='main-prompt-section-toggle']");
   const parametersToggle = page.locator("[data-testid='parameters-section-toggle']");
-  const queueToggle = page.locator("[data-testid='queue-section-toggle']");
+  const composeTab = page.locator("[data-testid='mode-tab-compose']");
+  const queueTab = page.locator("[data-testid='mode-tab-queue']");
 
   assert(await promptToggle.getAttribute("aria-expanded") === "true", "Main Prompt should default open.");
-  assert(await queueToggle.getAttribute("aria-expanded") === "true", "Queue should default open.");
   assert(await parametersToggle.getAttribute("aria-expanded") === "false", "Parameters should default collapsed.");
+  assert(await composeTab.getAttribute("aria-pressed") === "true", "Compose mode should default active.");
+  assert(await queueTab.getAttribute("aria-pressed") === "false", "Queue mode should default inactive.");
+  assert(!(await hasLocator(page.locator("[data-testid='queue-workspace']"))), "Queue workspace should not render in Compose mode.");
   assert(await hasLocator(page.locator("[data-testid='main-prompt-section-body']")), "Main Prompt body should default mounted.");
-  assert(await hasLocator(page.locator("[data-testid='queue-section-body']")), "Queue body should default mounted.");
   assert(!(await hasLocator(page.locator("[data-testid='parameters-section-body']"))), "Parameters body should default unmounted.");
 
 
@@ -344,7 +348,6 @@ async function checkPromptSectionToggles(page) {
   await page.locator("[data-testid='overlay-header']").waitFor({ timeout: 3000 });
   assert(await promptToggle.getAttribute("aria-expanded") === "true", "Main Prompt state was not preserved.");
   assert(await parametersToggle.getAttribute("aria-expanded") === "false", "Parameters state was not preserved.");
-  assert(await queueToggle.getAttribute("aria-expanded") === "true", "Queue state was not preserved.");
 }
 
 async function checkOverlayStaysInViewportAfterExpand(page) {
@@ -397,12 +400,8 @@ async function checkOverlayStaysInViewportAfterExpand(page) {
 }
 
 async function openQueuePanel(page) {
-  const queueToggle = page.locator("[data-testid='queue-section-toggle']");
-
-  if (await queueToggle.getAttribute("aria-expanded") === "false") {
-    await queueToggle.click();
-  }
-  assert(await queueToggle.getAttribute("aria-expanded") === "true", "Queue did not expand.");
+  await page.locator("[data-testid='mode-tab-queue']").click();
+  await page.locator("[data-testid='queue-workspace']").waitFor({ timeout: 3000 });
   await page.locator("[data-testid='queue-panel']").waitFor({ timeout: 3000 });
 }
 
@@ -596,6 +595,8 @@ async function checkAdvancedReadableRows(page) {
 async function dragTag(page, fromTestId, toTestId) {
   const source = page.locator(`[data-testid='${fromTestId}']`);
   const target = page.locator(`[data-testid='${toTestId}']`);
+  await source.evaluate((element) => element.scrollIntoView({ block: "center" }));
+  await page.waitForTimeout(100);
   const sourceBox = await source.boundingBox();
   const targetBox = await target.boundingBox();
   assert(sourceBox && targetBox, "Drag target boxes are missing.");
@@ -626,7 +627,9 @@ async function main() {
     });
 
     await page.goto(URL, { waitUntil: "networkidle" });
-    await page.locator("text=NAI Tag Builder v2.0").waitFor({ timeout: 5000 });
+    await page.locator("[data-testid='overlay-header']", {
+      hasText: "Easy-to Studio v1.0",
+    }).waitFor({ timeout: 5000 });
     await checkPromptSectionToggles(page);
     await checkOverlayStaysInViewportAfterExpand(page);
 
@@ -635,6 +638,7 @@ async function main() {
     await textarea.fill("alpha");
     assert(await getTextareaValue(page) === "alpha", "Main Prompt typing failed.");
 
+    await page.locator("[data-testid='tag-dictionary-section-toggle']").click();
     await setTextareaCursor(page, "alpha, omega", 5);
     await clickCatalogChip(page, "tag_1girl");
     assert(
@@ -684,7 +688,7 @@ async function main() {
       `Fat-finger cursor was not restored after separator: ${await getTextareaSelectionStart(page)}`,
     );
 
-    await page.locator("button", { hasText: "Characters" }).click();
+    await page.locator("[data-testid='characters-section-toggle']").click();
     const characterTextarea = page.locator("[data-testid='character-prompt-textarea-0']");
     await setLocatorCursor(characterTextarea, "brown hair, blue eyes", "brown hair".length);
     await clickCatalogChip(page, "tag_1boy");
@@ -831,6 +835,17 @@ async function main() {
       path: path.join(ROOT, "test-results", "compose-smoke-mobile.png"),
       fullPage: true,
     });
+
+    await page.locator("[data-testid='mode-tab-queue']").click();
+    await page.locator("[data-testid='queue-mode-select']").selectOption("off");
+    assert(
+      await page.locator("[data-testid='start-queue-button']").isDisabled(),
+      "Start Queue should be disabled when Auto-Queue is off.",
+    );
+    await page.locator("[data-testid='queue-mode-select']").selectOption("on");
+    
+    await page.locator("[data-testid='mode-tab-compose']").click();
+    await page.locator("[data-testid='main-prompt-textarea']").waitFor({ timeout: 3000 });
 
     const applyButton = page.locator("[data-testid='apply-button']");
     await applyButton.click();

@@ -256,7 +256,7 @@ async function main() {
           </main>
           <div id="nai-tag-builder-root" style="position: fixed; top: 24px; right: 24px;">
             <div style="width: 320px; padding: 16px; background: #aaa;">
-              NAI Tag Builder v2.0
+              Easy-to Studio v1.0
               <button id="stale-overlay-marker">NovelAI에 적용</button>
             </div>
           </div>
@@ -293,6 +293,8 @@ async function main() {
     `);
 
     await page.addScriptTag({ path: DIST_SCRIPT });
+    await page.locator("[data-testid='overlay-header']").waitFor({ timeout: 5000 });
+    await page.locator("[data-testid='mode-tab-compose']").click();
     await page.locator("[data-testid='main-prompt-textarea']").waitFor({ timeout: 5000 });
 
     const staleMarkerCount = await page.locator("#stale-overlay-marker").count();
@@ -383,7 +385,7 @@ async function main() {
     assert(syncedTheme.ok, `Theme sync failed: ${JSON.stringify(syncedTheme)}`);
 
     // Switch to Queue Mode
-    await page.locator("button:has-text('Auto-Queue')").click();
+    await page.locator("[data-testid='mode-tab-queue']").click();
     await page.locator("[data-testid='queue-workspace']").waitFor({ timeout: 5000 });
 
     await page.locator("[data-testid='queue-mode-select']").selectOption("on");

@@ -6,8 +6,8 @@ import { withAlpha } from "../styles/color";
 type QueueAutomationState = "off" | "on";
 
 interface QueuePanelProps {
-  autoGenerate: boolean;
-  setAutoGenerate: (val: boolean) => void;
+  queueEnabled: boolean;
+  setQueueEnabled: (val: boolean) => void;
   seedRule: SeedRule;
   setSeedRule: (val: SeedRule) => void;
   queueMode: QueueMode;
@@ -53,8 +53,8 @@ function queueStatusLabel(session: QueueSession | null): string {
 }
 
 export default function QueueWorkspace({
-  autoGenerate,
-  setAutoGenerate,
+  queueEnabled,
+  setQueueEnabled,
   seedRule,
   setSeedRule,
   queueMode,
@@ -109,9 +109,9 @@ export default function QueueWorkspace({
     textAlign: "center",
     width: "100%",
   };
-  const queueAutomationState: QueueAutomationState = autoGenerate ? "on" : "off";
+  const queueAutomationState: QueueAutomationState = queueEnabled ? "on" : "off";
   const handleQueueAutomationChange = (value: QueueAutomationState) => {
-    setAutoGenerate(value === "on");
+    setQueueEnabled(value === "on");
   };
 
   const statusTone = queueSession?.status === "failed"

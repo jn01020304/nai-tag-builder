@@ -11,9 +11,13 @@
     "dictionary:sync": "node scripts/catalog/sync-tag-dictionary-to-public.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
+    "test:unit": "tsx scripts/test/queue-planner-test.ts && tsx scripts/test/queue-session-test.ts",
     "test:e2e:compose": "node scripts/e2e/compose-smoke.mjs",
     "test:e2e:bookmarklet": "node scripts/e2e/bookmarklet-injection-smoke.mjs",
-    "test:e2e:theme": "node scripts/e2e/theme-probe-smoke.mjs"
+    "test:e2e:theme": "node scripts/e2e/theme-probe-smoke.mjs",
+    "test:e2e": "npm run test:e2e:compose && npm run test:e2e:bookmarklet && npm run test:e2e:theme && node scripts/e2e/queue-runner-smoke.mjs",
+    "test:all": "npm run test:unit && npm run test:e2e",
+    "test": "npm run test:unit"
   },
   "dependencies": {
     "dexie": "^4.3.0",
@@ -37,6 +41,7 @@
     "eslint-plugin-react-refresh": "^0.4.24",
     "globals": "^16.5.0",
     "playwright-core": "^1.60.0",
+    "tsx": "^4.22.4",
     "typescript": "~5.9.3",
     "typescript-eslint": "^8.48.0",
     "vite": "^7.3.1",
