@@ -13,6 +13,16 @@ writing:
 
 # Changelog
 
+## v3.1 (2026-06-30)
+Tag Dictionary stabilization and quick editor recovery.
+- Restored ComposeCatalogChips as the curated quick editor for target hints, aliases, negative routing, and base prompt tag reorder.
+- Kept Full Tag Dictionary as the broad browse/search surface that applies plain dictionary tags to the current active prompt target.
+- Added dictionary usage badges/highlights across main, negative, character, and negative character prompts.
+- Fixed the `negativeBase` versus `negative` prompt tone mismatch that could crash dictionary badge rendering.
+- Added category-level dictionary test ids such as `dict-category-character__headcount-and-relationship`.
+- Preserved textarea selection during dictionary group/category/tag clicks so repeated insertions keep the cursor position.
+- Rebuilt `dist/nai-tag-builder.js` and verified TypeScript, lint, unit, compose smoke, and bookmarklet smoke.
+
 ## v3.0 (2026-06-05)
 UI/UX 전면 개편 및 Glassmorphism 적용.
 - **Glassmorphism:** App 최상위 레이아웃, 오버레이 헤더/푸터에 반투명 효과 및 블러 적용.

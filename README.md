@@ -23,7 +23,8 @@ It helps users compose, import, save, queue, and apply NovelAI prompts without l
 - Mobile-oriented compact UI with collapsible sections and a circular collapsed launcher.
 - Main / Undesired prompt pair editor with tab and split views.
 - Character / Character Undesired prompt pair editor with the same tab and split model.
-- Tag dictionary chips with prompt-target badges.
+- Quick Catalog chips for curated prompt editing, negative routing, alias-aware toggles, and base prompt tag reorder.
+- Full Tag Dictionary browsing with prompt-target badges.
 - Presets and queue automation.
 - NovelAI metadata import from image files.
 - NovelAI metadata apply pipeline through generated PNG paste/import.
@@ -78,6 +79,9 @@ The overlay is optimized for narrow screens.
 
 - Repeated field subtitles above prompt textareas are removed.
 - Prompt identity is shown through tabs and color, not duplicate labels.
+- Tag Dictionary and Quick Catalog Chips are intentionally separate tools.
+- Quick Catalog Chips carry curated editor metadata such as target hints and aliases.
+- Full Tag Dictionary entries are broad search/browse records and insert into the current active prompt target.
 - Sections collapse independently.
 - The whole overlay can resize from all four edges.
 - The collapsed state becomes a small circular launcher, not a full-width bar.
@@ -101,11 +105,13 @@ The sampler avoids using button/tag colors as general text colors. This matters 
 ## Development
 
 ```bash
-npm install
-npm run build
-npm run lint
-npm run test:e2e:bookmarklet
-npm run test:e2e:compose
+rtk npm install
+rtk npx tsc -b
+rtk npm run lint
+rtk npm run test:unit
+rtk npm run build
+rtk npm run test:e2e:bookmarklet
+rtk npm run test:e2e:compose
 ```
 
 The production artifact is:

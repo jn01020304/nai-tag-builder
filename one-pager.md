@@ -121,6 +121,9 @@ Current compact UI decisions:
 - Character prompt pairs use the same tab/split pattern.
 - Mobile tab labels are shortened to `Main` and `Negative`.
 - `Insert target: ...` text is removed.
+- Quick Catalog Chips remain the curated editing surface for target hints, aliases, negative routing, and base prompt tag reorder.
+- Full Tag Dictionary remains the broad search/browse surface and applies plain dictionary tags to the current active prompt target.
+- Dictionary usage badges use prompt target colors and must preserve textarea selection during repeated chip clicks.
 - Collapsed overlay is a circular launcher, not a horizontal bar.
 - Overlay resize works on left, right, top, and bottom edges.
 - Footer Apply button remains outside body scroll.
@@ -147,14 +150,16 @@ If the user still sees old UI, check remote bundle freshness before debugging ru
 
 ## Key Tests
 
+- `rtk npx tsc -b`
 - `rtk npm run lint`
+- `rtk npm run test:unit`
 - `rtk npm run build`
 - `rtk npm run test:e2e:bookmarklet`
 - `rtk npm run test:e2e:compose`
 
 Bookmarklet smoke covers injection, theme sync, four-edge resizing, circular collapse, LSB import, and Generate automation.
 
-Compose smoke covers mobile layout, prompt editing, tab targeting, tag insertion/removal, character prompt targeting, highlight separation, queue controls, and apply lock behavior.
+Compose smoke covers mobile layout, prompt editing, tab targeting, dictionary insertion/removal, quick catalog chip rendering, character prompt targeting, highlight separation, queue controls, and apply lock behavior.
 
 ## Open Edges
 
@@ -162,3 +167,4 @@ Compose smoke covers mobile layout, prompt editing, tab targeting, tag insertion
 - WebP stealth recovery depends on alpha LSB preservation.
 - Direct NovelAI input mutation remains a fallback-only tactic.
 - Queue randomization and rotation can build on the batch import merge model but need explicit UX constraints.
+- Full dictionary autocomplete should avoid sorting every match in large chunks on each keystroke.
