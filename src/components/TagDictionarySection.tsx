@@ -13,7 +13,7 @@ interface Props {
   activePromptTarget: PromptInsertTarget;
   onToggleCatalogEntry: (entry: CoreCatalogEntry) => void;
   onReorderBasePrompt: (fromIndex: number, toIndex: number) => void;
-  onInsertDictionaryTag: (tag: string, target: "prompt" | "negative") => void;
+  onToggleDictionaryTag: (tag: string) => void;
 }
 
 export default function TagDictionarySection({
@@ -21,7 +21,7 @@ export default function TagDictionarySection({
   activePromptTarget,
   onToggleCatalogEntry,
   onReorderBasePrompt,
-  onInsertDictionaryTag,
+  onToggleDictionaryTag,
 }: Props) {
   const { theme } = useThemeStyles();
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -40,28 +40,8 @@ export default function TagDictionarySection({
     }
   })();
 
-  const handleToggle = (entry: CoreCatalogEntry) => {
-    onToggleCatalogEntry(entry);
-    
-    // Determine the actual target for the toast message
-    let targetName = "Main Prompt";
-    if (entry.target === 'negative' && activePromptTarget.kind === 'base') {
-      targetName = "Negative Prompt";
-    } else if (activePromptTarget.kind === 'character') {
-      const idx = prompt.characters.findIndex((c) => c.id === activePromptTarget.id);
-      if (entry.target === 'negative') {
-        targetName = `Character ${idx + 1} Negative`;
-      } else {
-        targetName = `Character ${idx + 1} Prompt`;
-      }
-    } else if (activePromptTarget.kind === 'negativeBase') {
-      targetName = "Negative Prompt";
-    } else if (activePromptTarget.kind === 'negativeCharacter') {
-      const idx = prompt.negativeCharacters.findIndex((c) => c.id === activePromptTarget.id);
-      targetName = `Character ${idx + 1} Negative`;
-    }
-
-    setToastMessage(`+ ${entry.tag} → ${targetName}`);
+  const showToast = (message: string) => {
+    setToastMessage(message);
     if (toastTimerRef.current) {
       clearTimeout(toastTimerRef.current);
     }
@@ -70,33 +50,42 @@ export default function TagDictionarySection({
     }, 900);
   };
 
-  const handleInsertDictionaryTag = (tag: string, dictTarget: "prompt" | "negative") => {
-    onInsertDictionaryTag(tag, dictTarget);
+  const handleToggleCatalogEntry = (entry: CoreCatalogEntry) => {
+    onToggleCatalogEntry(entry);
 
     let targetName = "Main Prompt";
-    if (dictTarget === 'negative' && activePromptTarget.kind === 'base') {
+    if (entry.target === "negative" && activePromptTarget.kind === "base") {
+      targetName = "Negative Prompt";
+    } else if (activePromptTarget.kind === "character") {
+      const idx = prompt.characters.findIndex((c) => c.id === activePromptTarget.id);
+      targetName = entry.target === "negative"
+        ? `Character ${idx + 1} Negative`
+        : `Character ${idx + 1} Prompt`;
+    } else if (activePromptTarget.kind === "negativeBase") {
+      targetName = "Negative Prompt";
+    } else if (activePromptTarget.kind === "negativeCharacter") {
+      const idx = prompt.negativeCharacters.findIndex((c) => c.id === activePromptTarget.id);
+      targetName = `Character ${idx + 1} Negative`;
+    }
+
+    showToast(`+ ${entry.tag} → ${targetName}`);
+  };
+
+  const handleToggleDictionaryTag = (tag: string) => {
+    onToggleDictionaryTag(tag);
+
+    let targetName = "Main Prompt";
+    if (activePromptTarget.kind === 'negativeBase') {
       targetName = "Negative Prompt";
     } else if (activePromptTarget.kind === 'character') {
       const idx = prompt.characters.findIndex((c) => c.id === activePromptTarget.id);
-      if (dictTarget === 'negative') {
-        targetName = `Character ${idx + 1} Negative`;
-      } else {
-        targetName = `Character ${idx + 1} Prompt`;
-      }
-    } else if (activePromptTarget.kind === 'negativeBase') {
-      targetName = "Negative Prompt";
+      targetName = `Character ${idx + 1} Prompt`;
     } else if (activePromptTarget.kind === 'negativeCharacter') {
       const idx = prompt.negativeCharacters.findIndex((c) => c.id === activePromptTarget.id);
       targetName = `Character ${idx + 1} Negative`;
     }
 
-    setToastMessage(`+ ${tag} → ${targetName}`);
-    if (toastTimerRef.current) {
-      clearTimeout(toastTimerRef.current);
-    }
-    toastTimerRef.current = setTimeout(() => {
-      setToastMessage(null);
-    }, 900);
+    showToast(`+ ${tag} → ${targetName}`);
   };
 
   useEffect(() => {
@@ -145,17 +134,18 @@ export default function TagDictionarySection({
       </div>
 
       <div style={{ position: 'relative' }}>
-        <TagDictionaryBrowser onInsertTag={handleInsertDictionaryTag} />
-        
-        <div style={{ marginTop: '16px', paddingTop: '16px', borderTop: '1px solid var(--ntb-border, rgba(255, 255, 255, 0.1))' }}>
-          <ComposeCatalogChips
-            prompt={prompt}
-            activePromptTarget={activePromptTarget}
-            activePromptValue={activePromptValue}
-            onToggle={handleToggle}
-            onReorderBasePrompt={onReorderBasePrompt}
-          />
-        </div>
+        <ComposeCatalogChips
+          prompt={prompt}
+          activePromptTarget={activePromptTarget}
+          activePromptValue={activePromptValue}
+          onToggle={handleToggleCatalogEntry}
+          onReorderBasePrompt={onReorderBasePrompt}
+        />
+        <TagDictionaryBrowser 
+          prompt={prompt}
+          activePromptTarget={activePromptTarget}
+          onToggleDictionaryTag={handleToggleDictionaryTag} 
+        />
         
         {toastMessage && (
           <div style={{

@@ -30,7 +30,11 @@ import type {
 } from './prompt/promptInsertTarget';
 import { promptTargetKey } from './prompt/promptInsertTarget';
 import type { CoreCatalogEntry } from './prompt/catalog/catalogTypes';
-import { movePromptTag, toggleCatalogTagWithSelection } from './prompt/catalog/promptTagText';
+import {
+  movePromptTag,
+  toggleCatalogTagWithSelection,
+  togglePromptTagWithSelection,
+} from './prompt/catalog/promptTagText';
 
 export type AppMode = 'compose' | 'queue';
 
@@ -339,6 +343,7 @@ function AppContent() {
     const targetKey = promptTargetKey(target);
     const promptValue = getTargetPromptValue(target);
     const selection = promptSelections[targetKey] ?? { start: promptValue.length, end: promptValue.length };
+
     const result = toggleCatalogTagWithSelection(promptValue, entry, selection.start);
 
     dispatchPromptTargetValue(target, result.value);
@@ -360,20 +365,13 @@ function AppContent() {
     }
   };
 
-  const handleInsertDictionaryTag = (tag: string, dictTarget: "prompt" | "negative") => {
-    let target = activePromptTarget;
-    if (dictTarget === 'negative' && activePromptTarget.kind === 'base') {
-      target = { kind: 'negativeBase' };
-    } else if (dictTarget === 'negative' && activePromptTarget.kind === 'character') {
-      target = getPairedNegativeCharacterTarget(activePromptTarget.id) ?? activePromptTarget;
-    }
-
+  const handleToggleDictionaryTag = (tag: string) => {
+    const target = activePromptTarget;
     const targetKey = promptTargetKey(target);
     const promptValue = getTargetPromptValue(target);
     const selection = promptSelections[targetKey] ?? { start: promptValue.length, end: promptValue.length };
 
-    const fakeEntry = { tag } as CoreCatalogEntry;
-    const result = toggleCatalogTagWithSelection(promptValue, fakeEntry, selection.start);
+    const result = togglePromptTagWithSelection(promptValue, tag, selection.start);
 
     dispatchPromptTargetValue(target, result.value);
 
@@ -799,7 +797,7 @@ function AppContent() {
                 activePromptTarget={activePromptTarget}
                 onToggleCatalogEntry={handleCatalogToggle}
                 onReorderBasePrompt={handleReorderBasePrompt}
-                onInsertDictionaryTag={handleInsertDictionaryTag}
+                onToggleDictionaryTag={handleToggleDictionaryTag}
               />
               <GenerationParams state={state} dispatch={dispatch} />
               <AdvancedParams state={state} dispatch={dispatch} />

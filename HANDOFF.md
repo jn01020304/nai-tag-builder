@@ -11,7 +11,7 @@ writing:
   asides: false
 ---
 
-# Handoff — 2026-06-09
+# Handoff — 2026-06-30
 
 ## 현재 상태
 
@@ -24,6 +24,7 @@ writing:
 - 모바일 화면을 덜 잡아먹는 UI 정리
 - 모바일 오버레이가 접힘, 펼침, 드래그, 리사이즈, viewport 변화 속에서도 화면 안에 남도록 하는 셸 안정화
 - Batched Queue 기반의 이미지 batch import → Preset 생성 → Queue append 흐름 추가
+- Tag Dictionary와 Quick Catalog Chips의 역할 경계 복구
 
 현재 `main`은 배포된 GitHub Pages 번들과 동기화되어 있으며, 최신 북마클릿은 원격 `nai-tag-builder.js`를 `?t=Date.now()`로 로드한다.
 
@@ -107,6 +108,33 @@ Batched Queue 1단계를 구현했다.
 - compose smoke에서 PNG metadata fixture 2개를 Queue Images로 주입해 Preset 생성과 Queue chip 추가를 검증
 - Queue 실행 중 현재 preset 이름과 batch 진행률을 Queue panel에 작게 표시하도록 UI 개선
 
+Tag Dictionary 안정화와 Quick Catalog Chips 복구를 진행했다.
+
+- Tag Dictionary는 전체 태그 탐색/검색 도구로 유지
+- ComposeCatalogChips는 curated quick editor로 복구
+- Quick Catalog Chips의 negative 자동 라우팅 복구
+- Quick Catalog Chips의 alias-aware toggle 경로 복구
+- base prompt selected tags reorder 경로 복구
+- `handleToggleDictionaryTag(tag)`는 dictionary 문자열 태그를 현재 active target에만 toggle
+- `handleCatalogToggle(entry)`는 `CoreCatalogEntry.target`, aliases, paired negative character target을 반영
+- `handleReorderBasePrompt(fromIndex, toIndex)`는 base prompt 내부 comma-separated tag order만 변경
+- Tag Dictionary category chip에 `data-testid="dict-category-${cat.id}"` 추가
+- compose smoke가 실제 category id인 `dict-category-character__headcount-and-relationship`를 클릭하도록 수정
+- dictionary group/category/tag 버튼이 textarea selection을 빼앗지 않도록 mouse/pointer down 기본 동작 차단
+- `tagUsageHelper.ts` 추가
+- dictionary usage badge/highlight에서 사용 위치를 `m`, `n`, `c1`, `nc1` 등으로 표시
+- `negativeBase` insert target과 `negative` display tone을 분리해 팔레트 크래시 방지
+- `promptTargetGroup(activePromptTarget)`를 사용해 Tag Dictionary highlight 팔레트 키를 통일
+- `dist/nai-tag-builder.js`를 최신 소스로 재빌드
+
+Tag Dictionary 설계 판단은 다음과 같다.
+
+- Tag Dictionary Entry는 `english_name`, `korean_name`, `description`, `keyword`, `count` 중심의 lexical data다.
+- Core Catalog Entry는 `target`, `aliases`, `productCategory`, `defaultVisible` 등을 가진 editor metadata다.
+- Tag Dictionary를 Core Catalog의 완전 대체재로 쓰면 negative routing, alias matching, selected tag reorder 같은 편집 의미가 사라진다.
+- 현재 안전한 구조는 Tag Dictionary는 태그 발견, ComposeCatalogChips는 curated 편집, App은 prompt 적용 정책을 담당하는 분리형 구조다.
+- 장기적으로 통합하려면 `PromptTagCandidate` 같은 공통 후보 모델을 만든 뒤 dictionary source와 core catalog source를 얹는 편이 안전하다.
+
 ## 핵심 파일
 
 - `src/utils/stealthLsbDecoder.ts`
@@ -130,6 +158,28 @@ Batched Queue 1단계를 구현했다.
 - `src/components/CharacterCaptions.tsx`
   - Character prompt pair 렌더링. 중복 subtitle 제거 완료
 
+- `src/components/TagDictionarySection.tsx`
+  - Tag Dictionary 섹션 조립
+  - active prompt target badge 표시
+  - Quick Catalog Chips와 Full Dictionary를 함께 렌더링
+  - catalog entry toggle toast와 dictionary tag toggle toast 처리
+
+- `src/components/TagDictionaryBrowser.tsx`
+  - 전체 dictionary group/category/tag 탐색
+  - dictionary search/category result 렌더링
+  - usage badge/highlight 표시
+  - category test id 제공
+  - prompt textarea selection 보존을 위한 pointer/mouse down 처리
+
+- `src/components/ComposeCatalogChips.tsx`
+  - curated quick catalog chips
+  - negative target hint와 alias-aware matching 기반 quick toggle UI
+  - selected base prompt tags reorder UI
+
+- `src/utils/tagUsageHelper.ts`
+  - dictionary tag가 현재 prompt의 어느 target에 들어 있는지 계산
+  - dictionary tag usage badge와 sort order용 assignment map 생성
+
 - `src/hooks/useEdgeResize.ts`
   - 4방향 overlay resize
 
@@ -144,6 +194,7 @@ Batched Queue 1단계를 구현했다.
   - collapse launcher (drag/click 충돌 해결)
   - viewport guard (visualViewport tracking을 통한 동적 maxHeight 관리 추가)
   - section state preservation을 위한 body visibility 전환
+  - dictionary tag toggle, quick catalog entry toggle, base prompt tag reorder의 정책 계층
 
 - `scripts/e2e/bookmarklet-injection-smoke.mjs`
   - 실제 번들 주입 smoke. theme, resize, collapse, LSB import, apply/generate 검증
@@ -175,8 +226,10 @@ Batched Queue 1단계를 구현했다.
 
 ```bash
 rtk git diff --check
+rtk npx tsc -b
 rtk npm run lint
 rtk npm run build
+rtk npm run test:unit
 rtk npm run test:e2e:bookmarklet
 rtk npm run test:e2e:compose
 ```
@@ -205,10 +258,26 @@ NovelAI 테마는 CSS 변수로 읽을 수 없다. `getComputedStyle()` 표본 �
 
 textarea 하이라이트는 보호 대상이다. textarea 배경을 칠하면 weighted prompt syntax highlighting이 묻힌다.
 
+Tag Dictionary와 Quick Catalog Chips는 같은 역할이 아니다. Dictionary는 넓고 얕은 태그 탐색 데이터이고, Core Catalog는 작고 깊은 편집 메타데이터다. 둘을 UI 레벨에서 섞더라도 적용 정책은 분리한다.
+
+`negativeBase`는 prompt insert target 이름이고, palette/display tone은 `negative`다. display badge나 color palette에 `negativeBase`를 그대로 넣으면 `promptTonePalettes[negativeBase]`가 `undefined`가 되어 런타임 크래시가 난다.
+
+Dictionary tag button은 textarea focus/selection을 빼앗으면 안 된다. `onMouseDown`/`onPointerDown`에서 기본 동작을 막지 않으면 연속 삽입 시 커서가 끝으로 튈 수 있다.
+
+Category chip test id는 group이 아니라 category 기준이다. `dict-group-character` 다음에는 `dict-category-character__headcount-and-relationship` 같은 category id를 사용한다.
+
+`dist/nai-tag-builder.js`를 갱신하지 않으면 bookmarklet smoke는 stale bundle을 검사한다. source e2e가 통과해도 bookmarklet e2e가 `catalog-chip-*` 또는 새 dictionary selector를 못 찾을 수 있다.
+
 WebP/LSB 복원은 이미지 변환 과정에서 alpha LSB가 보존된 경우에만 가능하다. 손실 변환은 payload를 깨뜨릴 수 있다.
 
 React-controlled NovelAI input은 직접 DOM 값 변경이 되돌아갈 수 있다. 기본 적용 경로는 metadata import pipeline이다.
 
 ## 다음 후보 작업
 
-(현재 정의된 즉각적인 후보 작업 없음 - 세션 마무리 가능)
+- `handleCatalogToggle` → `handleToggleQuickCatalogEntry`로 rename
+- `handleReorderBasePrompt` → `handleReorderBasePromptTags`로 rename
+- `onToggleCatalogEntry` → `onToggleQuickCatalogEntry`로 rename
+- `onReorderBasePrompt` → `onReorderBasePromptTags`로 rename
+- `ComposeCatalogChips` props의 `onToggle`도 `onToggleEntry`처럼 더 명확한 이름으로 정리
+- autocomplete 검색 성능 개선: 전체 match 정렬 후 50개 slice 대신 used matches 우선 보존 + 일반 match early limit
+- 장기 구조 후보: `PromptTagCandidate` 공통 모델 도입

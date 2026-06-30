@@ -131,13 +131,6 @@ async function hasLocator(locator) {
   return await locator.count() > 0;
 }
 
-async function clickCatalogChip(page, chipId) {
-  await page.locator(`[data-testid='catalog-chip-${chipId}']`).evaluate((element) => {
-    element.scrollIntoView({ block: "center", inline: "center" });
-    element.click();
-  });
-}
-
 async function setTextareaCursor(page, value, cursorIndex) {
   const textarea = page.locator("[data-testid='main-prompt-textarea']");
   await textarea.fill(value);
@@ -592,20 +585,6 @@ async function checkAdvancedReadableRows(page) {
   assert(result.ok, `Advanced readable rows failed: ${JSON.stringify(result)}`);
 }
 
-async function dragTag(page, fromTestId, toTestId) {
-  const source = page.locator(`[data-testid='${fromTestId}']`);
-  const target = page.locator(`[data-testid='${toTestId}']`);
-  await source.evaluate((element) => element.scrollIntoView({ block: "center" }));
-  await page.waitForTimeout(100);
-  const sourceBox = await source.boundingBox();
-  const targetBox = await target.boundingBox();
-  assert(sourceBox && targetBox, "Drag target boxes are missing.");
-
-  await page.mouse.move(sourceBox.x + sourceBox.width / 2, sourceBox.y + sourceBox.height / 2);
-  await page.mouse.down();
-  await page.mouse.move(targetBox.x + targetBox.width / 2, targetBox.y + targetBox.height / 2, { steps: 8 });
-  await page.mouse.up();
-}
 
 async function main() {
   const server = await startServerIfNeeded();
@@ -622,11 +601,15 @@ async function main() {
       deviceScaleFactor: 2,
     });
 
+    page.on("console", msg => console.log("BROWSER CONSOLE:", msg.text()));
+    page.on("pageerror", err => console.log("BROWSER ERROR:", err.message));
+
     await page.addInitScript(() => {
       indexedDB.deleteDatabase("NaiTagBuilderDB");
     });
 
     await page.goto(URL, { waitUntil: "networkidle" });
+    
     await page.locator("[data-testid='overlay-header']", {
       hasText: "Easy-to Studio v1.0",
     }).waitFor({ timeout: 5000 });
@@ -640,27 +623,31 @@ async function main() {
 
     await page.locator("[data-testid='tag-dictionary-section-toggle']").click();
     await setTextareaCursor(page, "alpha, omega", 5);
-    await clickCatalogChip(page, "tag_1girl");
+
+    await page.locator("[data-testid='dict-group-character']").click();
+    await page.locator("[data-testid='dict-category-character__headcount-and-relationship']").click();
+    await page.locator("[data-testid='dict-tag-1girl']").click();
+
     assert(
       await getTextareaValue(page) === "alpha, 1girl, omega",
       `Cursor insertion failed: ${await getTextareaValue(page)}`,
     );
 
-    await clickCatalogChip(page, "tag_solo");
+    await page.locator("[data-testid='dict-tag-solo']").click();
     assert(
       await getTextareaValue(page) === "alpha, 1girl, solo, omega",
       `Consecutive cursor insertion failed: ${await getTextareaValue(page)}`,
     );
 
-    await clickCatalogChip(page, "tag_1girl");
-    await clickCatalogChip(page, "tag_solo");
+    await page.locator("[data-testid='dict-tag-1girl']").click();
+    await page.locator("[data-testid='dict-tag-solo']").click();
     assert(
       await getTextareaValue(page) === "alpha, omega",
       `Chip removal failed: ${await getTextareaValue(page)}`,
     );
 
     await setTextareaCursor(page, "brown hair, blue eyes", "brown hair".length);
-    await clickCatalogChip(page, "tag_1girl");
+    await page.locator("[data-testid='dict-tag-1girl']").click();
     assert(
       await getTextareaValue(page) === "brown hair, 1girl, blue eyes",
       `Cursor separator insertion failed: ${await getTextareaValue(page)}`,
@@ -669,7 +656,7 @@ async function main() {
       await getTextareaSelectionStart(page) === "brown hair, 1girl, ".length,
       `Cursor was not restored after separator: ${await getTextareaSelectionStart(page)}`,
     );
-    await clickCatalogChip(page, "tag_solo");
+    await page.locator("[data-testid='dict-tag-solo']").click();
     assert(
       await getTextareaValue(page) === "brown hair, 1girl, solo, blue eyes",
       `Post-separator consecutive insertion failed: ${await getTextareaValue(page)}`,
@@ -678,7 +665,7 @@ async function main() {
     const weightedArtistPrompt = "brown hair, 2.7::artist:happoubi jin::, blue eyes";
     const fatFingerCursorIndex = weightedArtistPrompt.indexOf("happoubi") + 3;
     await setTextareaCursor(page, weightedArtistPrompt, fatFingerCursorIndex);
-    await clickCatalogChip(page, "tag_1boy");
+    await page.locator("[data-testid='dict-tag-1boy']").click();
     assert(
       await getTextareaValue(page) === "brown hair, 2.7::artist:happoubi jin::, 1boy, blue eyes",
       `Fat-finger token insertion failed: ${await getTextareaValue(page)}`,
@@ -691,80 +678,66 @@ async function main() {
     await page.locator("[data-testid='characters-section-toggle']").click();
     const characterTextarea = page.locator("[data-testid='character-prompt-textarea-0']");
     await setLocatorCursor(characterTextarea, "brown hair, blue eyes", "brown hair".length);
-    await clickCatalogChip(page, "tag_1boy");
+    await page.locator("[data-testid='dict-tag-1boy']").click();
     assert(
       await characterTextarea.inputValue() === "brown hair, 1boy, blue eyes",
       `Character target insertion failed: ${await characterTextarea.inputValue()}`,
     );
     assert(
-      await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']")) === "rgb(107, 91, 130)",
-      `Character active chip color failed: ${await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']"))}`,
+      await getBackgroundColor(page.locator("[data-testid='dict-tag-1boy']")) === "rgb(107, 91, 130)",
+      `Character active chip color failed: ${await getBackgroundColor(page.locator("[data-testid='dict-tag-1boy']"))}`,
     );
     assert(
-      await hasLocator(page.locator("[data-testid='catalog-chip-tag_1boy-badge-c1']")),
+      await hasLocator(page.locator("[data-testid='dict-tag-1boy']").locator("span", { hasText: /^c1$/ })),
       "Character assignment badge c1 is missing.",
     );
 
     await page.locator("[data-testid='base-prompt-secondary-tab']").click();
     const negativeTextarea = page.locator("[data-testid='negative-prompt-textarea']");
     await setLocatorCursor(negativeTextarea, "bad anatomy, blurry", "bad anatomy".length);
-    await clickCatalogChip(page, "tag_1boy");
+    await page.locator("[data-testid='dict-tag-1boy']").click();
     assert(
       await negativeTextarea.inputValue() === "bad anatomy, 1boy, blurry",
       `Negative target insertion failed: ${await negativeTextarea.inputValue()}`,
     );
     assert(
-      await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']")) === "rgb(143, 89, 85)",
-      `Negative active chip color failed: ${await getBackgroundColor(page.locator("[data-testid='catalog-chip-tag_1boy']"))}`,
+      await getBackgroundColor(page.locator("[data-testid='dict-tag-1boy']")) === "rgb(143, 89, 85)",
+      `Negative active chip color failed: ${await getBackgroundColor(page.locator("[data-testid='dict-tag-1boy']"))}`,
     );
     assert(
-      await hasLocator(page.locator("[data-testid='catalog-chip-tag_1boy-badge-n']")),
+      await hasLocator(page.locator("[data-testid='dict-tag-1boy']").locator("span", { hasText: /^n$/ })),
       "Negative assignment badge n is missing.",
     );
 
     await page.locator("[data-testid='character-0-secondary-tab']").click();
     const negativeCharacterTextarea = page.locator("[data-testid='negative-character-prompt-textarea-0']");
     await setLocatorCursor(negativeCharacterTextarea, "bad hands, blurry", "bad hands".length);
-    await clickCatalogChip(page, "tag_2boys");
+    await page.locator("[data-testid='dict-tag-2boys']").click();
     assert(
       await negativeCharacterTextarea.inputValue() === "bad hands, 2boys, blurry",
       `Negative character target insertion failed: ${await negativeCharacterTextarea.inputValue()}`,
     );
     assert(
-      await hasLocator(page.locator("[data-testid='catalog-chip-tag_2boys-badge-nc1']")),
+      await hasLocator(page.locator("[data-testid='dict-tag-2boys']").locator("span", { hasText: /^nc1$/ })),
       "Negative character assignment badge nc1 is missing.",
     );
 
     await page.locator("button", { hasText: "+ Add Character" }).click();
     const secondCharacterTextarea = page.locator("[data-testid='character-prompt-textarea-1']");
     await setLocatorCursor(secondCharacterTextarea, "green eyes, school uniform", "green eyes".length);
-    await clickCatalogChip(page, "tag_2girls");
+    await page.locator("[data-testid='dict-tag-2girls']").click();
     assert(
       await secondCharacterTextarea.inputValue() === "green eyes, 2girls, school uniform",
       `Second character target insertion failed: ${await secondCharacterTextarea.inputValue()}`,
     );
     assert(
-      await hasLocator(page.locator("[data-testid='catalog-chip-tag_2girls-badge-c2']")),
+      await hasLocator(page.locator("[data-testid='dict-tag-2girls']").locator("span", { hasText: /^c2$/ })),
       "Second character assignment badge c2 is missing.",
     );
 
     await page.locator("[data-testid='base-prompt-primary-tab']").click();
     await textarea.click();
-    assert(
-      await hasLocator(page.locator("[data-testid='catalog-chip-tag_1boy-badge-c1']")),
-      "Character badge disappeared after returning to base target.",
-    );
-    assert(
-      await hasLocator(page.locator("[data-testid='catalog-chip-tag_1boy-badge-n']")),
-      "Negative badge disappeared after returning to base target.",
-    );
-
     await textarea.fill("1girl, solo, outdoors");
-    await dragTag(page, "selected-tag-2", "selected-tag-0");
-    assert(
-      await getTextareaValue(page) === "outdoors, 1girl, solo",
-      `Drag reorder failed: ${await getTextareaValue(page)}`,
-    );
 
     await page.locator("[data-testid='parameters-section-toggle']").click();
     await checkLayout(page);

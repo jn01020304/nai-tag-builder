@@ -1,6 +1,6 @@
 import type { CoreCatalogEntry } from "./catalogTypes";
 
-function normalizePromptToken(value: string): string {
+export function normalizePromptToken(value: string): string {
   return value
     .trim()
     .replace(/^[-+]?\d+(?:\.\d+)?::/, "")
@@ -28,17 +28,23 @@ export function hasCatalogTag(value: string, entry: CoreCatalogEntry): boolean {
   return splitPromptTags(value).some((token) => matchEntryToken(token, entry));
 }
 
+export function hasPromptTag(value: string, tag: string): boolean {
+  const cleanMatch = normalizePromptToken(tag);
+  return splitPromptTags(value).some((token) => normalizePromptToken(token) === cleanMatch);
+}
+
 export function addPromptTag(value: string, tag: string): string {
-  const cleanTag = normalizePromptToken(tag);
-  if (!cleanTag) return value;
+  const cleanMatch = normalizePromptToken(tag);
+  if (!cleanMatch) return value;
 
   const tags = splitPromptTags(value);
-  if (tags.some((token) => normalizePromptToken(token) === cleanTag)) {
+  if (tags.some((token) => normalizePromptToken(token) === cleanMatch)) {
     return value;
   }
 
-  if (tags.length === 0) return cleanTag;
-  return `${tags.join(", ")}, ${cleanTag}`;
+  const insertTag = tag.trim();
+  if (tags.length === 0) return insertTag;
+  return `${tags.join(", ")}, ${insertTag}`;
 }
 
 function resolveSafeInsertIndex(value: string, cursorIndex: number): number {
@@ -70,16 +76,18 @@ export function addPromptTagAtCursorWithSelection(
   tag: string,
   cursorIndex: number | null,
 ): { value: string; nextCursorIndex: number | null } {
-  const cleanTag = normalizePromptToken(tag);
-  if (!cleanTag) return { value, nextCursorIndex: cursorIndex };
+  const cleanMatch = normalizePromptToken(tag);
+  if (!cleanMatch) return { value, nextCursorIndex: cursorIndex };
 
   const tags = splitPromptTags(value);
-  if (tags.some((token) => normalizePromptToken(token) === cleanTag)) {
+  if (tags.some((token) => normalizePromptToken(token) === cleanMatch)) {
     return { value, nextCursorIndex: cursorIndex };
   }
 
+  const insertTag = tag.trim();
+
   if (cursorIndex == null || cursorIndex < 0 || cursorIndex > value.length) {
-    const nextValue = addPromptTag(value, cleanTag);
+    const nextValue = addPromptTag(value, tag);
     return { value: nextValue, nextCursorIndex: nextValue.length };
   }
 
@@ -89,8 +97,8 @@ export function addPromptTagAtCursorWithSelection(
   const prefix = before ? `${before.replace(/,\s*$/, "")}, ` : "";
   const suffix = after ? `, ${after.replace(/^,\s*/, "")}` : "";
   return {
-    value: `${prefix}${cleanTag}${suffix}`,
-    nextCursorIndex: prefix.length + cleanTag.length + (suffix ? 2 : 0),
+    value: `${prefix}${insertTag}${suffix}`,
+    nextCursorIndex: prefix.length + insertTag.length + (suffix ? 2 : 0),
   };
 }
 
@@ -124,6 +132,29 @@ export function toggleCatalogTagWithSelection(
   }
 
   return addPromptTagAtCursorWithSelection(value, entry.tag, cursorIndex);
+}
+
+export function removePromptTag(value: string, tag: string): string {
+  const cleanMatch = normalizePromptToken(tag);
+  return splitPromptTags(value)
+    .filter((token) => normalizePromptToken(token) !== cleanMatch)
+    .join(", ");
+}
+
+export function togglePromptTagWithSelection(
+  value: string,
+  tag: string,
+  cursorIndex: number | null = null,
+): { value: string; nextCursorIndex: number | null } {
+  if (hasPromptTag(value, tag)) {
+    const nextValue = removePromptTag(value, tag);
+    return {
+      value: nextValue,
+      nextCursorIndex: Math.min(cursorIndex ?? nextValue.length, nextValue.length),
+    };
+  }
+
+  return addPromptTagAtCursorWithSelection(value, tag, cursorIndex);
 }
 
 export function movePromptTag(value: string, fromIndex: number, toIndex: number): string {

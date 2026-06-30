@@ -2,6 +2,11 @@ import React, { useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { useTagDictionary } from '../hooks/useTagDictionary';
 import type { TagDictionaryEntry } from '../catalog/tagDictionaryTypes';
+import type { PromptState } from '../types/metadata';
+import { promptTargetGroup, type PromptInsertTarget } from '../prompt/promptInsertTarget';
+import { sortTagsByUsage } from '../utils/tagUsageHelper';
+import type { TagAssignment } from '../utils/tagUsageHelper';
+import { promptTonePalettes } from '../styles/promptTonePalettes';
 
 const BrowserContainer = styled.div`
   display: flex;
@@ -55,20 +60,23 @@ const TagGrid = styled.div`
   margin-top: 10px;
 `;
 
-const TagChip = styled.button`
+const TagChip = styled.button<{ $bg: string; $border: string; $color: string; $shadow: string }>`
   text-align: left;
   padding: 8px 10px;
-  background: var(--ntb-surface, rgba(255, 255, 255, 0.05));
-  border: 1px solid var(--ntb-border, rgba(255, 255, 255, 0.15));
+  background: ${props => props.$bg};
+  border: 1px solid ${props => props.$border};
   border-radius: 6px;
+  box-shadow: ${props => props.$shadow !== 'none' ? `0 0 0 2px ${props.$shadow}` : 'none'};
+  color: ${props => props.$color};
   cursor: pointer;
   display: flex;
   flex-direction: column;
   gap: 4px;
+  position: relative;
   
   &:hover {
     border-color: var(--ntb-primary, #646cff);
-    background: rgba(255, 255, 255, 0.08);
+    background: ${props => props.$bg === 'var(--ntb-surface, rgba(255, 255, 255, 0.05))' ? 'rgba(255, 255, 255, 0.08)' : props.$bg};
   }
 `;
 
@@ -116,10 +124,16 @@ const WarningBox = styled.div`
 `;
 
 interface TagDictionaryBrowserProps {
-  onInsertTag: (tag: string, target: "prompt" | "negative") => void;
+  prompt: PromptState;
+  activePromptTarget: PromptInsertTarget;
+  onToggleDictionaryTag: (tag: string) => void;
 }
 
-export const TagDictionaryBrowser: React.FC<TagDictionaryBrowserProps> = ({ onInsertTag }) => {
+export const TagDictionaryBrowser: React.FC<TagDictionaryBrowserProps> = ({ 
+  prompt,
+  activePromptTarget,
+  onToggleDictionaryTag 
+}) => {
   const {
     manifest,
     groups,
@@ -137,10 +151,18 @@ export const TagDictionaryBrowser: React.FC<TagDictionaryBrowserProps> = ({ onIn
 
   const activeGroup = useMemo(() => groups.find(g => g.groupId === selectedGroup), [groups, selectedGroup]);
 
+  const preservePromptSelection = (event: React.SyntheticEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+  };
+
   // Handle Search for autocomplete chunks
-  const searchResults = useMemo(() => {
-    if (!chunkData || chunkData.mode !== "autocomplete") return [];
-    if (searchQuery.length < 2) return []; // Minimum query length 2
+  const { sortedSearchResults, searchAssignmentsMap } = useMemo<{
+    sortedSearchResults: TagDictionaryEntry[];
+    searchAssignmentsMap: Map<string, TagAssignment[]>;
+  }>(() => {
+    if (!chunkData || chunkData.mode !== "autocomplete") return { sortedSearchResults: [], searchAssignmentsMap: new Map() };
+    if (searchQuery.length < 2) return { sortedSearchResults: [], searchAssignmentsMap: new Map() };
 
     const q = searchQuery.toLowerCase();
     const results: TagDictionaryEntry[] = [];
@@ -152,12 +174,100 @@ export const TagDictionaryBrowser: React.FC<TagDictionaryBrowserProps> = ({ onIn
         tag.keyword.toLowerCase().includes(q)
       ) {
         results.push(tag);
-        if (results.length >= 50) break; // Limit to 50 results to prevent UI freeze
       }
     }
     
-    return results;
-  }, [chunkData, searchQuery]);
+    const { sortedTags, assignmentsMap } = sortTagsByUsage(results, prompt);
+    return { sortedSearchResults: sortedTags.slice(0, 50), searchAssignmentsMap: assignmentsMap };
+  }, [chunkData, searchQuery, prompt]);
+
+  const { sortedCategoryTags, categoryAssignmentsMap } = useMemo<{
+    sortedCategoryTags: TagDictionaryEntry[];
+    categoryAssignmentsMap: Map<string, TagAssignment[]>;
+  }>(() => {
+    if (!chunkData || chunkData.mode === "autocomplete") return { sortedCategoryTags: [], categoryAssignmentsMap: new Map() };
+    const { sortedTags, assignmentsMap } = sortTagsByUsage(chunkData.tags, prompt);
+    return { sortedCategoryTags: sortedTags, categoryAssignmentsMap: assignmentsMap };
+  }, [chunkData, prompt]);
+
+  const renderTag = (tag: TagDictionaryEntry, isSearch: boolean) => {
+    const assignmentsMap = isSearch ? searchAssignmentsMap : categoryAssignmentsMap;
+    const assignments = assignmentsMap.get(tag.english_name) || [];
+    const currentTargetGroup = promptTargetGroup(activePromptTarget);
+
+    const activeInCurrentTarget = assignments.some(a => a.group === currentTargetGroup);
+    const hasAnyAssignment = assignments.length > 0;
+    
+    // Styling
+    let bg = "var(--ntb-surface, rgba(255, 255, 255, 0.05))";
+    let border = "var(--ntb-border, rgba(255, 255, 255, 0.15))";
+    let color = "var(--ntb-text, #fff)";
+    let shadow = "none";
+
+    if (hasAnyAssignment) {
+      const currentAssignmentPalette = promptTonePalettes[currentTargetGroup];
+      const firstAssignmentPalette = promptTonePalettes[assignments[0].group];
+      const chipPalette = activeInCurrentTarget ? currentAssignmentPalette : firstAssignmentPalette;
+      
+      bg = chipPalette.background;
+      border = chipPalette.border;
+      color = chipPalette.color;
+      if (activeInCurrentTarget) {
+        shadow = chipPalette.shadow;
+      }
+    }
+
+    return (
+      <TagChip 
+        key={tag.english_name} 
+        data-testid={`dict-tag-${tag.english_name}`}
+        onMouseDown={preservePromptSelection}
+        onTouchStart={(event) => event.stopPropagation()}
+        onPointerDown={preservePromptSelection}
+        onClick={() => onToggleDictionaryTag(tag.english_name)}
+        $bg={bg}
+        $border={border}
+        $color={color}
+        $shadow={shadow}
+      >
+        <TagEnglish>{tag.english_name}</TagEnglish>
+        <TagKorean>{tag.korean_name}</TagKorean>
+        {assignments.length > 0 && (
+          <div
+            aria-hidden="true"
+            style={{
+              display: "flex",
+              gap: "2px",
+              position: "absolute",
+              right: "4px",
+              top: "4px",
+            }}
+          >
+            {assignments.map((assignment) => {
+              const palette = promptTonePalettes[assignment.group];
+              return (
+                <span
+                  key={assignment.key}
+                  style={{
+                    backgroundColor: palette.border,
+                    borderRadius: "999px",
+                    color: "#101224",
+                    fontSize: "9px",
+                    fontWeight: 800,
+                    lineHeight: 1,
+                    padding: "2px 4px",
+                    textTransform: "lowercase",
+                  }}
+                >
+                  {assignment.label}
+                </span>
+              );
+            })}
+          </div>
+        )}
+      </TagChip>
+    );
+  };
 
   if (isLoadingManifest) {
     return <BrowserContainer>Loading Tag Dictionary Manifest...</BrowserContainer>;
@@ -178,7 +288,11 @@ export const TagDictionaryBrowser: React.FC<TagDictionaryBrowserProps> = ({ onIn
         {groups.map(group => (
           <TabButton
             key={group.groupId}
+            data-testid={`dict-group-${group.groupId}`}
             $active={selectedGroup === group.groupId}
+            onMouseDown={preservePromptSelection}
+            onTouchStart={(event) => event.stopPropagation()}
+            onPointerDown={preservePromptSelection}
             onClick={() => selectGroup(group.groupId)}
           >
             {group.groupLabel}
@@ -192,9 +306,13 @@ export const TagDictionaryBrowser: React.FC<TagDictionaryBrowserProps> = ({ onIn
           {activeGroup.categories.map(cat => (
             <CategoryChip
               key={cat.id}
+              data-testid={`dict-category-${cat.id}`}
               $active={selectedCategory === cat.id}
+              onMouseDown={preservePromptSelection}
+              onTouchStart={(event) => event.stopPropagation()}
+              onPointerDown={preservePromptSelection}
               onClick={() => {
-                setSearchQuery(""); // Reset search on category change
+                setSearchQuery("");
                 selectCategory(cat.id);
               }}
             >
@@ -228,24 +346,14 @@ export const TagDictionaryBrowser: React.FC<TagDictionaryBrowserProps> = ({ onIn
                 <div style={{ fontSize: '12px', opacity: 0.6 }}>Type at least 2 characters to search.</div>
               ) : (
                 <TagGrid>
-                  {searchResults.map(tag => (
-                    <TagChip key={tag.english_name} onClick={() => onInsertTag(tag.english_name, "prompt")}>
-                      <TagEnglish>{tag.english_name}</TagEnglish>
-                      <TagKorean>{tag.korean_name}</TagKorean>
-                    </TagChip>
-                  ))}
-                  {searchResults.length === 0 && <div style={{ fontSize: '13px', gridColumn: '1 / -1' }}>No matches found.</div>}
+                  {sortedSearchResults.map(tag => renderTag(tag, true))}
+                  {sortedSearchResults.length === 0 && <div style={{ fontSize: '13px', gridColumn: '1 / -1' }}>No matches found.</div>}
                 </TagGrid>
               )}
             </div>
           ) : (
             <TagGrid>
-              {chunkData.tags.map(tag => (
-                <TagChip key={tag.english_name} onClick={() => onInsertTag(tag.english_name, "prompt")}>
-                  <TagEnglish>{tag.english_name}</TagEnglish>
-                  <TagKorean>{tag.korean_name}</TagKorean>
-                </TagChip>
-              ))}
+              {sortedCategoryTags.map(tag => renderTag(tag, false))}
             </TagGrid>
           )}
         </div>
