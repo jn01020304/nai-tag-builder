@@ -1,6 +1,7 @@
 import type { PromptState } from "../types/metadata";
 import type { TagDictionaryEntry } from "../catalog/tagDictionaryTypes";
-import { hasPromptTag, splitPromptTags, normalizePromptToken } from "../prompt/catalog/promptTagText";
+import type { CoreCatalogEntry } from "../prompt/catalog/catalogTypes";
+import { hasPromptTag, hasCatalogTag, splitPromptTags, normalizePromptToken } from "../prompt/catalog/promptTagText";
 import type { PromptTone } from "../styles/promptTonePalettes";
 
 export type TargetKind = PromptTone;
@@ -9,43 +10,67 @@ export interface TagAssignment {
   key: string;
   label: string;
   group: TargetKind;
-  order: number; // Order of appearance
+  order: number; // Order of appearance within the target value
 }
 
-export function getPromptAssignments(tag: string, prompt: PromptState): TagAssignment[] {
-  const assignments: TagAssignment[] = [];
-  const cleanMatch = normalizePromptToken(tag);
+interface PromptTargetSlot {
+  value: string;
+  key: string;
+  label: string;
+  group: TargetKind;
+}
 
-  const checkTarget = (
-    value: string,
-    key: string,
-    label: string,
-    group: TargetKind
-  ) => {
-    if (hasPromptTag(value, tag)) {
-      const tags = splitPromptTags(value);
-      const index = tags.findIndex(t => normalizePromptToken(t) === cleanMatch);
-      assignments.push({ key, label, group, order: index >= 0 ? index : 9999 });
-    }
-  };
+/**
+ * The ordered list of prompt fields a tag can live in. Base and negative base
+ * first, then each character paired with its negative character (c1, nc1, c2, nc2…).
+ */
+function promptTargetSlots(prompt: PromptState): PromptTargetSlot[] {
+  const slots: PromptTargetSlot[] = [
+    { value: prompt.basePrompt, key: "base", label: "m", group: "base" },
+    { value: prompt.negativeBase, key: "negativeBase", label: "n", group: "negative" },
+  ];
 
-  // 1. Main
-  checkTarget(prompt.basePrompt, "base", "m", "base");
-  // 2. Negative
-  checkTarget(prompt.negativeBase, "negativeBase", "n", "negative");
-  
-  // 3. Characters
   prompt.characters.forEach((char, index) => {
-    checkTarget(char.caption, `character:${char.id}`, `c${index + 1}`, "character");
-    
-    // Check corresponding negative character if it exists
+    slots.push({ value: char.caption, key: `character:${char.id}`, label: `c${index + 1}`, group: "character" });
     const negChar = prompt.negativeCharacters[index];
     if (negChar) {
-      checkTarget(negChar.caption, `negativeCharacter:${negChar.id}`, `nc${index + 1}`, "negativeCharacter");
+      slots.push({ value: negChar.caption, key: `negativeCharacter:${negChar.id}`, label: `nc${index + 1}`, group: "negativeCharacter" });
     }
   });
 
+  return slots;
+}
+
+function collectAssignments(
+  prompt: PromptState,
+  matches: (value: string) => boolean,
+  orderIn: (value: string) => number,
+): TagAssignment[] {
+  const assignments: TagAssignment[] = [];
+  for (const slot of promptTargetSlots(prompt)) {
+    if (matches(slot.value)) {
+      assignments.push({ key: slot.key, label: slot.label, group: slot.group, order: orderIn(slot.value) });
+    }
+  }
   return assignments;
+}
+
+/** Where a plain string tag currently appears across the prompt targets. */
+export function getPromptAssignments(tag: string, prompt: PromptState): TagAssignment[] {
+  const cleanMatch = normalizePromptToken(tag);
+  const orderIn = (value: string) => {
+    const index = splitPromptTags(value).findIndex((t) => normalizePromptToken(t) === cleanMatch);
+    return index >= 0 ? index : 9999;
+  };
+  return collectAssignments(prompt, (value) => hasPromptTag(value, tag), orderIn);
+}
+
+/**
+ * Where a curated catalog entry currently appears. Alias-aware via hasCatalogTag,
+ * so it matches any of the entry's canonical tag or aliases.
+ */
+export function getCatalogEntryAssignments(entry: CoreCatalogEntry, prompt: PromptState): TagAssignment[] {
+  return collectAssignments(prompt, (value) => hasCatalogTag(value, entry), () => 0);
 }
 
 export function sortTagsByUsage(tags: TagDictionaryEntry[], prompt: PromptState): {

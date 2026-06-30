@@ -735,6 +735,34 @@ async function main() {
       "Second character assignment badge c2 is missing.",
     );
 
+    // --- Inline tag autocomplete + heuristic recommendation ---
+    await page.locator("[data-testid='base-prompt-primary-tab']").click();
+    await textarea.click();
+    await textarea.fill("");
+    await textarea.pressSequentially("lo", { delay: 25 });
+    const autocompleteOption = page.locator("[data-testid='main-prompt-textarea-autocomplete-option-long hair']");
+    await autocompleteOption.waitFor({ timeout: 4000 });
+    await autocompleteOption.click();
+    assert(
+      await getTextareaValue(page) === "long hair",
+      `Autocomplete insertion failed: ${await getTextareaValue(page)}`,
+    );
+    // The accepted tag must not echo back as its own suggestion; the strip clears.
+    await page
+      .locator("[data-testid='main-prompt-textarea-autocomplete']")
+      .waitFor({ state: "detached", timeout: 4000 });
+
+    const recommendationOption = page.locator("[data-testid^='main-prompt-textarea-recommendation-option-']").first();
+    await recommendationOption.waitFor({ timeout: 4000 });
+    const recommendedTestId = await recommendationOption.getAttribute("data-testid");
+    const recommendedTag = recommendedTestId.replace("main-prompt-textarea-recommendation-option-", "");
+    await recommendationOption.click();
+    const afterRecommendation = await getTextareaValue(page);
+    assert(
+      afterRecommendation.startsWith("long hair, ") && afterRecommendation.includes(recommendedTag),
+      `Recommendation insertion failed: ${afterRecommendation}`,
+    );
+
     await page.locator("[data-testid='base-prompt-primary-tab']").click();
     await textarea.click();
     await textarea.fill("1girl, solo, outdoors");

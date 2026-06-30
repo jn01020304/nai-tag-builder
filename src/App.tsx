@@ -23,18 +23,10 @@ import OverlayFooter from './components/OverlayFooter';
 import OverlayHeader from './components/OverlayHeader';
 import { parseNovelAIImageFiles } from './utils/pngParser';
 import type { StatusFeedback } from './types/feedback';
-import type {
-  PromptInsertTarget,
-  PromptSelection,
-  PromptSelectionAfterRender,
-} from './prompt/promptInsertTarget';
-import { promptTargetKey } from './prompt/promptInsertTarget';
-import type { CoreCatalogEntry } from './prompt/catalog/catalogTypes';
-import {
-  movePromptTag,
-  toggleCatalogTagWithSelection,
-  togglePromptTagWithSelection,
-} from './prompt/catalog/promptTagText';
+import { movePromptTag } from './prompt/catalog/promptTagText';
+import { usePromptTargets } from './hooks/usePromptTargets';
+import { offlineTagSuggestionProvider } from './catalog/providers/tagSuggestionProvider';
+import type { PromptAutocompleteApi } from './components/PromptFieldSuggestions';
 
 export type AppMode = 'compose' | 'queue';
 
@@ -165,11 +157,39 @@ function AppContent() {
   const [feedback, setFeedback] = useState<StatusFeedback | null>(null);
   const [currentApplyPhase, setCurrentApplyPhase] = useState<ApplyPipelinePhase | null>(null);
   const applyInFlightRef = useRef(false);
-  const [activePromptTarget, setActivePromptTarget] = useState<PromptInsertTarget>({ kind: 'base' });
-  const [promptSelections, setPromptSelections] = useState<Record<string, PromptSelection>>({});
-  const [selectionAfterRenderByTarget, setSelectionAfterRenderByTarget] = useState<
-    Record<string, PromptSelectionAfterRender | undefined>
-  >({});
+  const {
+    activePromptTarget,
+    setActivePromptTarget,
+    recordPromptSelection,
+    getSelectionAfterRender,
+    handleCatalogToggle,
+    handleToggleDictionaryTag,
+    acceptAutocomplete,
+    addRelatedTag,
+  } = usePromptTargets(state, dispatch);
+  const [recentTags, setRecentTags] = useState<string[]>([]);
+
+  const pushRecentTag = (tag: string) => {
+    const trimmed = tag.trim();
+    if (!trimmed) return;
+    setRecentTags((current) =>
+      [trimmed, ...current.filter((existing) => existing.toLowerCase() !== trimmed.toLowerCase())].slice(0, 16),
+    );
+  };
+
+  const promptAutocomplete: PromptAutocompleteApi = {
+    provider: offlineTagSuggestionProvider,
+    prompt: state.prompt,
+    recentTags,
+    acceptAutocomplete: (target, caretIndex, tag) => {
+      acceptAutocomplete(target, caretIndex, tag);
+      pushRecentTag(tag);
+    },
+    acceptRecommendation: (target, tag) => {
+      addRelatedTag(target, tag);
+      pushRecentTag(tag);
+    },
+  };
 
   useLayoutEffect(() => {
     keepOverlayInViewport(CONTAINER_ID);
@@ -279,117 +299,6 @@ function AppContent() {
   const handleClose = () => {
     stopLoop();
     document.getElementById(CONTAINER_ID)?.remove();
-  };
-
-  const recordPromptSelection = (target: PromptInsertTarget, selection: PromptSelection) => {
-    const key = promptTargetKey(target);
-    setActivePromptTarget(target);
-    setPromptSelections((current) => ({
-      ...current,
-      [key]: selection,
-    }));
-  };
-
-  const getTargetPromptValue = (target: PromptInsertTarget): string => {
-    switch (target.kind) {
-      case 'base':
-        return state.prompt.basePrompt;
-      case 'negativeBase':
-        return state.prompt.negativeBase;
-      case 'character':
-        return state.prompt.characters.find((character) => character.id === target.id)?.caption ?? '';
-      case 'negativeCharacter':
-        return state.prompt.negativeCharacters.find((character) => character.id === target.id)?.caption ?? '';
-    }
-  };
-
-  const dispatchPromptTargetValue = (target: PromptInsertTarget, value: string) => {
-    switch (target.kind) {
-      case 'base':
-        dispatch({ type: 'SET_PROMPT', field: 'basePrompt', value });
-        return;
-      case 'negativeBase':
-        dispatch({ type: 'SET_PROMPT', field: 'negativeBase', value });
-        return;
-      case 'character':
-        dispatch({ type: 'UPDATE_CHARACTER', id: target.id, field: 'caption', value });
-        return;
-      case 'negativeCharacter':
-        dispatch({ type: 'UPDATE_NEG_CHARACTER', id: target.id, field: 'caption', value });
-        return;
-    }
-  };
-
-  const getPairedNegativeCharacterTarget = (characterId: string): PromptInsertTarget | null => {
-    const index = state.prompt.characters.findIndex((character) => character.id === characterId);
-    const negativeCharacter = index >= 0 ? state.prompt.negativeCharacters[index] : undefined;
-    return negativeCharacter ? { kind: 'negativeCharacter', id: negativeCharacter.id } : null;
-  };
-
-  const resolveCatalogTarget = (entry: CoreCatalogEntry): PromptInsertTarget => {
-    if (entry.target === 'negative' && activePromptTarget.kind === 'base') {
-      return { kind: 'negativeBase' };
-    }
-
-    if (entry.target === 'negative' && activePromptTarget.kind === 'character') {
-      return getPairedNegativeCharacterTarget(activePromptTarget.id) ?? activePromptTarget;
-    }
-
-    return activePromptTarget;
-  };
-
-  const handleCatalogToggle = (entry: CoreCatalogEntry) => {
-    const target = resolveCatalogTarget(entry);
-    const targetKey = promptTargetKey(target);
-    const promptValue = getTargetPromptValue(target);
-    const selection = promptSelections[targetKey] ?? { start: promptValue.length, end: promptValue.length };
-
-    const result = toggleCatalogTagWithSelection(promptValue, entry, selection.start);
-
-    dispatchPromptTargetValue(target, result.value);
-
-    if (result.nextCursorIndex != null) {
-      const nextSelection = {
-        start: result.nextCursorIndex,
-        end: result.nextCursorIndex,
-        version: Date.now(),
-      };
-      setPromptSelections((current) => ({
-        ...current,
-        [targetKey]: nextSelection,
-      }));
-      setSelectionAfterRenderByTarget((current) => ({
-        ...current,
-        [targetKey]: nextSelection,
-      }));
-    }
-  };
-
-  const handleToggleDictionaryTag = (tag: string) => {
-    const target = activePromptTarget;
-    const targetKey = promptTargetKey(target);
-    const promptValue = getTargetPromptValue(target);
-    const selection = promptSelections[targetKey] ?? { start: promptValue.length, end: promptValue.length };
-
-    const result = togglePromptTagWithSelection(promptValue, tag, selection.start);
-
-    dispatchPromptTargetValue(target, result.value);
-
-    if (result.nextCursorIndex != null) {
-      const nextSelection = {
-        start: result.nextCursorIndex,
-        end: result.nextCursorIndex,
-        version: Date.now(),
-      };
-      setPromptSelections((current) => ({
-        ...current,
-        [targetKey]: nextSelection,
-      }));
-      setSelectionAfterRenderByTarget((current) => ({
-        ...current,
-        [targetKey]: nextSelection,
-      }));
-    }
   };
 
   const handleReorderBasePrompt = (fromIndex: number, toIndex: number) => {
@@ -780,17 +689,19 @@ function AppContent() {
                 prompt={state.prompt}
                 dispatch={dispatch}
                 activePromptTarget={activePromptTarget}
-                getSelectionAfterRender={(target) => selectionAfterRenderByTarget[promptTargetKey(target)]}
+                getSelectionAfterRender={getSelectionAfterRender}
                 onPromptSelection={recordPromptSelection}
+                autocomplete={promptAutocomplete}
               />
               <CharacterCaptions
                 characters={state.prompt.characters}
                 negativeCharacters={state.prompt.negativeCharacters}
                 activePromptTarget={activePromptTarget}
                 dispatch={dispatch}
-                getSelectionAfterRender={(target) => selectionAfterRenderByTarget[promptTargetKey(target)]}
+                getSelectionAfterRender={getSelectionAfterRender}
                 onPromptSelection={recordPromptSelection}
                 onRemoveCharacter={handleRemoveCharacter}
+                autocomplete={promptAutocomplete}
               />
               <TagDictionarySection
                 prompt={state.prompt}

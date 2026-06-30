@@ -7,6 +7,7 @@ import type {
 import CollapsibleSection from './CollapsibleSection';
 import { useThemeStyles } from '../contexts/themeContextCore';
 import PromptPairTabs from './PromptPairTabs';
+import type { PromptAutocompleteApi } from './PromptFieldSuggestions';
 
 interface Props {
   characters: CharacterEntry[];
@@ -16,6 +17,7 @@ interface Props {
   getSelectionAfterRender: (target: PromptInsertTarget) => PromptSelectionAfterRender | undefined;
   onPromptSelection: (target: PromptInsertTarget, selection: { start: number; end: number }) => void;
   onRemoveCharacter: (id: string) => void;
+  autocomplete?: PromptAutocompleteApi;
 }
 
 export default function CharacterCaptions({
@@ -26,6 +28,7 @@ export default function CharacterCaptions({
   getSelectionAfterRender,
   onPromptSelection,
   onRemoveCharacter,
+  autocomplete,
 }: Props) {
   const { theme, inputStyle, labelStyle, smallBtnStyle } = useThemeStyles();
 
@@ -70,6 +73,7 @@ export default function CharacterCaptions({
                 activePromptTarget={activePromptTarget}
                 getSelectionAfterRender={getSelectionAfterRender}
                 onPromptSelection={onPromptSelection}
+                autocomplete={autocomplete}
                 primary={{
                   tabLabel: "Prompt",
                   target: { kind: 'character', id: char.id },

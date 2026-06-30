@@ -6,6 +6,7 @@ import type {
 import type { PromptState } from "../types/metadata";
 import CollapsibleSection from "./CollapsibleSection";
 import PromptPairTabs from "./PromptPairTabs";
+import type { PromptAutocompleteApi } from "./PromptFieldSuggestions";
 
 interface Props {
   prompt: PromptState;
@@ -13,6 +14,7 @@ interface Props {
   activePromptTarget: PromptInsertTarget;
   getSelectionAfterRender: (target: PromptInsertTarget) => PromptSelectionAfterRender | undefined;
   onPromptSelection: (target: PromptInsertTarget, selection: { start: number; end: number }) => void;
+  autocomplete?: PromptAutocompleteApi;
 }
 
 export default function MainPromptSection({
@@ -21,6 +23,7 @@ export default function MainPromptSection({
   activePromptTarget,
   getSelectionAfterRender,
   onPromptSelection,
+  autocomplete,
 }: Props) {
   return (
     <CollapsibleSection title="Main Prompt" testId="main-prompt-section" defaultOpen={true}>
@@ -29,6 +32,7 @@ export default function MainPromptSection({
         activePromptTarget={activePromptTarget}
         getSelectionAfterRender={getSelectionAfterRender}
         onPromptSelection={onPromptSelection}
+        autocomplete={autocomplete}
         primary={{
           tabLabel: "Main",
           target: { kind: "base" },

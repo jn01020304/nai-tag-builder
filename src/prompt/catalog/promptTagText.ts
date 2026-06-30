@@ -157,6 +157,44 @@ export function togglePromptTagWithSelection(
   return addPromptTagAtCursorWithSelection(value, tag, cursorIndex);
 }
 
+/**
+ * The text the user is currently typing: the comma-delimited segment from the
+ * previous comma up to the caret, trimmed. Empty when the caret sits right after
+ * a comma or on whitespace. Used to drive inline autocomplete.
+ */
+export function getPartialTokenAtCursor(value: string, cursorIndex: number): string {
+  const safe = Math.max(0, Math.min(cursorIndex, value.length));
+  const start = value.lastIndexOf(",", safe - 1) + 1;
+  return value.slice(start, safe).trim();
+}
+
+/**
+ * Replace the whole tag segment the caret sits in with `tag`, preserving the
+ * separator spacing, and return the caret index just after the inserted tag.
+ * This is the accept path for inline autocomplete (turn "long ha|" into "long hair|").
+ */
+export function replacePartialTokenWithTag(
+  value: string,
+  cursorIndex: number,
+  tag: string,
+): { value: string; nextCursorIndex: number } {
+  const insertTag = tag.trim();
+  const safe = Math.max(0, Math.min(cursorIndex, value.length));
+  const start = value.lastIndexOf(",", safe - 1) + 1;
+  const rightComma = value.indexOf(",", safe);
+  const end = rightComma === -1 ? value.length : rightComma;
+
+  const before = value.slice(0, start);
+  const after = value.slice(end);
+  const segment = value.slice(start, end);
+  const leading = segment.match(/^\s*/)?.[0] ?? "";
+
+  return {
+    value: `${before}${leading}${insertTag}${after}`,
+    nextCursorIndex: before.length + leading.length + insertTag.length,
+  };
+}
+
 export function movePromptTag(value: string, fromIndex: number, toIndex: number): string {
   const tags = splitPromptTags(value);
   if (

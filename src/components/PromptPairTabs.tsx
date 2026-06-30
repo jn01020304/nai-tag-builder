@@ -12,6 +12,8 @@ import { useThemeStyles } from "../contexts/themeContextCore";
 import { promptTonePalettes } from "../styles/promptTonePalettes";
 import { withAlpha } from "../styles/color";
 import HighlightedTextarea from "./HighlightedTextarea";
+import PromptFieldSuggestions from "./PromptFieldSuggestions";
+import type { PromptAutocompleteApi } from "./PromptFieldSuggestions";
 
 interface PromptPairField {
   tabLabel: string;
@@ -30,6 +32,7 @@ interface PromptPairTabsProps {
   testIdPrefix: string;
   getSelectionAfterRender: (target: PromptInsertTarget) => PromptSelectionAfterRender | undefined;
   onPromptSelection: (target: PromptInsertTarget, selection: { start: number; end: number }) => void;
+  autocomplete?: PromptAutocompleteApi;
 }
 
 type ActivePanel = "primary" | "secondary";
@@ -45,10 +48,12 @@ export default function PromptPairTabs({
   testIdPrefix,
   getSelectionAfterRender,
   onPromptSelection,
+  autocomplete,
 }: PromptPairTabsProps) {
   const { theme, inputStyle, smallBtnStyle } = useThemeStyles();
   const [selectedPanel, setSelectedPanel] = useState<ActivePanel>("primary");
   const [isSplit, setIsSplit] = useState(false);
+  const [caretByTarget, setCaretByTarget] = useState<Record<string, { index: number; version: number }>>({});
   const targetPanel: ActivePanel | null = targetMatches(activePromptTarget, primary.target)
     ? "primary"
     : targetMatches(activePromptTarget, secondary.target)
@@ -98,6 +103,21 @@ export default function PromptPairTabs({
   const renderField = (field: PromptPairField, panel: ActivePanel, marginBottom = "8px") => {
     const selectionAfterRender = getSelectionAfterRender(field.target);
 
+    // The caret that drives autocomplete: the freshest of the user-tracked caret
+    // and the post-commit caret (selectionAfterRender). Version-stamped so a
+    // programmatic insert's caret wins over a stale typed caret, and vice versa.
+    const trackedCaret = caretByTarget[promptTargetKey(field.target)];
+    const caretIndex =
+      trackedCaret && selectionAfterRender
+        ? trackedCaret.version >= selectionAfterRender.version
+          ? trackedCaret.index
+          : selectionAfterRender.start
+        : trackedCaret
+          ? trackedCaret.index
+          : selectionAfterRender
+            ? selectionAfterRender.start
+            : field.value.length;
+
     const promptInputStyle: CSSProperties = {
       ...inputStyle,
       boxSizing: "border-box",
@@ -111,6 +131,10 @@ export default function PromptPairTabs({
 
     const handleSelection = (element: HTMLTextAreaElement) => {
       setSelectedPanel(panel);
+      setCaretByTarget((current) => ({
+        ...current,
+        [promptTargetKey(field.target)]: { index: element.selectionStart, version: Date.now() },
+      }));
       onPromptSelection(field.target, {
         start: element.selectionStart,
         end: element.selectionEnd,
@@ -136,6 +160,15 @@ export default function PromptPairTabs({
           autoCapitalize="off"
           style={promptInputStyle}
         />
+        {autocomplete && activePanel === panel && (
+          <PromptFieldSuggestions
+            api={autocomplete}
+            target={field.target}
+            value={field.value}
+            caretIndex={caretIndex}
+            testIdPrefix={field.testId}
+          />
+        )}
       </div>
     );
   };

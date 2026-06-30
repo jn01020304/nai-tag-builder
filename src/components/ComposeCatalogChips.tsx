@@ -8,6 +8,7 @@ import { useTheme } from "../contexts/themeContextCore";
 import { promptTonePalettes } from "../styles/promptTonePalettes";
 import { readableTextColor, withAlpha } from "../styles/color";
 import { hasCatalogTag, splitPromptTags } from "../prompt/catalog/promptTagText";
+import { getCatalogEntryAssignments } from "../utils/tagUsageHelper";
 
 const CATEGORY_LABELS: Record<ProductCategory, string> = {
   headcount: "인원수",
@@ -66,48 +67,6 @@ export default function ComposeCatalogChips({
   const selectedPromptTags = splitPromptTags(activePromptValue);
   const activeTargetGroup = promptTargetGroup(activePromptTarget);
   const canReorderSelectedTags = activePromptTarget.kind === "base";
-
-  type TargetGroup = ReturnType<typeof promptTargetGroup>;
-
-  interface TagAssignment {
-    key: string;
-    label: string;
-    group: TargetGroup;
-  }
-
-  const getEntryAssignments = (entry: CoreCatalogEntry): TagAssignment[] => {
-    const assignments: TagAssignment[] = [];
-
-    if (hasCatalogTag(prompt.basePrompt, entry)) {
-      assignments.push({ key: "base", label: "m", group: "base" });
-    }
-
-    if (hasCatalogTag(prompt.negativeBase, entry)) {
-      assignments.push({ key: "negativeBase", label: "n", group: "negative" });
-    }
-
-    for (const [index, character] of prompt.characters.entries()) {
-      if (hasCatalogTag(character.caption, entry)) {
-        assignments.push({
-          key: `character:${character.id}`,
-          label: `c${index + 1}`,
-          group: "character",
-        });
-      }
-    }
-
-    for (const [index, character] of prompt.negativeCharacters.entries()) {
-      if (hasCatalogTag(character.caption, entry)) {
-        assignments.push({
-          key: `negativeCharacter:${character.id}`,
-          label: `nc${index + 1}`,
-          group: "negativeCharacter",
-        });
-      }
-    }
-
-    return assignments;
-  };
 
   const tabBaseStyle: React.CSSProperties = {
     backgroundColor: withAlpha(theme.mantle, 0.72),
@@ -172,7 +131,7 @@ export default function ComposeCatalogChips({
         }}
       >
         {visibleEntries.map((entry) => {
-          const assignments = getEntryAssignments(entry);
+          const assignments = getCatalogEntryAssignments(entry, prompt);
           const active = assignments.length > 0;
           const activeInCurrentTarget = hasCatalogTag(activePromptValue, entry);
           const currentAssignmentPalette = promptTonePalettes[activeTargetGroup];
