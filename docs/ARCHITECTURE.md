@@ -37,6 +37,7 @@ NovelAI는 CSS 변수를 사용하지 않고 Styled Components 기반의 해시 
 ## 상위 모듈 경계 및 의존성 원칙
 
 - Prompt 계층: Compose 화면 및 태그 입력/컴파일을 담당한다. 이 계층의 절대적인 진실의 원천(Source of Truth)은 구조화된 객체나 칩 상태가 아닌 **`raw prompt string`**이다. 이 계층은 NovelAI DOM selector나 Import Pipeline 구현을 절대 알면 안 된다.
+- Prompt Tag 도구 계층: Quick Catalog Chips와 Full Tag Dictionary의 역할을 분리한다. Quick Catalog Chips는 `CoreCatalogEntry`의 target hint와 aliases를 가진 curated editor이고, Full Tag Dictionary는 lazy-loaded lexical search/browse surface다. 두 UI가 같은 섹션에 있더라도 prompt 적용 정책은 App 계층의 handler에서 분리한다.
 - Tune 계층: 생성 조건(seed, size, steps 등)을 다루며, Advanced flags를 기본 조작면에서 엄격히 격리한다.
 - Queue 계층: 보류된 기술 부채가 아닌 독립된 핵심 도메인이다. `QueueDraft`, `QueueSession`, `QueueTickPlan` 등 명확한 데이터 계약을 소유하며 작업 지시를 관장한다. Batched Queue의 실행 단위는 기존 Preset이며, 이미지 batch import는 Preset 생성 후 Queue에 추가되는 입력 경로로 취급한다. Automation 계층의 DOM 셀렉터를 알지 못하며 결과만 관찰한다. 특히 무한 재시도를 막기 위해 **실패 시 중단(Stop on failure)**을 기본 정책으로 강제한다.
 - Review / Asset 계층: 결과물의 보관, 폐기, 보류 상태와 메타데이터의 연결을 담당한다. 런타임 환경에서 무거운 이미지 처리를 수행하는 대신, PC 편집 환경으로 안전하게 이관(Handoff)하기 위한 Manifest 생성 및 관리에 집중한다.
@@ -51,4 +52,4 @@ NovelAI는 CSS 변수를 사용하지 않고 Styled Components 기반의 해시 
 북마클릿이라는 태생적 한계와 런타임 보안을 유지하기 위해 다음 원칙을 강제한다:
 - API 키, 인증 토큰 등 민감한 자격 증명을 평문으로 로컬 스토리지에 저장하거나 소스 코드에 하드코딩하는 것을 금지한다.
 - 앱 내부에서 NovelAI 백엔드를 향해 직접적인 API 호출을 수행하는 것을 금지한다. (반드시 DOM 위임 경로를 따른다)
-- 런타임 메모리와 초기 로딩 비용 방어를 위해, 수십 MB에 달하는 전체 Danbooru DB나 무거운 LLM 의존성을 런타임에 번들링하는 것을 금지한다. 앱은 오프라인에서 사전 검수된 가벼운 Core Catalog만 소비한다.
+- 런타임 메모리와 초기 로딩 비용 방어를 위해, 수십 MB에 달하는 전체 Danbooru DB나 무거운 LLM 의존성을 런타임에 번들링하는 것을 금지한다. 앱은 오프라인에서 만든 작은 Core Catalog를 번들에 포함하고, 큰 Tag Dictionary chunk는 `public/catalog/tag-dictionary`에서 필요할 때만 lazy load한다.

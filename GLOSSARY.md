@@ -120,6 +120,30 @@ preset queue
 PromptPairTabs
 : Main/Undesired 또는 Character/Undesired Character 쌍을 탭과 split view로 보여주는 공통 컴포넌트.
 
+Quick Catalog Chips
+: `ComposeCatalogChips`가 렌더링하는 검수된 빠른 태그 편집 칩. `CoreCatalogEntry`의 `target`, `aliases`, `defaultVisible` 같은 편집 메타데이터를 사용한다.
+
+Full Tag Dictionary
+: 카테고리 chunk와 검색으로 전체 태그 사전을 탐색하는 UI. Dictionary entry는 넓은 검색용 lexical data이며, Quick Catalog의 편집 메타데이터를 대체하지 않는다.
+
+CoreCatalogEntry
+: Quick Catalog Chips의 입력 데이터. canonical tag, alias, product category, target hint, priority, review status 등을 가진다.
+
+TagDictionaryEntry
+: Full Tag Dictionary의 입력 데이터. `english_name`, `korean_name`, `description`, `keyword`, `count` 중심이며 target hint나 alias-aware editor policy를 직접 갖지 않는다.
+
+prompt target
+: 실제 삽입 대상. `base`, `negativeBase`, `character`, `negativeCharacter` 같은 값을 가진다.
+
+prompt tone
+: 색상과 badge 표시용 그룹. `base`, `negative`, `character`, `negativeCharacter` 값을 가진다. `negativeBase`는 prompt target이고, palette key는 `negative`다.
+
+dictionary usage badge
+: dictionary tag가 현재 prompt 어디에 들어 있는지 보여주는 작은 표시. 예: `m`, `n`, `c1`, `nc1`.
+
+dictionary category test id
+: Tag Dictionary category chip의 테스트 식별자. group id가 아니라 category id 기준이며 예시는 `dict-category-character__headcount-and-relationship`이다.
+
 split view
 : Main과 Negative prompt를 위아래로 동시에 보여주는 모드.
 
