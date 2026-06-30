@@ -1,5 +1,6 @@
 import type { CoreCatalogEntry } from "../prompt/catalog/catalogTypes";
 import type { TagDictionaryEntry } from "../catalog/tagDictionaryTypes";
+import type { TagRelationsData } from "../catalog/tagRelationsTypes";
 import { normalizePromptToken } from "../prompt/catalog/promptTagText";
 
 /**
@@ -122,6 +123,51 @@ export function recommendFromCatalogSiblings(
   }
 
   return out;
+}
+
+/**
+ * Data-driven recommendation from the offline relations asset. Unions the
+ * related lists of every present seed tag, scoring each candidate by positional
+ * relevance summed across seeds — so a tag related to several present tags
+ * (e.g. "pleated skirt" related to both "skirt" and "school uniform") rises.
+ * Excludes tags already present. Returns [] when no present tag is a seed, so
+ * the caller can fall back to the heuristic.
+ */
+export function recommendFromRelations(
+  data: TagRelationsData,
+  presentNormalized: ReadonlySet<string>,
+  limit: number,
+): TagSuggestion[] {
+  const scored = new Map<string, { suggestion: TagSuggestion; score: number }>();
+
+  for (const seed of presentNormalized) {
+    const related = data.relations[seed];
+    if (!related) continue;
+    related.forEach((entry, index) => {
+      const norm = normalizePromptToken(entry.english_name);
+      if (!norm || presentNormalized.has(norm)) return;
+      const positional = related.length - index;
+      const existing = scored.get(norm);
+      if (existing) {
+        existing.score += positional;
+      } else {
+        scored.set(norm, {
+          suggestion: {
+            english_name: entry.english_name,
+            korean_name: entry.korean_name,
+            count: entry.count,
+            source: "dictionary",
+          },
+          score: positional,
+        });
+      }
+    });
+  }
+
+  return [...scored.values()]
+    .sort((a, b) => b.score - a.score || b.suggestion.count - a.suggestion.count)
+    .slice(0, limit)
+    .map((entry) => entry.suggestion);
 }
 
 const EMPTY_SET: ReadonlySet<string> = new Set();

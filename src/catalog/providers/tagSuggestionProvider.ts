@@ -3,12 +3,14 @@ import type { PromptInsertTarget } from "../../prompt/promptInsertTarget";
 import { coreCatalog } from "../../prompt/catalog/coreCatalog.generated";
 import { splitPromptTags, normalizePromptToken } from "../../prompt/catalog/promptTagText";
 import { tagDictionaryLoader } from "../tagDictionaryLoader";
+import { tagRelationsLoader } from "../tagRelationsLoader";
 import {
   type TagSuggestion,
   catalogEntryToSuggestion,
   dictionaryEntryToSuggestion,
   filterAndRankByQuery,
   recommendFromCatalogSiblings,
+  recommendFromRelations,
 } from "../../utils/tagRankingAndFilter";
 
 export type { TagSuggestion };
@@ -72,6 +74,14 @@ export const offlineTagSuggestionProvider: TagSuggestionProvider = {
 
   async related(context, { limit }) {
     const present = presentTagSet(context.activeValue);
+
+    // Prefer the offline relations asset; fall back to the category/recent
+    // heuristic when it is unavailable or none of the present tags are seeds.
+    const relations = await tagRelationsLoader.load();
+    if (relations) {
+      const fromRelations = recommendFromRelations(relations, present, limit);
+      if (fromRelations.length > 0) return fromRelations;
+    }
     return recommendFromCatalogSiblings(coreCatalog, present, context.recentTags, limit);
   },
 };

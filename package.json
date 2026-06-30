@@ -9,6 +9,7 @@
     "catalog:build": "node scripts/catalog/build-core-catalog.mjs",
     "dictionary:split": "node scripts/catalog/build-tag-dictionary-chunks.mjs",
     "dictionary:sync": "node scripts/catalog/sync-tag-dictionary-to-public.mjs",
+    "relations:build": "node scripts/catalog/build-tag-relations.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "test:unit": "tsx scripts/test/queue-planner-test.ts && tsx scripts/test/queue-session-test.ts",

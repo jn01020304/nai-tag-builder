@@ -10,9 +10,9 @@ interface Props {
 }
 
 /**
- * Heuristic "related tags" for the field content, as a collapsible wrapped row.
- * Labeled (베타) because Phase 1 recommendation is a same-category/recent
- * heuristic interim, not the offline relations data planned for Phase 2.
+ * Related-tag suggestions for the field content, as a collapsible wrapped row.
+ * Backed by the offline relations asset, with a category/recent heuristic
+ * fallback for tags outside the asset's seed coverage.
  */
 export default function TagRecommendationRow({ recommendations, onPick, testIdPrefix }: Props) {
   const theme = useTheme();
@@ -44,7 +44,7 @@ export default function TagRecommendationRow({ recommendations, onPick, testIdPr
         }}
       >
         <span aria-hidden="true">{collapsed ? "▸" : "▾"}</span>
-        추천 (베타) {recommendations.length}
+        추천 {recommendations.length}
       </button>
 
       {!collapsed && (
