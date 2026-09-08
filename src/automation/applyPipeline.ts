@@ -7,9 +7,12 @@ import type { ApplyAutomationPhaseEvent, ApplyAutomationResult } from './automat
 export interface ApplyPipelineOptions {
   state: MetadataState;
   autoGenerate?: boolean;
+  seedIntent?: SeedIntent;
   signal?: AbortSignal;
   onPhase?: (event: ApplyPipelinePhaseEvent) => void;
 }
+
+export type SeedIntent = 'preserve' | 'randomize';
 
 export type ApplyPipelinePhase =
   | 'planning'
@@ -52,8 +55,11 @@ export function createRandomSeed(): number {
   return Math.floor(Math.random() * MAX_SEED) + 1;
 }
 
-export function planSeed(requestedSeed: number): SeedPlan {
-  const seedWasRandomized = requestedSeed === 0;
+export function planSeed(
+  requestedSeed: number,
+  seedIntent: SeedIntent = 'preserve',
+): SeedPlan {
+  const seedWasRandomized = seedIntent === 'randomize';
   return {
     requestedSeed,
     appliedSeed: seedWasRandomized ? createRandomSeed() : requestedSeed,
@@ -73,8 +79,12 @@ function applyPlannedSeed(state: MetadataState, seed: SeedPlan): MetadataState {
   };
 }
 
-export function planApply({ state, autoGenerate = false }: ApplyPipelineOptions): ApplyPlan {
-  const seed = planSeed(state.params.seed);
+export function planApply({
+  state,
+  autoGenerate = false,
+  seedIntent = 'preserve',
+}: ApplyPipelineOptions): ApplyPlan {
+  const seed = planSeed(state.params.seed, seedIntent);
   const appliedState = applyPlannedSeed(state, seed);
 
   return {

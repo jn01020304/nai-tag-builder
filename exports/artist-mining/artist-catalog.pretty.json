@@ -1,0 +1,5539 @@
+{
+  "version": 1,
+  "collected": "2026-08-24",
+  "count": 546,
+  "alias": {
+    "sho_(sho_lwlw)": "todoroki_masaru",
+    "parsely-f": "parsley-f",
+    "clioranko": "ciloranko",
+    "cola_gotouryouta": "cola_(gotouryouta)",
+    "horikoshi_kouhe": "horikoshi_kouhei",
+    "deadflow": "bee_(deadflow)",
+    "michinking": "michiking",
+    "ame_(ulten_cancel)": "ame_(uten_cancel)",
+    "danimnaru": "danimaru",
+    "henriku_(ahemaru)": "henriiku_(ahemaru)",
+    "ie_(raarami).": "ie_(raarami)",
+    "jp06_(orangemaru)": "jp06",
+    "mika_pizako": "mika_pikazo",
+    "pottness": "pottsness",
+    "ratatat74": "ratatatat74",
+    "shuri_84k": "shuri_(84k)",
+    "doremi": "doremi_(doremi4704)",
+    "noizi_ito": "ito_noizi",
+    "opossumachine": "possummachine",
+    "pochimaru": "pochimaru_(marumaru_wanwan)",
+    "riich": "riichu"
+  },
+  "artists": [
+    {
+      "tag": "pixie_willow_(voice_actor)",
+      "pop": 27.694,
+      "train": 644,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "xipa",
+      "pop": 20.127,
+      "train": 473,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "shexyo",
+      "pop": 16.986,
+      "train": 995,
+      "n": 200,
+      "used": 5,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "umezawa_itte",
+      "pop": 16.965,
+      "train": 276,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "0haribo0",
+      "pop": 15.994,
+      "train": 205,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "toma_(toma50)",
+      "pop": 15.137,
+      "train": 245,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ie_(raarami)",
+      "pop": 12.931,
+      "train": 392,
+      "n": 200,
+      "used": 16,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "qiandaiyiyu",
+      "pop": 12.318,
+      "train": 791,
+      "n": 200,
+      "used": 139,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ndgd",
+      "pop": 11.612,
+      "train": 847,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "billyhhyb",
+      "pop": 11.53,
+      "train": 187,
+      "n": 187,
+      "used": 23,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "afrobull",
+      "pop": 10.68,
+      "train": 1898,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "ebora",
+      "pop": 10.012,
+      "train": 2386,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "sushispin",
+      "pop": 9.817,
+      "train": 205,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mamimi_(mamamimi)",
+      "pop": 9.396,
+      "train": 445,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "sos_adult",
+      "pop": 9.373,
+      "train": 212,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "re0n",
+      "pop": 9.328,
+      "train": 309,
+      "n": 200,
+      "used": 5,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "manglifer",
+      "pop": 9.196,
+      "train": 208,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mignon",
+      "pop": 8.775,
+      "train": 963,
+      "n": 200,
+      "used": 276,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "beeeeen",
+      "pop": 8.691,
+      "train": 503,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ramanda",
+      "pop": 8.634,
+      "train": 537,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kakure_eria",
+      "pop": 8.497,
+      "train": 991,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "bluethebone",
+      "pop": 8.41,
+      "train": 671,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "ratatatat74",
+      "pop": 8.381,
+      "train": 563,
+      "n": 200,
+      "used": 17,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "tresmarrow",
+      "pop": 8.175,
+      "train": 84,
+      "n": 84,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "niliu_chahui",
+      "pop": 8.078,
+      "train": 1718,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "fugtrup",
+      "pop": 7.583,
+      "train": 972,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "meion",
+      "pop": 7.455,
+      "train": 424,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "momisan",
+      "pop": 7.44,
+      "train": 677,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "hero_neisan",
+      "pop": 7.363,
+      "train": 609,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "seito_edaha",
+      "pop": 7.321,
+      "train": 70,
+      "n": 70,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "yuki_(asayuki101)",
+      "pop": 7.283,
+      "train": 418,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mamerakkkkko",
+      "pop": 7.265,
+      "train": 1160,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "aestheticc-meme",
+      "pop": 7.213,
+      "train": 1317,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "haku89",
+      "pop": 7.137,
+      "train": 652,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "gwan-e",
+      "pop": 7.054,
+      "train": 239,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "hone_kawa",
+      "pop": 7.044,
+      "train": 674,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kyokucho",
+      "pop": 7.037,
+      "train": 456,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "wagashi_(dagashiya)",
+      "pop": 7.015,
+      "train": 267,
+      "n": 200,
+      "used": 10,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "dishwasher1910",
+      "pop": 6.958,
+      "train": 1751,
+      "n": 200,
+      "used": 20,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "akita_hika",
+      "pop": 6.858,
+      "train": 482,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "eonsang",
+      "pop": 6.852,
+      "train": 953,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ke-ta",
+      "pop": 6.741,
+      "train": 958,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "machi_(machi0910)",
+      "pop": 6.507,
+      "train": 825,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "ame_(uten_cancel)",
+      "pop": 6.479,
+      "train": 393,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "cutesexyrobutts",
+      "pop": 6.47,
+      "train": 1511,
+      "n": 200,
+      "used": 5,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "kezime",
+      "pop": 6.452,
+      "train": 38,
+      "n": 38,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "k_pring",
+      "pop": 6.424,
+      "train": 291,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "alp",
+      "pop": 6.298,
+      "train": 803,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "sadakage",
+      "pop": 6.273,
+      "train": 279,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ru_zhai",
+      "pop": 6.093,
+      "train": 1347,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kawakami_rokkaku",
+      "pop": 6.049,
+      "train": 884,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kokemomo_(makesound)",
+      "pop": 5.856,
+      "train": 216,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "t1kosewad",
+      "pop": 5.781,
+      "train": 674,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "nanoless",
+      "pop": 5.775,
+      "train": 803,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "batta_16-sei",
+      "pop": 5.727,
+      "train": 629,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "aiue_oka",
+      "pop": 5.68,
+      "train": 270,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "topu",
+      "pop": 5.657,
+      "train": 1004,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "marushin_(denwa0214)",
+      "pop": 5.651,
+      "train": 470,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kase_daiki",
+      "pop": 5.544,
+      "train": 1402,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "shinjiro",
+      "pop": 5.507,
+      "train": 257,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "pottsness",
+      "pop": 5.444,
+      "train": 706,
+      "n": 200,
+      "used": 9,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "freng",
+      "pop": 5.44,
+      "train": 671,
+      "n": 200,
+      "used": 335,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "yd_(orange_maru)",
+      "pop": 5.431,
+      "train": 1868,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "club3",
+      "pop": 5.423,
+      "train": 1056,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "ro_g_(oowack)",
+      "pop": 5.415,
+      "train": 608,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "sunhyun",
+      "pop": 5.355,
+      "train": 870,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "bongftah",
+      "pop": 5.278,
+      "train": 492,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "lunch_(shin_new)",
+      "pop": 5.273,
+      "train": 391,
+      "n": 200,
+      "used": 11,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "yoya_yogurt",
+      "pop": 5.258,
+      "train": 67,
+      "n": 67,
+      "used": 8,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "channel_(caststation)",
+      "pop": 5.206,
+      "train": 243,
+      "n": 200,
+      "used": 30,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mimonel",
+      "pop": 5.159,
+      "train": 1083,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "ayase-mio",
+      "pop": 5.137,
+      "train": 207,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "miyamoto_issa",
+      "pop": 5.126,
+      "train": 516,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "luizhtx",
+      "pop": 5.102,
+      "train": 379,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "b-ginga",
+      "pop": 5.095,
+      "train": 1609,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "rity",
+      "pop": 5.073,
+      "train": 315,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "sciamano240",
+      "pop": 5.041,
+      "train": 1030,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "fymrie",
+      "pop": 4.991,
+      "train": 296,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "age_fx",
+      "pop": 4.895,
+      "train": 226,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "shiguren_39",
+      "pop": 4.876,
+      "train": 290,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "sincos",
+      "pop": 4.866,
+      "train": 2768,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "blue_gk",
+      "pop": 4.761,
+      "train": 364,
+      "n": 200,
+      "used": 14,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "asutora",
+      "pop": 4.724,
+      "train": 1538,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "blushyspicy",
+      "pop": 4.722,
+      "train": 897,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "jack_dempa",
+      "pop": 4.717,
+      "train": 1266,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "gomashio_ponz",
+      "pop": 4.674,
+      "train": 313,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "oldsickkim",
+      "pop": 4.663,
+      "train": 834,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "nompang",
+      "pop": 4.659,
+      "train": 296,
+      "n": 200,
+      "used": 6,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "nora_higuma",
+      "pop": 4.647,
+      "train": 733,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "sonao",
+      "pop": 4.621,
+      "train": 445,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kabu_usagi",
+      "pop": 4.613,
+      "train": 273,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "takunomi",
+      "pop": 4.596,
+      "train": 605,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "asanagi",
+      "pop": 4.582,
+      "train": 1628,
+      "n": 200,
+      "used": 254,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "xi_xeong",
+      "pop": 4.544,
+      "train": 190,
+      "n": 190,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "myabit",
+      "pop": 4.492,
+      "train": 404,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "michiking",
+      "pop": 4.44,
+      "train": 280,
+      "n": 200,
+      "used": 262,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mikozin",
+      "pop": 4.439,
+      "train": 1495,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "bee_(deadflow)",
+      "pop": 4.435,
+      "train": 1321,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "daram_(shappydude)",
+      "pop": 4.417,
+      "train": 1815,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "betanonbeet",
+      "pop": 4.393,
+      "train": 760,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "neoartcore",
+      "pop": 4.385,
+      "train": 997,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "null_(nyanpyoun)",
+      "pop": 4.194,
+      "train": 2097,
+      "n": 200,
+      "used": 6,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "yunsang",
+      "pop": 4.19,
+      "train": 249,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "akipeko",
+      "pop": 4.187,
+      "train": 215,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "centurii-chan",
+      "pop": 4.165,
+      "train": 725,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "happoubi_jin",
+      "pop": 4.155,
+      "train": 1458,
+      "n": 200,
+      "used": 272,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "flippy_(cripine111)",
+      "pop": 4.109,
+      "train": 440,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "toraishi_666",
+      "pop": 4.108,
+      "train": 741,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "kuromoto-kun_(rina_masimaro)",
+      "pop": 4.107,
+      "train": 145,
+      "n": 145,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ohisashiburi",
+      "pop": 4.074,
+      "train": 1733,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "houtengeki",
+      "pop": 4.059,
+      "train": 2472,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "atahuta",
+      "pop": 4.056,
+      "train": 574,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "danimaru",
+      "pop": 4.053,
+      "train": 503,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "bitseon",
+      "pop": 4.035,
+      "train": 444,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "jp06",
+      "pop": 4.024,
+      "train": 327,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "try_(lsc)",
+      "pop": 4.022,
+      "train": 503,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ame_(amechan17391739)",
+      "pop": 4.005,
+      "train": 450,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "as109",
+      "pop": 3.952,
+      "train": 1535,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "healthyman",
+      "pop": 3.905,
+      "train": 244,
+      "n": 200,
+      "used": 24,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "haze_(7h4ze)",
+      "pop": 3.889,
+      "train": 486,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "kurono_mitsuki",
+      "pop": 3.889,
+      "train": 318,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "gurimjang",
+      "pop": 3.886,
+      "train": 428,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "kincora",
+      "pop": 3.807,
+      "train": 207,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "momo_no_sukebe",
+      "pop": 3.773,
+      "train": 1249,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "shusuchii",
+      "pop": 3.755,
+      "train": 522,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "konpeto",
+      "pop": 3.688,
+      "train": 822,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "0lightsource",
+      "pop": 3.656,
+      "train": 586,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "kani_fish",
+      "pop": 3.613,
+      "train": 412,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "greatmosu",
+      "pop": 3.588,
+      "train": 687,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "aak_(chalie363)",
+      "pop": 3.556,
+      "train": 511,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "umyonge_(lkakeu)",
+      "pop": 3.548,
+      "train": 649,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "7peach",
+      "pop": 3.489,
+      "train": 57,
+      "n": 57,
+      "used": 6,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "milkychu",
+      "pop": 3.448,
+      "train": 44,
+      "n": 44,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mashutarou_(neko_no_oyashiro)",
+      "pop": 3.444,
+      "train": 1061,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "zankuro",
+      "pop": 3.436,
+      "train": 890,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "nekojira",
+      "pop": 3.425,
+      "train": 328,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "agawa_ryou",
+      "pop": 3.407,
+      "train": 2013,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "dino_(dinoartforame)",
+      "pop": 3.385,
+      "train": 630,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "dandon_fuga",
+      "pop": 3.383,
+      "train": 1379,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "ctrlz77",
+      "pop": 3.378,
+      "train": 312,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "homunculus_(alchemynote)",
+      "pop": 3.307,
+      "train": 468,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ayagi_daifuku",
+      "pop": 3.286,
+      "train": 641,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "nbee_ya",
+      "pop": 3.276,
+      "train": 432,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kedama_milk",
+      "pop": 3.16,
+      "train": 653,
+      "n": 200,
+      "used": 203,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "branch_(blackrabbits)",
+      "pop": 3.14,
+      "train": 468,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "pro-p",
+      "pop": 3.134,
+      "train": 142,
+      "n": 142,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "hyulla",
+      "pop": 3.119,
+      "train": 159,
+      "n": 159,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "258n",
+      "pop": 3.106,
+      "train": 459,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "hata4564",
+      "pop": 3.069,
+      "train": 507,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "modare",
+      "pop": 3.067,
+      "train": 1070,
+      "n": 200,
+      "used": 218,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "jyt",
+      "pop": 3.029,
+      "train": 837,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "kelvin_hiu",
+      "pop": 3.021,
+      "train": 676,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "deyui",
+      "pop": 3.014,
+      "train": 1113,
+      "n": 200,
+      "used": 7,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "ulrich_(tagaragakuin)",
+      "pop": 3.001,
+      "train": 1194,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "kuren_kren",
+      "pop": 2.95,
+      "train": 145,
+      "n": 145,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "timy",
+      "pop": 2.933,
+      "train": 141,
+      "n": 141,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "onono_imoko",
+      "pop": 2.927,
+      "train": 681,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "unacchi_(nyusankin)",
+      "pop": 2.86,
+      "train": 416,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "saitou_masatsugu",
+      "pop": 2.854,
+      "train": 668,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "karyln",
+      "pop": 2.851,
+      "train": 282,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "akazawa_red",
+      "pop": 2.839,
+      "train": 252,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "yippee",
+      "pop": 2.834,
+      "train": 124,
+      "n": 124,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "baffu",
+      "pop": 2.832,
+      "train": 853,
+      "n": 200,
+      "used": 5,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "seicoh",
+      "pop": 2.825,
+      "train": 217,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "myung_yi",
+      "pop": 2.822,
+      "train": 151,
+      "n": 151,
+      "used": 6,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "guchico",
+      "pop": 2.786,
+      "train": 511,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "rhasta",
+      "pop": 2.776,
+      "train": 149,
+      "n": 149,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "92m",
+      "pop": 2.774,
+      "train": 1241,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "ayuma_sayu",
+      "pop": 2.723,
+      "train": 457,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "yomu_(sgt_epper)",
+      "pop": 2.717,
+      "train": 1396,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "henriiku_(ahemaru)",
+      "pop": 2.698,
+      "train": 446,
+      "n": 200,
+      "used": 7,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "hiroyama_hiroshi",
+      "pop": 2.686,
+      "train": 248,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "solipsist",
+      "pop": 2.671,
+      "train": 169,
+      "n": 169,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "bekotarou",
+      "pop": 2.652,
+      "train": 456,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "nixeu",
+      "pop": 2.65,
+      "train": 412,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "timbougami",
+      "pop": 2.646,
+      "train": 669,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "abubu",
+      "pop": 2.642,
+      "train": 2510,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "ebifurya",
+      "pop": 2.634,
+      "train": 6620,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "sumiyao_(amam)",
+      "pop": 2.615,
+      "train": 2055,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "arato_asato",
+      "pop": 2.609,
+      "train": 191,
+      "n": 191,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kaguyuzu",
+      "pop": 2.596,
+      "train": 458,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "kidmo",
+      "pop": 2.596,
+      "train": 325,
+      "n": 200,
+      "used": 46,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "asahina_yoshitoshi",
+      "pop": 2.588,
+      "train": 869,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "nui_(nuinui0300)",
+      "pop": 2.581,
+      "train": 660,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "a.t._zero",
+      "pop": 2.567,
+      "train": 114,
+      "n": 114,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "aria_(ariacue)",
+      "pop": 2.561,
+      "train": 336,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "huu_(dighapdlxm12)",
+      "pop": 2.553,
+      "train": 498,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "xiujia_yihuizi",
+      "pop": 2.493,
+      "train": 817,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "coffeekite",
+      "pop": 2.469,
+      "train": 650,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "ponponmaru",
+      "pop": 2.419,
+      "train": 527,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "gaou_(umaiyo_puyoman)",
+      "pop": 2.409,
+      "train": 950,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "fishine",
+      "pop": 2.401,
+      "train": 347,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "aomushi_(mushamusha)",
+      "pop": 2.382,
+      "train": 506,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "rin_yuu",
+      "pop": 2.36,
+      "train": 737,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mibu_natsuki",
+      "pop": 2.343,
+      "train": 734,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "lolita_channel",
+      "pop": 2.314,
+      "train": 1831,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "anmi",
+      "pop": 2.313,
+      "train": 671,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "hamada_yoshikazu",
+      "pop": 2.312,
+      "train": 529,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "tsukuring_agi",
+      "pop": 2.307,
+      "train": 15,
+      "n": 15,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "shuri_(84k)",
+      "pop": 2.304,
+      "train": 876,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "meme50",
+      "pop": 2.287,
+      "train": 372,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kakao_(chocolate_land)",
+      "pop": 2.282,
+      "train": 546,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "torino_aqua",
+      "pop": 2.279,
+      "train": 604,
+      "n": 200,
+      "used": 15,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "buzzlyears",
+      "pop": 2.271,
+      "train": 1841,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "piromizu",
+      "pop": 2.249,
+      "train": 1708,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "sakura_yuki_(clochette)",
+      "pop": 2.226,
+      "train": 560,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "sapysha",
+      "pop": 2.222,
+      "train": 84,
+      "n": 84,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "villainchin",
+      "pop": 2.214,
+      "train": 461,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kupa_(jesterwii)",
+      "pop": 2.196,
+      "train": 837,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "izumi_sai",
+      "pop": 2.181,
+      "train": 581,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "pioko",
+      "pop": 2.162,
+      "train": 234,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mankai_kaika",
+      "pop": 2.141,
+      "train": 340,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "shinozuka_yuuji",
+      "pop": 2.131,
+      "train": 8,
+      "n": 8,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "yueepon",
+      "pop": 2.116,
+      "train": 31,
+      "n": 31,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kim_hyung_tae",
+      "pop": 2.108,
+      "train": 374,
+      "n": 200,
+      "used": 10,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "cocoballking",
+      "pop": 2.105,
+      "train": 645,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "10mo",
+      "pop": 2.097,
+      "train": 411,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "kkuem",
+      "pop": 2.089,
+      "train": 165,
+      "n": 165,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "quasarcake",
+      "pop": 2.081,
+      "train": 375,
+      "n": 200,
+      "used": 145,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "azuuru",
+      "pop": 2.071,
+      "train": 537,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "genyaky",
+      "pop": 2.063,
+      "train": 945,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "hiyoko_spot",
+      "pop": 2.061,
+      "train": 617,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "void_0",
+      "pop": 2.061,
+      "train": 217,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "swd3e2",
+      "pop": 2.06,
+      "train": 1425,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "afukuro",
+      "pop": 2.057,
+      "train": 288,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "hetza_(hellshock)",
+      "pop": 2.04,
+      "train": 842,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "sasamori_tomoe",
+      "pop": 2.038,
+      "train": 537,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "gogalking",
+      "pop": 2.036,
+      "train": 495,
+      "n": 200,
+      "used": 11,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "takeuchi_takashi",
+      "pop": 2.016,
+      "train": 2165,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "akieda",
+      "pop": 2.013,
+      "train": 211,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "hyde_(tabakko)",
+      "pop": 2.009,
+      "train": 802,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "qys3",
+      "pop": 2.001,
+      "train": 620,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "nonco",
+      "pop": 1.995,
+      "train": 1052,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "horuhara",
+      "pop": 1.982,
+      "train": 575,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "1ssakawaguchi",
+      "pop": 1.974,
+      "train": 445,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "774_(nanashi)",
+      "pop": 1.946,
+      "train": 891,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "shimada_fumikane",
+      "pop": 1.942,
+      "train": 1709,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "murata_range",
+      "pop": 1.928,
+      "train": 1010,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "mochi_(circle_rin)",
+      "pop": 1.919,
+      "train": 173,
+      "n": 173,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "muririn",
+      "pop": 1.914,
+      "train": 985,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "cedar_(cedar_japonica)",
+      "pop": 1.912,
+      "train": 1365,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "kokosando",
+      "pop": 1.911,
+      "train": 312,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "blade_(galaxist)",
+      "pop": 1.893,
+      "train": 3207,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "yuzuriha_(nx_e78)",
+      "pop": 1.881,
+      "train": 95,
+      "n": 95,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "miruto_netsuki",
+      "pop": 1.874,
+      "train": 338,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "choco_chip",
+      "pop": 1.868,
+      "train": 611,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "kenkou_cross",
+      "pop": 1.865,
+      "train": 1030,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "momoko_(momopoco)",
+      "pop": 1.858,
+      "train": 1546,
+      "n": 200,
+      "used": 132,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "hxxg",
+      "pop": 1.858,
+      "train": 695,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "leonardo_vincent",
+      "pop": 1.853,
+      "train": 86,
+      "n": 86,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kousaki_rui",
+      "pop": 1.851,
+      "train": 640,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "miwabe_sakura",
+      "pop": 1.842,
+      "train": 610,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "taketora_suzume",
+      "pop": 1.84,
+      "train": 762,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "supernew",
+      "pop": 1.819,
+      "train": 129,
+      "n": 129,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "izuru_(timbermetal)",
+      "pop": 1.817,
+      "train": 229,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ningen_mame",
+      "pop": 1.81,
+      "train": 633,
+      "n": 200,
+      "used": 296,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "blue_borscht",
+      "pop": 1.806,
+      "train": 617,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "fajyobore",
+      "pop": 1.806,
+      "train": 347,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "hepari",
+      "pop": 1.796,
+      "train": 309,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "soeyumi",
+      "pop": 1.793,
+      "train": 58,
+      "n": 58,
+      "used": 5,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "pochincoff",
+      "pop": 1.774,
+      "train": 810,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "ogipote",
+      "pop": 1.77,
+      "train": 550,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "yuno_kaihara",
+      "pop": 1.769,
+      "train": 185,
+      "n": 185,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "horikoshi_kouhei",
+      "pop": 1.768,
+      "train": 360,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "tianliang_duohe_fangdongye",
+      "pop": 1.752,
+      "train": 151,
+      "n": 151,
+      "used": 10,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "hiten_(hitenkei)",
+      "pop": 1.75,
+      "train": 921,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "tam-u",
+      "pop": 1.747,
+      "train": 289,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "fkey",
+      "pop": 1.742,
+      "train": 1132,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "kagari_liroi",
+      "pop": 1.739,
+      "train": 293,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "soon_(c-u-soon)",
+      "pop": 1.725,
+      "train": 770,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "bison_cangshu",
+      "pop": 1.724,
+      "train": 876,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "21yc_(september_breeze)",
+      "pop": 1.724,
+      "train": 194,
+      "n": 194,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "hotosoka",
+      "pop": 1.718,
+      "train": 66,
+      "n": 66,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kim_eb",
+      "pop": 1.715,
+      "train": 413,
+      "n": 200,
+      "used": 5,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ideolo",
+      "pop": 1.696,
+      "train": 777,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "nenobi_(nenorium)",
+      "pop": 1.695,
+      "train": 506,
+      "n": 200,
+      "used": 179,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "riichu",
+      "pop": 1.688,
+      "train": 1195,
+      "n": 200,
+      "used": 271,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "wada_arco",
+      "pop": 1.688,
+      "train": 979,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "nahaki",
+      "pop": 1.68,
+      "train": 739,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "sousouman",
+      "pop": 1.676,
+      "train": 1160,
+      "n": 200,
+      "used": 259,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "zhibuji_loom",
+      "pop": 1.674,
+      "train": 402,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "crumbles",
+      "pop": 1.665,
+      "train": 847,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "creayus",
+      "pop": 1.664,
+      "train": 1633,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "moshimoshibe",
+      "pop": 1.664,
+      "train": 440,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "lack",
+      "pop": 1.643,
+      "train": 1341,
+      "n": 200,
+      "used": 206,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "amagai_tarou",
+      "pop": 1.643,
+      "train": 610,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mossacannibalis",
+      "pop": 1.634,
+      "train": 1367,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "mafuyu_(chibi21)",
+      "pop": 1.633,
+      "train": 609,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "lightningace",
+      "pop": 1.629,
+      "train": 100,
+      "n": 100,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ask_(askzy)",
+      "pop": 1.623,
+      "train": 612,
+      "n": 200,
+      "used": 9,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "ssambatea",
+      "pop": 1.621,
+      "train": 372,
+      "n": 200,
+      "used": 6,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "takai_isshiki",
+      "pop": 1.619,
+      "train": 116,
+      "n": 116,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "onyhakase",
+      "pop": 1.617,
+      "train": 773,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "40hara",
+      "pop": 1.612,
+      "train": 1035,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "kizuki_aruchu",
+      "pop": 1.602,
+      "train": 215,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mx2j",
+      "pop": 1.601,
+      "train": 844,
+      "n": 200,
+      "used": 81,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "robo_mikan",
+      "pop": 1.591,
+      "train": 814,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "bb_(baalbuddy)",
+      "pop": 1.589,
+      "train": 2974,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "nardack",
+      "pop": 1.548,
+      "train": 1042,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "fuumi_(radial_engine)",
+      "pop": 1.547,
+      "train": 428,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "yunamaro",
+      "pop": 1.542,
+      "train": 1627,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kaerunrun",
+      "pop": 1.542,
+      "train": 241,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "needbee_r",
+      "pop": 1.542,
+      "train": 171,
+      "n": 171,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kimhiro",
+      "pop": 1.533,
+      "train": 74,
+      "n": 74,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "hwan_(mob_hwan)",
+      "pop": 1.529,
+      "train": 244,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "wanke",
+      "pop": 1.529,
+      "train": 178,
+      "n": 178,
+      "used": 236,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "gotyou",
+      "pop": 1.525,
+      "train": 848,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "tsunako",
+      "pop": 1.523,
+      "train": 2232,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "lix_(iroiro3843)",
+      "pop": 1.519,
+      "train": 425,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "cheonyeon-hi",
+      "pop": 1.519,
+      "train": 163,
+      "n": 163,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "liduke",
+      "pop": 1.515,
+      "train": 433,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mery_(yangmalgage)",
+      "pop": 1.512,
+      "train": 1674,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ciloranko",
+      "pop": 1.484,
+      "train": 252,
+      "n": 200,
+      "used": 192,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "96yottea",
+      "pop": 1.475,
+      "train": 147,
+      "n": 147,
+      "used": 12,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kawacy",
+      "pop": 1.471,
+      "train": 520,
+      "n": 200,
+      "used": 7,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "7010",
+      "pop": 1.441,
+      "train": 1061,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "necomi",
+      "pop": 1.435,
+      "train": 639,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "cluseller",
+      "pop": 1.404,
+      "train": 1087,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "neco",
+      "pop": 1.403,
+      "train": 501,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "bigkwl",
+      "pop": 1.402,
+      "train": 888,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "yoneyama_mai",
+      "pop": 1.385,
+      "train": 322,
+      "n": 200,
+      "used": 7,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "akabane_(zebrasmise)",
+      "pop": 1.379,
+      "train": 458,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "hiro_(dismaless)",
+      "pop": 1.368,
+      "train": 253,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "hungry_clicker",
+      "pop": 1.359,
+      "train": 2884,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "sparrowl",
+      "pop": 1.358,
+      "train": 508,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "weri",
+      "pop": 1.347,
+      "train": 225,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "miv4t",
+      "pop": 1.345,
+      "train": 277,
+      "n": 200,
+      "used": 123,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "lansane",
+      "pop": 1.338,
+      "train": 656,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "murata_yuusuke",
+      "pop": 1.337,
+      "train": 465,
+      "n": 200,
+      "used": 7,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "maturiuta_sorato",
+      "pop": 1.335,
+      "train": 1329,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "maccha_(mochancc)",
+      "pop": 1.325,
+      "train": 588,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "ayuman",
+      "pop": 1.322,
+      "train": 240,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "nagishiro_mito",
+      "pop": 1.32,
+      "train": 807,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "amazuyu_tatsuki",
+      "pop": 1.319,
+      "train": 826,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "snow_is",
+      "pop": 1.31,
+      "train": 216,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "todoroki_masaru",
+      "pop": 1.31,
+      "train": 122,
+      "n": 122,
+      "used": 0,
+      "src": [
+        "alias"
+      ]
+    },
+    {
+      "tag": "sakon04",
+      "pop": 1.295,
+      "train": 215,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "wlop",
+      "pop": 1.292,
+      "train": 400,
+      "n": 200,
+      "used": 201,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "yamamoto_souichirou",
+      "pop": 1.291,
+      "train": 2035,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "aruka_(alka_p1)",
+      "pop": 1.285,
+      "train": 312,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "rurudo",
+      "pop": 1.281,
+      "train": 217,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "reoen",
+      "pop": 1.279,
+      "train": 377,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "dduck_kong",
+      "pop": 1.272,
+      "train": 494,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "toosaka_asagi",
+      "pop": 1.27,
+      "train": 2061,
+      "n": 200,
+      "used": 276,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "possummachine",
+      "pop": 1.257,
+      "train": 721,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "starshadowmagician",
+      "pop": 1.256,
+      "train": 1062,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "aogisa",
+      "pop": 1.251,
+      "train": 822,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "lam_(ramdayo)",
+      "pop": 1.245,
+      "train": 485,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mika_pikazo",
+      "pop": 1.242,
+      "train": 1117,
+      "n": 200,
+      "used": 6,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "cinquecento",
+      "pop": 1.241,
+      "train": 74,
+      "n": 74,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "tukiwani",
+      "pop": 1.229,
+      "train": 1741,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "kishida_mel",
+      "pop": 1.222,
+      "train": 1278,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "paddy_field",
+      "pop": 1.222,
+      "train": 433,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "lpip",
+      "pop": 1.215,
+      "train": 1216,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "33_gaff",
+      "pop": 1.201,
+      "train": 270,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "chuzenji",
+      "pop": 1.2,
+      "train": 206,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "gotoh_(nekocat)",
+      "pop": 1.191,
+      "train": 1001,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "chigusa_minori",
+      "pop": 1.188,
+      "train": 2030,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "rariatto_(ganguri)",
+      "pop": 1.186,
+      "train": 2540,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "drunkoak",
+      "pop": 1.181,
+      "train": 224,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "cola_(gotouryouta)",
+      "pop": 1.18,
+      "train": 133,
+      "n": 133,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ryuuzaki_ichi",
+      "pop": 1.177,
+      "train": 586,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mitsumoto_jouji",
+      "pop": 1.166,
+      "train": 1214,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "sheya",
+      "pop": 1.149,
+      "train": 1564,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "gulim",
+      "pop": 1.143,
+      "train": 242,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "fathom",
+      "pop": 1.138,
+      "train": 707,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "remsrar",
+      "pop": 1.137,
+      "train": 487,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ikeuchi_tanuma",
+      "pop": 1.126,
+      "train": 1616,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ixy",
+      "pop": 1.123,
+      "train": 3022,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "enami_katsumi",
+      "pop": 1.12,
+      "train": 432,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "suimya",
+      "pop": 1.114,
+      "train": 380,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "pochimaru_(marumaru_wanwan)",
+      "pop": 1.112,
+      "train": 1149,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "a-ka",
+      "pop": 1.108,
+      "train": 660,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "mochizuki_kei",
+      "pop": 1.106,
+      "train": 705,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "swav",
+      "pop": 1.106,
+      "train": 496,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ito_noizi",
+      "pop": 1.104,
+      "train": 1490,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "banananosongen",
+      "pop": 1.102,
+      "train": 144,
+      "n": 144,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "konya_karasue",
+      "pop": 1.1,
+      "train": 222,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "abara_heiki",
+      "pop": 1.094,
+      "train": 591,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "achiki",
+      "pop": 1.083,
+      "train": 475,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "az_(zero_glvimayhop)",
+      "pop": 1.07,
+      "train": 58,
+      "n": 58,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kurotofu",
+      "pop": 1.06,
+      "train": 629,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "teshima_nari",
+      "pop": 1.045,
+      "train": 663,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "dongsheng",
+      "pop": 1.035,
+      "train": 173,
+      "n": 173,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "skade",
+      "pop": 1.024,
+      "train": 276,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "tokiame",
+      "pop": 1.023,
+      "train": 353,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "amonitto",
+      "pop": 1.022,
+      "train": 517,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "hanekoto",
+      "pop": 1.018,
+      "train": 733,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kankan33333",
+      "pop": 1.007,
+      "train": 1659,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "luicent",
+      "pop": 1.004,
+      "train": 622,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "eho_(icbm)",
+      "pop": 0.993,
+      "train": 622,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "rolua",
+      "pop": 0.992,
+      "train": 269,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "cis_(carcharias)",
+      "pop": 0.988,
+      "train": 1045,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "horiguchi_yukiko",
+      "pop": 0.987,
+      "train": 973,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "hisakata_souji",
+      "pop": 0.987,
+      "train": 192,
+      "n": 192,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "arisaka_ako",
+      "pop": 0.986,
+      "train": 405,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "723/nanahumi",
+      "pop": 0.986,
+      "train": 194,
+      "n": 194,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "endo_(takolegs)",
+      "pop": 0.986,
+      "train": 88,
+      "n": 88,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "muju",
+      "pop": 0.979,
+      "train": 123,
+      "n": 123,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "hizaka",
+      "pop": 0.976,
+      "train": 2069,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "parsley-f",
+      "pop": 0.969,
+      "train": 892,
+      "n": 200,
+      "used": 278,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "minaba_hideo",
+      "pop": 0.963,
+      "train": 2671,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "fuzichoco",
+      "pop": 0.958,
+      "train": 1161,
+      "n": 200,
+      "used": 261,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "hoshi_(snacherubi)",
+      "pop": 0.955,
+      "train": 462,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "imamiya_pinoko",
+      "pop": 0.954,
+      "train": 597,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "shal.e",
+      "pop": 0.954,
+      "train": 73,
+      "n": 73,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "a20_(atsumaru)",
+      "pop": 0.942,
+      "train": 225,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "yurun_(yurun_ume)",
+      "pop": 0.938,
+      "train": 73,
+      "n": 73,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "honnryou_hanaru",
+      "pop": 0.935,
+      "train": 302,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kyouda_suzuka",
+      "pop": 0.933,
+      "train": 900,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "maeka_(kumaekake)",
+      "pop": 0.926,
+      "train": 298,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "asameshi",
+      "pop": 0.922,
+      "train": 324,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "shiromako",
+      "pop": 0.915,
+      "train": 322,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "zuizi",
+      "pop": 0.912,
+      "train": 475,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "fjsmu",
+      "pop": 0.899,
+      "train": 616,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "john_kafka",
+      "pop": 0.888,
+      "train": 482,
+      "n": 200,
+      "used": 6,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "clipe",
+      "pop": 0.878,
+      "train": 345,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "beni_shake",
+      "pop": 0.876,
+      "train": 1863,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "koito_(l0ve_la_bit)",
+      "pop": 0.876,
+      "train": 16,
+      "n": 16,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "takatisakana",
+      "pop": 0.873,
+      "train": 575,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "akakura",
+      "pop": 0.868,
+      "train": 390,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "akagashi_hagane",
+      "pop": 0.866,
+      "train": 867,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "rei_(sanbonzakura)",
+      "pop": 0.866,
+      "train": 662,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "aoi_ogata",
+      "pop": 0.861,
+      "train": 486,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "torino",
+      "pop": 0.856,
+      "train": 1,
+      "n": 1,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "doremi_(doremi4704)",
+      "pop": 0.855,
+      "train": 833,
+      "n": 200,
+      "used": 11,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "junkzero",
+      "pop": 0.854,
+      "train": 927,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "sorani_(kaeru0768)",
+      "pop": 0.854,
+      "train": 707,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "saru",
+      "pop": 0.843,
+      "train": 954,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "zoirun",
+      "pop": 0.841,
+      "train": 232,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "csyday",
+      "pop": 0.837,
+      "train": 652,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "waka_(wk4444)",
+      "pop": 0.836,
+      "train": 992,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "noyu_(noyu23386566)",
+      "pop": 0.836,
+      "train": 295,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "yutokamizu",
+      "pop": 0.827,
+      "train": 269,
+      "n": 200,
+      "used": 6,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "nikorashi-ka",
+      "pop": 0.826,
+      "train": 1786,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "onineko",
+      "pop": 0.825,
+      "train": 388,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mo_(kireinamo)",
+      "pop": 0.82,
+      "train": 1066,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "atdan",
+      "pop": 0.818,
+      "train": 1023,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "gishiki_(gshk)",
+      "pop": 0.817,
+      "train": 668,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "umemaro_(siona0908)",
+      "pop": 0.815,
+      "train": 354,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "sukja",
+      "pop": 0.806,
+      "train": 642,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "capriccio",
+      "pop": 0.805,
+      "train": 979,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "donguri_suzume",
+      "pop": 0.793,
+      "train": 873,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "akane_souichi",
+      "pop": 0.784,
+      "train": 428,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "dfd",
+      "pop": 0.784,
+      "train": 186,
+      "n": 186,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "anbutter_siruko",
+      "pop": 0.777,
+      "train": 214,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "dorontabi",
+      "pop": 0.764,
+      "train": 545,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "nanmokaken",
+      "pop": 0.764,
+      "train": 37,
+      "n": 37,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "suzumori_uina",
+      "pop": 0.753,
+      "train": 195,
+      "n": 195,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "cuso4_suiwabutu",
+      "pop": 0.749,
+      "train": 141,
+      "n": 141,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mamaloni",
+      "pop": 0.747,
+      "train": 918,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "dichlorvos",
+      "pop": 0.743,
+      "train": 167,
+      "n": 167,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "mocha_(cotton)",
+      "pop": 0.742,
+      "train": 636,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "rinotuna",
+      "pop": 0.733,
+      "train": 739,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "uccow",
+      "pop": 0.716,
+      "train": 1344,
+      "n": 200,
+      "used": 3,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "decrilus",
+      "pop": 0.715,
+      "train": 970,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "ueauwa",
+      "pop": 0.708,
+      "train": 255,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "peachuu",
+      "pop": 0.705,
+      "train": 73,
+      "n": 73,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "jonpei",
+      "pop": 0.687,
+      "train": 231,
+      "n": 200,
+      "used": 4,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "nishikujic",
+      "pop": 0.679,
+      "train": 789,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "nai_ga",
+      "pop": 0.677,
+      "train": 525,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "zain",
+      "pop": 0.673,
+      "train": 109,
+      "n": 109,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "au_(d_elete)",
+      "pop": 0.67,
+      "train": 315,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "0jae",
+      "pop": 0.67,
+      "train": 232,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "tanaka_hirotaka",
+      "pop": 0.669,
+      "train": 135,
+      "n": 135,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "maratang",
+      "pop": 0.66,
+      "train": 401,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "op_na_yarou",
+      "pop": 0.659,
+      "train": 839,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "nakayama_miyuki",
+      "pop": 0.656,
+      "train": 567,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "umehara_sei",
+      "pop": 0.655,
+      "train": 241,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "fenyon",
+      "pop": 0.647,
+      "train": 539,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "lulalang",
+      "pop": 0.641,
+      "train": 439,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "hanaseto",
+      "pop": 0.639,
+      "train": 209,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "matsurika_youko",
+      "pop": 0.628,
+      "train": 368,
+      "n": 200,
+      "used": 71,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "cha_goma",
+      "pop": 0.627,
+      "train": 170,
+      "n": 170,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "pigeon666",
+      "pop": 0.623,
+      "train": 628,
+      "n": 200,
+      "used": 6,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "akiyama_enma",
+      "pop": 0.618,
+      "train": 674,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "chihiro_(kemonomichi)",
+      "pop": 0.612,
+      "train": 595,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "amazon_(taitaitaira)",
+      "pop": 0.6,
+      "train": 806,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "misoshiru_umai4",
+      "pop": 0.6,
+      "train": 254,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kibisake",
+      "pop": 0.597,
+      "train": 652,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "gomennasai",
+      "pop": 0.583,
+      "train": 1270,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "aoi_(annbi)",
+      "pop": 0.582,
+      "train": 823,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "lemon89h",
+      "pop": 0.581,
+      "train": 801,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "asteroid_ill",
+      "pop": 0.577,
+      "train": 1542,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "chaesu",
+      "pop": 0.575,
+      "train": 936,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "cyawa",
+      "pop": 0.571,
+      "train": 254,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "warugaki_(sk-ii)",
+      "pop": 0.568,
+      "train": 2458,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "sinlaire",
+      "pop": 0.568,
+      "train": 169,
+      "n": 169,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "jajimalgeol",
+      "pop": 0.567,
+      "train": 62,
+      "n": 62,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "lubya",
+      "pop": 0.559,
+      "train": 507,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "yuimisu",
+      "pop": 0.556,
+      "train": 734,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "kaidenchii",
+      "pop": 0.556,
+      "train": 25,
+      "n": 25,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "baocaizi",
+      "pop": 0.553,
+      "train": 368,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "k-suwabe",
+      "pop": 0.546,
+      "train": 1630,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "hwansang",
+      "pop": 0.512,
+      "train": 888,
+      "n": 200,
+      "used": 11,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "akaneya",
+      "pop": 0.5,
+      "train": 555,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "keiko_(mitakarawa)",
+      "pop": 0.495,
+      "train": 314,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "akai_sashimi",
+      "pop": 0.483,
+      "train": 617,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "akkijin",
+      "pop": 0.48,
+      "train": 997,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "naoki_(2rzmcaizerails6)",
+      "pop": 0.475,
+      "train": 519,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "sqloveraven",
+      "pop": 0.463,
+      "train": 213,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "naga_u",
+      "pop": 0.46,
+      "train": 3872,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kazutake_hazano",
+      "pop": 0.459,
+      "train": 873,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "harano",
+      "pop": 0.449,
+      "train": 696,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "nishihara_isao",
+      "pop": 0.445,
+      "train": 586,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "ka_(996beshi)",
+      "pop": 0.443,
+      "train": 549,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "dopey_(dopq)",
+      "pop": 0.441,
+      "train": 888,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "shouhou-san_daisuki_teitoku",
+      "pop": 0.439,
+      "train": 924,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "alzi_xiaomi",
+      "pop": 0.437,
+      "train": 286,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "monyami",
+      "pop": 0.428,
+      "train": 599,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "ugonba_(howatoro)",
+      "pop": 0.428,
+      "train": 189,
+      "n": 189,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "chueog",
+      "pop": 0.422,
+      "train": 523,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "apios",
+      "pop": 0.418,
+      "train": 510,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "xelvy",
+      "pop": 0.413,
+      "train": 83,
+      "n": 83,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "bm94199",
+      "pop": 0.411,
+      "train": 136,
+      "n": 136,
+      "used": 15,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "michibata_65",
+      "pop": 0.403,
+      "train": 595,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "dishing",
+      "pop": 0.391,
+      "train": 291,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "kiri_futoshi",
+      "pop": 0.387,
+      "train": 807,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "uenomigi",
+      "pop": 0.382,
+      "train": 670,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "blackbox_(blackbox9158)",
+      "pop": 0.382,
+      "train": 480,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "doran_(doran7280)",
+      "pop": 0.365,
+      "train": 411,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "shin_(sinsin12121)",
+      "pop": 0.365,
+      "train": 76,
+      "n": 76,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "rizu_(rizunm)",
+      "pop": 0.364,
+      "train": 839,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "syurikenmaru",
+      "pop": 0.355,
+      "train": 598,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "boyano",
+      "pop": 0.355,
+      "train": 384,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "tp_p_pt",
+      "pop": 0.348,
+      "train": 651,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "fujiwara_akina",
+      "pop": 0.348,
+      "train": 366,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "ninahachi",
+      "pop": 0.347,
+      "train": 1200,
+      "n": 200,
+      "used": 2,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "zandra",
+      "pop": 0.346,
+      "train": 880,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined",
+        "listed"
+      ]
+    },
+    {
+      "tag": "huke",
+      "pop": 0.344,
+      "train": 2841,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "another_eden_art_team",
+      "pop": 0.342,
+      "train": 426,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "nozo_(hitomiz)",
+      "pop": 0.333,
+      "train": 877,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "2015x127",
+      "pop": 0.332,
+      "train": 7,
+      "n": 7,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "namiki_itsuki",
+      "pop": 0.329,
+      "train": 201,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "joze",
+      "pop": 0.329,
+      "train": 49,
+      "n": 49,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "deco_(geigeki_honey)",
+      "pop": 0.309,
+      "train": 702,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "ewa_(seraphhuiyu)",
+      "pop": 0.306,
+      "train": 857,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "nploser",
+      "pop": 0.288,
+      "train": 589,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "edarow",
+      "pop": 0.273,
+      "train": 646,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "driftwoodwolf",
+      "pop": 0.259,
+      "train": 224,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "momentcorefly",
+      "pop": 0.254,
+      "train": 237,
+      "n": 200,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "bkub",
+      "pop": 0.252,
+      "train": 5839,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "naku_(naku999ziye)",
+      "pop": 0.221,
+      "train": 92,
+      "n": 92,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "eichi_turnr",
+      "pop": 0.219,
+      "train": 189,
+      "n": 189,
+      "used": 1,
+      "src": [
+        "mined"
+      ]
+    },
+    {
+      "tag": "meyoco",
+      "pop": 0.218,
+      "train": 1274,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    },
+    {
+      "tag": "meme_(sleepsheep)",
+      "pop": 0.191,
+      "train": 1082,
+      "n": 200,
+      "used": 0,
+      "src": [
+        "listed"
+      ]
+    }
+  ]
+}

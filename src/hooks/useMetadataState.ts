@@ -1,11 +1,7 @@
 import { useReducer } from 'react';
 import type { MetadataState, CharacterEntry, PromptState, ParamsState, AdvancedFlags } from '../types/metadata';
+import { createCharacterId } from '../model/characterIdentity';
 import { DEFAULT_STATE, normalizeMetadataState } from '../model/defaults';
-
-let nextId = 1;
-function genId(): string {
-  return 'char_' + (nextId++);
-}
 
 export type MetadataAction =
   | { type: 'SET_PROMPT'; field: keyof PromptState; value: PromptState[keyof PromptState] }
@@ -35,7 +31,7 @@ function reducer(state: MetadataState, action: MetadataAction): MetadataState {
       return { ...state, [action.field]: action.value };
 
     case 'ADD_CHARACTER': {
-      const id = genId();
+      const id = createCharacterId();
       const newChar: CharacterEntry = { id, caption: '', centerX: 0.5, centerY: 0.5 };
       const newNegChar: CharacterEntry = { id, caption: '', centerX: 0.5, centerY: 0.5 };
       return {

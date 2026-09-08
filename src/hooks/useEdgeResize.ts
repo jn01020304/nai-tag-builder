@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export type ResizeHandle =
   | "left"
@@ -27,8 +27,11 @@ function getOverlayRect(rootId: string): DOMRect | null {
 export function useEdgeResize(minWidth: number, rootId: string) {
   const [overlayWidth, setOverlayWidth] = useState(minWidth);
   const [overlayHeight, setOverlayHeight] = useState<number | null>(null);
+  const resizeCleanupRef = useRef<(() => void) | null>(null);
 
   const startResize = (handle: ResizeHandle, clientX: number, clientY: number) => {
+    resizeCleanupRef.current?.();
+
     const root = document.getElementById(rootId) as HTMLElement | null;
     const rect = getOverlayRect(rootId);
     if (!rect) return;
@@ -115,22 +118,32 @@ export function useEdgeResize(minWidth: number, rootId: string) {
       if (resizesHeight) applyHeight(nextHeight(e.touches[0].clientY));
     };
 
-    const up = () => {
+    const cleanup = () => {
       document.body.style.cursor = "";
       document.body.style.userSelect = "";
       document.removeEventListener("mousemove", onMM);
-      document.removeEventListener("mouseup", up);
+      document.removeEventListener("mouseup", cleanup);
       document.removeEventListener("touchmove", onTM);
-      document.removeEventListener("touchend", up);
+      document.removeEventListener("touchend", cleanup);
+      document.removeEventListener("touchcancel", cleanup);
+      if (resizeCleanupRef.current === cleanup) {
+        resizeCleanupRef.current = null;
+      }
     };
 
+    resizeCleanupRef.current = cleanup;
     document.body.style.cursor = getResizeCursor(handle);
     document.body.style.userSelect = "none";
     document.addEventListener("mousemove", onMM);
-    document.addEventListener("mouseup", up);
+    document.addEventListener("mouseup", cleanup);
     document.addEventListener("touchmove", onTM, { passive: false });
-    document.addEventListener("touchend", up);
+    document.addEventListener("touchend", cleanup);
+    document.addEventListener("touchcancel", cleanup);
   };
+
+  useEffect(() => () => {
+    resizeCleanupRef.current?.();
+  }, []);
 
   return { overlayWidth, overlayHeight, startResize };
 }

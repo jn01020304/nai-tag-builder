@@ -1,0 +1,276 @@
+{
+  "ghosts": [
+    {
+      "tag": "ame_(ulten_cancel)",
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "clioranko",
+      "count": 3,
+      "byText": 0,
+      "byStealth": 3
+    },
+    {
+      "tag": "cola_gotouryouta",
+      "count": 3,
+      "byText": 2,
+      "byStealth": 1
+    },
+    {
+      "tag": "danimnaru",
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "deadflow",
+      "count": 2,
+      "byText": 2,
+      "byStealth": 0
+    },
+    {
+      "tag": "henriku_(ahemaru)",
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "horikoshi_kouhe",
+      "count": 3,
+      "byText": 2,
+      "byStealth": 1
+    },
+    {
+      "tag": "ie_(raarami).",
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "jp06_(orangemaru)",
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "lal!role",
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "lin+",
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "michinking",
+      "count": 2,
+      "byText": 1,
+      "byStealth": 1
+    },
+    {
+      "tag": "mika_pizako",
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "parsely-f",
+      "count": 4,
+      "byText": 4,
+      "byStealth": 0
+    },
+    {
+      "tag": "pottness",
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    },
+    {
+      "tag": "ratatat74",
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "shuri_84k",
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "simon_(n.s.craft)",
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    }
+  ],
+  "empty": [
+    {
+      "tag": "bloomminority",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "bongfill",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 3,
+      "byText": 0,
+      "byStealth": 3
+    },
+    {
+      "tag": "chenpeipeiii",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "cui_(jidanhaidaitang)",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "d_jirooo",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    },
+    {
+      "tag": "doremi",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "geminingen",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "kei",
+      "postCount": 0,
+      "deprecated": true,
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    },
+    {
+      "tag": "nekodayo22",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "noizi_ito",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    },
+    {
+      "tag": "opossumachine",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "pako",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    },
+    {
+      "tag": "pochimaru",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    },
+    {
+      "tag": "sho_(sho_lwlw)",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 280,
+      "byText": 275,
+      "byStealth": 5
+    },
+    {
+      "tag": "wanpaku",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "youshouhaoxianzhe",
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    }
+  ],
+  "nonArtist": [
+    {
+      "tag": "ahemaru",
+      "postCount": 0,
+      "category": 0,
+      "count": 2,
+      "byText": 2,
+      "byStealth": 0
+    },
+    {
+      "tag": "makoto_shinkai",
+      "postCount": 0,
+      "category": 0,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "pope",
+      "postCount": 103,
+      "category": 0,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "range_murata",
+      "postCount": 0,
+      "category": 0,
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    }
+  ]
+}

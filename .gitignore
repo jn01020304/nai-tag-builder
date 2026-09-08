@@ -28,3 +28,6 @@ test-results/
 *.njsproj
 *.sln
 *.sw?
+
+# 단부루 대표 이미지 로컬 캐시 (107MB). cache-images.mjs 로 언제든 다시 받는다
+resource/catalog/images/

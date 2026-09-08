@@ -2,6 +2,7 @@ import { colorLuminance, readableTextColor } from "./color";
 import type { ThemeColors } from "./theme";
 
 const OVERLAY_ROOT_ID = "nai-tag-builder-root";
+export const THEME_PROBE_ATTRIBUTE = "data-nai-theme-probe";
 
 const INTENSITY_CLASS_CANDIDATES = {
   low: [
@@ -188,6 +189,7 @@ function findGenerateButton(): HTMLButtonElement | undefined {
 function probeIntensityColor(kind: keyof typeof INTENSITY_CLASS_CANDIDATES, fallback: string): string {
   for (const className of INTENSITY_CLASS_CANDIDATES[kind]) {
     const probe = document.createElement("span");
+    probe.setAttribute(THEME_PROBE_ATTRIBUTE, "true");
     probe.className = className;
     probe.textContent = "probe";
     probe.style.position = "fixed";

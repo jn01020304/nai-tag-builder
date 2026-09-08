@@ -165,7 +165,7 @@ export default function GenerationParams({ state, dispatch }: Props) {
           <option value="custom">Custom / Imported</option>
         </SelectField>
         <NumberField
-          label="Seed (0 = random)"
+          label="Seed"
           min={0}
           value={state.params.seed}
           onChange={(event) => setP("seed", Number(event.target.value))}

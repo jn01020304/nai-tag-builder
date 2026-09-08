@@ -1,0 +1,5270 @@
+[
+  {
+    "name": "freng",
+    "count": 335,
+    "byText": 301,
+    "byStealth": 34,
+    "share": 81.9,
+    "meanWeight": 1.42,
+    "maxWeight": 2,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, outdoor, 2__artist_mx2j__, artist_sousouman, artist_fuzichoco, artist_mom s-1582190914.png"
+    ]
+  },
+  {
+    "name": "parsley-f",
+    "count": 278,
+    "byText": 276,
+    "byStealth": 2,
+    "share": 68,
+    "meanWeight": 1.24,
+    "maxWeight": 2.7,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, outdoor, 2__artist_mx2j__, artist_sousouman, artist_fuzichoco, artist_mom s-1582190914.png"
+    ]
+  },
+  {
+    "name": "mignon",
+    "count": 276,
+    "byText": 275,
+    "byStealth": 1,
+    "share": 67.5,
+    "meanWeight": 1.42,
+    "maxWeight": 2.5,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, outdoor, 2__artist_mx2j__, artist_sousouman, artist_fuzichoco, artist_mom s-1582190914.png"
+    ]
+  },
+  {
+    "name": "riichu",
+    "count": 271,
+    "byText": 271,
+    "byStealth": 0,
+    "share": 66.3,
+    "meanWeight": 1.18,
+    "maxWeight": 1.5,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, outdoor, 2__artist_mx2j__, artist_sousouman, artist_fuzichoco, artist_mom s-1582190914.png"
+    ]
+  },
+  {
+    "name": "michiking",
+    "count": 262,
+    "byText": 262,
+    "byStealth": 0,
+    "share": 64.1,
+    "meanWeight": 0.95,
+    "maxWeight": 1.5,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, outdoor, 2__artist_mx2j__, artist_sousouman, artist_fuzichoco, artist_mom s-1582190914.png"
+    ]
+  },
+  {
+    "name": "fuzichoco",
+    "count": 261,
+    "byText": 261,
+    "byStealth": 0,
+    "share": 63.8,
+    "meanWeight": 1,
+    "maxWeight": 1.5,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, outdoor, 2__artist_mx2j__, artist_sousouman, artist_fuzichoco, artist_mom s-1582190914.png"
+    ]
+  },
+  {
+    "name": "ningen mame",
+    "count": 259,
+    "byText": 246,
+    "byStealth": 13,
+    "share": 63.3,
+    "meanWeight": 1.1,
+    "maxWeight": 1.5,
+    "samples": [
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, outdoor, 2__artist_mx2j__, artist_sousouman, artist_fuzichoco, artist_mom s-1582190914.png",
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, 2__artist_mignon__ s-1576315594.png"
+    ]
+  },
+  {
+    "name": "sousouman",
+    "count": 259,
+    "byText": 259,
+    "byStealth": 0,
+    "share": 63.3,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, outdoor, 2__artist_mx2j__, artist_sousouman, artist_fuzichoco, artist_mom s-1582190914.png"
+    ]
+  },
+  {
+    "name": "asanagi",
+    "count": 254,
+    "byText": 252,
+    "byStealth": 2,
+    "share": 62.1,
+    "meanWeight": 1.2,
+    "maxWeight": 2,
+    "samples": [
+      "1girl, outdoor, 2__artist_mx2j__, artist_sousouman, artist_fuzichoco, artist_mom s-1582190914.png",
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, 2__artist_mignon__ s-1576315594.png",
+      "1girl, solo, bedroom, 1.5__artist_riichu__, artist_lack, artist_sousouman, artis s-3291489138.png"
+    ]
+  },
+  {
+    "name": "toosaka asagi",
+    "count": 245,
+    "byText": 244,
+    "byStealth": 1,
+    "share": 59.9,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, outdoor, 2__artist_mx2j__, artist_sousouman, artist_fuzichoco, artist_mom s-1582190914.png",
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, 2__artist_mignon__ s-1576315594.png"
+    ]
+  },
+  {
+    "name": "happoubi jin",
+    "count": 244,
+    "byText": 243,
+    "byStealth": 1,
+    "share": 59.7,
+    "meanWeight": 3.94,
+    "maxWeight": 5,
+    "samples": [
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, outdoor, 2__artist_mx2j__, artist_sousouman, artist_fuzichoco, artist_mom s-1582190914.png",
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, 2__artist_mignon__ s-1576315594.png"
+    ]
+  },
+  {
+    "name": "sho (sho lwlw)",
+    "count": 244,
+    "byText": 240,
+    "byStealth": 4,
+    "share": 59.7,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, outdoor, 2__artist_mx2j__, artist_sousouman, artist_fuzichoco, artist_mom s-1582190914.png",
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, 2__artist_mignon__ s-1576315594.png"
+    ]
+  },
+  {
+    "name": "wanke",
+    "count": 236,
+    "byText": 209,
+    "byStealth": 27,
+    "share": 57.7,
+    "meanWeight": 1,
+    "maxWeight": 3,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, 2__artist_mignon__ s-1576315594.png"
+    ]
+  },
+  {
+    "name": "modare",
+    "count": 218,
+    "byText": 211,
+    "byStealth": 7,
+    "share": 53.3,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, 2__artist_mignon__ s-1576315594.png"
+    ]
+  },
+  {
+    "name": "lack",
+    "count": 206,
+    "byText": 205,
+    "byStealth": 1,
+    "share": 50.4,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, 2__artist_mignon__ s-1576315594.png"
+    ]
+  },
+  {
+    "name": "wlop",
+    "count": 201,
+    "byText": 197,
+    "byStealth": 4,
+    "share": 49.1,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, 2__artist_mignon__ s-1576315594.png",
+      "1girl, solo, bedroom, 1.5__artist_riichu__, artist_lack, artist_sousouman, artis s-3291489138.png"
+    ]
+  },
+  {
+    "name": "ciloranko",
+    "count": 192,
+    "byText": 182,
+    "byStealth": 10,
+    "share": 46.9,
+    "meanWeight": 1,
+    "maxWeight": 1.5,
+    "samples": [
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, solo, bedroom, 1.5__artist_riichu__, artist_lack, artist_sousouman, artis s-3291489138.png",
+      "1girl, solo, cowboy shot, white background, artist_lack, artist_riichu, artist_s s-1230002.png"
+    ]
+  },
+  {
+    "name": "kedama milk",
+    "count": 170,
+    "byText": 167,
+    "byStealth": 3,
+    "share": 41.6,
+    "meanWeight": 1.34,
+    "maxWeight": 1.5,
+    "samples": [
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, 2__artist_mignon__ s-1576315594.png",
+      "1girl, solo, bedroom, 1.5__artist_riichu__, artist_lack, artist_sousouman, artis s-3291489138.png"
+    ]
+  },
+  {
+    "name": "nenobi (nenorium)",
+    "count": 149,
+    "byText": 149,
+    "byStealth": 0,
+    "share": 36.4,
+    "meanWeight": 1.32,
+    "maxWeight": 1.5,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, solo, bedroom, 1.5__artist_riichu__, artist_lack, artist_sousouman, artis s-3291489138.png"
+    ]
+  },
+  {
+    "name": "quasarcake",
+    "count": 145,
+    "byText": 132,
+    "byStealth": 13,
+    "share": 35.5,
+    "meanWeight": 1,
+    "maxWeight": 1.7,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, solo, bedroom, 1.5__artist_riichu__, artist_lack, artist_sousouman, artis s-3291489138.png"
+    ]
+  },
+  {
+    "name": "qiandaiyiyu",
+    "count": 139,
+    "byText": 127,
+    "byStealth": 12,
+    "share": 34,
+    "meanWeight": 0.99,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, 2__artist_mignon__ s-1576315594.png",
+      "1girl, solo, bedroom, 1.5__artist_riichu__, artist_lack, artist_sousouman, artis s-3291489138.png",
+      "1girl, solo, dynamic pose, feet out of frame, close-up, perspective, simple back s-1494785438.png"
+    ]
+  },
+  {
+    "name": "momoko (momopoco)",
+    "count": 132,
+    "byText": 131,
+    "byStealth": 1,
+    "share": 32.3,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, outdoor, 2__artist_mx2j__, artist_sousouman, artist_fuzichoco, artist_mom s-1582190914.png",
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, 2__artist_mignon__ s-1576315594.png",
+      "1girl, solo, cowboy shot, white background, artist_lack, artist_riichu, artist_s s-1230002.png"
+    ]
+  },
+  {
+    "name": "miv4t",
+    "count": 123,
+    "byText": 123,
+    "byStealth": 0,
+    "share": 30.1,
+    "meanWeight": 2.75,
+    "maxWeight": 3.5,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "1girl, dynamic angle, looking at viewer, straight-on, feet out of frame, indoor, s-3724682106.png",
+      "1girl, solo, bedroom, 1.5__artist_riichu__, artist_lack, artist_sousouman, artis s-3291489138.png"
+    ]
+  },
+  {
+    "name": "mx2j",
+    "count": 81,
+    "byText": 66,
+    "byStealth": 15,
+    "share": 19.8,
+    "meanWeight": 1.62,
+    "maxWeight": 2,
+    "samples": [
+      "1girl, outdoor, 2__artist_mx2j__, artist_sousouman, artist_fuzichoco, artist_mom s-1582190914.png",
+      "0.6__artist_mx2j__, 1.0__artist_takatisakana__, 1.1__artist_boyano__, 0.5__artis s-2238462187.png",
+      "1a0d008b4305c281019ca03a12ce83586258289e7e46d36e19f12bad91a015e6.png"
+    ]
+  },
+  {
+    "name": "matsurika youko",
+    "count": 71,
+    "byText": 71,
+    "byStealth": 0,
+    "share": 17.4,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, bedroom, 1.5__artist_riichu__, artist_lack, artist_sousouman, artis s-3291489138.png",
+      "1girl, solo, dynamic pose, feet out of frame, close-up, perspective, simple back s-1494785438.png",
+      "1girl, solo, pantyshot, park, 1.5__artist_riichu__, artist_lack, artist_sousouma s-2452097494.png"
+    ]
+  },
+  {
+    "name": "kidmo",
+    "count": 46,
+    "byText": 40,
+    "byStealth": 6,
+    "share": 11.2,
+    "meanWeight": 1.4,
+    "maxWeight": 1.5,
+    "samples": [
+      "1girl, solo, dynamic pose, feet out of frame, close-up, perspective, simple back s-1494785438.png",
+      "1girl, solo, _2.0__artist_deadflow __, 1.6__artist_freng __, 1.3__artist_pottsne s-2011950707.png",
+      "90b666da78a8408d7bbf50be84f82bbf69e1dfba8e3c6da3c87f4e734efb4b97.png"
+    ]
+  },
+  {
+    "name": "ningen_mame",
+    "count": 37,
+    "byText": 35,
+    "byStealth": 2,
+    "share": 9,
+    "meanWeight": 1.09,
+    "maxWeight": 1.5,
+    "samples": [
+      "asdfqwer.png",
+      "그림체 줍9.png",
+      "눈가리고 절정.png"
+    ]
+  },
+  {
+    "name": "sho_ (sho_lwlw)",
+    "count": 36,
+    "byText": 35,
+    "byStealth": 1,
+    "share": 8.8,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "asdfqwer.png",
+      "rerun13.png"
+    ]
+  },
+  {
+    "name": "kedama_milk",
+    "count": 33,
+    "byText": 33,
+    "byStealth": 0,
+    "share": 8.1,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "눈가리고 절정.png",
+      "NAI-파란 메이드-손가락 하트.png"
+    ]
+  },
+  {
+    "name": "toosaka_asagi",
+    "count": 31,
+    "byText": 31,
+    "byStealth": 0,
+    "share": 7.6,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "-wolp + 2국밥.png",
+      "눈가리고 절정.png",
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, 1girl, maid, short ha s-704489012.png"
+    ]
+  },
+  {
+    "name": "nenobi_ (nenorium)",
+    "count": 30,
+    "byText": 30,
+    "byStealth": 0,
+    "share": 7.3,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "눈가리고 절정.png",
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, 1girl, maid, short ha s-704489012.png",
+      "NAI-파란 메이드-손가락 하트.png"
+    ]
+  },
+  {
+    "name": "happoubi_jin",
+    "count": 28,
+    "byText": 28,
+    "byStealth": 0,
+    "share": 6.8,
+    "meanWeight": 1.05,
+    "maxWeight": 1.3,
+    "samples": [
+      "눈가리고 절정.png",
+      "1girl, solo, close-up, from above, foot focus, indoor, artist_lack, artist_riich s-2377087029_upscale.png",
+      "illustration, artist_lack, artist_riichu, artist_sousouman, artist_fuzichoco, ar s-3679262341_upscale.png"
+    ]
+  },
+  {
+    "name": "channel (caststation)",
+    "count": 27,
+    "byText": 5,
+    "byStealth": 22,
+    "share": 6.6,
+    "meanWeight": 1.11,
+    "maxWeight": 2.5,
+    "samples": [
+      "0.6__artist_mx2j__, 1.0__artist_takatisakana__, 1.1__artist_boyano__, 0.5__artis s-2238462187.png",
+      "1a0d008b4305c281019ca03a12ce83586258289e7e46d36e19f12bad91a015e6.png",
+      "1girl, 0.5__artist_healthyman__, 0.5__artist_mx2j__, 0.5__artist_channel (castst s-2570218437.png"
+    ]
+  },
+  {
+    "name": "healthyman",
+    "count": 24,
+    "byText": 9,
+    "byStealth": 15,
+    "share": 5.9,
+    "meanWeight": 1.08,
+    "maxWeight": 1.8,
+    "samples": [
+      "1girl, 0.5__artist_healthyman__, 0.5__artist_mx2j__, 0.5__artist_channel (castst s-2570218437.png",
+      "1girl, 1__artist_wanke __, 1.2__artist_healthyman __, 2__artist_freng __, 0.6__a s-2142657620.png",
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, artist_momoko (mom s-5295529865.png"
+    ]
+  },
+  {
+    "name": "billyhhyb",
+    "count": 23,
+    "byText": 23,
+    "byStealth": 0,
+    "share": 5.6,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "눈가리고 절정.png",
+      "1girl, solo, close-up, from above, foot focus, indoor, artist_lack, artist_riich s-2377087029_upscale.png",
+      "illustration, artist_lack, artist_riichu, artist_sousouman, artist_fuzichoco, ar s-3679262341_upscale.png"
+    ]
+  },
+  {
+    "name": "dishwasher1910",
+    "count": 20,
+    "byText": 5,
+    "byStealth": 15,
+    "share": 4.9,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, 0.45__noco (adamas)__, 0.5__artist_dishwasher1910 __, 0.55__artist_ s-249390739.png",
+      "1girl, solo, 0.5__henriiku (ahemaru), artist_marushin (denwa0214)__, 0.75__artis s-328958889.png",
+      "90b666da78a8408d7bbf50be84f82bbf69e1dfba8e3c6da3c87f4e734efb4b97.png"
+    ]
+  },
+  {
+    "name": "ratatatat74",
+    "count": 17,
+    "byText": 5,
+    "byStealth": 12,
+    "share": 4.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, 1__artist_wanke __, 1.2__artist_healthyman __, 2__artist_freng __, 0.6__a s-2142657620.png",
+      "rerun.png",
+      "rerun11.png"
+    ]
+  },
+  {
+    "name": "ie (raarami)",
+    "count": 16,
+    "byText": 4,
+    "byStealth": 12,
+    "share": 3.9,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, 1__artist_wanke __, 1.2__artist_healthyman __, 2__artist_freng __, 0.6__a s-2142657620.png",
+      "d41bd70a78aef3fd166ce4b03d035b06e1a4632c0a953d583137c81d307ba2f5.png",
+      "rerun13.png"
+    ]
+  },
+  {
+    "name": "bm94199",
+    "count": 15,
+    "byText": 4,
+    "byStealth": 11,
+    "share": 3.7,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1a0d008b4305c281019ca03a12ce83586258289e7e46d36e19f12bad91a015e6.png",
+      "1girl, solo, 0.45__noco (adamas)__, 0.5__artist_dishwasher1910 __, 0.55__artist_ s-249390739.png",
+      "1girl, solo, 0.5__henriiku (ahemaru), artist_marushin (denwa0214)__, 0.75__artis s-328958889.png"
+    ]
+  },
+  {
+    "name": "torino aqua",
+    "count": 15,
+    "byText": 4,
+    "byStealth": 11,
+    "share": 3.7,
+    "meanWeight": 1.12,
+    "maxWeight": 1.8,
+    "samples": [
+      "1girl, solo, 0.45__noco (adamas)__, 0.5__artist_dishwasher1910 __, 0.55__artist_ s-249390739.png",
+      "1girl, solo, 0.5__henriiku (ahemaru), artist_marushin (denwa0214)__, 0.75__artis s-328958889.png",
+      "1girl, solo, _2.0__artist_deadflow __, 1.6__artist_freng __, 1.3__artist_pottsne s-2011950707.png"
+    ]
+  },
+  {
+    "name": "blue gk",
+    "count": 14,
+    "byText": 6,
+    "byStealth": 8,
+    "share": 3.4,
+    "meanWeight": 0.91,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, outdoor, 0.7__artist_freng __, 0.7__artist_modare __, 1.0__artist_blue gk s-1992513018.png",
+      "1girl, solo, full body, simple background, 1.3__artist_mx2j__, artist_riichu, ar s-1401209931.png",
+      "90b666da78a8408d7bbf50be84f82bbf69e1dfba8e3c6da3c87f4e734efb4b97.png"
+    ]
+  },
+  {
+    "name": "96yottea",
+    "count": 12,
+    "byText": 4,
+    "byStealth": 8,
+    "share": 2.9,
+    "meanWeight": 0.99,
+    "maxWeight": 1.25,
+    "samples": [
+      "1girl, 1__artist_wanke __, 1.2__artist_healthyman __, 2__artist_freng __, 0.6__a s-2142657620.png",
+      "1girl, solo, 0.45__noco (adamas)__, 0.5__artist_dishwasher1910 __, 0.55__artist_ s-249390739.png",
+      "1girl, solo, 0.5__henriiku (ahemaru), artist_marushin (denwa0214)__, 0.75__artis s-328958889.png"
+    ]
+  },
+  {
+    "name": "doremi (doremi4704)",
+    "count": 11,
+    "byText": 7,
+    "byStealth": 4,
+    "share": 2.7,
+    "meanWeight": 1.43,
+    "maxWeight": 2,
+    "samples": [
+      "masterpiece, best quality, highres, very aesthetic, amazing quality, finely deta s-360840810.png",
+      "rerun12.png",
+      "solo, full body, low angle,_0.5__artist_ebifurya__, 0.6__artist_ixy__, 0.8__arti s-2486149625.png"
+    ]
+  },
+  {
+    "name": "gogalking",
+    "count": 11,
+    "byText": 1,
+    "byStealth": 10,
+    "share": 2.7,
+    "meanWeight": 0.92,
+    "maxWeight": 1,
+    "samples": [
+      "rerun13.png",
+      "rerun19.png",
+      "rerun5.png"
+    ]
+  },
+  {
+    "name": "hwansang",
+    "count": 11,
+    "byText": 7,
+    "byStealth": 4,
+    "share": 2.7,
+    "meanWeight": 1.08,
+    "maxWeight": 2,
+    "samples": [
+      "1girl, solo, 0.45__noco (adamas)__, 0.5__artist_dishwasher1910 __, 0.55__artist_ s-249390739.png",
+      "solo, full body, low angle,_0.5__artist_ebifurya__, 0.6__artist_ixy__, 0.8__arti s-2486149625.png",
+      "그림체 줍2.png"
+    ]
+  },
+  {
+    "name": "lunch (shin new)",
+    "count": 11,
+    "byText": 3,
+    "byStealth": 8,
+    "share": 2.7,
+    "meanWeight": 1.35,
+    "maxWeight": 5,
+    "samples": [
+      "nai-image-1752746292989.png",
+      "rerun14.png",
+      "rerun8.png"
+    ]
+  },
+  {
+    "name": "kim hyung tae",
+    "count": 10,
+    "byText": 4,
+    "byStealth": 6,
+    "share": 2.4,
+    "meanWeight": 1.13,
+    "maxWeight": 1.75,
+    "samples": [
+      "90b666da78a8408d7bbf50be84f82bbf69e1dfba8e3c6da3c87f4e734efb4b97.png",
+      "artist_kim hyung tae,  1.5__artist_hyulla__, artist_dishwasher1910, artist_yoya  s-2068533157.png",
+      "artist_kim hyung tae,  1.5__artist_hyulla__, artist_dishwasher1910, artist_yoya  s-3971776986.png"
+    ]
+  },
+  {
+    "name": "tianliang duohe fangdongye",
+    "count": 10,
+    "byText": 3,
+    "byStealth": 7,
+    "share": 2.4,
+    "meanWeight": 0.83,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png",
+      "rerun20.png",
+      "그림체 줍15.png"
+    ]
+  },
+  {
+    "name": "ask (askzy)",
+    "count": 9,
+    "byText": 0,
+    "byStealth": 9,
+    "share": 2.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1a0d008b4305c281019ca03a12ce83586258289e7e46d36e19f12bad91a015e6.png",
+      "rerun11.png",
+      "그림체 줍12.png"
+    ]
+  },
+  {
+    "name": "pottsness",
+    "count": 9,
+    "byText": 6,
+    "byStealth": 3,
+    "share": 2.2,
+    "meanWeight": 0.92,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, _2.0__artist_deadflow __, 1.6__artist_freng __, 1.3__artist_pottsne s-2011950707.png",
+      "nai-image-1763373423207.png",
+      "nai-image-1760591294174.png"
+    ]
+  },
+  {
+    "name": "wagashi (dagashiya)",
+    "count": 8,
+    "byText": 4,
+    "byStealth": 4,
+    "share": 2,
+    "meanWeight": 0.94,
+    "maxWeight": 1.15,
+    "samples": [
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, artist_momoko (mom s-5295529865.png",
+      "nai-image-1752746292989.png",
+      "nai-image-1752754268979.png"
+    ]
+  },
+  {
+    "name": "yoya yogurt",
+    "count": 8,
+    "byText": 3,
+    "byStealth": 5,
+    "share": 2,
+    "meanWeight": 1.13,
+    "maxWeight": 1.6,
+    "samples": [
+      "90b666da78a8408d7bbf50be84f82bbf69e1dfba8e3c6da3c87f4e734efb4b97.png",
+      "artist_kim hyung tae,  1.5__artist_hyulla__, artist_dishwasher1910, artist_yoya  s-2068533157.png",
+      "artist_kim hyung tae,  1.5__artist_hyulla__, artist_dishwasher1910, artist_yoya  s-3971776986.png"
+    ]
+  },
+  {
+    "name": "deyui",
+    "count": 7,
+    "byText": 4,
+    "byStealth": 3,
+    "share": 1.7,
+    "meanWeight": 0.93,
+    "maxWeight": 1,
+    "samples": [
+      "2__from above__, upper body, simple background, grey background, blue archive, 3 s-1191596148.png",
+      "blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime colori s-2833028278.png",
+      "nsfw, blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime  s-2234887166.png"
+    ]
+  },
+  {
+    "name": "henriiku (ahemaru)",
+    "count": 7,
+    "byText": 0,
+    "byStealth": 7,
+    "share": 1.7,
+    "meanWeight": 0.49,
+    "maxWeight": 1,
+    "samples": [
+      "rerun10.png",
+      "그림체 줍6.png",
+      "Global Preset 3.png"
+    ]
+  },
+  {
+    "name": "kawacy",
+    "count": 7,
+    "byText": 5,
+    "byStealth": 2,
+    "share": 1.7,
+    "meanWeight": 1.01,
+    "maxWeight": 1.1,
+    "samples": [
+      "rerun9.png",
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, artist_yoneyama mai,  s-3177848419.png",
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, artist_yoneyama mai,  s-369131695.png"
+    ]
+  },
+  {
+    "name": "yoneyama mai",
+    "count": 7,
+    "byText": 4,
+    "byStealth": 3,
+    "share": 1.7,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun4.png",
+      "rerun5.png",
+      "rerun9.png"
+    ]
+  },
+  {
+    "name": "7peach",
+    "count": 6,
+    "byText": 5,
+    "byStealth": 1,
+    "share": 1.5,
+    "meanWeight": 1.33,
+    "maxWeight": 1.5,
+    "samples": [
+      "solo, full body, low angle,_0.5__artist_ebifurya__, 0.6__artist_ixy__, 0.8__arti s-2486149625.png",
+      "2__from above__, upper body, simple background, grey background, blue archive, 3 s-1191596148.png",
+      "blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime colori s-2833028278.png"
+    ]
+  },
+  {
+    "name": "mika pikazo",
+    "count": 6,
+    "byText": 1,
+    "byStealth": 5,
+    "share": 1.5,
+    "meanWeight": 0.88,
+    "maxWeight": 1,
+    "samples": [
+      "d41bd70a78aef3fd166ce4b03d035b06e1a4632c0a953d583137c81d307ba2f5.png",
+      "rerun4.png",
+      "rerun9.png"
+    ]
+  },
+  {
+    "name": "murata yuusuke",
+    "count": 6,
+    "byText": 3,
+    "byStealth": 3,
+    "share": 1.5,
+    "meanWeight": 0.89,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, 0.5__henriiku (ahemaru), artist_marushin (denwa0214)__, 0.75__artis s-328958889.png",
+      "nai-image-1752746292989.png",
+      "rerun.png"
+    ]
+  },
+  {
+    "name": "myung yi",
+    "count": 6,
+    "byText": 5,
+    "byStealth": 1,
+    "share": 1.5,
+    "meanWeight": 1.05,
+    "maxWeight": 1.3,
+    "samples": [
+      "그림체 줍.png",
+      "nai-image-1760591294174.png",
+      "nai-image-1760591298019.png"
+    ]
+  },
+  {
+    "name": "nompang",
+    "count": 6,
+    "byText": 6,
+    "byStealth": 0,
+    "share": 1.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, 1girl, maid, short ha s-704489012.png",
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, artist_yoneyama mai,  s-3177848419.png",
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, artist_yoneyama mai,  s-369131695.png"
+    ]
+  },
+  {
+    "name": "null (nyanpyoun)",
+    "count": 6,
+    "byText": 4,
+    "byStealth": 2,
+    "share": 1.5,
+    "meanWeight": 0.93,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, _2.0__artist_deadflow __, 1.6__artist_freng __, 1.3__artist_pottsne s-2011950707.png",
+      "nai-image-1752746292989.png",
+      "rerun13.png"
+    ]
+  },
+  {
+    "name": "pigeon666",
+    "count": 6,
+    "byText": 0,
+    "byStealth": 6,
+    "share": 1.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun5.png",
+      "그림체 줍11.png",
+      "그림체 줍3.png"
+    ]
+  },
+  {
+    "name": "ssambatea",
+    "count": 6,
+    "byText": 1,
+    "byStealth": 5,
+    "share": 1.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun11.png",
+      "rerun13.png",
+      "그림체 줍12.png"
+    ]
+  },
+  {
+    "name": "yutokamizu",
+    "count": 6,
+    "byText": 5,
+    "byStealth": 1,
+    "share": 1.5,
+    "meanWeight": 1.67,
+    "maxWeight": 2,
+    "samples": [
+      "solo, full body, low angle,_0.5__artist_ebifurya__, 0.6__artist_ixy__, 0.8__arti s-2486149625.png",
+      "2__from above__, upper body, simple background, grey background, blue archive, 3 s-1191596148.png",
+      "blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime colori s-2833028278.png"
+    ]
+  },
+  {
+    "name": "baffu",
+    "count": 5,
+    "byText": 1,
+    "byStealth": 4,
+    "share": 1.2,
+    "meanWeight": 0.92,
+    "maxWeight": 1,
+    "samples": [
+      "rerun.png",
+      "rerun21.png",
+      "rerun3.png"
+    ]
+  },
+  {
+    "name": "cutesexyrobutts",
+    "count": 5,
+    "byText": 3,
+    "byStealth": 2,
+    "share": 1.2,
+    "meanWeight": 0.9,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, 0.45__noco (adamas)__, 0.5__artist_dishwasher1910 __, 0.55__artist_ s-249390739.png",
+      "1girl, solo, 0.5__henriiku (ahemaru), artist_marushin (denwa0214)__, 0.75__artis s-328958889.png",
+      "1girl, solo, _2.0__artist_deadflow __, 1.6__artist_freng __, 1.3__artist_pottsne s-2011950707.png"
+    ]
+  },
+  {
+    "name": "kim eb",
+    "count": 5,
+    "byText": 2,
+    "byStealth": 3,
+    "share": 1.2,
+    "meanWeight": 1.39,
+    "maxWeight": 1.75,
+    "samples": [
+      "1girl, solo, 0.5__henriiku (ahemaru), artist_marushin (denwa0214)__, 0.75__artis s-328958889.png",
+      "그림체 줍13.png",
+      "1girl, solo, feet out of frame,  0.8__artist_qiandaiyiyu__, 0.85__artist_aiue ok s-2352861906.png"
+    ]
+  },
+  {
+    "name": "re0n",
+    "count": 5,
+    "byText": 0,
+    "byStealth": 5,
+    "share": 1.2,
+    "meanWeight": 0.88,
+    "maxWeight": 1,
+    "samples": [
+      "이미지015.png",
+      "이미지028.png",
+      "이미지030.png"
+    ]
+  },
+  {
+    "name": "shexyo",
+    "count": 5,
+    "byText": 2,
+    "byStealth": 3,
+    "share": 1.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "90b666da78a8408d7bbf50be84f82bbf69e1dfba8e3c6da3c87f4e734efb4b97.png",
+      "artist_kim hyung tae,  1.5__artist_hyulla__, artist_dishwasher1910, artist_yoya  s-2068533157.png",
+      "artist_kim hyung tae,  1.5__artist_hyulla__, artist_dishwasher1910, artist_yoya  s-3971776986.png"
+    ]
+  },
+  {
+    "name": "soeyumi",
+    "count": 5,
+    "byText": 5,
+    "byStealth": 0,
+    "share": 1.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "solo, full body, low angle,_0.5__artist_ebifurya__, 0.6__artist_ixy__, 0.8__arti s-2486149625.png",
+      "2__from above__, upper body, simple background, grey background, blue archive, 3 s-1191596148.png",
+      "blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime colori s-2833028278.png"
+    ]
+  },
+  {
+    "name": "chuzenji",
+    "count": 4,
+    "byText": 1,
+    "byStealth": 3,
+    "share": 1,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun13.png",
+      "rerun17.png",
+      "rerun5.png"
+    ]
+  },
+  {
+    "name": "hiten (hitenkei)",
+    "count": 4,
+    "byText": 3,
+    "byStealth": 1,
+    "share": 1,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 작가 광산.png",
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, 1girl, maid, short ha s-704489012.png",
+      "1girl, solo, feet out of frame, artist_ningen mame, artist_ciloranko, artist_miv s-3397943910.png"
+    ]
+  },
+  {
+    "name": "hyulla",
+    "count": 4,
+    "byText": 3,
+    "byStealth": 1,
+    "share": 1,
+    "meanWeight": 1.51,
+    "maxWeight": 1.55,
+    "samples": [
+      "1girl, solo, 0.45__noco (adamas)__, 0.5__artist_dishwasher1910 __, 0.55__artist_ s-249390739.png",
+      "90b666da78a8408d7bbf50be84f82bbf69e1dfba8e3c6da3c87f4e734efb4b97.png",
+      "artist_kim hyung tae,  1.5__artist_hyulla__, artist_dishwasher1910, artist_yoya  s-2068533157.png"
+    ]
+  },
+  {
+    "name": "john_kafka",
+    "count": 4,
+    "byText": 0,
+    "byStealth": 4,
+    "share": 1,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun10.png",
+      "정액 원샷.png",
+      "쥬지 길이 재기.png"
+    ]
+  },
+  {
+    "name": "jonpei",
+    "count": 4,
+    "byText": 1,
+    "byStealth": 3,
+    "share": 1,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1a0d008b4305c281019ca03a12ce83586258289e7e46d36e19f12bad91a015e6.png",
+      "rerun13.png",
+      "내가 마춤1.png"
+    ]
+  },
+  {
+    "name": "jyt",
+    "count": 4,
+    "byText": 1,
+    "byStealth": 3,
+    "share": 1,
+    "meanWeight": 0.8,
+    "maxWeight": 1,
+    "samples": [
+      "rerun14.png",
+      "rerun8.png",
+      "_girl, solo, 2__artist_sushispin__, artist_michibata 65, artist_fymrie, artist_t s-1038788476.png"
+    ]
+  },
+  {
+    "name": "kaerunrun",
+    "count": 4,
+    "byText": 4,
+    "byStealth": 0,
+    "share": 1,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "2__from above__, upper body, simple background, grey background, blue archive, 3 s-1191596148.png",
+      "blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime colori s-2833028278.png",
+      "nsfw, blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime  s-2234887166.png"
+    ]
+  },
+  {
+    "name": "karyln",
+    "count": 4,
+    "byText": 0,
+    "byStealth": 4,
+    "share": 1,
+    "meanWeight": 1.13,
+    "maxWeight": 1.5,
+    "samples": [
+      "rerun14.png",
+      "이미지002.png",
+      "이미지004.png"
+    ]
+  },
+  {
+    "name": "ke-ta",
+    "count": 4,
+    "byText": 1,
+    "byStealth": 3,
+    "share": 1,
+    "meanWeight": 1.27,
+    "maxWeight": 1.65,
+    "samples": [
+      "asdfqwer.png",
+      "그림체 줍9.png",
+      "이미지003.png"
+    ]
+  },
+  {
+    "name": "kyokucho",
+    "count": 4,
+    "byText": 4,
+    "byStealth": 0,
+    "share": 1,
+    "meanWeight": 1.13,
+    "maxWeight": 1.5,
+    "samples": [
+      "nai-image-1760591294174.png",
+      "nai-image-1760591298019.png",
+      "nai-image-1753649307633.png"
+    ]
+  },
+  {
+    "name": "mikozin",
+    "count": 4,
+    "byText": 1,
+    "byStealth": 3,
+    "share": 1,
+    "meanWeight": 0.88,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png",
+      "그림체 줍15.png",
+      "이미지012.png"
+    ]
+  },
+  {
+    "name": "myabit",
+    "count": 4,
+    "byText": 2,
+    "byStealth": 2,
+    "share": 1,
+    "meanWeight": 1.02,
+    "maxWeight": 1.1,
+    "samples": [
+      "rerun13.png",
+      "내가 마춤1.png",
+      "nai-image-1752077622966.png"
+    ]
+  },
+  {
+    "name": "noyu (noyu23386566)",
+    "count": 4,
+    "byText": 1,
+    "byStealth": 3,
+    "share": 1,
+    "meanWeight": 0.95,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png",
+      "작가 덩어리 너무 많아.png",
+      "이미지003.png"
+    ]
+  },
+  {
+    "name": "parsely-f",
+    "count": 4,
+    "byText": 4,
+    "byStealth": 0,
+    "share": 1,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "nai-image-1760591294174.png",
+      "nai-image-1760591298019.png",
+      "nai-image-1753648720734.png"
+    ]
+  },
+  {
+    "name": "rin yuu",
+    "count": 4,
+    "byText": 4,
+    "byStealth": 0,
+    "share": 1,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "2__from above__, upper body, simple background, grey background, blue archive, 3 s-1191596148.png",
+      "blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime colori s-2833028278.png",
+      "nsfw, blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime  s-2234887166.png"
+    ]
+  },
+  {
+    "name": "rurudo",
+    "count": 4,
+    "byText": 0,
+    "byStealth": 4,
+    "share": 1,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun4.png",
+      "그림체 줍10.png",
+      "그림체 줍3.png"
+    ]
+  },
+  {
+    "name": "sapysha",
+    "count": 4,
+    "byText": 4,
+    "byStealth": 0,
+    "share": 1,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "2__from above__, upper body, simple background, grey background, blue archive, 3 s-1191596148.png",
+      "blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime colori s-2833028278.png",
+      "nsfw, blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime  s-2234887166.png"
+    ]
+  },
+  {
+    "name": "shusuchii",
+    "count": 4,
+    "byText": 4,
+    "byStealth": 0,
+    "share": 1,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "2__from above__, upper body, simple background, grey background, blue archive, 3 s-1191596148.png",
+      "blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime colori s-2833028278.png",
+      "nsfw, blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime  s-2234887166.png"
+    ]
+  },
+  {
+    "name": "snow is",
+    "count": 4,
+    "byText": 4,
+    "byStealth": 0,
+    "share": 1,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "2__from above__, upper body, simple background, grey background, blue archive, 3 s-1191596148.png",
+      "blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime colori s-2833028278.png",
+      "nsfw, blue archive, 3__official art__, 3__game cg__, majo no tabitabi, 3__anime  s-2234887166.png"
+    ]
+  },
+  {
+    "name": "toma_ (toma50)",
+    "count": 4,
+    "byText": 0,
+    "byStealth": 4,
+    "share": 1,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun10.png",
+      "정액 원샷.png",
+      "쥬지 길이 재기.png"
+    ]
+  },
+  {
+    "name": "bongfill",
+    "count": 3,
+    "byText": 0,
+    "byStealth": 3,
+    "share": 0.7,
+    "meanWeight": 0.93,
+    "maxWeight": 1.1,
+    "samples": [
+      "이미지006.png",
+      "Global Preset 2.png",
+      "Global Preset 2.png"
+    ]
+  },
+  {
+    "name": "channel_ (caststation)",
+    "count": 3,
+    "byText": 0,
+    "byStealth": 3,
+    "share": 0.7,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지006.png",
+      "Global Preset 1.png",
+      "Global Preset 1.png"
+    ]
+  },
+  {
+    "name": "clioranko",
+    "count": 3,
+    "byText": 0,
+    "byStealth": 3,
+    "share": 0.7,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun11.png",
+      "그림체 줍12.png",
+      "자세 짤 줌.png"
+    ]
+  },
+  {
+    "name": "cola gotouryouta",
+    "count": 3,
+    "byText": 2,
+    "byStealth": 1,
+    "share": 0.7,
+    "meanWeight": 0.97,
+    "maxWeight": 1.1,
+    "samples": [
+      "1girl, solo, _2.0__artist_deadflow __, 1.6__artist_freng __, 1.3__artist_pottsne s-2011950707.png",
+      "그림체 줍13.png",
+      "1girl, solo, feet out of frame,  0.8__artist_qiandaiyiyu__, 0.85__artist_aiue ok s-2352861906.png"
+    ]
+  },
+  {
+    "name": "dino (dinoartforame)",
+    "count": 3,
+    "byText": 2,
+    "byStealth": 1,
+    "share": 0.7,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, 1girl, maid, short ha s-704489012.png",
+      "1girl, solo, feet out of frame, artist_ningen mame, artist_ciloranko, artist_miv s-3397943910.png",
+      "이미지012.png"
+    ]
+  },
+  {
+    "name": "eonsang",
+    "count": 3,
+    "byText": 1,
+    "byStealth": 2,
+    "share": 0.7,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "nai-image-1752077622966.png",
+      "이미지014.png",
+      "이미지028.png"
+    ]
+  },
+  {
+    "name": "greatmosu",
+    "count": 3,
+    "byText": 0,
+    "byStealth": 3,
+    "share": 0.7,
+    "meanWeight": 1.27,
+    "maxWeight": 1.4,
+    "samples": [
+      "이미지003.png",
+      "이미지008.png",
+      "이미지015.png"
+    ]
+  },
+  {
+    "name": "horikoshi_kouhe",
+    "count": 3,
+    "byText": 2,
+    "byStealth": 1,
+    "share": 0.7,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "90b666da78a8408d7bbf50be84f82bbf69e1dfba8e3c6da3c87f4e734efb4b97.png",
+      "artist_kim hyung tae,  1.5__artist_hyulla__, artist_dishwasher1910, artist_yoya  s-2068533157.png",
+      "artist_kim hyung tae,  1.5__artist_hyulla__, artist_dishwasher1910, artist_yoya  s-3971776986.png"
+    ]
+  },
+  {
+    "name": "konya karasue",
+    "count": 3,
+    "byText": 2,
+    "byStealth": 1,
+    "share": 0.7,
+    "meanWeight": 1.13,
+    "maxWeight": 1.7,
+    "samples": [
+      "1girl, solo, 0.45__noco (adamas)__, 0.5__artist_dishwasher1910 __, 0.55__artist_ s-249390739.png",
+      "1girl, solo, 0.5__henriiku (ahemaru), artist_marushin (denwa0214)__, 0.75__artis s-328958889.png",
+      "작가 덩어리 너무 많아.png"
+    ]
+  },
+  {
+    "name": "kurono mitsuki",
+    "count": 3,
+    "byText": 1,
+    "byStealth": 2,
+    "share": 0.7,
+    "meanWeight": 1.63,
+    "maxWeight": 2.8,
+    "samples": [
+      "1a0d008b4305c281019ca03a12ce83586258289e7e46d36e19f12bad91a015e6.png",
+      "solo, full body, low angle,_0.5__artist_ebifurya__, 0.6__artist_ixy__, 0.8__arti s-2486149625.png",
+      "이미지005.png"
+    ]
+  },
+  {
+    "name": "maccha (mochancc)",
+    "count": 3,
+    "byText": 1,
+    "byStealth": 2,
+    "share": 0.7,
+    "meanWeight": 0.55,
+    "maxWeight": 1,
+    "samples": [
+      "아싸 주웠다.png",
+      "작가 덩어리 너무 많아.png",
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, 1girl, maid, short ha s-704489012.png"
+    ]
+  },
+  {
+    "name": "mankai kaika",
+    "count": 3,
+    "byText": 2,
+    "byStealth": 1,
+    "share": 0.7,
+    "meanWeight": 0.9,
+    "maxWeight": 1.3,
+    "samples": [
+      "그림체 줍7.png",
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, 1girl, maid, short ha s-704489012.png",
+      "1girl, solo, feet out of frame, artist_ningen mame, artist_ciloranko, artist_miv s-3397943910.png"
+    ]
+  },
+  {
+    "name": "meme50",
+    "count": 3,
+    "byText": 1,
+    "byStealth": 2,
+    "share": 0.7,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun.png",
+      "rerun3.png",
+      "이미지026.png"
+    ]
+  },
+  {
+    "name": "necomi",
+    "count": 3,
+    "byText": 3,
+    "byStealth": 0,
+    "share": 0.7,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png",
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, 1girl, maid, short ha s-704489012.png",
+      "1girl, solo, feet out of frame, artist_ningen mame, artist_ciloranko, artist_miv s-3397943910.png"
+    ]
+  },
+  {
+    "name": "shinjiro",
+    "count": 3,
+    "byText": 1,
+    "byStealth": 2,
+    "share": 0.7,
+    "meanWeight": 1.47,
+    "maxWeight": 1.7,
+    "samples": [
+      "그림체 줍14.png",
+      "그림체 줍4.png",
+      "그림체줍16.png"
+    ]
+  },
+  {
+    "name": "soon (c-u-soon)",
+    "count": 3,
+    "byText": 0,
+    "byStealth": 3,
+    "share": 0.7,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun11.png",
+      "그림체 줍12.png",
+      "자세 짤 줌.png"
+    ]
+  },
+  {
+    "name": "sushispin",
+    "count": 3,
+    "byText": 1,
+    "byStealth": 2,
+    "share": 0.7,
+    "meanWeight": 1.53,
+    "maxWeight": 2,
+    "samples": [
+      "_girl, solo, 2__artist_sushispin__, artist_michibata 65, artist_fymrie, artist_t s-1038788476.png",
+      "그림체 줍.png",
+      "그림체 줍5.png"
+    ]
+  },
+  {
+    "name": "teshima nari",
+    "count": 3,
+    "byText": 2,
+    "byStealth": 1,
+    "share": 0.7,
+    "meanWeight": 0.57,
+    "maxWeight": 0.7,
+    "samples": [
+      "rerun.png",
+      "rerun3.png",
+      "그림체 줍14.png"
+    ]
+  },
+  {
+    "name": "tsunako",
+    "count": 3,
+    "byText": 1,
+    "byStealth": 2,
+    "share": 0.7,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png",
+      "아싸 주웠다.png",
+      "이미지016.png"
+    ]
+  },
+  {
+    "name": "uccow",
+    "count": 3,
+    "byText": 2,
+    "byStealth": 1,
+    "share": 0.7,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, 1girl, maid, short ha s-704489012.png",
+      "1girl, solo, feet out of frame, artist_ningen mame, artist_ciloranko, artist_miv s-3397943910.png",
+      "이미지013.png"
+    ]
+  },
+  {
+    "name": "zuizi",
+    "count": 3,
+    "byText": 0,
+    "byStealth": 3,
+    "share": 0.7,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "아싸 주웠다.png",
+      "Global Preset 1.png",
+      "Global Preset 1.png"
+    ]
+  },
+  {
+    "name": "0jae",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, _2.0__artist_deadflow __, 1.6__artist_freng __, 1.3__artist_pottsne s-2011950707.png",
+      "이미지016.png"
+    ]
+  },
+  {
+    "name": "afukuro",
+    "count": 2,
+    "byText": 2,
+    "byStealth": 0,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "science fiction, machinery, uncensored, nsfw, 1girl, blank stare, solo, amputee, s-1344761950.png",
+      "science fiction, machinery, uncensored, nsfw, 1girl, blank stare, solo, amputee, s-530190833.png"
+    ]
+  },
+  {
+    "name": "ahemaru",
+    "count": 2,
+    "byText": 2,
+    "byStealth": 0,
+    "share": 0.5,
+    "meanWeight": 0.85,
+    "maxWeight": 1,
+    "samples": [
+      "solo, full body, low angle,_0.5__artist_ebifurya__, 0.6__artist_ixy__, 0.8__arti s-2486149625.png",
+      "nai-image-1752077622966.png"
+    ]
+  },
+  {
+    "name": "akieda",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun2.png",
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "aoi ogata",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun9.png",
+      "아싸 주웠다.png"
+    ]
+  },
+  {
+    "name": "arato asato",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "nai-image-1752077622966.png",
+      "이미지015.png"
+    ]
+  },
+  {
+    "name": "as109",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "asdfqwer.png",
+      "이미지017.png"
+    ]
+  },
+  {
+    "name": "asahina yoshitoshi",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 0.9,
+    "maxWeight": 0.9,
+    "samples": [
+      "Global Preset 2.png",
+      "Global Preset 2.png"
+    ]
+  },
+  {
+    "name": "au (d elete)",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1a0d008b4305c281019ca03a12ce83586258289e7e46d36e19f12bad91a015e6.png",
+      "1girl, 1__artist_wanke __, 1.2__artist_healthyman __, 2__artist_freng __, 0.6__a s-2142657620.png"
+    ]
+  },
+  {
+    "name": "ayuma_sayu",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 0.9,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍6.png",
+      "그림체 줍7.png"
+    ]
+  },
+  {
+    "name": "banananosongen",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 0.8,
+    "maxWeight": 0.8,
+    "samples": [
+      "Global Preset 2.png",
+      "Global Preset 2.png"
+    ]
+  },
+  {
+    "name": "baocaizi",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "아싸 주웠다.png",
+      "이미지007.png"
+    ]
+  },
+  {
+    "name": "cha goma",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 0.8,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, 0.45__noco (adamas)__, 0.5__artist_dishwasher1910 __, 0.55__artist_ s-249390739.png",
+      "이미지016.png"
+    ]
+  },
+  {
+    "name": "cluseller",
+    "count": 2,
+    "byText": 2,
+    "byStealth": 0,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, 1girl, maid, short ha s-704489012.png",
+      "1girl, solo, feet out of frame, artist_ningen mame, artist_ciloranko, artist_miv s-3397943910.png"
+    ]
+  },
+  {
+    "name": "cola (gotouryouta)",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 1.25,
+    "maxWeight": 1.25,
+    "samples": [
+      "이미지003.png",
+      "이미지008.png"
+    ]
+  },
+  {
+    "name": "csyday",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 0.95,
+    "maxWeight": 1,
+    "samples": [
+      "아싸 주웠다.png",
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "danimaru",
+    "count": 2,
+    "byText": 2,
+    "byStealth": 0,
+    "share": 0.5,
+    "meanWeight": 0.6,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 작가 광산.png",
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, 1girl, maid, short ha s-704489012.png"
+    ]
+  },
+  {
+    "name": "daram (shappydude)",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지002.png",
+      "이미지004.png"
+    ]
+  },
+  {
+    "name": "deadflow",
+    "count": 2,
+    "byText": 2,
+    "byStealth": 0,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, _2.0__artist_deadflow __, 1.6__artist_freng __, 1.3__artist_pottsne s-2011950707.png",
+      "nai-image-1763373423207.png"
+    ]
+  },
+  {
+    "name": "dorontabi",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 1.5,
+    "maxWeight": 1.5,
+    "samples": [
+      "rerun.png",
+      "rerun3.png"
+    ]
+  },
+  {
+    "name": "ebifurya",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 0.75,
+    "maxWeight": 1,
+    "samples": [
+      "solo, full body, low angle,_0.5__artist_ebifurya__, 0.6__artist_ixy__, 0.8__arti s-2486149625.png",
+      "이미지028.png"
+    ]
+  },
+  {
+    "name": "fymrie",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 0.85,
+    "maxWeight": 1,
+    "samples": [
+      "rerun8.png",
+      "_girl, solo, 2__artist_sushispin__, artist_michibata 65, artist_fymrie, artist_t s-1038788476.png"
+    ]
+  },
+  {
+    "name": "hiro (dismaless)",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "solo, full body, low angle,_0.5__artist_ebifurya__, 0.6__artist_ixy__, 0.8__arti s-2486149625.png",
+      "이미지014.png"
+    ]
+  },
+  {
+    "name": "hone kawa",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png",
+      "그림체 줍8.png"
+    ]
+  },
+  {
+    "name": "hoshi (snacherubi)",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png",
+      "이미지009.png"
+    ]
+  },
+  {
+    "name": "ikeuchi tanuma",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "Global Preset 1.png",
+      "Global Preset 1.png"
+    ]
+  },
+  {
+    "name": "john kafka",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun17.png",
+      "1girl, solo, feet out of frame, [[artist_quasarcake]], artist_kawacy, artist_mod s-3397943910.png"
+    ]
+  },
+  {
+    "name": "kabu_usagi",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍10.png",
+      "그림체 줍3.png"
+    ]
+  },
+  {
+    "name": "kakure eria",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "nai-image-1752754268979.png",
+      "rerun21.png"
+    ]
+  },
+  {
+    "name": "kase daiki",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 0.7,
+    "maxWeight": 0.7,
+    "samples": [
+      "Global Preset 3.png",
+      "Global Preset 3.png"
+    ]
+  },
+  {
+    "name": "kezime",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "Global Preset 1.png",
+      "Global Preset 1.png"
+    ]
+  },
+  {
+    "name": "machi_ (machi0910)",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍10.png",
+      "그림체 줍3.png"
+    ]
+  },
+  {
+    "name": "mamimi (mamamimi)",
+    "count": 2,
+    "byText": 2,
+    "byStealth": 0,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, artist_yoneyama mai,  s-3939467771.png",
+      "1girl,artist_yoneyama mai[[[[artist_blue gk, artist_mamimi (mamamimi)]]]], [[[[a s-2.png"
+    ]
+  },
+  {
+    "name": "meion",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun13.png",
+      "내가 마춤1.png"
+    ]
+  },
+  {
+    "name": "michinking",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 0.8,
+    "maxWeight": 0.8,
+    "samples": [
+      "rerun.png",
+      "rerun3.png"
+    ]
+  },
+  {
+    "name": "minaba hideo",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 0.85,
+    "maxWeight": 1.4,
+    "samples": [
+      "rerun17.png",
+      "그림체 줍10.png"
+    ]
+  },
+  {
+    "name": "momisan",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "Global Preset 1.png",
+      "Global Preset 1.png"
+    ]
+  },
+  {
+    "name": "moshimoshibe",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1a0d008b4305c281019ca03a12ce83586258289e7e46d36e19f12bad91a015e6.png",
+      "rerun19.png"
+    ]
+  },
+  {
+    "name": "neco",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "기계룡 미소녀.png",
+      "이미지012.png"
+    ]
+  },
+  {
+    "name": "ninahachi",
+    "count": 2,
+    "byText": 2,
+    "byStealth": 0,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, 1girl, maid, short ha s-704489012.png",
+      "1girl, solo, feet out of frame, artist_ningen mame, artist_ciloranko, artist_miv s-3397943910.png"
+    ]
+  },
+  {
+    "name": "nishikujic",
+    "count": 2,
+    "byText": 2,
+    "byStealth": 0,
+    "share": 0.5,
+    "meanWeight": 1.1,
+    "maxWeight": 1.2,
+    "samples": [
+      "1girl, solo, _2.0__artist_deadflow __, 1.6__artist_freng __, 1.3__artist_pottsne s-2011950707.png",
+      "그림체 줍2.png"
+    ]
+  },
+  {
+    "name": "nixeu",
+    "count": 2,
+    "byText": 2,
+    "byStealth": 0,
+    "share": 0.5,
+    "meanWeight": 1.75,
+    "maxWeight": 2.4,
+    "samples": [
+      "그림체 줍2.png",
+      "반실사.png"
+    ]
+  },
+  {
+    "name": "pro-p",
+    "count": 2,
+    "byText": 2,
+    "byStealth": 0,
+    "share": 0.5,
+    "meanWeight": 1.15,
+    "maxWeight": 1.3,
+    "samples": [
+      "rerun12.png",
+      "solo, full body, low angle,_0.5__artist_ebifurya__, 0.6__artist_ixy__, 0.8__arti s-2486149625.png"
+    ]
+  },
+  {
+    "name": "rei (sanbonzakura)",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1.5,
+    "samples": [
+      "rerun7.png",
+      "그림체 줍11.png"
+    ]
+  },
+  {
+    "name": "sos adult",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "nai-image-1752077622966.png",
+      "이미지023.png"
+    ]
+  },
+  {
+    "name": "sparrowl",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 1.75,
+    "maxWeight": 1.75,
+    "samples": [
+      "Global Preset 1.png",
+      "Global Preset 1.png"
+    ]
+  },
+  {
+    "name": "starshadowmagician",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun17.png",
+      "작가 덩어리 너무 많아.png"
+    ]
+  },
+  {
+    "name": "try (lsc)",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 0.95,
+    "maxWeight": 1,
+    "samples": [
+      "nai-image-1752746292989.png",
+      "이미지030.png"
+    ]
+  },
+  {
+    "name": "wagashi_ (dagashiya)",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun13.png",
+      "내가 마춤1.png"
+    ]
+  },
+  {
+    "name": "xipa",
+    "count": 2,
+    "byText": 1,
+    "byStealth": 1,
+    "share": 0.5,
+    "meanWeight": 0.7,
+    "maxWeight": 1,
+    "samples": [
+      "반실사.png",
+      "이미지013.png"
+    ]
+  },
+  {
+    "name": "yunamaro",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 0.5,
+    "maxWeight": 0.5,
+    "samples": [
+      "Global Preset 3.png",
+      "Global Preset 3.png"
+    ]
+  },
+  {
+    "name": "zhibuji loom",
+    "count": 2,
+    "byText": 0,
+    "byStealth": 2,
+    "share": 0.5,
+    "meanWeight": 0.8,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍3.png",
+      "투 컷1.png"
+    ]
+  },
+  {
+    "name": "0haribo0",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지015.png"
+    ]
+  },
+  {
+    "name": "2015x127",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun7.png"
+    ]
+  },
+  {
+    "name": "21yc_ (september_breeze)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "33 gaff",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지015.png"
+    ]
+  },
+  {
+    "name": "723/nanahumi",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.7,
+    "maxWeight": 0.7,
+    "samples": [
+      "그림체 작가 광산.png"
+    ]
+  },
+  {
+    "name": "a.t. zero",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지015.png"
+    ]
+  },
+  {
+    "name": "a20 (atsumaru)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun19.png"
+    ]
+  },
+  {
+    "name": "achiki",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.4,
+    "maxWeight": 1.4,
+    "samples": [
+      "그림체 줍.png"
+    ]
+  },
+  {
+    "name": "age_fx",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.3,
+    "maxWeight": 0.3,
+    "samples": [
+      "그림체 작가 광산.png"
+    ]
+  },
+  {
+    "name": "aiue oka",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.85,
+    "maxWeight": 0.85,
+    "samples": [
+      "1girl, solo, feet out of frame,  0.8__artist_qiandaiyiyu__, 0.85__artist_aiue ok s-2352861906.png"
+    ]
+  },
+  {
+    "name": "akakura",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1.45,
+    "maxWeight": 1.45,
+    "samples": [
+      "그림체 줍14.png"
+    ]
+  },
+  {
+    "name": "akaneya",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "akazawa red",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지026.png"
+    ]
+  },
+  {
+    "name": "akipeko",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지014.png"
+    ]
+  },
+  {
+    "name": "akita hika",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun19.png"
+    ]
+  },
+  {
+    "name": "alp",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.5,
+    "maxWeight": 0.5,
+    "samples": [
+      "그림체 작가 광산.png"
+    ]
+  },
+  {
+    "name": "alzi xiaomi",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.5,
+    "maxWeight": 0.5,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "amagai tarou",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지030.png"
+    ]
+  },
+  {
+    "name": "ame (ulten cancel)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.8,
+    "maxWeight": 1.8,
+    "samples": [
+      "그림체줍16.png"
+    ]
+  },
+  {
+    "name": "ame (uten cancel)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지030.png"
+    ]
+  },
+  {
+    "name": "anbutter_siruko",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.9,
+    "maxWeight": 0.9,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "aomushi_ (mushamusha)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "aria_ (ariacue)",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 작가 광산.png"
+    ]
+  },
+  {
+    "name": "arisaka ako",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체줍16.png"
+    ]
+  },
+  {
+    "name": "aruka (alka p1)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.9,
+    "maxWeight": 0.9,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "asameshi",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.9,
+    "maxWeight": 0.9,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "asutora",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.4,
+    "maxWeight": 0.4,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "atahuta",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.7,
+    "maxWeight": 0.7,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "ayase-mio",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍8.png"
+    ]
+  },
+  {
+    "name": "ayuman",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.5,
+    "maxWeight": 0.5,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "az_ (zero_glvimayhop)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지009.png"
+    ]
+  },
+  {
+    "name": "azuuru",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun20.png"
+    ]
+  },
+  {
+    "name": "beeeeen",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "nai-image-1752077622966.png"
+    ]
+  },
+  {
+    "name": "bekotarou",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, _2.0__artist_deadflow __, 1.6__artist_freng __, 1.3__artist_pottsne s-2011950707.png"
+    ]
+  },
+  {
+    "name": "blackbox (blackbox9158)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "작가 덩어리 너무 많아.png"
+    ]
+  },
+  {
+    "name": "bloomminority",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.5,
+    "maxWeight": 0.5,
+    "samples": [
+      "아싸 주웠다.png"
+    ]
+  },
+  {
+    "name": "boyano",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1.1,
+    "maxWeight": 1.1,
+    "samples": [
+      "0.6__artist_mx2j__, 1.0__artist_takatisakana__, 1.1__artist_boyano__, 0.5__artis s-2238462187.png"
+    ]
+  },
+  {
+    "name": "chenpeipeiii",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.8,
+    "maxWeight": 0.8,
+    "samples": [
+      "rerun7.png"
+    ]
+  },
+  {
+    "name": "cheonyeon-hi",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지012.png"
+    ]
+  },
+  {
+    "name": "chigusa minori",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.6,
+    "maxWeight": 0.6,
+    "samples": [
+      "rerun4.png"
+    ]
+  },
+  {
+    "name": "cinquecento",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.7,
+    "maxWeight": 0.7,
+    "samples": [
+      "그림체 작가 광산.png"
+    ]
+  },
+  {
+    "name": "clipe",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.9,
+    "maxWeight": 0.9,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "cocoballking",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "아싸 주웠다.png"
+    ]
+  },
+  {
+    "name": "creayus",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.9,
+    "maxWeight": 0.9,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "ctrlz77",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, _2.0__artist_deadflow __, 1.6__artist_freng __, 1.3__artist_pottsne s-2011950707.png"
+    ]
+  },
+  {
+    "name": "cui (jidanhaidaitang)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.1,
+    "maxWeight": 1.1,
+    "samples": [
+      "작가 덩어리 너무 많아.png"
+    ]
+  },
+  {
+    "name": "cuso4 suiwabutu",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, 0.5__henriiku (ahemaru), artist_marushin (denwa0214)__, 0.75__artis s-328958889.png"
+    ]
+  },
+  {
+    "name": "cyawa",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png"
+    ]
+  },
+  {
+    "name": "d_jirooo",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, feet out of frame,  2__artist_freng __, 1.5__artist_mignon __, 1.4_ s-3397943910.png"
+    ]
+  },
+  {
+    "name": "danimnaru",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지013.png"
+    ]
+  },
+  {
+    "name": "dduck kong",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체줍16.png"
+    ]
+  },
+  {
+    "name": "dfd",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.6,
+    "maxWeight": 0.6,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "dichlorvos",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.5,
+    "maxWeight": 0.5,
+    "samples": [
+      "그림체 줍3.png"
+    ]
+  },
+  {
+    "name": "dishing",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.8,
+    "maxWeight": 0.8,
+    "samples": [
+      "_girl, solo, 2__artist_sushispin__, artist_michibata 65, artist_fymrie, artist_t s-1038788476.png"
+    ]
+  },
+  {
+    "name": "dongsheng",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 작가 광산.png"
+    ]
+  },
+  {
+    "name": "doran (doran7280)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "doremi",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지012.png"
+    ]
+  },
+  {
+    "name": "driftwoodwolf",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지007.png"
+    ]
+  },
+  {
+    "name": "drunkoak",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "ebora",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "solo, full body, low angle,_0.5__artist_ebifurya__, 0.6__artist_ixy__, 0.8__arti s-2486149625.png"
+    ]
+  },
+  {
+    "name": "eichi turnr",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지007.png"
+    ]
+  },
+  {
+    "name": "endo (takolegs)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 2.5,
+    "maxWeight": 2.5,
+    "samples": [
+      "그림체 줍11.png"
+    ]
+  },
+  {
+    "name": "fajyobore",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.5,
+    "maxWeight": 0.5,
+    "samples": [
+      "이미지028.png"
+    ]
+  },
+  {
+    "name": "fishine",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지030.png"
+    ]
+  },
+  {
+    "name": "fujiwara akina",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 2,
+    "maxWeight": 2,
+    "samples": [
+      "그림체 줍10.png"
+    ]
+  },
+  {
+    "name": "gaou (umaiyo puyoman)",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.8,
+    "maxWeight": 0.8,
+    "samples": [
+      "nai-image-1752746292989.png"
+    ]
+  },
+  {
+    "name": "geminingen",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지014.png"
+    ]
+  },
+  {
+    "name": "gomashio ponz",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지015.png"
+    ]
+  },
+  {
+    "name": "guchico",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun20.png"
+    ]
+  },
+  {
+    "name": "gulim",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png"
+    ]
+  },
+  {
+    "name": "gwan-e",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun14.png"
+    ]
+  },
+  {
+    "name": "hamada yoshikazu",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "투 컷1.png"
+    ]
+  },
+  {
+    "name": "hanaseto",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun7.png"
+    ]
+  },
+  {
+    "name": "hanekoto",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun20.png"
+    ]
+  },
+  {
+    "name": "henriku (ahemaru)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체줍16.png"
+    ]
+  },
+  {
+    "name": "hepari",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지013.png"
+    ]
+  },
+  {
+    "name": "hero_neisan",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍4.png"
+    ]
+  },
+  {
+    "name": "hiroyama hiroshi",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png"
+    ]
+  },
+  {
+    "name": "hisakata souji",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "작가 덩어리 너무 많아.png"
+    ]
+  },
+  {
+    "name": "hizaka",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.4,
+    "maxWeight": 0.4,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "homunculus_ (alchemynote)",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 작가 광산.png"
+    ]
+  },
+  {
+    "name": "honnryou_hanaru",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 2.5,
+    "maxWeight": 2.5,
+    "samples": [
+      "1girl, 0.5__artist_healthyman__, 0.5__artist_mx2j__, 0.5__artist_channel (castst s-2570218437.png"
+    ]
+  },
+  {
+    "name": "horikoshi kouhei",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지014.png"
+    ]
+  },
+  {
+    "name": "hotosoka",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png"
+    ]
+  },
+  {
+    "name": "huu (dighapdlxm12)",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun2.png"
+    ]
+  },
+  {
+    "name": "hwan (mob hwan)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지007.png"
+    ]
+  },
+  {
+    "name": "hxxg",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.8,
+    "maxWeight": 0.8,
+    "samples": [
+      "solo, full body, low angle,_0.5__artist_ebifurya__, 0.6__artist_ixy__, 0.8__arti s-2486149625.png"
+    ]
+  },
+  {
+    "name": "ie (raarami).",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "90b666da78a8408d7bbf50be84f82bbf69e1dfba8e3c6da3c87f4e734efb4b97.png"
+    ]
+  },
+  {
+    "name": "ixy",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.6,
+    "maxWeight": 0.6,
+    "samples": [
+      "solo, full body, low angle,_0.5__artist_ebifurya__, 0.6__artist_ixy__, 0.8__arti s-2486149625.png"
+    ]
+  },
+  {
+    "name": "izuru (timbermetal)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "기계룡 미소녀.png"
+    ]
+  },
+  {
+    "name": "jack dempa",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍4.png"
+    ]
+  },
+  {
+    "name": "jajimalgeol",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지013.png"
+    ]
+  },
+  {
+    "name": "joze",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "투 컷1.png"
+    ]
+  },
+  {
+    "name": "jp06",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍15.png"
+    ]
+  },
+  {
+    "name": "jp06 (orangemaru)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체줍16.png"
+    ]
+  },
+  {
+    "name": "k pring",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "d41bd70a78aef3fd166ce4b03d035b06e1a4632c0a953d583137c81d307ba2f5.png"
+    ]
+  },
+  {
+    "name": "ka (996beshi)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지007.png"
+    ]
+  },
+  {
+    "name": "kagari liroi",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지025.png"
+    ]
+  },
+  {
+    "name": "kaidenchii",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지013.png"
+    ]
+  },
+  {
+    "name": "kakao_ (chocolate_land)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍16.png"
+    ]
+  },
+  {
+    "name": "kani fish",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "아싸 주웠다.png"
+    ]
+  },
+  {
+    "name": "kawakami rokkaku",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "d41bd70a78aef3fd166ce4b03d035b06e1a4632c0a953d583137c81d307ba2f5.png"
+    ]
+  },
+  {
+    "name": "kei",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1.2,
+    "maxWeight": 1.2,
+    "samples": [
+      "masterpiece, best quality, highres, very aesthetic, amazing quality, finely deta s-360840810.png"
+    ]
+  },
+  {
+    "name": "keiko (mitakarawa)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.6,
+    "maxWeight": 0.6,
+    "samples": [
+      "작가 덩어리 너무 많아.png"
+    ]
+  },
+  {
+    "name": "kenkou cross",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지015.png"
+    ]
+  },
+  {
+    "name": "kimhiro",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지025.png"
+    ]
+  },
+  {
+    "name": "kincora",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun17.png"
+    ]
+  },
+  {
+    "name": "kishida mel",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.1,
+    "maxWeight": 1.1,
+    "samples": [
+      "이미지028.png"
+    ]
+  },
+  {
+    "name": "kizuki aruchu",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.6,
+    "maxWeight": 0.6,
+    "samples": [
+      "반실사.png"
+    ]
+  },
+  {
+    "name": "kkuem",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체줍16.png"
+    ]
+  },
+  {
+    "name": "koito (l0ve la bit)",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png"
+    ]
+  },
+  {
+    "name": "kokemomo (makesound)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun14.png"
+    ]
+  },
+  {
+    "name": "kokosando",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1.05,
+    "maxWeight": 1.05,
+    "samples": [
+      "nai-image-1752746292989.png"
+    ]
+  },
+  {
+    "name": "kuren kren",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun20.png"
+    ]
+  },
+  {
+    "name": "kuromoto-kun (rina masimaro)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.5,
+    "maxWeight": 0.5,
+    "samples": [
+      "그림체 줍15.png"
+    ]
+  },
+  {
+    "name": "lal!role",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun5.png"
+    ]
+  },
+  {
+    "name": "lam (ramdayo)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "기계룡 미소녀.png"
+    ]
+  },
+  {
+    "name": "leonardo vincent",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "작가 덩어리 너무 많아.png"
+    ]
+  },
+  {
+    "name": "liduke",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "기계룡 미소녀.png"
+    ]
+  },
+  {
+    "name": "lightningace",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지013.png"
+    ]
+  },
+  {
+    "name": "lin+",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍.png"
+    ]
+  },
+  {
+    "name": "lix (iroiro3843)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 2,
+    "maxWeight": 2,
+    "samples": [
+      "rerun5.png"
+    ]
+  },
+  {
+    "name": "luizhtx",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "작가 덩어리 너무 많아.png"
+    ]
+  },
+  {
+    "name": "machi (machi0910)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "투 컷1.png"
+    ]
+  },
+  {
+    "name": "maeka (kumaekake)",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, _2.0__artist_deadflow __, 1.6__artist_freng __, 1.3__artist_pottsne s-2011950707.png"
+    ]
+  },
+  {
+    "name": "makoto shinkai",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지028.png"
+    ]
+  },
+  {
+    "name": "mamerakkkkko",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, feet out of frame,  2__artist_freng __, 1.5__artist_mignon __, 1.4_ s-3397943910.png"
+    ]
+  },
+  {
+    "name": "manglifer",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지009.png"
+    ]
+  },
+  {
+    "name": "maratang",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.7,
+    "maxWeight": 0.7,
+    "samples": [
+      "그림체 줍11.png"
+    ]
+  },
+  {
+    "name": "marushin (denwa0214)",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, 0.5__henriiku (ahemaru), artist_marushin (denwa0214)__, 0.75__artis s-328958889.png"
+    ]
+  },
+  {
+    "name": "mashutarou_ (neko_no_oyashiro)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍16.png"
+    ]
+  },
+  {
+    "name": "maturiuta_sorato",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "mery (yangmalgage)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun17.png"
+    ]
+  },
+  {
+    "name": "michibata 65",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "_girl, solo, 2__artist_sushispin__, artist_michibata 65, artist_fymrie, artist_t s-1038788476.png"
+    ]
+  },
+  {
+    "name": "mika pizako",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "작가 덩어리 너무 많아.png"
+    ]
+  },
+  {
+    "name": "milkychu",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1.2,
+    "maxWeight": 1.2,
+    "samples": [
+      "반실사.png"
+    ]
+  },
+  {
+    "name": "miruto netsuki",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "작가 덩어리 너무 많아.png"
+    ]
+  },
+  {
+    "name": "misoshiru umai4",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지014.png"
+    ]
+  },
+  {
+    "name": "mo (kireinamo)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun19.png"
+    ]
+  },
+  {
+    "name": "mochi (circle rin)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.6,
+    "maxWeight": 0.6,
+    "samples": [
+      "그림체 줍15.png"
+    ]
+  },
+  {
+    "name": "mochizuki kei",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.7,
+    "maxWeight": 0.7,
+    "samples": [
+      "0.6__artist_mx2j__, 1.0__artist_takatisakana__, 1.1__artist_boyano__, 0.5__artis s-2238462187.png"
+    ]
+  },
+  {
+    "name": "momentcorefly",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun2.png"
+    ]
+  },
+  {
+    "name": "momo_no_sukebe",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍7.png"
+    ]
+  },
+  {
+    "name": "muju",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.9,
+    "maxWeight": 0.9,
+    "samples": [
+      "반실사.png"
+    ]
+  },
+  {
+    "name": "murata_yuusuke",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지026.png"
+    ]
+  },
+  {
+    "name": "naga u",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "아싸 주웠다.png"
+    ]
+  },
+  {
+    "name": "nagishiro mito",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.8,
+    "maxWeight": 0.8,
+    "samples": [
+      "그림체 줍10.png"
+    ]
+  },
+  {
+    "name": "nai ga",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.7,
+    "maxWeight": 0.7,
+    "samples": [
+      "작가 덩어리 너무 많아.png"
+    ]
+  },
+  {
+    "name": "naku (naku999ziye)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지007.png"
+    ]
+  },
+  {
+    "name": "namiki itsuki",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지007.png"
+    ]
+  },
+  {
+    "name": "nanmokaken",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png"
+    ]
+  },
+  {
+    "name": "nanoless",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.8,
+    "maxWeight": 0.8,
+    "samples": [
+      "그림체 줍9.png"
+    ]
+  },
+  {
+    "name": "nardack",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지015.png"
+    ]
+  },
+  {
+    "name": "nbee ya",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍8.png"
+    ]
+  },
+  {
+    "name": "ndgd",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍8.png"
+    ]
+  },
+  {
+    "name": "needbee r",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.1,
+    "maxWeight": 1.1,
+    "samples": [
+      "이미지005.png"
+    ]
+  },
+  {
+    "name": "nekodayo22",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지017.png"
+    ]
+  },
+  {
+    "name": "nekojira",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "투 컷1.png"
+    ]
+  },
+  {
+    "name": "nikorashi-ka",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.8,
+    "maxWeight": 0.8,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "noizi ito",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1.2,
+    "maxWeight": 1.2,
+    "samples": [
+      "masterpiece, best quality, highres, very aesthetic, amazing quality, finely deta s-360840810.png"
+    ]
+  },
+  {
+    "name": "nonco",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지017.png"
+    ]
+  },
+  {
+    "name": "ogipote",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun19.png"
+    ]
+  },
+  {
+    "name": "ohisashiburi",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.5,
+    "maxWeight": 0.5,
+    "samples": [
+      "rerun8.png"
+    ]
+  },
+  {
+    "name": "onineko",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.8,
+    "maxWeight": 0.8,
+    "samples": [
+      "그림체 줍9.png"
+    ]
+  },
+  {
+    "name": "opossumachine",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.5,
+    "maxWeight": 0.5,
+    "samples": [
+      "그림체 줍15.png"
+    ]
+  },
+  {
+    "name": "pako",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "solo, full body, low angle,_0.5__artist_ebifurya__, 0.6__artist_ixy__, 0.8__arti s-2486149625.png"
+    ]
+  },
+  {
+    "name": "peachuu",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.1,
+    "maxWeight": 1.1,
+    "samples": [
+      "이미지005.png"
+    ]
+  },
+  {
+    "name": "pioko",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.28,
+    "maxWeight": 0.28,
+    "samples": [
+      "그림체 작가 광산.png"
+    ]
+  },
+  {
+    "name": "piromizu",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.7,
+    "maxWeight": 0.7,
+    "samples": [
+      "이미지006.png"
+    ]
+  },
+  {
+    "name": "pochimaru",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, 1girl, maid, short ha s-704489012.png"
+    ]
+  },
+  {
+    "name": "pochimaru (marumaru wanwan)",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, feet out of frame, artist_ningen mame, artist_ciloranko, artist_miv s-3397943910.png"
+    ]
+  },
+  {
+    "name": "pochimaru_ (marumaru_wanwan)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지013.png"
+    ]
+  },
+  {
+    "name": "ponponmaru",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍8.png"
+    ]
+  },
+  {
+    "name": "pope",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지028.png"
+    ]
+  },
+  {
+    "name": "pottness",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.4,
+    "maxWeight": 0.4,
+    "samples": [
+      "그림체 작가 광산.png"
+    ]
+  },
+  {
+    "name": "qys3",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, _2.0__artist_deadflow __, 1.6__artist_freng __, 1.3__artist_pottsne s-2011950707.png"
+    ]
+  },
+  {
+    "name": "ramanda",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1a0d008b4305c281019ca03a12ce83586258289e7e46d36e19f12bad91a015e6.png"
+    ]
+  },
+  {
+    "name": "range murata",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.5,
+    "maxWeight": 0.5,
+    "samples": [
+      "masterpiece, best quality, highres, very aesthetic, amazing quality, finely deta s-360840810.png"
+    ]
+  },
+  {
+    "name": "ratatat74",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지013.png"
+    ]
+  },
+  {
+    "name": "remsrar",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.8,
+    "maxWeight": 0.8,
+    "samples": [
+      "rerun17.png"
+    ]
+  },
+  {
+    "name": "reoen",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.2,
+    "maxWeight": 1.2,
+    "samples": [
+      "이미지028.png"
+    ]
+  },
+  {
+    "name": "rhasta",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, feet out of frame, artist_ningen mame, artist_ciloranko, artist_miv s-3397943910.png"
+    ]
+  },
+  {
+    "name": "rity",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지015.png"
+    ]
+  },
+  {
+    "name": "rolua",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.2,
+    "maxWeight": 1.2,
+    "samples": [
+      "그림체 줍.png"
+    ]
+  },
+  {
+    "name": "ru_zhai",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun8.png"
+    ]
+  },
+  {
+    "name": "ryuuzaki ichi",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun17.png"
+    ]
+  },
+  {
+    "name": "sadakage",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍4.png"
+    ]
+  },
+  {
+    "name": "sakon04",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지007.png"
+    ]
+  },
+  {
+    "name": "saru",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "nai-image-1752077651081.png"
+    ]
+  },
+  {
+    "name": "sasamori tomoe",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍4.png"
+    ]
+  },
+  {
+    "name": "seicoh",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지030.png"
+    ]
+  },
+  {
+    "name": "seito_edaha",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.9,
+    "maxWeight": 0.9,
+    "samples": [
+      "반실사.png"
+    ]
+  },
+  {
+    "name": "shal.e",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "반실사.png"
+    ]
+  },
+  {
+    "name": "sheya",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, _2.0__artist_deadflow __, 1.6__artist_freng __, 1.3__artist_pottsne s-2011950707.png"
+    ]
+  },
+  {
+    "name": "shiguren 39",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍8.png"
+    ]
+  },
+  {
+    "name": "shimada fumikane",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지017.png"
+    ]
+  },
+  {
+    "name": "shin (sinsin12121)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지007.png"
+    ]
+  },
+  {
+    "name": "shinozuka_yuuji",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "얻음... NAI 밝은 그림체 1.png"
+    ]
+  },
+  {
+    "name": "shiromako",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.7,
+    "maxWeight": 0.7,
+    "samples": [
+      "그림체 줍16.png"
+    ]
+  },
+  {
+    "name": "shuri (84k)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun19.png"
+    ]
+  },
+  {
+    "name": "shuri 84k",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.5,
+    "maxWeight": 1.5,
+    "samples": [
+      "그림체 줍15.png"
+    ]
+  },
+  {
+    "name": "simon (n.s.craft)",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 작가 광산.png"
+    ]
+  },
+  {
+    "name": "sinlaire",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "작가 덩어리 너무 많아.png"
+    ]
+  },
+  {
+    "name": "skade",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun17.png"
+    ]
+  },
+  {
+    "name": "solipsist",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.8,
+    "maxWeight": 0.8,
+    "samples": [
+      "그림체 줍5.png"
+    ]
+  },
+  {
+    "name": "sonao",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1.2,
+    "maxWeight": 1.2,
+    "samples": [
+      "nai-image-1752746292989.png"
+    ]
+  },
+  {
+    "name": "sqloveraven",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.5,
+    "maxWeight": 0.5,
+    "samples": [
+      "rerun5.png"
+    ]
+  },
+  {
+    "name": "suimya",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png"
+    ]
+  },
+  {
+    "name": "sumiyao (amam)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지014.png"
+    ]
+  },
+  {
+    "name": "sunhyun",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "아싸 주웠다.png"
+    ]
+  },
+  {
+    "name": "supernew",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지015.png"
+    ]
+  },
+  {
+    "name": "suzumori uina",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png"
+    ]
+  },
+  {
+    "name": "swav",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지012.png"
+    ]
+  },
+  {
+    "name": "t1kosewad",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun2.png"
+    ]
+  },
+  {
+    "name": "takai_isshiki",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.7,
+    "maxWeight": 0.7,
+    "samples": [
+      "그림체 줍16.png"
+    ]
+  },
+  {
+    "name": "takatisakana",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "0.6__artist_mx2j__, 1.0__artist_takatisakana__, 1.1__artist_boyano__, 0.5__artis s-2238462187.png"
+    ]
+  },
+  {
+    "name": "tam-u",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 2,
+    "maxWeight": 2,
+    "samples": [
+      "이미지011.png"
+    ]
+  },
+  {
+    "name": "tanaka hirotaka",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.6,
+    "maxWeight": 1.6,
+    "samples": [
+      "그림체 줍.png"
+    ]
+  },
+  {
+    "name": "timy",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.2,
+    "maxWeight": 1.2,
+    "samples": [
+      "그림체 줍11.png"
+    ]
+  },
+  {
+    "name": "tokiame",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1.1,
+    "maxWeight": 1.1,
+    "samples": [
+      "그림체 줍14.png"
+    ]
+  },
+  {
+    "name": "topu",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 2,
+    "maxWeight": 2,
+    "samples": [
+      "이미지001.png"
+    ]
+  },
+  {
+    "name": "torino",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.8,
+    "maxWeight": 0.8,
+    "samples": [
+      "그림체 줍10.png"
+    ]
+  },
+  {
+    "name": "tresmarrow",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍8.png"
+    ]
+  },
+  {
+    "name": "tsukuring_agi",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 5,
+    "maxWeight": 5,
+    "samples": [
+      "1girl, solo, artist_lack, artist_sousouman, artist_fuzichoco, artist_momoko (mom s-5295529865.png"
+    ]
+  },
+  {
+    "name": "ueauwa",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1.2,
+    "maxWeight": 1.2,
+    "samples": [
+      "그림체 작가 광산.png"
+    ]
+  },
+  {
+    "name": "uenomigi",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍8.png"
+    ]
+  },
+  {
+    "name": "ugonba (howatoro)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.05,
+    "maxWeight": 1.05,
+    "samples": [
+      "이미지005.png"
+    ]
+  },
+  {
+    "name": "umehara sei",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png"
+    ]
+  },
+  {
+    "name": "umemaro (siona0908)",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png"
+    ]
+  },
+  {
+    "name": "umezawa_itte",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍4.png"
+    ]
+  },
+  {
+    "name": "unacchi_ (nyusankin)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 줍6.png"
+    ]
+  },
+  {
+    "name": "villainchin",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지013.png"
+    ]
+  },
+  {
+    "name": "void 0",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지017.png"
+    ]
+  },
+  {
+    "name": "wanpaku",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.9,
+    "maxWeight": 0.9,
+    "samples": [
+      "이미지028.png"
+    ]
+  },
+  {
+    "name": "weri",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "rerun12.png"
+    ]
+  },
+  {
+    "name": "xelvy",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.5,
+    "maxWeight": 1.5,
+    "samples": [
+      "이미지026.png"
+    ]
+  },
+  {
+    "name": "xi xeong",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, maid, short hair, large breasts, kneehighs, gloves, 1girl, maid, short ha s-704489012.png"
+    ]
+  },
+  {
+    "name": "xiujia yihuizi",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지017.png"
+    ]
+  },
+  {
+    "name": "yamamoto souichirou",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 0.8,
+    "maxWeight": 0.8,
+    "samples": [
+      "그림체 줍15.png"
+    ]
+  },
+  {
+    "name": "yd (orange maru)",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "nai-image-1763373423207.png"
+    ]
+  },
+  {
+    "name": "yippee",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지013.png"
+    ]
+  },
+  {
+    "name": "yomu (sgt epper)",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "0.6__artist_mx2j__, 1.0__artist_takatisakana__, 1.1__artist_boyano__, 0.5__artis s-2238462187.png"
+    ]
+  },
+  {
+    "name": "youshouhaoxianzhe",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.2,
+    "maxWeight": 1.2,
+    "samples": [
+      "그림체 줍.png"
+    ]
+  },
+  {
+    "name": "yueepon",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지015.png"
+    ]
+  },
+  {
+    "name": "yuki (asayuki101)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1.3,
+    "maxWeight": 1.3,
+    "samples": [
+      "그림체 줍.png"
+    ]
+  },
+  {
+    "name": "yuno_kaihara",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 0.5,
+    "maxWeight": 0.5,
+    "samples": [
+      "그림체 작가 광산.png"
+    ]
+  },
+  {
+    "name": "yunsang",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "nai-image-1752077622966.png"
+    ]
+  },
+  {
+    "name": "yurun_ (yurun_ume)",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "그림체 작가 광산.png"
+    ]
+  },
+  {
+    "name": "yuzuriha (nx e78)",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "이미지007.png"
+    ]
+  },
+  {
+    "name": "zain",
+    "count": 1,
+    "byText": 0,
+    "byStealth": 1,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "기계룡 미소녀.png"
+    ]
+  },
+  {
+    "name": "zandra",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "1girl, solo, 0.5__henriiku (ahemaru), artist_marushin (denwa0214)__, 0.75__artis s-328958889.png"
+    ]
+  },
+  {
+    "name": "zoirun",
+    "count": 1,
+    "byText": 1,
+    "byStealth": 0,
+    "share": 0.2,
+    "meanWeight": 1,
+    "maxWeight": 1,
+    "samples": [
+      "nai-image-1752077651081.png"
+    ]
+  }
+]

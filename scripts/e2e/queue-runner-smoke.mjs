@@ -135,18 +135,20 @@ async function main() {
     await page.locator("[data-testid='queue-target-count-input']").fill("5");
     await page.locator("[data-testid='start-queue-button']").click();
 
-    // Wait for first tick to finish
-    await page.locator("text=완료 후 대기").waitFor({ timeout: 5000 });
-
-    // Stop Queue mid-way
+    // 실행 중 중지 후 즉시 재시작
+    await page.locator("text=생성 완료 대기").waitFor({ timeout: 5000 });
     await page.locator("[data-testid='stop-queue-button']").click();
     await page.locator("text=중지됨").waitFor({ timeout: 2000 });
+    await page.locator("[data-testid='queue-target-count-input']").fill("1");
+    await page.locator("[data-testid='start-queue-button']").click();
+    await page.locator('text="완료"').waitFor({ timeout: 10000 });
 
-    // Wait a bit to ensure it doesn't run the second tick
-    await page.waitForTimeout(4000);
-    const stopGenCount = await page.evaluate(() => window.generateCount);
-    // Gen count should be 2 from before + 1 = 3
-    assert(stopGenCount === 3, `Generate count should be 3 after stopping, got ${stopGenCount}`);
+    await page.waitForTimeout(1200);
+    const restartGenCount = await page.evaluate(() => window.generateCount);
+    assert(
+      restartGenCount === 4,
+      `Generate count should be 4 after stop and immediate restart, got ${restartGenCount}`,
+    );
 
     // --- TEST: Stop on Failure ---
     // Mock failure by NOT restoring the Import button
@@ -154,6 +156,7 @@ async function main() {
       window.disableMockImportRestore = true;
     });
 
+    await page.locator("[data-testid='queue-target-count-input']").fill("2");
     await page.locator("[data-testid='start-queue-button']").click();
     
     // It should fail because the import button is missing!
@@ -161,8 +164,8 @@ async function main() {
     
     const failGenCount = await page.evaluate(() => window.generateCount);
     // The first tick succeeds (because the button was there), but its Generate step doesn't restore the button.
-    // The second tick fails. So count should be 3 + 1 = 4.
-    assert(failGenCount === 4, `Generate count should be 4, got ${failGenCount}`);
+    // The second tick fails. So count should be 4 + 1 = 5.
+    assert(failGenCount === 5, `Generate count should be 5, got ${failGenCount}`);
 
     console.log("queue runner smoke passed");
   } catch (err) {

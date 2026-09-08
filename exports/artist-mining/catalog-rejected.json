@@ -1,0 +1,378 @@
+{
+  "ghost": [
+    {
+      "tag": "ame_(ulten_cancel)",
+      "src": [
+        "mined"
+      ],
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "clioranko",
+      "src": [
+        "mined"
+      ],
+      "count": 3,
+      "byText": 0,
+      "byStealth": 3
+    },
+    {
+      "tag": "cola_gotouryouta",
+      "src": [
+        "mined"
+      ],
+      "count": 3,
+      "byText": 2,
+      "byStealth": 1
+    },
+    {
+      "tag": "danimnaru",
+      "src": [
+        "mined"
+      ],
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "deadflow",
+      "src": [
+        "mined"
+      ],
+      "count": 2,
+      "byText": 2,
+      "byStealth": 0
+    },
+    {
+      "tag": "henriku_(ahemaru)",
+      "src": [
+        "mined"
+      ],
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "horikoshi_kouhe",
+      "src": [
+        "mined"
+      ],
+      "count": 3,
+      "byText": 2,
+      "byStealth": 1
+    },
+    {
+      "tag": "ie_(raarami).",
+      "src": [
+        "mined"
+      ],
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "jp06_(orangemaru)",
+      "src": [
+        "mined"
+      ],
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "lal!role",
+      "src": [
+        "mined"
+      ],
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "lin+",
+      "src": [
+        "mined"
+      ],
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "michinking",
+      "src": [
+        "mined"
+      ],
+      "count": 2,
+      "byText": 1,
+      "byStealth": 1
+    },
+    {
+      "tag": "mika_pizako",
+      "src": [
+        "mined"
+      ],
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "parsely-f",
+      "src": [
+        "mined"
+      ],
+      "count": 4,
+      "byText": 4,
+      "byStealth": 0
+    },
+    {
+      "tag": "pottness",
+      "src": [
+        "mined"
+      ],
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    },
+    {
+      "tag": "ratatat74",
+      "src": [
+        "mined"
+      ],
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "shuri_84k",
+      "src": [
+        "mined"
+      ],
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "simon_(n.s.craft)",
+      "src": [
+        "mined"
+      ],
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    }
+  ],
+  "empty": [
+    {
+      "tag": "bloomminority",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "bongfill",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 3,
+      "byText": 0,
+      "byStealth": 3
+    },
+    {
+      "tag": "chenpeipeiii",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "cui_(jidanhaidaitang)",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "d_jirooo",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    },
+    {
+      "tag": "doremi",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "geminingen",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "kei",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": true,
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    },
+    {
+      "tag": "nekodayo22",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "noizi_ito",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    },
+    {
+      "tag": "opossumachine",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "pako",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    },
+    {
+      "tag": "pochimaru",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 1,
+      "byStealth": 0
+    },
+    {
+      "tag": "sho_(sho_lwlw)",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 280,
+      "byText": 275,
+      "byStealth": 5
+    },
+    {
+      "tag": "wanpaku",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    },
+    {
+      "tag": "youshouhaoxianzhe",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "deprecated": false,
+      "count": 1,
+      "byText": 0,
+      "byStealth": 1
+    }
+  ],
+  "nonArtist": [
+    {
+      "tag": "ahemaru",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "category": 0
+    },
+    {
+      "tag": "makoto_shinkai",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "category": 0
+    },
+    {
+      "tag": "pope",
+      "src": [
+        "mined"
+      ],
+      "postCount": 103,
+      "category": 0
+    },
+    {
+      "tag": "range_murata",
+      "src": [
+        "mined"
+      ],
+      "postCount": 0,
+      "category": 0
+    }
+  ]
+}

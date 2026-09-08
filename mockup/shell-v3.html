@@ -1,0 +1,437 @@
+<!doctype html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>껍데기 v2 — NAI 결</title>
+<style>
+  /* ── NAI 공식 페이지의 결을 따라간다: 짙은 남색 바닥, 촘촘한 여백,
+        모서리는 살짝만, 강조는 노란 버튼 하나에만 몰아준다 ── */
+  :root{
+    --bg:#0c0e13;            /* 화면 바닥 */
+    --panel:#151920;         /* 패널 */
+    --panel2:#1b202a;        /* 패널 안의 입력칸 */
+    --line:#252b36;          /* 경계선 */
+    --ink:#dfe4ec;           /* 본문 글자 */
+    --dim:#7b8494;           /* 흐린 글자 */
+    --hole:#1a1f28;          /* 아직 내용 없는 칸 */
+    --accent:#f0c440;        /* Generate 계열 강조 */
+    --sel:#2c4a7a;           /* 가중치 표시 배경 */
+    --fs:13px;
+    --gap:6px;
+    --r:6px;
+  }
+  html[data-theme="light"]{
+    --bg:#eef0f4; --panel:#ffffff; --panel2:#f3f5f9; --line:#d6dae2;
+    --ink:#1b1f27; --dim:#767f8d; --hole:#e9ecf1; --accent:#d9a712; --sel:#cfe0fb;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:system-ui,"Segoe UI","Malgun Gothic",sans-serif;
+    font-size:var(--fs); line-height:1.5;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+
+  /* ── 상단 툴바 ── */
+  .top{
+    flex:0 0 auto; height:40px; display:flex; align-items:center; gap:8px;
+    padding:0 8px; background:var(--panel); border-bottom:1px solid var(--line);
+  }
+  .brand{font-weight:700; letter-spacing:-.3px; padding-right:4px}
+  .chip{
+    display:flex; align-items:center; gap:6px; padding:3px 9px;
+    background:var(--panel2); border:1px solid var(--line); border-radius:var(--r);
+    color:var(--dim); font-size:.9em;
+  }
+  .chip b{color:var(--ink); font-weight:600}
+  .top .spacer{flex:1}
+  .ico{
+    font:inherit; color:var(--dim); background:transparent; border:1px solid transparent;
+    border-radius:var(--r); padding:3px 8px; cursor:pointer;
+  }
+  .ico:hover{color:var(--ink); background:var(--panel2); border-color:var(--line)}
+  .ico.on{color:var(--ink); background:var(--panel2); border-color:var(--line)}
+
+  /* ── 4열 무대 ── */
+  .stage{flex:1 1 auto; display:flex; min-height:0; padding:var(--gap); gap:0}
+  .col{display:flex; flex-direction:column; min-width:0; min-height:0}
+  #sideL{flex:0 0 300px}
+  #mainL{flex:1 1 55%}
+  #mainR{flex:1 1 45%}
+  #sideR{flex:0 0 132px}
+  body.noL #sideL,body.noL #spL{display:none}
+  body.noR #sideR,body.noR #spR{display:none}
+
+  .panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--r);
+    display:flex; flex-direction:column; min-height:0; overflow:hidden;
+  }
+  .panel+.panel{margin-top:var(--gap)}
+  .phead{
+    flex:0 0 auto; display:flex; align-items:center; gap:6px;
+    padding:5px 8px; border-bottom:1px solid var(--line);
+    color:var(--dim); font-size:.86em;
+  }
+  .phead .spacer{flex:1}
+  .pbody{flex:1 1 auto; min-height:0; overflow:auto; padding:8px}
+  .pfoot{flex:0 0 auto; border-top:1px solid var(--line); padding:6px 8px}
+
+  .hole{
+    height:100%; min-height:48px; border-radius:var(--r); background:var(--hole);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--dim); font-size:.85em; text-align:center; padding:8px;
+  }
+
+  /* ── 칸 사이 손잡이 ── */
+  .split{flex:0 0 var(--gap); cursor:col-resize; position:relative}
+  .split::after{content:""; position:absolute; inset:0 1px; border-radius:2px}
+  .split:hover::after{background:var(--accent); opacity:.4}
+  .split.v{cursor:row-resize}
+  .split.v::after{inset:1px 0}
+
+  /* ── 왼쪽 사이드바: 프롬프트 ── */
+  .row{display:flex; align-items:center; gap:6px}
+  .row+.row{margin-top:6px}
+  .sel{
+    font:inherit; color:var(--ink); background:var(--panel2);
+    border:1px solid var(--line); border-radius:var(--r); padding:3px 6px;
+  }
+  .tabs{display:flex; gap:2px}
+  .tab{
+    font:inherit; color:var(--dim); background:transparent; border:none;
+    padding:4px 9px; border-radius:var(--r) var(--r) 0 0; cursor:pointer;
+  }
+  .tab.on{color:var(--ink); background:var(--panel2)}
+  .tabbody{display:none; flex:1 1 auto; min-height:0; overflow:auto}
+  .tabbody.on{display:block}
+  textarea.pt{
+    width:100%; height:100%; min-height:120px; resize:none; font:inherit;
+    color:var(--ink); background:var(--panel2); border:1px solid var(--line);
+    border-radius:0 var(--r) var(--r) var(--r); padding:8px; outline:none; line-height:1.6;
+  }
+  .w-tag{background:var(--sel); border-radius:3px; padding:0 2px}
+
+  /* ── 작가 조합 = 슬라이더이자 그래프 ──
+     한 줄에 한 명. 막대 길이가 곧 가중치이고, 막대를 끌면 값이 바뀐다.
+     열일곱 명이 세로로 쌓이면 그 자체가 상대 분포 그래프가 된다. */
+  .arow{display:flex; align-items:center; gap:5px; padding:1px 3px; border-radius:4px}
+  .arow:hover{background:var(--panel2)}
+  .arow .nm{
+    flex:0 0 78px; min-width:0; overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; font-size:.9em;
+  }
+  /* 막대가 놓이는 홈. --base 는 가중치 1.0 이 오는 자리(%) */
+  .arow .track{
+    flex:1 1 auto; position:relative; height:16px; border-radius:3px;
+    background:var(--hole); cursor:ew-resize; overflow:hidden;
+  }
+  .arow .track::before{                 /* 1.0 기준선 */
+    content:""; position:absolute; top:0; bottom:0; left:var(--base);
+    width:1px; background:var(--dim); opacity:.55; z-index:2;
+  }
+  .arow .fill{
+    position:absolute; top:0; bottom:0; left:0; width:50%;
+    background:var(--accent); opacity:.55; border-radius:3px 0 0 3px;
+  }
+  .arow.under .fill{background:#6f7a8c}   /* 1.0 미만이면 색을 죽인다 */
+  .arow .w{
+    flex:0 0 46px; text-align:center; font:inherit; font-size:.9em; color:var(--ink);
+    background:var(--panel2); border:1px solid var(--line); border-radius:4px; padding:1px 3px;
+  }
+  .arow .x{flex:0 0 auto; border:none; background:none; color:var(--dim); cursor:pointer; font:inherit}
+  .arow .x:hover{color:var(--accent)}
+  .combobar{
+    display:flex; align-items:center; gap:6px; padding:0 3px 6px;
+    color:var(--dim); font-size:.82em;
+  }
+  .combobar .spacer{flex:1}
+  .mini{
+    font:inherit; font-size:.95em; color:var(--dim); background:transparent;
+    border:1px solid var(--line); border-radius:4px; padding:1px 6px; cursor:pointer;
+  }
+  .mini:hover{color:var(--ink)}
+
+  .genbtn{
+    width:100%; font:inherit; font-weight:700; color:#20180a;
+    background:var(--accent); border:none; border-radius:var(--r);
+    padding:9px; cursor:pointer;
+  }
+  .genbtn:hover{filter:brightness(1.08)}
+
+  /* ── 가운데: 결과 ── */
+  .canvas{
+    flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center;
+    padding:10px;
+  }
+  .canvas .hole{width:min(100%,420px); aspect-ratio:832/1216; height:auto}
+  .barbtn{
+    font:inherit; color:var(--dim); background:var(--panel2);
+    border:1px solid var(--line); border-radius:var(--r); padding:3px 8px; cursor:pointer;
+  }
+  .barbtn:hover{color:var(--ink)}
+
+  /* ── 오른쪽 메인: 작가 ── */
+  .agrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(92px,1fr)); gap:6px}
+  .agrid div{aspect-ratio:3/4; background:var(--hole); border-radius:4px}
+  .find{
+    width:100%; font:inherit; color:var(--ink); background:var(--panel2);
+    border:1px solid var(--line); border-radius:var(--r); padding:5px 8px; outline:none;
+  }
+  .find:focus{border-color:var(--accent)}
+
+  /* ── 오른쪽 사이드바: 히스토리 ── */
+  .hist{display:flex; flex-direction:column; gap:6px}
+  .hist div{aspect-ratio:3/4; background:var(--hole); border-radius:4px}
+  .hist div:first-child{outline:2px solid var(--accent); outline-offset:-2px}
+
+  @media (max-width:900px){
+    .stage{flex-direction:column}
+    #sideL,#sideR{flex:0 0 auto; height:160px}
+    #mainL,#mainR{flex:1 1 auto; min-height:220px}
+    .split{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <button class="ico" id="tL" title="왼쪽 접기">▤</button>
+  <span class="brand">Tag Lab</span>
+  <span class="chip">Anlas <b>9335</b></span>
+  <span class="spacer"></span>
+  <button class="ico">✦</button><button class="ico">⊞ 32</button><button class="ico">◲ 1</button>
+  <span class="spacer"></span>
+  <button class="ico" id="fsD">A−</button>
+  <button class="ico" id="fsU">A+</button>
+  <button class="ico" id="th">◐</button>
+  <button class="ico" id="tR" title="히스토리 접기">▦</button>
+</div>
+
+<div class="stage">
+
+  <!-- 왼쪽 사이드바 : 프롬프트 -->
+  <div class="col" id="sideL">
+    <div class="panel" style="flex:1 1 auto">
+      <div class="phead">
+        <select class="sel"><option>V4.5 Full</option></select>
+        <select class="sel"><option>Anime</option></select>
+      </div>
+      <div class="pbody" style="display:flex;flex-direction:column;gap:0">
+        <div class="tabs">
+          <button class="tab on" data-t="t1">Base Prompt</button>
+          <button class="tab" data-t="t2">작가 조합</button>
+          <button class="tab" data-t="t3">Undesired</button>
+        </div>
+        <div class="tabbody on" id="t1" style="display:flex">
+          <textarea class="pt">1girl, solo, portrait,
+
+artist:lack, 0.5::artist:riich::, artist:wlop, artist:ciloranko,
+0.8::artist:happoubi jin::, artist:michiking, artist:modare,
+
+solo artist, year 2025, shallow depth of field, best quality</textarea>
+        </div>
+        <div class="tabbody" id="t2" style="padding-top:6px">
+          <div class="combobar">
+            <span>17명 · 합 <b id="wsum" style="color:var(--ink)">14.6</b></span>
+            <span class="spacer"></span>
+            <button class="mini" id="sortW">가중치순</button>
+            <button class="mini" id="resetW">전부 1.0</button>
+          </div>
+          <div id="combo"></div>
+        </div>
+        <div class="tabbody" id="t3" style="padding-top:6px"><div class="hole">Undesired Content</div></div>
+      </div>
+      <div class="pfoot">
+        <div class="row" style="color:var(--dim);font-size:.85em">
+          <span>Steps <b style="color:var(--ink)">28</b></span>
+          <span>Guidance <b style="color:var(--ink)">8</b></span>
+          <span>Sampler <b style="color:var(--ink)">Euler A</b></span>
+        </div>
+      </div>
+    </div>
+    <div class="panel" style="flex:0 0 auto">
+      <div class="pfoot" style="border-top:none"><button class="genbtn">Generate 1 Image</button></div>
+    </div>
+  </div>
+
+  <div class="split" id="spL"></div>
+
+  <!-- 왼쪽 메인 : NAI 이미지 만들기 -->
+  <div class="col" id="mainL">
+    <div class="panel" style="flex:1 1 auto">
+      <div class="phead">이미지 제작<span class="spacer"></span><span>832 × 1216</span></div>
+      <div class="canvas"><div class="hole">NAI로 만들어진 이미지</div></div>
+      <div class="pfoot row">
+        <button class="barbtn">⚙</button>
+        <button class="barbtn">seed 4257072022</button>
+        <span class="spacer"></span>
+        <button class="barbtn">📌</button><button class="barbtn">⧉</button><button class="barbtn">💾</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="split" id="spM"></div>
+
+  <!-- 오른쪽 메인 : 작가 그림 보기 -->
+  <div class="col" id="mainR">
+    <div class="panel" id="rA" style="flex:1 1 auto">
+      <div class="phead">작가 그림<span class="spacer"></span><span>lack</span></div>
+      <div class="pbody">
+        <div class="agrid">
+          <div></div><div></div><div></div><div></div><div></div><div></div>
+          <div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+      </div>
+      <div class="pfoot"><input class="find" placeholder="작가 이름으로 찾기"></div>
+    </div>
+    <div class="split v" id="spV"></div>
+    <div class="panel" id="rB" style="flex:0 0 116px">
+      <div class="phead">관련 정보 · 수치</div>
+      <div class="pbody"><div class="hole">그래프 / 도표</div></div>
+    </div>
+  </div>
+
+  <div class="split" id="spR"></div>
+
+  <!-- 오른쪽 사이드바 : 히스토리 -->
+  <div class="col" id="sideR">
+    <div class="panel" style="flex:1 1 auto">
+      <div class="phead">History ▶</div>
+      <div class="pbody"><div class="hist">
+        <div></div><div></div><div></div><div></div><div></div><div></div>
+      </div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── 만진 것은 전부 기억한다. 브라우저가 저장을 막아도 화면은 정상이어야 한다 ──
+const KEY="shell-v2";
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||"{}")}catch{return{}}};
+const save=p=>{try{localStorage.setItem(KEY,JSON.stringify({...load(),...p}))}catch{}};
+const S=load(), root=document.documentElement;
+
+let fs=S.fs||13;
+const applyFs=()=>{root.style.setProperty("--fs",fs+"px");save({fs})};
+applyFs();
+fsU.onclick=()=>{fs=Math.min(fs+1,20);applyFs()};
+fsD.onclick=()=>{fs=Math.max(fs-1,11);applyFs()};
+
+if(S.theme)root.setAttribute("data-theme",S.theme);
+th.onclick=()=>{const n=root.getAttribute("data-theme")==="dark"?"light":"dark";
+  root.setAttribute("data-theme",n);save({theme:n})};
+
+if(S.noL)document.body.classList.add("noL");
+if(S.noR)document.body.classList.add("noR");
+tL.onclick=()=>{document.body.classList.toggle("noL");save({noL:document.body.classList.contains("noL")})};
+tR.onclick=()=>{document.body.classList.toggle("noR");save({noR:document.body.classList.contains("noR")})};
+
+// 탭
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+  document.querySelectorAll(".tabbody").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); document.getElementById(b.dataset.t).classList.add("on");
+});
+
+// 가로/세로 손잡이. dir=+1 이면 오른쪽으로 끌 때 커진다
+function drag(handle,target,key,axis,dir,min,max){
+  handle.addEventListener("pointerdown",e=>{
+    handle.setPointerCapture(e.pointerId);
+    const p0=axis==="x"?e.clientX:e.clientY;
+    const r=target.getBoundingClientRect(), s0=axis==="x"?r.width:r.height;
+    const move=ev=>{
+      const p=axis==="x"?ev.clientX:ev.clientY;
+      const v=Math.min(max,Math.max(min,s0+(p-p0)*dir));
+      target.style.flex="0 0 "+v+"px";
+    };
+    const up=()=>{handle.removeEventListener("pointermove",move);
+      handle.removeEventListener("pointerup",up);
+      const rr=target.getBoundingClientRect();
+      save({[key]:Math.round(axis==="x"?rr.width:rr.height)})};
+    handle.addEventListener("pointermove",move);
+    handle.addEventListener("pointerup",up);
+  });
+}
+const sideL=document.getElementById("sideL"), sideR=document.getElementById("sideR"),
+      mainL=document.getElementById("mainL"), rB=document.getElementById("rB");
+if(S.sideL)sideL.style.flex="0 0 "+S.sideL+"px";
+if(S.sideR)sideR.style.flex="0 0 "+S.sideR+"px";
+if(S.mainL)mainL.style.flex="0 0 "+S.mainL+"px";
+if(S.rB)   rB.style.flex   ="0 0 "+S.rB+"px";
+drag(spL,sideL,"sideL","x",+1,200,560);
+drag(spM,mainL,"mainL","x",+1,240,1400);
+drag(spR,sideR,"sideR","x",-1,90,420);
+drag(spV,rB,"rB","y",-1,70,600);
+
+// ── 작가 조합: 막대가 슬라이더이자 그래프 ──
+const WMIN=0, WMAX=2;                     // 막대가 표현하는 범위. 1.0이 한가운데 온다
+const BASE=(1-WMIN)/(WMAX-WMIN)*100;      // 기준선 1.0 이 놓이는 위치(%)
+const artists=[
+  ["lack",1.0],["riich",0.5],["sousouman",0.5],["wlop",1.0],["wanke",1.0],
+  ["ciloranko",1.0],["happoubi jin",0.8],["michiking",1.0],["toosaka asagi",0.9],
+  ["modare",1.0],["freng",1.0],["quasarcake",0.4],["fuzichoco",0.5],
+  ["sho (sho lwlw)",1.0],["mignon",1.0],["asanagi",1.0],["parsley-f",1.0],
+];
+const combo=document.getElementById("combo");
+
+function render(){
+  combo.innerHTML="";
+  artists.forEach((a,i)=>{
+    const row=document.createElement("div");
+    row.className="arow"; row.dataset.i=i;
+    row.innerHTML=
+      `<span class="nm" title="${a[0]}">${a[0]}</span>`+
+      `<span class="track" style="--base:${BASE}%"><span class="fill"></span></span>`+
+      `<input class="w" value="${a[1].toFixed(2)}">`+
+      `<button class="x">×</button>`;
+    combo.appendChild(row);
+  });
+  paint();
+}
+function paint(){
+  [...combo.children].forEach(row=>{
+    const v=artists[row.dataset.i][1];
+    row.querySelector(".fill").style.width=((v-WMIN)/(WMAX-WMIN)*100)+"%";
+    row.classList.toggle("under", v<1);
+    const inp=row.querySelector(".w");
+    if(document.activeElement!==inp) inp.value=v.toFixed(2);
+  });
+  document.getElementById("wsum").textContent=
+    artists.reduce((s,a)=>s+a[1],0).toFixed(1);
+}
+// 막대 끌기 — 누른 자리로 바로 가고, 그대로 이어서 끌 수 있다
+combo.addEventListener("pointerdown",e=>{
+  const track=e.target.closest(".track"); if(!track)return;
+  const row=track.closest(".arow"), i=row.dataset.i;
+  track.setPointerCapture(e.pointerId);
+  const set=ev=>{
+    const r=track.getBoundingClientRect();
+    let v=WMIN+((ev.clientX-r.left)/r.width)*(WMAX-WMIN);
+    v=Math.round(Math.min(WMAX,Math.max(WMIN,v))*20)/20;   // 0.05 눈금
+    artists[i][1]=v; paint();
+  };
+  set(e);
+  const up=()=>{track.removeEventListener("pointermove",set);
+    track.removeEventListener("pointerup",up)};
+  track.addEventListener("pointermove",set);
+  track.addEventListener("pointerup",up);
+});
+// 숫자로 직접 입력
+combo.addEventListener("input",e=>{
+  if(!e.target.classList.contains("w"))return;
+  const v=parseFloat(e.target.value);
+  if(!isNaN(v)){artists[e.target.closest(".arow").dataset.i][1]=v; paint()}
+});
+combo.addEventListener("click",e=>{
+  if(!e.target.classList.contains("x"))return;
+  artists.splice(e.target.closest(".arow").dataset.i,1); render();
+});
+document.getElementById("sortW").onclick=()=>{artists.sort((a,b)=>b[1]-a[1]); render()};
+document.getElementById("resetW").onclick=()=>{artists.forEach(a=>a[1]=1); render()};
+render();
+</script>
+</body>
+</html>

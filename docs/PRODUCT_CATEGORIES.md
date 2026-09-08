@@ -26,7 +26,7 @@ Product Category는 앱의 칩 그룹, 검색 필터, 프리셋 조각, 향후 �
 - 카테고리는 사용자의 작업 언어로 이름 붙인다.
 - 한 카테고리에 너무 많은 칩을 기본 노출하지 않는다.
 - 기본 노출 칩은 자주 쓰고 의미가 즉시 이해되는 태그만 포함한다.
-- 애매한 태그는 Core Catalog가 아니라 Lite Search나 Raw Prompt로 보낸다.
+- 애매한 태그는 Core Catalog가 아니라 Full Tag Dictionary나 Raw Prompt로 보낸다.
 - adult, artist, copyright, character 고유명사는 초기 Core Catalog 기본 노출에서 제외한다.
 - 프롬프트에 실제로 들어가는 값은 canonical English tag다.
 - `korean_name`, `description`, `keyword`는 UI 검색과 검수 보조 정보이며 prompt output이 아니다.
@@ -108,6 +108,10 @@ Core Catalog 항목은 최소한 다음 의미를 가져야 한다.
 - `target`: `prompt`, `negative`, `character`, `any` 중 하나
 - `reviewStatus`: `accepted`, `candidate`, `rejected`, `needs_review` 중 하나
 
+Core Catalog Entry는 Tag Dictionary Entry와 다르다.
+Core Catalog Entry는 Quick Catalog Chips의 편집 정책을 위한 작은 curated record이고, Tag Dictionary Entry는 전체 사전 탐색을 위한 큰 lexical record다.
+Tag Dictionary Entry에는 target hint나 aliases가 없다고 가정해야 한다.
+
 ## 분류 판단 규칙
 
 `major_categories`와 `minor_categories`는 1차 힌트다.
@@ -130,7 +134,7 @@ user catalog는 Core Catalog와 분리하고, 향후 export/import 대상이 된
 
 ## 초기 제한
 
-Core Catalog는 초기 150개 안팎으로 제한한다.
+Core Catalog는 작고 검수된 quick editor surface로 유지한다.
 카테고리별 기본 노출은 8개에서 20개 사이를 목표로 한다.
-Lite Autocomplete Index는 별도 파일로 지연 로드한다.
+Full Tag Dictionary는 별도 category chunk로 지연 로드한다.
 전체 원천 태그 JSON은 Runtime bundle에 포함하지 않는다.

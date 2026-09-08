@@ -28,6 +28,12 @@ interface GenerationStatus {
   loadingIndicatorCount: number;
 }
 
+interface GenerationObservationContext {
+  generateButton: HTMLButtonElement;
+  scope: ParentNode;
+  baselineLoadingIndicators: ReadonlySet<Element>;
+}
+
 function delay(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
@@ -91,12 +97,12 @@ function isVisibleElement(element: Element): boolean {
     && style.visibility !== "hidden";
 }
 
-function findLoadingIndicators(): Element[] {
+function findLoadingIndicators(scope: ParentNode): Element[] {
   const indicators = new Set<Element>();
 
   for (const selector of LOADING_SELECTORS) {
     try {
-      document.querySelectorAll(selector).forEach((element) => {
+      scope.querySelectorAll(selector).forEach((element) => {
         if (!isInsideOverlayRoot(element) && isVisibleElement(element)) {
           indicators.add(element);
         }
@@ -109,12 +115,37 @@ function findLoadingIndicators(): Element[] {
   return Array.from(indicators);
 }
 
-function getGenerationStatus(): GenerationStatus {
-  const generateButton = findGenerateButton();
+function createGenerationObservationContext(
+  generateButton: HTMLButtonElement,
+): GenerationObservationContext {
+  const pageMain = generateButton.closest("main, [role='main']");
+  const generationSurface = generateButton.parentElement?.closest(
+    "[data-testid*='image-generation' i], "
+      + "[data-testid*='image-gen' i], "
+      + "[class*='image-generation' i], "
+      + "[class*='image-gen' i]",
+  );
+  const scope = pageMain ?? generationSurface ?? document.body;
+
+  return {
+    generateButton,
+    scope,
+    baselineLoadingIndicators: new Set(findLoadingIndicators(scope)),
+  };
+}
+
+function getGenerationStatus(
+  context: GenerationObservationContext,
+): GenerationStatus {
+  const generateButton = context.generateButton.isConnected
+    ? context.generateButton
+    : findGenerateButton();
+  const activeLoadingIndicators = findLoadingIndicators(context.scope)
+    .filter((indicator) => !context.baselineLoadingIndicators.has(indicator));
 
   return {
     disabledGenerateButton: generateButton ? isDisabledButton(generateButton) : false,
-    loadingIndicatorCount: findLoadingIndicators().length,
+    loadingIndicatorCount: activeLoadingIndicators.length,
   };
 }
 
@@ -157,16 +188,18 @@ async function waitUntil(
 }
 
 async function waitForGenerationStart(
+  context: GenerationObservationContext,
   timeoutMs: number,
   signal?: AbortSignal,
 ): Promise<GenerationStatus | null> {
   return waitFor(() => {
-    const status = getGenerationStatus();
+    const status = getGenerationStatus(context);
     return isGenerationStarted(status) ? status : undefined;
   }, timeoutMs, signal);
 }
 
 async function waitForGenerationComplete(
+  context: GenerationObservationContext,
   initialStatus: GenerationStatus,
   timeoutMs: number,
   idleStableMs: number,
@@ -179,7 +212,7 @@ async function waitForGenerationComplete(
   while (Date.now() < deadline) {
     if (signal?.aborted) return false;
 
-    const status = getGenerationStatus();
+    const status = getGenerationStatus(context);
     if (status.loadingIndicatorCount > 0) {
       observedStrongLoading = true;
     }
@@ -371,6 +404,7 @@ export async function applyMetadataToNovelAi(
     }
 
     emitPhase("clicking-generate-button", "NovelAI Generate 버튼을 클릭하는 중");
+    const generationContext = createGenerationObservationContext(enabledGenerateButton);
     try {
       enabledGenerateButton.click();
     } catch (error) {
@@ -385,7 +419,11 @@ export async function applyMetadataToNovelAi(
     }
 
     emitPhase("waiting-generation-start", "NovelAI 생성 시작을 확인하는 중");
-    const generationStart = await waitForGenerationStart(generationStartTimeoutMs, options.signal);
+    const generationStart = await waitForGenerationStart(
+      generationContext,
+      generationStartTimeoutMs,
+      options.signal,
+    );
     if (options.signal?.aborted) return abortFailure(phases);
     if (!generationStart) {
       return createFailure(
@@ -400,6 +438,7 @@ export async function applyMetadataToNovelAi(
 
     emitPhase("waiting-generation-complete", "NovelAI 이미지 생성 완료를 기다리는 중");
     const generationCompleted = await waitForGenerationComplete(
+      generationContext,
       generationStart,
       generationCompleteTimeoutMs,
       generationIdleStableMs,

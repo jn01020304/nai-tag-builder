@@ -35,7 +35,8 @@ writing:
 
 Runtime은 사용자의 모바일 브라우저 안에서 실행되는 북마크릿 앱이다.
 초기 렌더링, Compose, Tune, Queue, Apply, status feedback, handoff preview를 담당한다.
-Runtime에는 승인된 Core Catalog와 최소 로직만 포함한다.
+Runtime에는 승인된 Core Catalog와 최소 로직만 초기 번들에 포함한다.
+Full Tag Dictionary 데이터는 `public/catalog/tag-dictionary`의 manifest와 chunk로 분리하고 사용자가 연 범위만 lazy load한다.
 
 Offline은 개발 또는 빌드 단계에서 실행되는 도구다.
 로컬 Danbooru 태그 스냅샷 파싱, Product Category 후보 생성, 향후 Danbooru API 검증, 향후 LLM 분류 보조, catalog 압축을 담당한다.
@@ -68,6 +69,8 @@ Footer는 Apply, Stop, metadata notice, status summary를 항상 접근 가능�
 
 Prompt 도메인은 prompt document, raw prompt, tag catalog, parser, linter, compiler, preset piece를 담당한다.
 이 도메인은 NovelAI DOM이나 PNG encoding을 알면 안 된다.
+Quick Catalog Chips는 curated editor metadata를 가진 Core Catalog를 사용하고, Full Tag Dictionary는 lexical search/browse data를 사용한다.
+둘을 같은 prompt 편집면에 배치하더라도 적용 정책은 분리한다.
 
 Metadata 도메인은 `MetadataState`, seed planning, NovelAI Comment JSON, PNG metadata encoding을 담당한다.
 이 도메인은 Product Category와 UI 칩 출처를 알면 안 된다.

@@ -1,10 +1,11 @@
 import { useState } from 'react';
 import type { MetadataState } from '../types/metadata';
 import { useThemeStyles } from '../contexts/themeContextCore';
+import type { MetadataPatch } from "../model/metadataPatch";
 
 interface Props {
     importedState: MetadataState;
-    onConfirm: (partial: Partial<MetadataState>) => void;
+    onConfirm: (patch: MetadataPatch) => void;
     onCancel: () => void;
 }
 
@@ -24,46 +25,42 @@ export default function ImportModal({ importedState, onConfirm, onCancel }: Prop
     const [importSettings, setImportSettings] = useState(true);
 
     const handleApply = () => {
-        const partial: Partial<MetadataState> = {};
+        const patch: MetadataPatch = {};
 
-        // prompt 그룹 구성
-        const promptPatch: Partial<MetadataState['prompt']> = {};
+        const promptPatch: MetadataPatch["prompt"] = {};
         if (importBasePrompt) {
             promptPatch.basePrompt = importedState.prompt.basePrompt;
         }
-        promptPatch.characters = importedState.prompt.characters.filter(c => selectedChars.includes(c.id));
+        if (selectedChars.length > 0) {
+            promptPatch.characters = importedState.prompt.characters.filter(c => selectedChars.includes(c.id));
+        }
         if (importNegative) {
             promptPatch.negativeBase = importedState.prompt.negativeBase;
         }
-        promptPatch.negativeCharacters = importedState.prompt.negativeCharacters.filter(c => selectedNegChars.includes(c.id));
-        partial.prompt = promptPatch as MetadataState['prompt'];
-
-        if (importSeed) {
-            partial.params = { ...importedState.params, seed: importedState.params.seed };
+        if (selectedNegChars.length > 0) {
+            promptPatch.negativeCharacters = importedState.prompt.negativeCharacters.filter(c => selectedNegChars.includes(c.id));
+        }
+        if (Object.keys(promptPatch).length > 0) {
+            patch.prompt = promptPatch;
         }
 
         if (importSettings) {
-            const paramsWithoutSeed: Partial<MetadataState['params']> = { ...importedState.params };
+            const paramsWithoutSeed: MetadataPatch["params"] = { ...importedState.params };
             delete paramsWithoutSeed.seed;
-            partial.params = importSeed
+            patch.params = importSeed
                 ? { ...importedState.params }
-                : paramsWithoutSeed as MetadataState['params'];
-            partial.advanced = { ...importedState.advanced };
-            partial.useCoords = importedState.useCoords;
-            partial.useOrder = importedState.useOrder;
+                : paramsWithoutSeed;
+            patch.advanced = { ...importedState.advanced };
+            patch.useCoords = importedState.useCoords;
+            patch.useOrder = importedState.useOrder;
+            if (importedState.source) {
+                patch.source = importedState.source;
+            }
+        } else if (importSeed) {
+            patch.params = { seed: importedState.params.seed };
         }
 
-        // seed만 import (settings 없이)
-        if (importSeed && !importSettings) {
-            partial.params = { seed: importedState.params.seed } as MetadataState['params'];
-        }
-
-        // Always import the source model hash.
-        if (importedState.source) {
-            partial.source = importedState.source;
-        }
-
-        onConfirm(partial);
+        onConfirm(patch);
     };
 
     const overlayStyle: React.CSSProperties = {

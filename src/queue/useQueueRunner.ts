@@ -41,6 +41,15 @@ export interface QueueRunnerState {
   stopLoop: () => void;
 }
 
+interface ActiveQueueRun {
+  runId: string;
+  stopped: boolean;
+  completedCount: number;
+  queueCursor: number;
+  timeoutId: number | null;
+  applyAbort: AbortController | null;
+}
+
 export function useQueueRunner({
   state,
   queue,
@@ -63,12 +72,8 @@ export function useQueueRunner({
   const intervalRef = useRef(Number(intervalSec) || 10);
   const targetCountRef = useRef(Number(targetCount) || 100);
   const runsPerPresetRef = useRef(Number(runsPerPreset) || 1);
-  const loopCountRef = useRef(0);
-  const loopTimeoutRef = useRef<number | null>(null);
-  const applyAbortRef = useRef<AbortController | null>(null);
-  const queueIndexRef = useRef(0);
   const queueSessionRef = useRef<QueueSession | null>(null);
-  const stopRequestedRef = useRef(false);
+  const activeRunRef = useRef<ActiveQueueRun | null>(null);
 
   useEffect(() => { stateRef.current = state; }, [state]);
   useEffect(() => { queueRef.current = queue; }, [queue]);
@@ -85,15 +90,21 @@ export function useQueueRunner({
   };
 
   const stopLoop = () => {
-    if (loopTimeoutRef.current !== null) {
-      clearTimeout(loopTimeoutRef.current);
-      loopTimeoutRef.current = null;
+    const activeRun = activeRunRef.current;
+    if (activeRun) {
+      activeRun.stopped = true;
+      if (activeRun.timeoutId !== null) {
+        clearTimeout(activeRun.timeoutId);
+        activeRun.timeoutId = null;
+      }
+      activeRun.applyAbort?.abort();
+      activeRun.applyAbort = null;
+      activeRunRef.current = null;
     }
-    applyAbortRef.current?.abort();
-    applyAbortRef.current = null;
-    stopRequestedRef.current = true;
     if (
+      activeRun &&
       queueSessionRef.current &&
+      queueSessionRef.current.runId === activeRun.runId &&
       queueSessionRef.current.status !== "completed" &&
       queueSessionRef.current.status !== "failed" &&
       queueSessionRef.current.status !== "stopped"
@@ -104,8 +115,12 @@ export function useQueueRunner({
   };
 
   useEffect(() => () => {
-    if (loopTimeoutRef.current) clearTimeout(loopTimeoutRef.current);
-    applyAbortRef.current?.abort();
+    const activeRun = activeRunRef.current;
+    if (!activeRun) return;
+    activeRun.stopped = true;
+    if (activeRun.timeoutId !== null) clearTimeout(activeRun.timeoutId);
+    activeRun.applyAbort?.abort();
+    activeRunRef.current = null;
   }, []);
 
   const getQueuedSources = async (): Promise<QueueSourceSnapshot[]> => {
@@ -122,11 +137,8 @@ export function useQueueRunner({
 
   const startQueueLoop = async () => {
     stopLoop();
-    stopRequestedRef.current = false;
     setIsLooping(true);
-    loopCountRef.current = 0;
     setLoopCount(0);
-    queueIndexRef.current = 0;
 
     const draft = createQueueDraft({
       targetCount: targetCountRef.current,
@@ -136,9 +148,59 @@ export function useQueueRunner({
       runsPerPreset: runsPerPresetRef.current,
     });
     const initialSession = startQueueSession(draft);
+    const activeRun: ActiveQueueRun = {
+      runId: initialSession.runId,
+      stopped: false,
+      completedCount: 0,
+      queueCursor: 0,
+      timeoutId: null,
+      applyAbort: null,
+    };
+    activeRunRef.current = activeRun;
     updateQueueSession(initialSession);
 
-    const initialSources = await getQueuedSources();
+    const isActiveRun = () => (
+      activeRunRef.current === activeRun &&
+      !activeRun.stopped
+    );
+    const getActiveSession = (): QueueSession | null => {
+      if (!isActiveRun()) return null;
+      const currentSession = queueSessionRef.current;
+      return currentSession?.runId === activeRun.runId ? currentSession : null;
+    };
+    const finishActiveRun = () => {
+      if (!isActiveRun()) return;
+      if (activeRun.timeoutId !== null) {
+        clearTimeout(activeRun.timeoutId);
+        activeRun.timeoutId = null;
+      }
+      activeRun.applyAbort = null;
+      activeRunRef.current = null;
+      setIsLooping(false);
+    };
+
+    let initialSources: QueueSourceSnapshot[];
+    try {
+      initialSources = await getQueuedSources();
+    } catch (error) {
+      const currentSession = getActiveSession();
+      if (!currentSession) return;
+      const detail = error instanceof Error ? error.message : undefined;
+      updateQueueSession(markQueueTickFailure(currentSession, {
+        code: "QUEUE_PLANNING_FAILED",
+        message: "Queue 프리셋을 불러오지 못했습니다.",
+        detail,
+      }));
+      feedbackRef.current?.({
+        tone: "error",
+        message: "Queue 프리셋을 불러오지 못했습니다.",
+        detail,
+      });
+      finishActiveRun();
+      return;
+    }
+
+    if (!getActiveSession()) return;
     const warnings = createQueuePreflightWarnings(
       draft,
       initialSources,
@@ -157,12 +219,11 @@ export function useQueueRunner({
     }
 
     const executeLoop = async () => {
-      if (stopRequestedRef.current) return;
-      const currentSession = queueSessionRef.current;
-      if (!currentSession || currentSession.runId !== initialSession.runId) return;
+      const currentSession = getActiveSession();
+      if (!currentSession) return;
 
-      if (loopCountRef.current >= draft.targetCount) {
-        stopLoop();
+      if (activeRun.completedCount >= draft.targetCount) {
+        finishActiveRun();
         return;
       }
 
@@ -171,21 +232,22 @@ export function useQueueRunner({
         draft,
         currentState: stateRef.current,
         queuedSources: initialSources,
-        tickIndex: loopCountRef.current,
-        queueCursor: queueIndexRef.current,
+        tickIndex: activeRun.completedCount,
+        queueCursor: activeRun.queueCursor,
         scheduledAt: Date.now(),
       });
 
       if (!plan) {
-        stopLoop();
+        finishActiveRun();
         return;
       }
 
-      queueIndexRef.current = plan.nextQueueCursor;
-      updateQueueSession(markQueueWaiting(currentSession, plan));
-      updateQueueSession(markQueueApplying(queueSessionRef.current ?? currentSession, plan));
+      activeRun.queueCursor = plan.nextQueueCursor;
+      const waitingSession = markQueueWaiting(currentSession, plan);
+      updateQueueSession(waitingSession);
+      updateQueueSession(markQueueApplying(waitingSession, plan));
       const applyAbort = new AbortController();
-      applyAbortRef.current = applyAbort;
+      activeRun.applyAbort = applyAbort;
 
       try {
         const result = await runApplyPipeline({
@@ -194,17 +256,21 @@ export function useQueueRunner({
           signal: applyAbort.signal,
           onPhase: (event) => {
             if (event.phase === "waiting-generation-complete") {
-              updateQueueSession(markQueueGenerating(queueSessionRef.current ?? currentSession, plan));
+              const phaseSession = getActiveSession();
+              if (phaseSession) {
+                updateQueueSession(markQueueGenerating(phaseSession, plan));
+              }
             }
           },
         });
-        if (applyAbortRef.current === applyAbort) {
-          applyAbortRef.current = null;
+        if (activeRun.applyAbort === applyAbort) {
+          activeRun.applyAbort = null;
         }
+        const resultSession = getActiveSession();
+        if (!resultSession) return;
         if (result.effect.status === "failed") {
-          if (result.effect.code === "ABORTED" && stopRequestedRef.current) return;
           console.error("Auto generate effect failed:", result.effect);
-          updateQueueSession(markQueueTickFailure(queueSessionRef.current ?? currentSession, {
+          updateQueueSession(markQueueTickFailure(resultSession, {
             code: result.effect.code,
             message: result.effect.message,
             detail: result.effect.detail,
@@ -216,21 +282,22 @@ export function useQueueRunner({
             message: result.effect.message,
             detail: formatApplyErrorDetail(result.effect.code, result.effect.detail),
           });
-          stopLoop();
+          finishActiveRun();
           return;
         }
-        updateQueueSession(markQueueTickSuccess(queueSessionRef.current ?? currentSession, plan, result));
+        updateQueueSession(markQueueTickSuccess(resultSession, plan, result));
         feedbackRef.current?.({
           tone: "success",
           message: result.effect.message,
         });
       } catch (error) {
-        if (applyAbortRef.current === applyAbort) {
-          applyAbortRef.current = null;
+        if (activeRun.applyAbort === applyAbort) {
+          activeRun.applyAbort = null;
         }
-        if (stopRequestedRef.current) return;
+        const errorSession = getActiveSession();
+        if (!errorSession) return;
         console.error("Auto generate pipeline failed:", error);
-        updateQueueSession(markQueueTickFailure(queueSessionRef.current ?? currentSession, {
+        updateQueueSession(markQueueTickFailure(errorSession, {
           code: "QUEUE_PLANNING_FAILED",
           message: "자동 생성 적용 중 오류가 발생했습니다.",
           detail: error instanceof Error ? error.message : undefined,
@@ -238,21 +305,21 @@ export function useQueueRunner({
           tickIndex: plan.tickIndex,
         }));
         feedbackRef.current?.({ tone: "error", message: "자동 생성 적용 중 오류가 발생했습니다." });
-        stopLoop();
+        finishActiveRun();
         return;
       }
 
-      loopCountRef.current += 1;
-      setLoopCount(loopCountRef.current);
-      if (loopCountRef.current >= draft.targetCount) {
-        setIsLooping(false);
-        loopTimeoutRef.current = null;
+      if (!isActiveRun()) return;
+      activeRun.completedCount += 1;
+      setLoopCount(activeRun.completedCount);
+      if (activeRun.completedCount >= draft.targetCount) {
+        finishActiveRun();
         return;
       }
-      loopTimeoutRef.current = window.setTimeout(executeLoop, draft.intervalSec * 1000);
+      activeRun.timeoutId = window.setTimeout(executeLoop, draft.intervalSec * 1000);
     };
 
-    if (stopRequestedRef.current) return;
+    if (!isActiveRun()) return;
     void executeLoop();
   };
 

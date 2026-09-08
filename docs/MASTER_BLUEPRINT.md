@@ -114,8 +114,9 @@ Runtime 앱은 Offline script를 import하면 안 된다.
 ## Runtime and Offline 경계
 
 Runtime은 모바일 브라우저에서 실행되는 단일 북마크릿 번들이다.
-Runtime은 빠르게 로드되어야 하며 승인된 Core Catalog만 포함한다.
+Runtime은 빠르게 로드되어야 하며 승인된 Core Catalog만 초기 번들에 포함한다.
 전체 Danbooru DB, LLM client, 대형 index, 무거운 이미지 분석기는 Runtime 초기 번들에 들어오면 안 된다.
+Tag Dictionary처럼 큰 태그 탐색 데이터는 오프라인에서 chunk로 만들고, Runtime에서는 manifest와 사용자가 연 chunk만 lazy load한다.
 
 Offline은 개발 또는 빌드 단계에서 실행되는 도구다.
 로컬 Danbooru 태그 스냅샷 파싱, Product Category 후보 생성, 사람이 승인한 Core Catalog 생성, 향후 Danbooru API 검증, 향후 LLM 분류 보조는 Offline 책임이다.
@@ -177,6 +178,7 @@ metadata 제거와 복원 토큰 은닉은 같은 기능처럼 표현하면 안 
 
 Product Category 칩은 Core Catalog의 조종면이다.
 전체 태그 백과사전으로 확장하면 안 된다.
+Full Tag Dictionary는 별도 탐색면으로 둘 수 있지만, Quick Catalog Chips의 target hint, aliases, selected tag reorder 같은 편집 계약을 대체하면 안 된다.
 
 ## Verification 계약
 
@@ -232,11 +234,11 @@ Runtime 보안 경계와 번들 크기 예산을 침범하면 이 단계로 들�
 
 ## 현재 우선순위
 
-현재 프로젝트는 v3 Queue 아키텍처 설계 단계로 이동했다.
-이미 Core Catalog, 카테고리 칩, active prompt target, global assignment badge, 커서 복원, token boundary safe insert, Overlay Shell 분리, v2 Automation reliability, 상태 단계 UI가 들어갔다.
+현재 프로젝트는 v3 Queue MVP와 Tag Dictionary 안정화 이후 정리 단계다.
+이미 Core Catalog, Quick Catalog Chips, Full Tag Dictionary chunk lazy load, active prompt target, global assignment badge, 커서 복원, token boundary safe insert, Overlay Shell 분리, v2 Automation reliability, Batched Queue, 상태 단계 UI가 들어갔다.
 
-다음 우선순위는 `docs/V3_QUEUE_ARCHITECTURE.md`에 따라 QueueDraft, QueueSession, QueueTickPlan, QueueTickResult 계약을 구현하는 것이다.
-반복 생성은 반드시 `runApplyPipeline()` 성공과 실패를 관찰해야 하며 NovelAI DOM selector를 직접 다루면 안 된다.
+다음 우선순위는 Tag Dictionary/Quick Catalog handler 이름을 더 명확히 바꾸고, 큰 autocomplete chunk 검색 비용을 줄이는 것이다.
+반복 생성은 계속 `runApplyPipeline()` 성공과 실패를 관찰해야 하며 NovelAI DOM selector를 직접 다루면 안 된다.
 
 배지 일괄 해제, 사용자 색상 설정, 고급 catalog personalization은 v1 핵심 계약을 깨지 않는 작은 편의 기능으로 보관한다.
 하지만 지금 우선순위는 아니다.

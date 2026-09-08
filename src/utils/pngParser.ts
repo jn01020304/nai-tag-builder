@@ -51,14 +51,22 @@ export function extractPngMetadata(buffer: ArrayBuffer): Record<string, string> 
         );
         offset += 4;
 
+        const chunkDataEnd = offset + chunkLength;
+        const chunkEnd = chunkDataEnd + 4;
+        if (chunkDataEnd > length || chunkEnd > length) break;
+
         if (typeString === 'tEXt' || typeString === 'zTXt' || typeString === 'iTXt') {
-            const parsed = parseTextChunk(typeString, uint8View.slice(offset, offset + chunkLength), textDecoder);
-            if (parsed) {
-                metadata[parsed.keyword] = parsed.text;
+            try {
+                const parsed = parseTextChunk(typeString, uint8View.slice(offset, chunkDataEnd), textDecoder);
+                if (parsed) {
+                    metadata[parsed.keyword] = parsed.text;
+                }
+            } catch {
+                // 손상된 텍스트 chunk만 건너뜁니다.
             }
         }
 
-        offset += chunkLength + 4;
+        offset = chunkEnd;
     }
 
     return metadata;
@@ -202,23 +210,6 @@ export async function parseNovelAIImage(file: Blob): Promise<ParsedImageMetadata
     return null;
 }
 
-function cloneStateWithNewCharacterIds(state: MetadataState, fileIndex: number): MetadataState {
-    return {
-        ...state,
-        prompt: {
-            ...state.prompt,
-            characters: state.prompt.characters.map((character, index) => ({
-                ...character,
-                id: `batch_${fileIndex}_char_${index}_${Date.now()}`,
-            })),
-            negativeCharacters: state.prompt.negativeCharacters.map((character, index) => ({
-                ...character,
-                id: `batch_${fileIndex}_neg_${index}_${Date.now()}`,
-            })),
-        },
-    };
-}
-
 function mergeImportedStates(states: MetadataState[]): MetadataState | null {
     if (states.length === 0) return null;
 
@@ -239,8 +230,15 @@ export async function parseNovelAIImageFiles(files: readonly File[]): Promise<Ba
     const patches: ImageImportPatch[] = [];
     const failedFiles: string[] = [];
 
-    for (const [index, file] of files.entries()) {
-        const metadata = await parseNovelAIImage(file);
+    for (const file of files) {
+        let metadata: ParsedImageMetadata | null;
+        try {
+            metadata = await parseNovelAIImage(file);
+        } catch {
+            failedFiles.push(file.name);
+            continue;
+        }
+
         if (!metadata) {
             failedFiles.push(file.name);
             continue;
@@ -249,7 +247,7 @@ export async function parseNovelAIImageFiles(files: readonly File[]): Promise<Ba
         patches.push({
             fileName: file.name,
             metadata,
-            state: cloneStateWithNewCharacterIds(translateNovelAiMetadata(metadata.data, metadata.source), index),
+            state: translateNovelAiMetadata(metadata.data, metadata.source),
         });
     }
 

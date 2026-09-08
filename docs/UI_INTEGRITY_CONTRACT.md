@@ -55,6 +55,18 @@ NovelAI DOM은 읽을 수는 있지만, 디자인 적용 대상은 아니다.
 Body에 기능 section을 계속 세로로 추가하지 않는다.
 작업면 전환 구조가 필요한 기능은 mode registry 도입 후 붙인다.
 
+## Compose 태그 도구 원칙
+
+Quick Catalog Chips와 Full Tag Dictionary는 같은 도구가 아니다.
+Quick Catalog Chips는 `CoreCatalogEntry`의 target hint, aliases, selected tag reorder 같은 편집 계약을 담당한다.
+Full Tag Dictionary는 lazy-loaded dictionary chunk를 탐색하고 현재 active prompt target에 plain tag를 적용한다.
+
+Dictionary group, category, tag button은 prompt textarea의 selection을 빼앗으면 안 된다.
+반복 삽입, token boundary insert, cursor restore가 깨지지 않도록 pointer/mouse down 기본 동작을 방지한다.
+
+색상과 badge는 prompt insert target이 아니라 display tone을 사용한다.
+`negativeBase`를 palette key로 쓰지 말고 `promptTargetGroup()` 결과인 `negative`를 사용한다.
+
 ## 검증 기준
 
 UI 리팩토링은 시각적 변화가 거의 없어야 성공이다.

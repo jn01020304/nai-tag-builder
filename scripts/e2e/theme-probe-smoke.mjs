@@ -28,11 +28,26 @@ function getExecutablePath() {
   const page = await browser.newPage();
   const __dirname = path.dirname(fileURLToPath(import.meta.url));
   const scriptContent = readFileSync(path.resolve(__dirname, '../../dist/nai-tag-builder.js'), 'utf8');
-  
+
+  await page.evaluate(() => {
+    window.naiThemeProbeAppendCount = 0;
+    const appendChild = Node.prototype.appendChild;
+    Node.prototype.appendChild = function appendInstrumentedNode(node) {
+      if (
+        node instanceof Element &&
+        node.getAttribute("data-nai-theme-probe") === "true"
+      ) {
+        window.naiThemeProbeAppendCount += 1;
+      }
+      return appendChild.call(this, node);
+    };
+  });
+
   // Theme variants we want to simulate
   const themes = [
     {
       name: 'Light Theme',
+      expectedBase: 'rgb(229, 231, 235)',
       html: `
         <body style="background-color: #ffffff; color: #111222; font-family: 'Open Sans', sans-serif;">
           <div id="__next" style="background-color: #f1f2f3;">
@@ -53,6 +68,7 @@ function getExecutablePath() {
     },
     {
       name: 'Dark Theme',
+      expectedBase: 'rgb(37, 41, 52)',
       html: `
         <body style="background-color: #0b0d12; color: #f1f1f1; font-family: Inter, sans-serif;">
           <div id="__next">
@@ -87,6 +103,7 @@ function getExecutablePath() {
     // Wait for the UI to mount
     const rootEl = page.locator('#nai-tag-builder-root > div').nth(0);
     await rootEl.waitFor({ state: 'attached', timeout: 5000 });
+    await page.waitForTimeout(700);
 
     // Validate the background color of the overlay body
     const bodyBg = await rootEl.evaluate((el) => window.getComputedStyle(el).backgroundColor);
@@ -97,10 +114,27 @@ function getExecutablePath() {
       console.error(`  - ${theme.name} failed to resolve base background!`);
       anyFailed = true;
     }
+    if (bodyBg !== theme.expectedBase) {
+      console.error(
+        `  - ${theme.name} resolved ${bodyBg}, expected ${theme.expectedBase}`,
+      );
+      anyFailed = true;
+    }
+
+    await page.waitForTimeout(3400);
+    const settledProbeCount = await page.evaluate(() => window.naiThemeProbeAppendCount);
+    await page.waitForTimeout(900);
+    const finalProbeCount = await page.evaluate(() => window.naiThemeProbeAppendCount);
+    if (finalProbeCount !== settledProbeCount) {
+      console.error(
+        `  - ${theme.name} theme probes did not settle: ${settledProbeCount} -> ${finalProbeCount}`,
+      );
+      anyFailed = true;
+    }
 
     // Clean up
     await page.evaluate(() => {
-      document.getElementById('nai-tag-builder-root')?.remove();
+      window.__NAI_TAG_BUILDER_INSTANCE__?.unmount();
     });
   }
 

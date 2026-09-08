@@ -1,5 +1,8 @@
 import { useEffect, useState } from "react";
-import { sampleHostTheme } from "./themeProbe";
+import {
+  sampleHostTheme,
+  THEME_PROBE_ATTRIBUTE,
+} from "./themeProbe";
 
 export interface ThemeColors {
   base: string;
@@ -110,6 +113,28 @@ function areThemeColorsEqual(a: ThemeColors, b: ThemeColors): boolean {
   ));
 }
 
+function isInternalThemeNode(node: Node): boolean {
+  const element = node instanceof Element ? node : node.parentElement;
+  return element?.closest(
+    `#nai-tag-builder-root, [${THEME_PROBE_ATTRIBUTE}="true"]`,
+  ) !== null;
+}
+
+function includesHostThemeMutation(records: MutationRecord[]): boolean {
+  return records.some((record) => {
+    if (isInternalThemeNode(record.target)) return false;
+    if (record.type !== "childList") return true;
+
+    const changedNodes = [
+      ...record.addedNodes,
+      ...record.removedNodes,
+    ];
+    return changedNodes.length === 0 || changedNodes.some((node) => (
+      !isInternalThemeNode(node)
+    ));
+  });
+}
+
 export function useDynamicTheme() {
   const [currentTheme, setCurrentTheme] = useState<ThemeColors>(fallbackTheme);
 
@@ -126,7 +151,8 @@ export function useDynamicTheme() {
     ));
 
     let debounceTimer: ReturnType<typeof setTimeout>;
-    const scheduleThemeUpdate = () => {
+    const scheduleThemeUpdate: MutationCallback = (records) => {
+      if (!includesHostThemeMutation(records)) return;
       clearTimeout(debounceTimer);
       debounceTimer = setTimeout(updateTheme, 300);
     };

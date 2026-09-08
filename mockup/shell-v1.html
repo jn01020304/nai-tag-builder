@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>껍데기 v1</title>
+<style>
+  /* ── 색은 전부 여기 한 곳에서만 정의한다. 테마 바꿀 때 이 두 블록만 건드리면 된다 ── */
+  :root{
+    --bg:#f6f7f9; --panel:#ffffff; --line:#d8dce3; --ink:#1b1f24; --dim:#8b939e;
+    --hole:#e9ecf1;            /* 아직 내용 없는 칸의 회색 */
+    --accent:#5b6ee1;
+    --fs:14px;                 /* 글자 크기. JS가 이 값만 바꾼다 */
+    --gap:8px;
+  }
+  html[data-theme="dark"]{
+    --bg:#15171b; --panel:#1c1f25; --line:#2e333c; --ink:#e6e9ee; --dim:#7d8590;
+    --hole:#22262d;
+    --accent:#7c8cf0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:system-ui,"Segoe UI","Malgun Gothic",sans-serif;
+    font-size:var(--fs);
+    display:flex; flex-direction:column;
+    overflow:hidden;           /* 페이지 전체는 절대 스크롤되지 않는다 */
+  }
+
+  /* ── 메뉴판 ── */
+  .menubar{
+    flex:0 0 auto; display:flex; align-items:center; gap:12px;
+    padding:0 10px; height:36px;
+    background:var(--panel); border-bottom:1px solid var(--line);
+  }
+  .menubar .title{font-weight:600; letter-spacing:-.2px}
+  .menubar .spacer{flex:1}
+  .btn{
+    font:inherit; color:var(--ink); background:transparent;
+    border:1px solid var(--line); border-radius:6px;
+    padding:3px 9px; cursor:pointer; line-height:1.4;
+  }
+  .btn:hover{border-color:var(--accent); color:var(--accent)}
+  .group{display:flex; gap:4px; align-items:center}
+  .group .lbl{color:var(--dim); font-size:.85em}
+
+  /* ── 본문 3열 ── */
+  .stage{flex:1 1 auto; display:flex; min-height:0; padding:var(--gap); gap:0}
+  .col{display:flex; flex-direction:column; min-width:0; min-height:0}
+  #left{flex:0 0 260px}
+  #center{flex:1 1 auto}
+  #right{flex:0 0 340px}
+  body.collapsed #left{display:none}
+  body.collapsed #split-l{display:none}
+
+  .panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:8px;
+    display:flex; flex-direction:column; min-height:0; overflow:hidden;
+  }
+  .panel + .panel{margin-top:var(--gap)}
+  .phead{
+    flex:0 0 auto; padding:6px 10px; color:var(--dim);
+    border-bottom:1px solid var(--line); font-size:.85em; letter-spacing:.2px;
+  }
+  .pbody{flex:1 1 auto; min-height:0; overflow:auto; padding:10px}
+
+  /* 내용이 아직 없는 칸 */
+  .hole{
+    height:100%; min-height:60px; border-radius:6px;
+    background:var(--hole);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--dim); font-size:.85em; text-align:center; padding:8px;
+  }
+
+  /* ── 칸 사이 손잡이 ── */
+  .split{flex:0 0 var(--gap); cursor:col-resize; position:relative}
+  .split::after{
+    content:""; position:absolute; inset:0 2px; border-radius:3px;
+  }
+  .split:hover::after{background:var(--accent); opacity:.35}
+  .split.v{cursor:row-resize; flex-basis:var(--gap)}
+  .split.v::after{inset:2px 0}
+
+  /* ── 왼쪽: 프롬프트 + 조합 ── */
+  textarea.prompt{
+    width:100%; height:100%; min-height:80px; resize:none;
+    font:inherit; color:var(--ink); background:var(--hole);
+    border:none; border-radius:6px; padding:8px; outline:none;
+  }
+  .artist-row{
+    display:flex; align-items:center; gap:6px;
+    padding:5px 6px; border-radius:6px; background:var(--hole);
+  }
+  .artist-row + .artist-row{margin-top:5px}
+  .artist-row .nm{flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .artist-row .w{
+    flex:0 0 58px; text-align:center; font:inherit; color:var(--ink);
+    background:var(--panel); border:1px solid var(--line); border-radius:5px; padding:2px 4px;
+  }
+  .artist-row .x{flex:0 0 auto; color:var(--dim); cursor:pointer; border:none; background:none; font:inherit}
+  .artist-row .x:hover{color:var(--accent)}
+
+  /* ── 오른쪽 히스토리 ── */
+  .histgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(64px,1fr)); gap:6px}
+  .histgrid div{aspect-ratio:3/4; background:var(--hole); border-radius:5px}
+
+  /* 좁은 화면에서는 세로로 쌓는다 */
+  @media (max-width:820px){
+    .stage{flex-direction:column}
+    #left,#right{flex:0 0 auto; height:200px}
+    .split{display:none}
+  }
+</style>
+</head>
+<body>
+
+<div class="menubar">
+  <button class="btn" id="toggleSide" title="왼쪽 접기/펴기">☰</button>
+  <span class="title">껍데기 v1</span>
+  <span class="spacer"></span>
+  <span class="group">
+    <span class="lbl">글자</span>
+    <button class="btn" id="fsDown">A−</button>
+    <button class="btn" id="fsUp">A+</button>
+  </span>
+  <button class="btn" id="theme">◐</button>
+</div>
+
+<div class="stage" id="stage">
+
+  <!-- 왼쪽: 만드는 쪽 -->
+  <div class="col" id="left">
+    <div class="panel" style="flex:1 1 40%">
+      <div class="phead">프롬프트</div>
+      <div class="pbody"><textarea class="prompt" placeholder="여기에 프롬프트"></textarea></div>
+    </div>
+    <div class="panel" style="flex:1 1 60%">
+      <div class="phead">조합</div>
+      <div class="pbody">
+        <div class="artist-row"><span class="nm">artist_name_1</span><input class="w" value="1.0"><button class="x">×</button></div>
+        <div class="artist-row"><span class="nm">artist_name_2</span><input class="w" value="1.1"><button class="x">×</button></div>
+        <div class="artist-row"><span class="nm">artist_name_3</span><input class="w" value="0.9"><button class="x">×</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="split" id="split-l"></div>
+
+  <!-- 가운데: 결과 -->
+  <div class="col" id="center">
+    <div class="panel" style="flex:1 1 auto">
+      <div class="phead">이미지 제작</div>
+      <div class="pbody"><div class="hole">NAI로 만들어진 이미지가 여기</div></div>
+    </div>
+  </div>
+
+  <div class="split" id="split-r"></div>
+
+  <!-- 오른쪽: 보는 쪽 -->
+  <div class="col" id="right">
+    <div class="panel" id="r1" style="flex:1 1 45%">
+      <div class="phead">작가 일러스트</div>
+      <div class="pbody"><div class="hole">작가 그림</div></div>
+    </div>
+    <div class="split v" id="split-r1"></div>
+    <div class="panel" id="r2" style="flex:0 0 110px">
+      <div class="phead">관련 정보 · 수치</div>
+      <div class="pbody"><div class="hole">그래프 / 도표</div></div>
+    </div>
+    <div class="split v" id="split-r2"></div>
+    <div class="panel" id="r3" style="flex:1 1 40%">
+      <div class="phead">히스토리</div>
+      <div class="pbody">
+        <div class="histgrid">
+          <div></div><div></div><div></div><div></div><div></div><div></div>
+          <div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── 저장/복원. 브라우저가 막아도 화면은 정상 동작해야 한다 ──
+const KEY = "shell-v1";
+function load(){ try{ return JSON.parse(localStorage.getItem(KEY)||"{}"); }catch{ return {}; } }
+function save(p){ try{ localStorage.setItem(KEY, JSON.stringify({...load(), ...p})); }catch{} }
+
+const S = load();
+const root = document.documentElement;
+
+// 글자 크기
+let fs = S.fs || 14;
+function applyFs(){ root.style.setProperty("--fs", fs+"px"); save({fs}); }
+applyFs();
+fsUp.onclick   = () => { fs = Math.min(fs+1, 22); applyFs(); };
+fsDown.onclick = () => { fs = Math.max(fs-1, 11); applyFs(); };
+
+// 테마
+if(S.theme) root.setAttribute("data-theme", S.theme);
+theme.onclick = () => {
+  const next = root.getAttribute("data-theme")==="dark" ? "light" : "dark";
+  root.setAttribute("data-theme", next); save({theme:next});
+};
+
+// 사이드바 접기
+if(S.collapsed) document.body.classList.add("collapsed");
+toggleSide.onclick = () => {
+  document.body.classList.toggle("collapsed");
+  save({collapsed: document.body.classList.contains("collapsed")});
+};
+
+// 좌우 폭 복원
+const left = document.getElementById("left"), right = document.getElementById("right");
+if(S.leftW)  left.style.flexBasis  = S.leftW  + "px";
+if(S.rightW) right.style.flexBasis = S.rightW + "px";
+
+// 가로 손잡이 — 왼쪽은 커지는 방향, 오른쪽은 반대 방향
+function dragX(handle, target, dir, key, min, max){
+  handle.addEventListener("pointerdown", e => {
+    handle.setPointerCapture(e.pointerId);
+    const x0 = e.clientX, w0 = target.getBoundingClientRect().width;
+    const move = ev => {
+      const w = Math.min(max, Math.max(min, w0 + (ev.clientX - x0) * dir));
+      target.style.flexBasis = w + "px";
+    };
+    const up = () => {
+      handle.removeEventListener("pointermove", move);
+      handle.removeEventListener("pointerup", up);
+      save({[key]: Math.round(target.getBoundingClientRect().width)});
+    };
+    handle.addEventListener("pointermove", move);
+    handle.addEventListener("pointerup", up);
+  });
+}
+dragX(document.getElementById("split-l"), left,  +1, "leftW",  180, 520);
+dragX(document.getElementById("split-r"), right, -1, "rightW", 220, 620);
+
+// 세로 손잡이 — 오른쪽 열 안에서 위 칸의 높이를 바꾼다
+function dragY(handle, target, key, min, max){
+  handle.addEventListener("pointerdown", e => {
+    handle.setPointerCapture(e.pointerId);
+    const y0 = e.clientY, h0 = target.getBoundingClientRect().height;
+    const move = ev => {
+      const h = Math.min(max, Math.max(min, h0 + (ev.clientY - y0)));
+      target.style.flex = "0 0 " + h + "px";
+    };
+    const up = () => {
+      handle.removeEventListener("pointermove", move);
+      handle.removeEventListener("pointerup", up);
+      save({[key]: Math.round(target.getBoundingClientRect().height)});
+    };
+    handle.addEventListener("pointermove", move);
+    handle.addEventListener("pointerup", up);
+  });
+}
+const r1 = document.getElementById("r1"), r2 = document.getElementById("r2");
+if(S.r1H) r1.style.flex = "0 0 " + S.r1H + "px";
+if(S.r2H) r2.style.flex = "0 0 " + S.r2H + "px";
+dragY(document.getElementById("split-r1"), r1, "r1H", 90, 900);
+dragY(document.getElementById("split-r2"), r2, "r2H", 60, 600);
+
+// 조합 줄 지우기
+document.addEventListener("click", e => {
+  if(e.target.classList.contains("x")) e.target.closest(".artist-row").remove();
+});
+</script>
+</body>
+</html>

@@ -404,6 +404,8 @@ async function checkQueueImagesImport(page) {
 
   const firstPath = path.join(fixturesDir, "queue-alpha.png");
   const secondPath = path.join(fixturesDir, "queue-beta.png");
+  const invalidPath = path.join(fixturesDir, "queue-invalid.png");
+  await writeFile(invalidPath, Buffer.from("not a png"));
   await writeFile(firstPath, createNovelAiPngFixture({
     prompt: "queue alpha prompt",
     uc: "queue alpha negative",
@@ -432,7 +434,17 @@ async function checkQueueImagesImport(page) {
     await presetsToggle.click();
   }
 
-  await page.locator("[data-testid='queue-images-input']").setInputFiles([firstPath, secondPath]);
+  const queueImagesInput = page.locator("[data-testid='queue-images-input']");
+  await queueImagesInput.setInputFiles(invalidPath);
+  await page.locator("[data-testid='status-banner']", {
+    hasText: "가져온 이미지에서 NovelAI 메타데이터를 찾지 못했습니다.",
+  }).waitFor({ timeout: 5000 });
+  assert(
+    await queueImagesInput.inputValue() === "",
+    "Queue image input was not reset after an invalid selection.",
+  );
+
+  await queueImagesInput.setInputFiles([firstPath, secondPath]);
   await page.locator("[data-testid='status-banner']", {
     hasText: "2개 이미지에서 프리셋을 만들고 Queue에 추가했습니다.",
   }).waitFor({ timeout: 5000 });

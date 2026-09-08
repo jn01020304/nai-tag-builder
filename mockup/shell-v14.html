@@ -1,0 +1,2571 @@
+<!doctype html>
+<!--
+TAG LAB UI CONTRACT v0.6
+
+STATUS
+  This file is an interaction specification that happens to run in a browser.
+  Layout, feedback, and state transitions are demonstrable. Domain data, persistence,
+  NovelAI generation, and external-service adapters are MOCK implementations.
+
+HOW TO READ
+  FEATURE     why a visible region exists
+  EVENT       user action and the state transition it must cause
+  STATE       durable or transient values the implementation must own
+  INVARIANT   rule that must never be broken by a real implementation
+  MOCK        sample-only content that must be replaced, never inferred as product truth
+  TODO        missing production work and its expected boundary
+  ACCEPTANCE  observable behavior required before the feature is considered implemented
+
+CORE STATE MACHINE
+  editing
+    -> seed-selected       user explicitly selects one artist
+    -> chunk-selection     user opens the chunk experiment for that seed
+    -> tournament-running  user chooses an existing chunk or starts a new one
+    -> tournament-complete fifteen decisions produce one winner
+    -> weight-tuning       blind coordinate descent over the champion chunk's weights
+    -> chunk-saved         the tuned chunk is named, stored, and optionally written to the prompt
+
+WHY WEIGHT TUNING IS THE SAME MECHANISM AS THE TOURNAMENT
+  The tournament answers WHICH artists belong together. It cannot answer HOW MUCH of each,
+  because weight is continuous and a bracket only ranks a fixed candidate set.
+  So the same blind pairwise judgement is reused on one axis at a time: hold every weight
+  fixed, move exactly one, and ask which image is better. That is coordinate descent, and
+  it is what the user was already doing by hand when nudging 1.0 to 1.1.
+  Blindness matters more here than in the tournament: the user must not know which side
+  carries the larger number, or the decision becomes arithmetic instead of perception.
+
+MINIMUM DOMAIN SHAPES
+  Artist      { id, tag, displayName, weight, promptIndex, representativeImage, danbooruUrl, xUrl }
+  Chunk       { id, name, artists: [{ artistId, order, weight }], representativeImage, status }
+  Match       { id, round, index, leftCandidateId, rightCandidateId, winnerId, decidedAt }
+  Tournament  { id, seedArtistId, candidateType, matches, currentMatchId, championId }
+  Axis        { artistId, current, step, direction, reversals, settled }
+  Trial       { id, artistId, holdValue, probeValue, chosenValue, step, decidedAt }
+  Tuning      { id, chunkId, axes, trials, cursor, baseline, status }
+  PromptState { rawText, parsedArtists }
+
+GLOBAL INVARIANTS
+  1. raw prompt text is the only source of truth for artist order and weight.
+  2. seed artist is an explicit user decision; never infer it from the first tag or MOCK data.
+  3. sorting changes only the view. It never rewrites prompt order.
+  4. changing seed invalidates and clears the active tournament.
+  5. a new or selected chunk always starts with clean bracket and history state.
+  6. bracket and history are two projections of one Match collection, never separate datasets.
+  7. current/latest history appears above older history.
+  8. all motion explains a state transition and honors prefers-reduced-motion.
+  9. weight tuning never adds or removes a chunk member. Membership is the tournament's output
+     and is read-only from here on.
+ 10. exactly one weight differs between the two images under comparison. Never two.
+ 11. the side carrying the probe value is randomised per trial and never revealed before
+     the decision. A/B position must not encode which value is larger.
+ 12. step size only shrinks within a tuning run. A settled axis is never reopened by the
+     algorithm, only by the user.
+ 13. every weight lives on the same 0.05 grid the manual editor uses. Tuning cannot produce
+     a value the user could not have typed.
+ 14. saving a chunk is a separate act from applying it to the prompt. Saving never mutates
+     PromptState; applying is the only writer, and it writes through the same token path
+     as manual editing.
+ 15. abandoning tuning restores the champion's baseline weights and leaves the library
+     untouched.
+-->
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tag Lab v0.6 — 가중치 조율과 청크 저장</title>
+<style>
+  /* ── NAI 공식 페이지의 결: 짙은 남색 바닥, 촘촘한 여백, 강조는 노란 버튼 하나 ── */
+  :root{
+    --bg:#0c0e13; --panel:#151920; --panel2:#1b202a; --line:#252b36;
+    --ink:#dfe4ec; --dim:#7b8494; --hole:#1a1f28;
+    --accent:#f0c440; --sel:#2c4a7a;
+    --fs:13px; --gap:6px; --r:6px;
+  }
+  html[data-theme="light"]{
+    --bg:#eef0f4; --panel:#ffffff; --panel2:#f3f5f9; --line:#d6dae2;
+    --ink:#1b1f27; --dim:#767f8d; --hole:#e9ecf1; --accent:#d9a712; --sel:#cfe0fb;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:system-ui,"Segoe UI","Malgun Gothic",sans-serif;
+    font-size:var(--fs); line-height:1.5;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+
+  /* ── 상단 툴바 ── */
+  .top{
+    position:relative; flex:0 0 auto; height:40px; display:flex; align-items:center; gap:8px;
+    padding:0 8px; background:var(--panel); border-bottom:1px solid var(--line);
+  }
+  .brand{font-weight:700; letter-spacing:-.3px; padding-right:4px}
+  .chip{
+    display:flex; align-items:center; gap:6px; padding:3px 9px;
+    background:var(--panel2); border:1px solid var(--line); border-radius:var(--r);
+    color:var(--dim); font-size:.9em;
+  }
+  .chip b{color:var(--ink); font-weight:600}
+  .top .spacer{flex:1}
+  .ico{
+    font:inherit; color:var(--dim); background:transparent; border:1px solid transparent;
+    border-radius:var(--r); padding:3px 8px; cursor:pointer;
+  }
+  .ico:hover,.ico.on{color:var(--ink); background:var(--panel2); border-color:var(--line)}
+  .tournament-status{
+    display:none; position:absolute; z-index:3; left:50%; top:50%; transform:translate(-50%,-50%);
+    min-width:148px; padding:4px 12px; border:1px solid #f0c44088; border-radius:var(--r);
+    color:var(--ink); background:var(--panel2); text-align:center; font-weight:700;
+    font-variant-numeric:tabular-nums; white-space:nowrap; box-shadow:0 0 16px #f0c44012;
+  }
+  .tournament-status span{color:var(--dim); font-weight:600}
+  .tournament-status b{color:var(--accent)}
+  body.chunkDuel .tournament-status{display:block}
+  body.chunkDuel .top-mid{opacity:0; pointer-events:none}
+
+  /* ── 4열 무대 ── */
+  .stage{flex:1 1 auto; display:flex; min-height:0; padding:var(--gap); gap:0}
+  .col{display:flex; flex-direction:column; min-width:0; min-height:0}
+  #sideL{flex:0 0 320px}
+  #mainL{flex:1 1 55%}
+  #mainR{flex:1 1 45%}
+  #sideR{flex:0 0 132px}
+  /* 사이드바는 위에서 아래까지 온전히 자기 옆면을 갖는다.
+     바닥 그래프는 가운데 기둥 안에서만 살고, 사이드바 아래로는 넘어오지 않는다 */
+  #center{flex:1 1 auto; display:flex; flex-direction:column; min-width:0; min-height:0}
+  .mains{flex:1 1 auto; display:flex; min-width:0; min-height:0}
+  body.noL #sideL,body.noL #spL{display:none}
+  body.noR #sideR,body.noR #spR{display:none}
+
+  .panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--r);
+    display:flex; flex-direction:column; min-height:0; overflow:hidden;
+  }
+  .panel+.panel{margin-top:var(--gap)}
+  .phead{
+    flex:0 0 auto; display:flex; align-items:center; gap:6px;
+    padding:5px 8px; border-bottom:1px solid var(--line);
+    color:var(--dim); font-size:.86em;
+  }
+  .phead .spacer{flex:1}
+  .pbody{flex:1 1 auto; min-height:0; overflow:auto; padding:8px}
+  .pfoot{flex:0 0 auto; border-top:1px solid var(--line); padding:6px 8px}
+
+  .hole{
+    height:100%; min-height:48px; border-radius:var(--r); background:var(--hole);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--dim); font-size:.85em; text-align:center; padding:8px;
+  }
+
+  /* ── 칸 사이 손잡이 ── */
+  .split{flex:0 0 var(--gap); cursor:col-resize; position:relative}
+  .split::after{content:""; position:absolute; inset:0 1px; border-radius:2px}
+  .split:hover::after{background:var(--accent); opacity:.4}
+  .split.v{cursor:row-resize}
+  .split.v::after{inset:1px 0}
+
+  /* ── 왼쪽 사이드바 ── */
+  .row{display:flex; align-items:center; gap:6px}
+  .sel{
+    font:inherit; color:var(--ink); background:var(--panel2);
+    border:1px solid var(--line); border-radius:var(--r); padding:3px 6px;
+  }
+  .tabs{display:flex; gap:2px; flex:0 0 auto}
+  .tab{
+    font:inherit; color:var(--dim); background:transparent; border:none;
+    padding:4px 9px; border-radius:var(--r) var(--r) 0 0; cursor:pointer;
+  }
+  .tab.on{color:var(--ink); background:var(--panel2)}
+  .tabbody{display:none; flex:1 1 auto; min-height:0; flex-direction:column}
+  .tabbody.on{display:flex}
+
+  /* ── 프롬프트 글상자 ──
+     textarea 안의 글자는 부분 색칠이 안 된다. 그래서 두 겹으로 쌓는다:
+     아래 = 색칠한 사본(mirror), 위 = 글자를 투명하게 만든 진짜 textarea.
+     커서와 선택은 위층이, 색은 아래층이 담당한다. 둘의 글자 상자는 완전히 같아야 겹친다. */
+  .ptwrap{
+    flex:0 0 auto; position:relative; overflow:hidden;
+    background:var(--panel2); border:1px solid var(--line);
+    border-radius:0 var(--r) var(--r) var(--r);
+  }
+  .ptwrap:focus-within{border-color:var(--accent)}
+  .ptmirror,.pt{
+    position:absolute; inset:0; width:100%; height:100%;
+    font:inherit; font-family:inherit; font-size:inherit; line-height:1.9;
+    padding:8px; border:none; background:transparent;
+    white-space:pre-wrap; overflow-wrap:break-word; word-break:break-word;
+    letter-spacing:inherit; tab-size:2;
+  }
+  .ptmirror{color:var(--dim); overflow:hidden; pointer-events:none; z-index:0}
+  .pt{color:transparent; caret-color:var(--ink); resize:none; outline:none; overflow:auto; z-index:1}
+  .pt::selection{background:var(--sel)}
+  .ptmirror .tk{border-radius:2px}
+  .ptmirror .tk.hi{background:var(--sel)}
+  .ptmirror .tk{position:relative}
+  .ptmirror .ord{
+    position:absolute; left:0; top:-1.02em; min-width:13px; padding:1px 3px;
+    border:1px solid color-mix(in srgb,currentColor 45%,transparent);
+    border-radius:4px; background:var(--panel); color:inherit;
+    font-size:.58em; font-weight:700; line-height:1; text-align:center;
+    opacity:.9; pointer-events:none;
+  }
+
+  /* ── 목록 = 프롬프트를 읽어서 보여주는 창구 ── */
+  .combobar{
+    flex:0 0 auto; display:flex; align-items:center; gap:6px;
+    padding:6px 3px 4px; color:var(--dim); font-size:.82em;
+  }
+  .combobar .spacer{flex:1}
+  .mini{
+    font:inherit; font-size:.95em; color:var(--dim); background:transparent;
+    border:1px solid var(--line); border-radius:4px; padding:1px 6px; cursor:pointer;
+  }
+  .mini:hover{color:var(--ink)}
+  .mini.on{color:var(--ink); background:var(--panel2)}
+  .pick{
+    flex:1 1 0; min-width:0; font:inherit; font-size:.95em;
+    color:var(--ink); background:var(--panel2);
+    border:1px solid var(--line); border-radius:4px; padding:1px 3px; cursor:pointer;
+  }
+  #combo{flex:1 1 auto; min-height:0; overflow:auto}
+
+  .arow{
+    display:flex; align-items:center; gap:5px; padding:1px 3px;
+    border-radius:4px; border-left:3px solid transparent;
+  }
+  .arow:hover{background:var(--panel2)}
+  .arow.dragging,.bar.dragging{opacity:.42}
+  .arow.drop-before{box-shadow:0 -2px 0 var(--accent)}
+  .arow.drop-after{box-shadow:0 2px 0 var(--accent)}
+  .arow.hi{background:var(--panel2); border-left-color:var(--c)}
+  .arow .dot{flex:0 0 8px; height:8px; border-radius:50%; background:var(--c)}
+  .arow .idx{
+    flex:0 0 20px; color:var(--dim); font-size:.72em;
+    font-variant-numeric:tabular-nums; text-align:right;
+  }
+  .arow .nm{
+    flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; font-size:.9em; color:var(--c);     /* 글자 자체가 그 작가의 색 */
+  }
+  .arow.plain .nm{color:var(--dim)}
+  /* 지금 조합에서 가장 세게/가장 약하게 누른 작가. 1.0 은 손대지 않은 값이라 제외 */
+  .arow.top .nm,.arow.bot .nm,.arow.top .w,.arow.bot .w{font-weight:700}
+  /* 지금 정렬 기준이 되는 수치. 왜 이 순서로 섰는지 눈으로 확인하라고 띄운다 */
+  .arow .meta{flex:0 0 auto; color:var(--dim); font-size:.78em; font-variant-numeric:tabular-nums}
+  .arow .w{
+    flex:0 0 50px; text-align:center; font:inherit; font-size:.9em; color:var(--ink);
+    background:var(--panel2); border:1px solid var(--line); border-radius:4px; padding:1px 3px;
+  }
+  .arow.neg .w{color:#ff8f8f}
+  .arow .x{flex:0 0 auto; border:none; background:none; color:var(--dim); cursor:pointer; font:inherit}
+  .arow .x:hover{color:var(--accent)}
+
+  .genbtn{
+    width:100%; font:inherit; font-weight:700; color:#20180a;
+    background:var(--accent); border:none; border-radius:var(--r);
+    padding:9px; cursor:pointer;
+  }
+  .genbtn:hover{filter:brightness(1.08)}
+  .genbtn:disabled{color:var(--dim); background:var(--panel2); cursor:not-allowed; filter:none}
+
+  /* ── 가운데: 결과 ── */
+  .canvas{
+    flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; padding:10px;
+  }
+  .canvas .hole{width:min(100%,420px); aspect-ratio:832/1216; height:auto}
+  .barbtn{
+    font:inherit; color:var(--dim); background:var(--panel2);
+    border:1px solid var(--line); border-radius:var(--r); padding:3px 8px; cursor:pointer;
+  }
+  .barbtn:hover{color:var(--ink)}
+
+  /* ── 오른쪽 메인: 작가 ── */
+  .agrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(92px,1fr)); gap:6px}
+  .agrid div{aspect-ratio:3/4; background:var(--hole); border-radius:4px}
+  .find{
+    width:100%; font:inherit; color:var(--ink); background:var(--panel2);
+    border:1px solid var(--line); border-radius:var(--r); padding:5px 8px; outline:none;
+  }
+  .find:focus{border-color:var(--accent)}
+
+  /* ── 오른쪽 사이드바: 히스토리 ── */
+  .hist{display:flex; flex-direction:column; gap:6px}
+  .hist div{aspect-ratio:3/4; background:var(--hole); border-radius:4px}
+  .hist div:first-child{outline:2px solid var(--accent); outline-offset:-2px}
+
+  /* ── 바닥 그래프 ── */
+  .floor{
+    flex:0 0 auto;
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--r);
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  body.noF .floor,body.noF #spF{display:none}
+  .bars{
+    flex:1 1 auto; min-height:0; display:flex; align-items:stretch; gap:2px;
+    padding:14px 10px 0; position:relative; overflow-x:auto;
+  }
+  .ticks{position:absolute; inset:14px 10px 0; pointer-events:none; z-index:0}
+  .tickline{position:absolute; left:0; right:0; border-top:1px dashed var(--line)}
+  .tickline.major{border-top-style:solid; border-top-color:var(--dim); opacity:.8}
+  .ticklabel{
+    position:absolute; left:2px; padding:0 3px; border-radius:3px;
+    background:var(--panel); color:var(--dim); font-size:.68em;
+    font-variant-numeric:tabular-nums; transform:translateY(50%);
+  }
+  .graphinfo{
+    position:absolute; top:10px; right:10px; z-index:6;
+    display:flex; gap:10px; padding:5px 8px;
+    background:color-mix(in srgb,var(--panel) 90%,transparent);
+    border:1px solid var(--line); border-radius:5px; color:var(--dim);
+    font-size:.76em; font-variant-numeric:tabular-nums; pointer-events:none;
+    box-shadow:0 4px 14px #0004;
+  }
+  .graphinfo b{color:var(--ink); font-weight:600}
+  .bar{flex:1 1 0; min-width:24px; cursor:ns-resize; position:relative; z-index:2}
+  .bar .stem{position:absolute; left:1px; right:1px; background:var(--c); opacity:.75; min-height:2px}
+  .bar.pos .stem{border-radius:3px 3px 0 0}
+  .bar.neg .stem{border-radius:0 0 3px 3px; opacity:.55}
+  .bar:hover .stem,.bar.hi .stem{opacity:1}
+  .bar.drop-before{box-shadow:-3px 0 0 var(--accent)}
+  .bar.drop-after{box-shadow:3px 0 0 var(--accent)}
+  .bar.hi::before{content:""; position:absolute; inset:0; background:var(--c); opacity:.12; border-radius:3px}
+  .bar .val{
+    position:absolute; left:0; right:0; text-align:center; font-size:.74em;
+    color:var(--dim); pointer-events:none; z-index:5;
+  }
+  .bar.hi .val{color:var(--ink)}
+  .names{flex:0 0 auto; display:flex; gap:2px; padding:3px 10px 6px; overflow-x:auto}
+  .names span{
+    flex:1 1 0; min-width:24px; text-align:center; font-size:.72em;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    border-top:2px solid var(--c); padding-top:2px; color:var(--dim); cursor:default;
+  }
+  .names span.hi{color:var(--ink)}
+
+  .artistpeek{
+    position:fixed; z-index:100; width:176px; padding:6px;
+    background:var(--panel); border:1px solid var(--line); border-radius:8px;
+    box-shadow:0 12px 34px #0009; pointer-events:none;
+    opacity:0; transform:translateY(5px); transition:opacity .08s,transform .08s;
+  }
+  .artistpeek.on{opacity:1; transform:translateY(0)}
+  .artistpeek img{
+    display:block; width:100%; aspect-ratio:832/1216; object-fit:cover;
+    border-radius:5px; background:var(--hole);
+  }
+  .artistpeek .peekname{margin-top:5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .artistpeek .peekmeta{color:var(--dim); font-size:.78em}
+  .artistadd{display:flex; gap:4px; padding:0 3px 6px}
+  .artistadd input{
+    min-width:0; flex:1; font:inherit; color:var(--ink); background:var(--panel2);
+    border:1px solid var(--line); border-radius:4px; padding:3px 6px; outline:none;
+  }
+  .artistadd input:focus{border-color:var(--accent)}
+  .arow.seed{background:color-mix(in srgb,var(--accent) 10%,var(--panel2))}
+  .arow.seed .idx,.arow.seed .nm{color:var(--accent)}
+  .bar.seed{background:color-mix(in srgb,var(--accent) 7%,transparent)}
+  .bar.seed .stem{box-shadow:0 0 0 1px var(--accent),0 0 10px #f0c44033}
+  .names span.seed{color:var(--accent); font-weight:700}
+  .ptmirror .tk.seed{box-shadow:inset 0 -1px 0 var(--accent)}
+
+  /* 평상시 작가 그림과 1단계 청크 선택은 같은 패널의 두 상태다 */
+  .main-left-normal,.duel-left,.artist-normal,.chunk-entry,.duel-right,.history-normal,.tournament-history{
+    flex:1 1 auto; min-height:0; display:flex; flex-direction:column;
+  }
+  .main-left-normal>.panel{flex:1 1 auto}
+  .duel-left,.chunk-entry,.duel-right,.tournament-history,#tournamentBracket{display:none}
+  body.chunkStage .artist-normal{display:none}
+  body.chunkStage .chunk-entry{display:flex}
+  body.chunkDuel .main-left-normal,body.chunkDuel .chunk-entry{display:none}
+  body.chunkDuel .duel-left,body.chunkDuel .duel-right{display:flex}
+  body.chunkDuel .history-normal{display:none}
+  body.chunkDuel .tournament-history{display:flex}
+  body.chunkDuel #bars,body.chunkDuel #names{display:none}
+  body.chunkDuel #tournamentBracket{display:flex}
+  body.chunkStage #sideR{flex-basis:214px}
+
+  /* ── V0.6 : 가중치 조율 ──
+     대전 화면의 두 칸을 그대로 물려받는다. 바뀌는 것은 바닥과 오른쪽 기록뿐이다.
+     사용자 입장에서 "또 A랑 B 중 고르는 화면"이어야 손이 안 헷갈린다. */
+  .tune-history,.chunk-save,#tuneGraph{display:none}
+  .tune-history,.chunk-save{flex:1 1 auto; min-height:0; display:none; flex-direction:column}
+  body.chunkTune .main-left-normal,body.chunkTune .chunk-entry,body.chunkTune .artist-normal{display:none}
+  body.chunkTune .duel-left,body.chunkTune .duel-right{display:flex}
+  body.chunkTune .history-normal,body.chunkTune .tournament-history{display:none}
+  body.chunkTune .tune-history{display:flex}
+  body.chunkTune #bars,body.chunkTune #names,body.chunkTune #tournamentBracket{display:none}
+  body.chunkTune #tuneGraph{display:flex}
+  body.chunkSave .duel-right,body.chunkSave .chunk-entry,body.chunkSave .artist-normal{display:none}
+  body.chunkSave .chunk-save{display:flex}
+
+  /* 조율 바닥 : 막대 하나가 작가 하나. 지금 만지는 축만 두 개의 표식을 갖는다 */
+  #tuneGraph{flex:1 1 auto; min-height:0; flex-direction:column}
+  .tunetools{
+    flex:0 0 auto; display:flex; align-items:center; gap:8px;
+    padding:5px 8px; border-bottom:1px solid var(--line); color:var(--dim); font-size:.8em;
+  }
+  .tunetools b{color:var(--ink)}
+  .tunestep{
+    font-variant-numeric:tabular-nums; padding:1px 6px; border-radius:4px;
+    background:var(--panel2); border:1px solid var(--line);
+  }
+  /* 청크는 두세 명짜리다. 폭을 나눠 가지면 막대가 아니라 벽이 되므로 폭을 고정한다 */
+  .tunebars{
+    flex:1 1 auto; min-height:0; position:relative;
+    display:flex; align-items:stretch; justify-content:flex-start;
+    gap:10px; padding:16px 44px 0; overflow-x:auto;
+  }
+  .tuneticks{position:absolute; inset:16px 10px 0; pointer-events:none; z-index:0}
+  .tunebar{flex:0 0 92px; position:relative; z-index:2; cursor:pointer; border-radius:4px}
+  .tunebar .tstem{
+    position:absolute; left:22px; right:22px; background:var(--c);
+    opacity:.55; min-height:2px; border-radius:3px 3px 0 0;
+  }
+  .tunebar.neg .tstem{border-radius:0 0 3px 3px; opacity:.4}
+  .tunebar.settled .tstem{opacity:.9}
+  .tunebar.live{background:color-mix(in srgb,var(--accent) 7%,transparent); box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--accent) 35%,transparent)}
+  .tunebar.live .tstem{opacity:1}
+  .tunebar .tval{
+    position:absolute; left:0; right:0; text-align:center; font-size:.74em;
+    color:var(--dim); pointer-events:none; z-index:5; font-variant-numeric:tabular-nums;
+  }
+  /* 활성 막대의 값은 아래 두 표식이 대신 말한다. 같은 자리에 두 번 쓰면 겹친다 */
+  .tunebar.live .tval{display:none}
+  /* 이미 지나간 값들의 자취. 어디서 출발해서 어디로 왔는지가 보여야 한다 */
+  .tghost{position:absolute; left:12px; right:12px; height:0; border-top:1px dashed var(--dim); opacity:.45; z-index:3}
+  .tghost.kept{border-top-style:solid; opacity:.75}
+  /* 지금 비교 중인 두 값. 둘의 간격이 곧 스텝이다.
+     어느 쪽이 A이고 어느 쪽이 B인지는 여기서도 알려주지 않는다 (전역 11) */
+  .tprobe{
+    position:absolute; left:0; right:0; height:0; z-index:6;
+    border-top:2px solid var(--accent);
+  }
+  /* 스텝이 0.05까지 줄면 두 선이 붙는다. 좌우로 갈라 두면 절대 안 겹친다 */
+  .tprobe span{
+    position:absolute; right:0; transform:translateY(-50%);
+    padding:0 5px; border-radius:3px; background:var(--accent); color:#151920;
+    font-size:.66em; font-weight:700; white-space:nowrap; line-height:1.5;
+  }
+  .tprobe.hold{border-top-color:var(--dim); border-top-style:dashed}
+  .tprobe.hold span{left:0; right:auto; background:var(--dim); color:var(--panel)}
+  .tunenames{flex:0 0 auto; display:flex; gap:10px; padding:3px 44px 6px; overflow-x:auto}
+  .tunenames span{
+    flex:0 0 92px; text-align:center; font-size:.72em;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    border-top:2px solid var(--c); padding-top:2px; color:var(--dim);
+  }
+  .tunenames span.live{color:var(--accent); font-weight:700}
+  .tunenames span.settled{color:var(--ink)}
+
+  /* 조율 기록 : 어느 작가의 어느 값이 어느 값을 이겼는지 한 줄에 하나 */
+  .tunelog{display:flex; flex-direction:column; gap:4px}
+  .tunerow{
+    display:grid; grid-template-columns:1fr auto; gap:2px 6px; align-items:center;
+    padding:4px 6px; background:var(--panel2); border:1px solid var(--line);
+    border-radius:4px; border-left:3px solid var(--c);
+  }
+  .tunerow.current{border-color:var(--accent); background:color-mix(in srgb,var(--accent) 9%,var(--panel2))}
+  .tunerow .tname{
+    font-size:.78em; color:var(--ink); overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .tunerow .tstepmark{font-size:.68em; color:var(--dim); font-variant-numeric:tabular-nums}
+  .tunerow .tpair{grid-column:1/-1; display:flex; align-items:center; gap:5px; font-size:.76em; font-variant-numeric:tabular-nums}
+  .tunerow .tpair b{color:var(--accent)}
+  .tunerow .tpair s{color:var(--dim); text-decoration-thickness:1px}
+  .tunerow .tarrow{color:var(--dim)}
+  .tunehint{padding:6px; color:var(--dim); font-size:.78em; line-height:1.6}
+
+  /* 저장 화면 : 이름을 붙이는 순간 실험이 자산이 된다 */
+  .savebody{flex:1 1 auto; min-height:0; padding:8px; display:flex; flex-direction:column; gap:8px}
+  .savehero{flex:0 0 auto; display:flex; gap:8px; align-items:flex-start}
+  .savehero img{
+    flex:0 0 72px; width:72px; aspect-ratio:832/1216; object-fit:cover;
+    border-radius:5px; background:var(--hole); border:1px solid var(--line);
+  }
+  .savefields{flex:1 1 auto; min-width:0; display:flex; flex-direction:column; gap:6px}
+  .savefields input{
+    font:inherit; color:var(--ink); background:var(--panel2);
+    border:1px solid var(--line); border-radius:4px; padding:4px 7px; outline:none;
+  }
+  .savefields input:focus{border-color:var(--accent)}
+  .savenote{color:var(--dim); font-size:.78em; line-height:1.6}
+  .savelist{flex:1 1 auto; min-height:0; overflow-y:auto; display:flex; flex-direction:column; gap:3px}
+  .saverow{
+    display:flex; align-items:center; gap:6px; padding:3px 6px;
+    background:var(--panel2); border:1px solid var(--line); border-radius:4px;
+    border-left:3px solid var(--c); font-size:.8em;
+  }
+  .saverow .sname{flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .saverow .sfrom{color:var(--dim); font-variant-numeric:tabular-nums}
+  .saverow .sto{color:var(--ink); font-weight:700; font-variant-numeric:tabular-nums}
+  .saverow.moved .sto{color:var(--accent)}
+  .savefoot{flex:0 0 auto; display:flex; gap:6px; padding:6px; border-top:1px solid var(--line)}
+  .savefoot .genbtn{flex:1 1 0}
+  .ghostbtn{
+    flex:0 0 auto; font:inherit; padding:0 10px; border-radius:var(--r);
+    background:var(--panel2); color:var(--ink); border:1px solid var(--line); cursor:pointer;
+  }
+  .ghostbtn:hover{border-color:var(--accent)}
+  .chunkcard.fresh{outline:2px solid var(--accent); outline-offset:-2px}
+
+  .duelpick{
+    position:relative; flex:1 1 auto; min-height:0; padding:8px; overflow:hidden;
+    border:0; background:var(--panel); color:var(--ink); cursor:pointer;
+  }
+  .duelpick img{
+    display:block; width:100%; height:100%; object-fit:contain;
+    border-radius:5px; background:var(--hole); transition:filter .12s,box-shadow .12s;
+  }
+  .duelpick:hover img,.duelpick:focus-visible img{box-shadow:0 0 0 1px var(--accent)}
+  .duelpick:disabled{cursor:default}
+  body.tournamentMoving .duelpick{pointer-events:none}
+  body.tournamentMoving #duelExit,body.tournamentMoving #tUndo,body.tournamentMoving #tReset{pointer-events:none;opacity:.3}
+  .duelpick.choice-win img{
+    box-shadow:0 0 0 2px #5bd197,0 0 30px #5bd19744;
+    transform:scale(1.012); transition:transform .18s ease,box-shadow .18s ease;
+  }
+  .duelpick.choice-win .duelmark{opacity:1; transform:translate(-50%,0); background:#5bd197}
+  .duelpick.choice-lose img{
+    filter:grayscale(1)!important; opacity:.28; transform:scale(.975);
+    transition:filter .18s ease,opacity .18s ease,transform .18s ease;
+  }
+  .duelpick.empty img{display:none}
+  .duelpick.empty::before{
+    content:"◆"; position:absolute; inset:0; display:grid; place-items:center;
+    color:var(--line); font-size:2em; background:var(--hole);
+  }
+  .duelmark{
+    position:absolute; left:50%; bottom:16px; transform:translate(-50%,4px);
+    width:30px; height:30px; display:grid; place-items:center; border-radius:50%;
+    color:#211903; background:var(--accent); opacity:0; transition:opacity .12s,transform .12s;
+  }
+  .duelpick:hover .duelmark,.duelpick:focus-visible .duelmark{opacity:1; transform:translate(-50%,0)}
+  .duelround{color:var(--accent); font-variant-numeric:tabular-nums}
+  .motion-token{
+    position:fixed; z-index:2000; margin:0; padding:0; object-fit:cover;
+    border:2px solid #5bd197; border-radius:5px; box-shadow:0 8px 28px #000a,0 0 22px #5bd19766;
+    pointer-events:none; transform-origin:top left; will-change:transform,opacity;
+  }
+
+  @media (prefers-reduced-motion:reduce){
+    .duelpick img,.duelmark{transition:none!important}
+  }
+
+  .artisthero{
+    flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center;
+    padding:8px; background:var(--hole); border-radius:5px; overflow:hidden;
+  }
+  .artisthero img{width:100%; height:100%; object-fit:contain; border-radius:5px}
+  .artistprompt{color:var(--dim); text-align:center; padding:16px}
+  .artistlinks{display:flex; gap:5px; margin-left:auto}
+  .artistlink{
+    color:var(--dim); text-decoration:none; padding:2px 6px;
+    border:1px solid var(--line); border-radius:4px; background:var(--panel2);
+  }
+  .artistlink:hover{color:var(--ink); border-color:var(--accent)}
+
+  .chunkintro{
+    flex:0 0 auto; display:flex; align-items:center; gap:6px; margin-bottom:7px;
+    color:var(--dim); font-size:.82em;
+  }
+  .chunkintro b{color:var(--ink)}
+  .chunkgrid{
+    flex:1 1 auto; min-height:0; display:grid;
+    grid-template-columns:repeat(3,minmax(74px,1fr)); gap:6px;
+  }
+  .chunkcard{
+    min-width:0; min-height:0; position:relative; overflow:hidden;
+    border:1px solid var(--line); border-radius:5px; background:var(--hole);
+    color:var(--ink); cursor:default;
+  }
+  .chunkcard img{width:100%; height:100%; object-fit:cover; display:block}
+  .chunkcard:nth-child(2) img,.chunkcard:nth-child(7) img{filter:hue-rotate(22deg) saturate(.82)}
+  .chunkcard:nth-child(3) img,.chunkcard:nth-child(5) img{filter:hue-rotate(-28deg) contrast(1.05)}
+  .chunkcard:nth-child(4) img,.chunkcard:nth-child(8) img{filter:saturate(.68) brightness(.9)}
+  .chunkname{
+    position:absolute; left:0; right:0; bottom:0; padding:14px 5px 4px;
+    background:linear-gradient(transparent,#080a0ddd); font-size:.78em;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  }
+  .chunkmeta{display:block; color:#aab2c0; font-size:.82em}
+  .chunkcard.create{
+    display:grid; place-items:center; border-style:dashed; color:var(--dim);
+    background:var(--panel2); text-align:center;
+  }
+  .chunkcard.create b{display:block; color:var(--ink); margin-top:4px}
+  .chunkplus{font-size:2em; color:var(--accent); line-height:1}
+  .chunktooltip{
+    position:fixed; z-index:1000; display:none; min-width:210px; max-width:280px;
+    padding:8px; border:1px solid #f0c44088; border-radius:var(--r);
+    color:var(--ink); background:#11151deF; box-shadow:0 10px 28px #0008;
+    pointer-events:none; backdrop-filter:blur(6px);
+  }
+  .chunktooltip.on{display:block}
+  .chunktooltip-head{
+    display:flex; align-items:center; gap:6px; padding:0 2px 6px;
+    color:var(--dim); border-bottom:1px solid var(--line); font-size:.78em;
+  }
+  .chunktooltip-head b{color:var(--ink); font-size:1.08em}
+  .chunktooltip-head span{margin-left:auto}
+  .chunktooltip-list{display:flex; flex-direction:column; gap:3px; padding-top:6px}
+  .chunktooltip-row{
+    display:grid; grid-template-columns:24px minmax(0,1fr) 44px; align-items:center; gap:6px;
+    min-height:25px; padding:3px 5px; border-radius:4px; background:var(--panel2);
+  }
+  .chunktooltip-order{color:var(--accent); font-size:.72em; font-variant-numeric:tabular-nums}
+  .chunktooltip-name{overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .chunktooltip-weight{color:var(--ink); text-align:right; font-family:ui-monospace,Consolas,monospace; font-size:.82em}
+  .chunktooltip-weight.neg{color:#ff8f8f}
+
+  .axishead{display:flex; align-items:center; gap:6px; width:100%}
+  .axisglyph{color:var(--accent); font-size:1.15em}
+  .axiscount{color:var(--dim); font-variant-numeric:tabular-nums}
+  .axisbtn{
+    width:24px; height:24px; display:grid; place-items:center; padding:0;
+    color:var(--dim); background:transparent; border:1px solid transparent;
+    border-radius:4px; cursor:pointer;
+  }
+  .axisbtn:hover{color:var(--ink); background:var(--panel2); border-color:var(--line)}
+  .axisbtn:disabled{opacity:.25; cursor:default}
+
+  .matchhistory{
+    position:relative; display:flex; flex-direction:column; gap:5px;
+    padding-left:12px; min-height:100%;
+  }
+  .matchhistory::before{
+    content:""; position:absolute; left:4px; top:4px; bottom:4px;
+    border-left:1px solid var(--line);
+  }
+  .hgroup{
+    position:relative; display:flex; flex-direction:column; gap:4px; padding:5px;
+    border:1px solid var(--line); border-radius:6px; background:color-mix(in srgb,var(--panel2) 48%,transparent);
+  }
+  .hgroup.current{border-color:#f0c44099; box-shadow:inset 0 0 0 1px #f0c44018}
+  .hgroup-head{
+    display:flex; align-items:center; gap:5px; min-height:20px; padding:0 2px;
+    color:var(--dim); font-size:.72em; font-variant-numeric:tabular-nums;
+  }
+  .hgroup-head span{color:var(--ink); font-weight:700}
+  .hgroup.current .hgroup-head span{color:var(--accent)}
+  .hgroup-head b{margin-left:auto; color:var(--dim); font-weight:600}
+  .hgroup-list{display:flex; flex-direction:column; gap:4px}
+  .hmatch{
+    position:relative; display:grid; grid-template-columns:1fr 14px 1fr;
+    align-items:center; gap:3px; padding:4px; border-radius:5px; background:var(--panel2);
+  }
+  .hmatch::before{
+    content:attr(data-step); position:absolute; left:-14px; top:50%; transform:translate(-50%,-50%);
+    width:14px; height:14px; display:grid; place-items:center; border-radius:50%;
+    color:var(--dim); background:var(--panel); border:1px solid var(--line); font-size:.58em;
+  }
+  .hmatch.current::before{color:#211903; background:var(--accent); border-color:var(--accent)}
+  .hmatch.current{box-shadow:inset 0 0 0 1px #f0c44088}
+  .hslot{
+    position:relative; min-width:0; height:54px; padding:0; overflow:hidden;
+    border:1px solid var(--line); border-radius:4px; background:var(--hole); cursor:pointer;
+  }
+  .hslot img{width:100%; height:100%; object-fit:cover; display:block; transition:filter .12s,opacity .12s}
+  .hslot.win{border-color:#5bd197; box-shadow:inset 0 0 0 1px #5bd19755}
+  .hslot.lose img{filter:grayscale(1)!important; opacity:.24}
+  .hslot.lose{border-color:#303641}
+  .hslot.live:hover{border-color:var(--accent)}
+  .hvs{color:var(--dim); text-align:center; font-size:.72em}
+
+  #tournamentBracket{
+    flex:1 1 auto; min-height:0; flex-direction:column; padding:7px 10px 7px;
+  }
+  .brackettools{
+    position:relative; flex:0 0 32px; display:flex; align-items:center; gap:5px;
+    color:var(--dim); font-size:.75em;
+  }
+  .bracketstatus{
+    position:absolute; left:50%; transform:translateX(-50%);
+    color:var(--ink); font-size:1.08em; font-weight:700; font-variant-numeric:tabular-nums;
+  }
+  .bracketstatus b{color:var(--accent)}
+  .bracketcanvas{
+    flex:1 1 auto; min-height:0; display:grid;
+    grid-template-columns:repeat(5,minmax(92px,1fr)); gap:22px; padding:2px 9px 4px;
+    overflow:auto;
+  }
+  .bround{min-width:0; min-height:360px; display:flex; flex-direction:column}
+  .broundhead{
+    flex:0 0 24px; display:flex; align-items:center; justify-content:center; gap:5px;
+    color:var(--dim); font-size:.78em; font-variant-numeric:tabular-nums;
+  }
+  .broundhead b{color:var(--dim); font-weight:600}
+  .bround.active .broundhead{color:var(--accent); font-weight:700}
+  .bround.active .broundhead b{color:var(--ink)}
+  .bcolumn{flex:1 1 auto; min-height:0; display:flex; flex-direction:column; justify-content:space-around; gap:3px}
+  .bmatch{
+    position:relative; display:grid; grid-template-columns:1fr 1fr; gap:3px;
+  }
+  .bmatch.current{margin:-3px; padding:3px; border-radius:5px; background:#f0c4400b; box-shadow:0 0 0 2px #f0c440bb}
+  .bround:not(:last-child) .bmatch::after{
+    content:""; position:absolute; left:100%; top:50%; width:23px; border-top:1px solid var(--line);
+  }
+  .bmatch.decided:hover::before{
+    content:"↶"; position:absolute; z-index:3; left:50%; top:50%; transform:translate(-50%,-50%);
+    width:19px; height:19px; display:grid; place-items:center; border-radius:50%;
+    color:var(--accent); background:#0d1016dd; pointer-events:none;
+  }
+  .bslot{
+    position:relative; min-width:0; height:38px; padding:0; overflow:hidden;
+    border:1px solid var(--line); border-radius:4px; background:var(--hole); cursor:pointer;
+  }
+  .bslot img{width:100%; height:100%; object-fit:cover; display:block; transition:filter .12s,opacity .12s}
+  .bslot.win{border-color:#5bd197; box-shadow:inset 0 0 0 1px #5bd19755}
+  .bslot.lose img{filter:grayscale(1)!important; opacity:.38}
+  .bslot.lose{border-color:#303641}
+  .bslot.live:hover{border-color:var(--accent); transform:translateY(-1px)}
+  .bslot.empty{cursor:default; border-style:dashed; opacity:.32}
+  .bchamp{
+    width:min(100%,72px); aspect-ratio:1; align-self:center; padding:0; overflow:hidden;
+    border:1px dashed var(--line); border-radius:50%; background:var(--hole);
+  }
+  .bchamp img{width:100%; height:100%; object-fit:cover}
+  .bchamp.done{border:2px solid var(--accent); box-shadow:0 0 20px #f0c44022}
+  .roundscale{
+    flex:0 0 30px; position:relative; display:grid; grid-template-columns:repeat(5,1fr);
+    align-items:center; margin:0 9px; color:var(--dim); font-size:.7em; text-align:center;
+  }
+  .roundscale::before{
+    content:""; position:absolute; left:10%; right:10%; top:50%; height:2px;
+    transform:translateY(-50%); background:var(--line);
+  }
+  .roundscale::after{
+    content:""; position:absolute; left:10%; top:50%; width:var(--round-progress,0%); height:2px;
+    transform:translateY(-50%); background:#5bd197; transition:width .18s ease;
+  }
+  .rmark{position:relative; z-index:1; display:grid; place-items:center; gap:1px}
+  .rmark i{width:8px; height:8px; border-radius:50%; background:var(--line); box-shadow:0 0 0 3px var(--panel)}
+  .rmark.done i{background:#5bd197}
+  .rmark.on{color:var(--ink)}
+  .rmark.on i{width:11px; height:11px; background:var(--accent)}
+
+  @media (max-width:900px){
+    .stage{flex-direction:column}
+    .mains{flex-direction:column}
+    #sideL,#sideR{flex:0 0 auto; height:200px}
+    #mainL,#mainR{flex:1 1 auto; min-height:220px}
+    .split{display:none}
+    .floor{margin-top:var(--gap)}   /* 손잡이가 사라지므로 간격을 직접 준다 */
+    .chunkgrid{grid-template-columns:repeat(2,minmax(90px,1fr))}
+    .bracketcanvas{grid-template-columns:repeat(5,118px); overflow-x:auto}
+  }
+</style>
+</head>
+<body>
+
+<!--
+FEATURE app-shell
+  PURPOSE      preserve the NovelAI-like working context while an experiment changes inner panels
+  STATE        panel sizes, collapsed panels, theme, font size, floor height
+  EVENT        resize handles and toolbar buttons update layout without losing prompt or experiment state
+  TODO         persist user preferences in the application settings store instead of localStorage
+  ACCEPTANCE   reopening restores presentation preferences but never resurrects a discarded tournament
+-->
+<div class="top">
+  <button class="ico" id="tL" title="왼쪽 접기">▤</button>
+  <span class="brand">Tag Lab</span>
+  <span class="chip">Anlas <b>9335</b></span>
+  <span class="tournament-status" id="tournamentStatus" aria-live="polite"></span>
+  <span class="spacer"></span>
+  <button class="ico top-mid">✦</button><button class="ico top-mid">⊞ 32</button><button class="ico top-mid">◲ 1</button>
+  <span class="spacer"></span>
+  <button class="ico" id="fsD">A−</button>
+  <button class="ico" id="fsU">A+</button>
+  <button class="ico" id="th">◐</button>
+  <button class="ico" id="tF" title="바닥 그래프 접기">▭</button>
+  <button class="ico" id="tR" title="히스토리 접기">▦</button>
+</div>
+
+<div class="stage">
+
+  <!--
+  FEATURE prompt-and-artist-source
+    PURPOSE      edit the NovelAI prompt and expose its artist tokens as manipulable views
+    INPUT        PromptState.rawText using `artist:name` or `weight::artist:name::`
+    EVENT        text edit reparses; weight edit, add, remove, or drag rewrites rawText immediately
+    OUTPUT       numbered artist rows, stable colors, weights, and graph bars
+    INVARIANT    rows and bars are projections of rawText; never maintain a second artist array as truth
+    INVARIANT    drag order writes prompt order; popularity/training/weight sorting never does
+    TODO         replace the small MOCK Danbooru metric map with the shipped offline catalog
+    ACCEPTANCE   reloading parsed text reproduces exactly the same artist order and weights
+  -->
+  <div class="col" id="sideL">
+    <div class="panel" style="flex:1 1 auto">
+      <div class="phead">
+        <select class="sel"><option>V4.5 Full</option></select>
+        <select class="sel"><option>Anime</option></select>
+      </div>
+      <div class="pbody" style="display:flex;flex-direction:column;gap:0;padding-bottom:4px">
+        <div class="tabs">
+          <button class="tab on" data-t="t1">Prompt</button>
+          <button class="tab" data-t="t2">Undesired</button>
+        </div>
+
+        <div class="tabbody on" id="t1">
+          <div class="ptwrap" id="ptwrap" style="height:150px">
+            <div class="ptmirror" id="mirror" aria-hidden="true"></div>
+            <textarea class="pt" id="pt" spellcheck="false">1girl, solo, portrait,
+
+artist:lack, 0.5::artist:riich::, 0.5::artist:sousouman::, artist:wlop,
+artist:wanke, artist:ciloranko, 0.8::artist:happoubi jin::, artist:michiking,
+0.9::artist:toosaka asagi::, artist:modare, artist:freng, 0.4::artist:quasarcake::,
+0.5::artist:fuzichoco::, artist:sho (sho lwlw), artist:mignon, artist:asanagi,
+-0.4::artist:parsley-f::,
+
+solo artist, year 2025, shallow depth of field, best quality</textarea>
+          </div>
+          <div class="split v" id="spT" style="flex:0 0 8px;margin:0"></div>
+
+          <div class="combobar">
+            <span><b id="wcnt" style="color:var(--ink)">0</b>개 · 합 <b id="wsum" style="color:var(--ink)">0</b></span>
+            <span class="spacer"></span>
+            <button class="mini on" id="onlyA">작가만</button>
+            <button class="mini" id="resetW">전부 1.0</button>
+          </div>
+          <div class="combobar" style="padding:0 3px 4px">
+            <select class="pick" id="sortKey">
+              <option value="prompt">프롬프트</option>
+              <option value="weight">가중치순</option>
+              <option value="pop">작가 인기순</option>
+              <option value="train">작가 학습량순</option>
+            </select>
+            <select class="pick" id="sortDir" style="flex:0 0 84px">
+              <option value="asc">오름차순</option>
+              <option value="desc">내림차순</option>
+            </select>
+          </div>
+          <div class="artistadd">
+            <input id="addArtist" placeholder="작가 태그 추가" autocomplete="off">
+            <button class="mini" id="addArtistBtn">＋</button>
+          </div>
+          <div id="combo"></div>
+        </div>
+
+        <div class="tabbody" id="t2" style="padding-top:6px"><div class="hole">Undesired Content</div></div>
+      </div>
+      <div class="pfoot">
+        <div class="row" style="color:var(--dim);font-size:.85em">
+          <span>Steps <b style="color:var(--ink)">28</b></span>
+          <span>Guidance <b style="color:var(--ink)">8</b></span>
+          <span>Sampler <b style="color:var(--ink)">Euler A</b></span>
+        </div>
+      </div>
+    </div>
+    <div class="panel" style="flex:0 0 auto">
+      <div class="pfoot" style="border-top:none"><button class="genbtn">Generate 1 Image</button></div>
+    </div>
+  </div>
+
+  <div class="split" id="spL"></div>
+
+  <!-- 가운데 기둥 : 메인 두 칸 + 그 아래 바닥 그래프 -->
+  <div id="center">
+  <div class="mains">
+
+  <!--
+  FEATURE generation-canvas-and-left-candidate
+    PURPOSE      editing state shows the generated NovelAI image; tournament state shows candidate A
+    EVENT        in editing, generation settings create one image; in tournament, clicking A selects it
+    TODO         connect generation to the NovelAI adapter and store prompt, seed, model, and settings
+    TODO         candidate images must be generated from the frozen tournament probe, not reused MOCK assets
+    ACCEPTANCE   entering and leaving tournament mode restores the generation canvas without losing its image
+  -->
+  <div class="col" id="mainL">
+    <div class="main-left-normal">
+      <div class="panel" style="flex:1 1 auto">
+        <div class="phead">이미지 제작<span class="spacer"></span><span>832 × 1216</span></div>
+        <div class="canvas"><div class="hole">NAI로 만들어진 이미지</div></div>
+        <div class="pfoot row">
+          <button class="barbtn">⚙</button>
+          <button class="barbtn">seed 4257072022</button>
+          <span class="spacer"></span>
+          <button class="barbtn">📌</button><button class="barbtn">⧉</button><button class="barbtn">💾</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel duel-left">
+      <div class="phead"><span>◐ A</span><span class="spacer"></span><span class="duelround" id="duelRoundLeft">16</span></div>
+      <button class="duelpick" id="duelLeftPick" aria-label="왼쪽 후보 선택">
+        <img id="duelLeftImage" alt="">
+        <span class="duelmark" aria-hidden="true">✓</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="split" id="spM"></div>
+
+  <!--
+  FEATURE seed-context-and-right-candidate
+    PURPOSE      before an experiment, inspect the explicitly selected seed artist; during it, show candidate B
+    STATE        selectedSeed is null until the user clicks an artist row, graph bar, or graph label
+    EVENT        seed selection updates title, representative image, links, chunk chooser, and tournament context
+    INVARIANT    no default seed. MOCK tag `lack` inside the prompt is ordinary prompt content, not application state
+    TODO         resolve representative image and verified external links from the artist catalog
+    ACCEPTANCE   selecting `mignon` makes every seed label read `mignon`; changing seed mid-match clears the tournament
+  -->
+  <div class="col" id="mainR">
+    <div class="panel" id="rA" style="flex:1 1 auto">
+      <div class="artist-normal">
+        <div class="phead">
+          작가 그림 · <span id="whoA">—</span>
+          <span class="artistlinks">
+            <a class="artistlink" id="danbooruLink" href="#">Danbooru ↗</a>
+            <a class="artistlink" id="twitterLink" href="#">X / Twitter ↗</a>
+          </span>
+        </div>
+        <div class="pbody" style="display:flex;flex-direction:column">
+          <div class="artisthero">
+            <div class="artistprompt" id="artistPrompt">왼쪽 작가명이나 그래프 막대를 눌러 시드 선택</div>
+            <img id="artistHero" alt="" hidden>
+          </div>
+        </div>
+        <div class="pfoot"><button class="genbtn" id="chunkStart">작가 청크 실험하기</button></div>
+      </div>
+
+      <!--
+      FEATURE chunk-selection
+        PURPOSE      choose a reusable verified chunk or create a new tournament for the selected seed
+        INPUT        Chunk records with ordered artists and weights
+        EVENT        hover/focus reveals order, artist name, and weight from the same Chunk.artists array
+        EVENT        clicking an existing or new chunk resets prior matches and enters tournament-running
+        INVARIANT    the floor remains the weight graph while browsing chunks; it changes only after a chunk starts
+        MOCK         eight cards, images, statuses, and chunkLibrary compositions are demonstration records
+        TODO         load personal library, favorites, notes, and prior experiment status from persistence
+        ACCEPTANCE   card member count always equals tooltip row count; no previous bracket survives entry
+      -->
+      <div class="chunk-entry">
+        <div class="phead">
+          작가 청크 고르기 · 시드 <b id="chunkSeed" style="color:var(--ink)">—</b>
+          <span class="spacer"></span>
+          <button class="mini" id="chunkBack">← 작가 그림</button>
+        </div>
+        <div class="pbody" style="display:flex;flex-direction:column">
+          <div class="chunkintro"><b>이전 청크</b><span>대표 이미지를 보고 고르거나 새 청크를 만든다.</span></div>
+          <div class="chunkgrid">
+            <button class="chunkcard" data-chunk="cold-fantasy"><img src="../resource/original.png" alt="차가운 판타지 청크"><span class="chunkname">차가운 판타지<span class="chunkmeta">3명 · 검증 완료</span></span></button>
+            <button class="chunkcard" data-chunk="glass-portrait"><img src="../resource/test.png" alt="유리빛 인물화 청크"><span class="chunkname">유리빛 인물화<span class="chunkmeta">2명 · 검증 완료</span></span></button>
+            <button class="chunkcard" data-chunk="vivid-contrast"><img src="../resource/original.png" alt="선명한 명암 청크"><span class="chunkname">선명한 명암<span class="chunkmeta">4명 · 8강 진출</span></span></button>
+            <button class="chunkcard" data-chunk="soft-color"><img src="../resource/test.png" alt="부드러운 채색 청크"><span class="chunkname">부드러운 채색<span class="chunkmeta">3명 · 검증 완료</span></span></button>
+            <button class="chunkcard" data-chunk="gray-outfit"><img src="../resource/original.png" alt="무채색 의상 청크"><span class="chunkname">무채색 의상<span class="chunkmeta">2명 · 탈락 기록</span></span></button>
+            <button class="chunkcard" data-chunk="strong-line"><img src="../resource/test.png" alt="강한 선화 청크"><span class="chunkname">강한 선화<span class="chunkmeta">3명 · 검증 완료</span></span></button>
+            <button class="chunkcard" data-chunk="dream-bg"><img src="../resource/original.png" alt="몽환 배경 청크"><span class="chunkname">몽환 배경<span class="chunkmeta">2명 · 검증 완료</span></span></button>
+            <button class="chunkcard" data-chunk="calm-color"><img src="../resource/test.png" alt="차분한 색감 청크"><span class="chunkname">차분한 색감<span class="chunkmeta">3명 · 준결승</span></span></button>
+            <button class="chunkcard create" id="newChunkButton"><span><span class="chunkplus">＋</span><b>새 청크 만들기</b></span></button>
+          </div>
+        </div>
+      </div>
+
+      <div class="duel-right">
+        <div class="phead"><span>◐ B</span><span class="spacer"></span><span class="duelround" id="duelRoundRight">16</span><button class="axisbtn" id="duelExit" aria-label="청크 선택으로 돌아가기">×</button></div>
+        <button class="duelpick" id="duelRightPick" aria-label="오른쪽 후보 선택">
+          <img id="duelRightImage" alt="">
+          <span class="duelmark" aria-hidden="true">✓</span>
+        </button>
+      </div>
+
+      <!--
+      FEATURE chunk-save
+        PURPOSE      turn a finished experiment into a reusable named asset
+        STATE        draft name, the tuned weights, the baseline weights, the representative image
+        EVENT        saving writes a Chunk record and returns to chunk-selection with the new card marked
+        EVENT        applying writes each member weight into PromptState through the same token path
+                     the manual editor uses, appending members the prompt does not yet contain
+        INVARIANT    saving never touches PromptState. applying is the only writer (global 14)
+        INVARIANT    the row list shows baseline and tuned value together so the user can see what
+                     the experiment actually bought them
+        MOCK         the library is an in-memory object; the representative image is the champion thumbnail
+        TODO         persist the Chunk record, its provenance (seed, probe, model, settings, trial log),
+                     and a real representative image rendered from the final weights
+        ACCEPTANCE   after saving, the chunk grid contains a card whose tooltip rows equal the saved
+                     member list, and the prompt is unchanged until 프롬프트에 넣기 is pressed
+      -->
+      <div class="chunk-save">
+        <div class="phead">
+          청크 저장 · 시드 <b id="saveSeed" style="color:var(--ink)">—</b>
+          <span class="spacer"></span>
+          <button class="mini" id="saveBack">← 조율로</button>
+        </div>
+        <div class="savebody">
+          <div class="savehero">
+            <img id="saveHero" alt="우승 청크 대표 이미지">
+            <div class="savefields">
+              <input id="saveName" placeholder="청크 이름" autocomplete="off">
+              <div class="savenote" id="saveSummary"></div>
+            </div>
+          </div>
+          <div class="savelist" id="saveList"></div>
+        </div>
+        <div class="savefoot">
+          <button class="genbtn" id="saveCommit">청크 저장</button>
+          <button class="ghostbtn" id="saveApply">프롬프트에 넣기</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  </div><!-- /.mains -->
+
+  <div class="split v" id="spF" style="flex:0 0 var(--gap)"></div>
+
+  <!--
+  FEATURE floor-projection
+    PURPOSE      use the same resizable floor for weight editing or tournament structure
+    STATE        editing and chunk-selection show bars; tournament-running shows bracket
+    EVENT        vertical bar drag edits weight, horizontal drag edits prompt order, bracket click rolls back a branch
+    INVARIANT    graph and prompt share artist identity, order, weight, hover highlight, add, and remove behavior
+    INVARIANT    bracket rollback deletes every downstream decision dependent on the changed match
+    TODO         replace MOCK candidate images while retaining Match identity across rerenders
+    ACCEPTANCE   choosing a winner updates main pair, bracket, progress, and history from one state mutation
+  -->
+  <div class="floor" id="floor" style="height:600px">
+    <div class="bars" id="bars">
+      <div class="ticks" id="ticks"></div>
+      <div class="graphinfo">
+        <span>작가 <b id="infoCount">0</b></span>
+        <span>최대 <b id="infoMax">—</b></span>
+        <span>최소 <b id="infoMin">—</b></span>
+      </div>
+    </div>
+    <div class="names" id="names"></div>
+    <div id="tournamentBracket">
+      <div class="brackettools">
+        <span class="axisglyph">↔</span>
+        <span class="axiscount" id="bracketCount">0/15</span>
+        <span class="bracketstatus" id="bracketStatus"></span>
+        <span class="spacer"></span>
+        <button class="axisbtn" id="tUndo" title="마지막 판정 되돌리기" aria-label="마지막 판정 되돌리기">↶</button>
+        <button class="axisbtn" id="tReset" title="대진 초기화" aria-label="대진 초기화">⟲</button>
+        <button class="mini" id="tuneStart" disabled>가중치 조율 →</button>
+      </div>
+      <div class="bracketcanvas" id="bracketCanvas" aria-label="토너먼트 대진표"></div>
+      <div class="roundscale" id="roundScale" aria-label="라운드 진행 척도"></div>
+    </div>
+
+    <!--
+    FEATURE weight-tuning-floor
+      PURPOSE      show the search itself: where each weight started, where it is now, and which
+                   two values the current image pair is asking about
+      STATE        one Axis per chunk member, the active cursor, the current step, the trial log
+      EVENT        clicking a settled bar reopens that axis at the current step (user override only)
+      INVARIANT    only the active axis draws probe markers; every other bar draws a single value
+      INVARIANT    ghost lines are past values of that axis and are never redrawn from the log's order
+      TODO         axis scale should come from the model's usable weight range, not the chunk's spread
+      ACCEPTANCE   the two probe markers always differ by exactly the displayed step, and the bar
+                   they sit on is the artist named in the status line
+    -->
+    <div id="tuneGraph">
+      <div class="tunetools">
+        <span class="axisglyph">↕</span>
+        <span>확정 <b id="tuneCursor">0/0</b></span>
+        <span class="tunestep">스텝 <b id="tuneStepLabel">0.20</b></span>
+        <span id="tuneWho" style="color:var(--accent);font-weight:700"></span>
+        <span class="spacer"></span>
+        <button class="axisbtn" id="tuneUndo" title="마지막 판정 되돌리기" aria-label="마지막 판정 되돌리기">↶</button>
+        <button class="axisbtn" id="tuneSkip" title="이 작가 건너뛰기" aria-label="이 작가 건너뛰기">⇥</button>
+        <button class="mini" id="tuneDone">저장으로 →</button>
+      </div>
+      <div class="tunebars" id="tuneBars"><div class="tuneticks" id="tuneTicks"></div></div>
+      <div class="tunenames" id="tuneNames"></div>
+    </div>
+  </div>
+  </div><!-- /#center -->
+
+  <div class="split" id="spR"></div>
+
+  <!--
+  FEATURE history-projection
+    PURPOSE      show match decisions as the temporal Y axis paired with the bracket's structural X axis
+    ORDER        current match first, then decided matches newest to oldest
+    GROUPING     final, semifinal, quarterfinal, round of sixteen; newest active group stays on top
+    VISUAL       winner remains colored, loser becomes grayscale; round groups have visible borders and progress
+    EVENT        clicking either candidate in a decided record changes that decision and recomputes downstream state
+    INVARIANT    history never owns winners separately from Tournament.matches
+    ACCEPTANCE   a rollback is reflected identically in history, bracket, top status, and current A/B pair
+  -->
+  <div class="col" id="sideR">
+    <div class="panel" style="flex:1 1 auto">
+      <div class="history-normal">
+        <div class="phead">History ▶</div>
+        <div class="pbody"><div class="hist">
+          <div></div><div></div><div></div><div></div><div></div><div></div>
+        </div></div>
+      </div>
+      <div class="tournament-history">
+        <div class="phead"><div class="axishead"><span class="axisglyph">↕</span><span class="axiscount" id="historyCount">0/15</span></div></div>
+        <div class="pbody" style="padding:5px"><div class="matchhistory" id="matchHistory" aria-label="시간순 대전 기록"></div></div>
+      </div>
+
+      <!--
+      FEATURE tuning-history
+        PURPOSE      make the descent auditable. the user must be able to see that a value moved
+                     because they chose it, not because the tool decided
+        ORDER        current trial first, then decided trials newest to oldest (global 7)
+        VISUAL       the kept value is accented, the rejected value is struck through
+        INVARIANT    this list is a projection of Tuning.trials, never a second record
+        TODO         a rejected value must remain reachable so the user can revisit a close call
+        ACCEPTANCE   the row count equals the number of decided trials plus the live one
+      -->
+      <div class="tune-history">
+        <div class="phead"><div class="axishead"><span class="axisglyph">↕</span><span class="axiscount" id="tuneCount">0</span></div></div>
+        <div class="pbody" style="padding:5px"><div class="tunelog" id="tuneLog" aria-label="가중치 판정 기록"></div></div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<div class="artistpeek" id="artistpeek">
+  <img id="peekimg" alt="">
+  <div class="peekname" id="peekname"></div>
+  <div class="peekmeta">NAI 대표 이미지 · 고정 프롬프트</div>
+</div>
+
+<div class="chunktooltip" id="chunkTooltip" role="tooltip" aria-hidden="true"></div>
+
+<script>
+/*
+IMPLEMENTATION MAP
+  Presentation preferences: KEY, load, save, resize handlers
+  Prompt domain: tokenize -> rebuild -> render -> paint -> syncText
+  Seed domain: selectSeed -> paintSeedSelection -> renderSeedContext
+  Chunk domain: chunkLibrary -> tooltip handlers -> startTournament
+  Tournament domain: tournamentWinners and tournamentOrder -> renderTournament
+  Tournament projections: renderDuel, renderBracket, renderHistory, renderRoundScale
+  Decision mutation: chooseTournament and clearTournamentAfter
+  Feedback: animateTournamentChoice and animateDuelArrival
+  Tuning domain: startTuning -> buildPair -> decideTune -> advanceAxis
+  Tuning projections: renderTuneFloor, renderTuneLog, renderTuneDuel
+  Save domain: openSave -> registerChunkCard, applyChunkToPrompt
+
+PRODUCTION REPLACEMENT RULE
+  Replace MOCK storage and data sources behind these boundaries. Do not rewrite the visible
+  event sequence unless the corresponding FEATURE and ACCEPTANCE comments are updated first.
+*/
+// ── 만진 것은 전부 기억한다. 브라우저가 저장을 막아도 화면은 정상이어야 한다 ──
+// 화면 취향은 목업 판번호를 따라다니면 안 된다. 버전이 올라도 같은 자리에 저장한다
+const KEY="tag-lab";
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||"{}")}catch{return{}}};
+const save=p=>{try{localStorage.setItem(KEY,JSON.stringify({...load(),...p}))}catch{}};
+const S=load(), root=document.documentElement;
+
+let fs=S.fs||13;
+const applyFs=()=>{root.style.setProperty("--fs",fs+"px");save({fs})};
+applyFs();
+fsU.onclick=()=>{fs=Math.min(fs+1,20);applyFs()};
+fsD.onclick=()=>{fs=Math.max(fs-1,11);applyFs()};
+
+if(S.theme)root.setAttribute("data-theme",S.theme);
+th.onclick=()=>{const n=root.getAttribute("data-theme")==="dark"?"light":"dark";
+  root.setAttribute("data-theme",n);save({theme:n})};
+
+if(S.noL)document.body.classList.add("noL");
+if(S.noR)document.body.classList.add("noR");
+tL.onclick=()=>{document.body.classList.toggle("noL");save({noL:document.body.classList.contains("noL")})};
+tR.onclick=()=>{document.body.classList.toggle("noR");save({noR:document.body.classList.contains("noR")})};
+
+const floor=document.getElementById("floor");
+if(S.noF)document.body.classList.add("noF");
+if(S.floorH)floor.style.height=S.floorH+"px";
+tF.onclick=()=>{document.body.classList.toggle("noF");save({noF:document.body.classList.contains("noF")})};
+document.getElementById("spF").addEventListener("pointerdown",e=>{
+  const h=e.currentTarget; h.setPointerCapture(e.pointerId);
+  const y0=e.clientY, h0=floor.getBoundingClientRect().height;
+  const move=ev=>{floor.style.height=Math.min(1000,Math.max(70,h0-(ev.clientY-y0)))+"px"};
+  const up=()=>{h.removeEventListener("pointermove",move);h.removeEventListener("pointerup",up);
+    save({floorH:Math.round(floor.getBoundingClientRect().height)})};
+  h.addEventListener("pointermove",move); h.addEventListener("pointerup",up);
+});
+
+// 탭
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+  document.querySelectorAll(".tabbody").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); document.getElementById(b.dataset.t).classList.add("on");
+});
+
+// 가로/세로 손잡이
+function drag(handle,target,key,axis,dir,min,max){
+  handle.addEventListener("pointerdown",e=>{
+    handle.setPointerCapture(e.pointerId);
+    const p0=axis==="x"?e.clientX:e.clientY;
+    const r=target.getBoundingClientRect(), s0=axis==="x"?r.width:r.height;
+    const move=ev=>{
+      const p=axis==="x"?ev.clientX:ev.clientY;
+      target.style.flex="0 0 "+Math.min(max,Math.max(min,s0+(p-p0)*dir))+"px";
+    };
+    const up=()=>{handle.removeEventListener("pointermove",move);
+      handle.removeEventListener("pointerup",up);
+      const rr=target.getBoundingClientRect();
+      save({[key]:Math.round(axis==="x"?rr.width:rr.height)})};
+    handle.addEventListener("pointermove",move);
+    handle.addEventListener("pointerup",up);
+  });
+}
+const sideL=document.getElementById("sideL"), sideR=document.getElementById("sideR"),
+      mainL=document.getElementById("mainL"),
+      pt=document.getElementById("pt"), mirror=document.getElementById("mirror"),
+      ptwrap=document.getElementById("ptwrap");
+if(S.sideL)sideL.style.flex="0 0 "+S.sideL+"px";
+if(S.sideR)sideR.style.flex="0 0 "+S.sideR+"px";
+if(S.mainL)mainL.style.flex="0 0 "+S.mainL+"px";
+if(S.ptH)  ptwrap.style.height=S.ptH+"px";
+drag(spL,sideL,"sideL","x",+1,200,560);
+drag(spM,mainL,"mainL","x",+1,240,1400);
+drag(spR,sideR,"sideR","x",-1,90,420);
+document.getElementById("spT").addEventListener("pointerdown",e=>{
+  const h=e.currentTarget; h.setPointerCapture(e.pointerId);
+  const y0=e.clientY, h0=ptwrap.getBoundingClientRect().height;
+  const move=ev=>{ptwrap.style.height=Math.min(600,Math.max(52,h0+(ev.clientY-y0)))+"px"};
+  const up=()=>{h.removeEventListener("pointermove",move);h.removeEventListener("pointerup",up);
+    save({ptH:Math.round(ptwrap.getBoundingClientRect().height)})};
+  h.addEventListener("pointermove",move); h.addEventListener("pointerup",up);
+});
+
+/* ══════════════════════════════════════════════════════════════
+   프롬프트 글자가 유일한 원본이다.
+   색칠한 사본, 목록, 막대는 전부 그 글자를 읽어서 그린 것이고
+   어느 쪽을 만지든 곧바로 그 글자가 다시 쓰인다.
+   ══════════════════════════════════════════════════════════════ */
+
+// 색은 이름에 붙어 다닌다. 정렬하든 지웠다 다시 넣든 그 태그의 색은 안 바뀐다
+const hues=new Map(); let hueN=0;
+function hueOf(name){
+  if(!hues.has(name)) hues.set(name, Math.round((hueN++*137.508)%360));
+  return hues.get(name);
+}
+const colorOf=name=>`hsl(${hueOf(name)} 62% 62%)`;
+
+const fmt=v=>String(Math.round(v*100)/100);
+const isArtist=n=>/^artist:/i.test(n);
+const shortName=n=>n.replace(/^artist:/i,"");
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+// 프롬프트 글자 → 토큰. 여백과 줄바꿈은 손대지 않고 그대로 들고 있는다
+function parseCore(core){
+  const m=/^(-?\d+(?:\.\d+)?)\s*::\s*([\s\S]+?)\s*::$/.exec(core);
+  return m ? {w:parseFloat(m[1]), name:m[2]} : {w:1, name:core};
+}
+function tokenize(text){
+  const out=[]; let start=0;
+  for(let i=0;i<=text.length;i++){
+    if(i<text.length && text[i]!==",") continue;
+    const body=text.slice(start,i);
+    let sep="";
+    if(i<text.length){
+      let j=i+1; while(j<text.length && /\s/.test(text[j])) j++;
+      sep=text.slice(i,j); i=j-1; start=j;
+    }
+    const m=/^(\s*)([\s\S]*?)(\s*)$/.exec(body);
+    out.push({pre:m[1], post:m[3], sep, ...parseCore(m[2])});
+    if(!sep) break;
+  }
+  return out;
+}
+const tokenText=t=>t.w===1 ? t.name : `${fmt(t.w)}::${t.name}::`;
+
+function syncText(refreshMirror=true){
+  const s=pt.selectionStart;
+  pt.value=toks.map(t=>t.pre+tokenText(t)+t.post+t.sep).join("");
+  try{pt.selectionStart=pt.selectionEnd=Math.min(s,pt.value.length)}catch{}
+  if(refreshMirror)paintMirror();
+}
+// 아래층 사본을 다시 칠한다. 글자 하나하나가 그 작가의 색을 갖는다
+function paintMirror(){
+  const slot=new Map(); ai.forEach((ti,k)=>slot.set(ti,k));
+  const order=new Map(); let no=0;
+  toks.forEach((t,i)=>{if(isArtist(t.name))order.set(i,++no)});
+  let html="";
+  toks.forEach((t,i)=>{
+    const k=slot.get(i), body=esc(tokenText(t));
+    html+=esc(t.pre)
+       + (k===undefined ? body
+          : `<span class="tk" data-k="${k}" style="color:${colorOf(t.name)}">`+
+            `<span class="ord">${order.get(i)??""}</span>${body}</span>`)
+       + esc(t.post) + esc(t.sep);
+  });
+  mirror.innerHTML=html+"\n";
+  mirror.scrollTop=pt.scrollTop;
+}
+pt.addEventListener("scroll",()=>{mirror.scrollTop=pt.scrollTop});
+
+/* ── 세로 축 ──
+   -10~10 은 NAI가 허용하는 한계일 뿐 늘 그만큼 그릴 이유는 없다.
+   지금 들어 있는 값에 맞춰 축을 좁히되, 0 과 1.0 은 기준선이라 항상 품는다.
+   끌어올리는 중에는 축을 줄이지 않는다(줄었다 늘었다 하면 손이 흔들린다). */
+const HARD=10;
+let LO=-0.5, HI=1.5;
+const upTo=v=>Math.ceil(v*2)/2, downTo=v=>Math.floor(v*2)/2;   // 0.5 눈금 바깥으로
+function fitAxis(growOnly){
+  let mx=1, mn=0;                       // 1.0 과 0 은 무조건 보인다
+  ai.forEach(i=>{const w=toks[i].w; if(w>mx)mx=w; if(w<mn)mn=w});
+  const pad=Math.max((mx-mn)*0.12, 0.25);
+  let hi=Math.min(HARD, upTo(mx+pad)), lo=Math.max(-HARD, downTo(mn-pad));
+  if(growOnly){ hi=Math.max(hi,HI); lo=Math.min(lo,LO); }
+  HI=hi; LO=lo;
+}
+const pctOf=v=>(v-LO)/(HI-LO)*100;
+
+let toks=[], ai=[], onlyArtist=S.onlyArtist!==false, selectedSeed=S.seedArtist||null;
+const combo=document.getElementById("combo"),
+      bars=document.getElementById("bars"), ticks=document.getElementById("ticks"),
+      names=document.getElementById("names"),
+      sortKey=document.getElementById("sortKey"), sortDir=document.getElementById("sortDir");
+sortKey.value=S.sortKey||"prompt";
+sortDir.value=S.sortDir||"asc";
+
+/*
+MOCK artist-metrics adapter
+   Danbooru에서 실제로 긁어온 값 (2026-08-23 기준).
+   인기  = 그 작가 그림들의 Score 평균. 전량이 아니라 order:random 표본의 평균이다.
+   학습량 = 그 작가 태그의 post_count.
+   riich 는 태그 자체가 없고 sho (sho lwlw) 는 0장이라 값이 없다.
+TODO production adapter returns `{ pop, train }` from the offline catalog by normalized artist tag.
+*/
+const DAN={
+  "mignon":       {pop:232.0, train:963},
+  "freng":        {pop:123.4, train:670},
+  "asanagi":      {pop:106.2, train:1628},
+  "michiking":    {pop: 97.4, train:280},
+  "modare":       {pop: 64.4, train:1070},
+  "happoubi jin": {pop: 62.1, train:1458},
+  "quasarcake":   {pop: 40.4, train:375},
+  "lack":         {pop: 37.4, train:1341},
+  "ciloranko":    {pop: 34.1, train:252},
+  "sousouman":    {pop: 33.2, train:1160},
+  "wanke":        {pop: 32.0, train:178},
+  "toosaka asagi":{pop: 22.7, train:2061},
+  "wlop":         {pop: 22.4, train:400},
+  "fuzichoco":    {pop: 19.9, train:1161},
+  "parsley-f":    {pop: 16.0, train:892},
+  "sho (sho lwlw)":{pop:null, train:0},
+};
+const danOf=(n,f)=>{const d=DAN[shortName(n)]; return d?d[f]:null};
+// 정렬 기준. prompt 는 프롬프트에 적힌 자리 그대로
+const sortVal={
+  prompt:i=>i,
+  weight:i=>toks[i].w,
+  pop:   i=>danOf(toks[i].name,"pop"),
+  train: i=>danOf(toks[i].name,"train"),
+};
+// 수치를 모르는 태그는 오름/내림과 무관하게 늘 맨 끝으로 보낸다
+function cmp(a,b,d){
+  const A=a[1],B=b[1], an=A==null||Number.isNaN(A), bn=B==null||Number.isNaN(B);
+  if(an&&bn) return a[0]-b[0];
+  if(an) return 1;
+  if(bn) return -1;
+  return (A-B)*d || a[0]-b[0];
+}
+
+function rebuild(){
+  toks=tokenize(pt.value);
+  ai=toks.map((t,i)=>i).filter(i=>toks[i].name && (!onlyArtist || isArtist(toks[i].name)));
+  const artists=toks.filter(t=>isArtist(t.name));
+  if(selectedSeed&&!artists.some(t=>t.name.toLowerCase()===selectedSeed.toLowerCase())){
+    selectedSeed=null;
+    save({seedArtist:selectedSeed});
+  }
+  // 정렬은 보기 순서일 뿐, 프롬프트 글자는 건드리지 않는다.
+  // 그래야 "프롬프트" 순으로 언제든 되돌아올 수 있다
+  const f=sortVal[sortKey.value]||sortVal.prompt, d=sortDir.value==="desc"?-1:1;
+  ai=ai.map(i=>[i,f(i)]).sort((a,b)=>cmp(a,b,d)).map(x=>x[0]);
+  fitAxis(false);
+  render();
+}
+function render(){
+  combo.innerHTML=""; names.innerHTML="";
+  [...bars.querySelectorAll(".bar")].forEach(b=>b.remove());
+  const order=new Map(); let no=0;
+  toks.forEach((t,i)=>{if(isArtist(t.name))order.set(i,++no)});
+  ai.forEach((ti,k)=>{
+    const t=toks[ti], c=colorOf(t.name);
+
+    const row=document.createElement("div");
+    row.className="arow"+(isArtist(t.name)?"":" plain");
+    row.dataset.k=k; row.style.setProperty("--c",c);
+    row.title=isArtist(t.name)?"위아래로 끌어서 프롬프트 순서 변경":"";
+    const sk=sortKey.value, showMeta=(sk==="pop"||sk==="train");
+    const mv=showMeta?danOf(t.name,sk):undefined;
+    row.innerHTML=`<span class="dot"></span>`+
+      `<span class="idx">${order.has(ti)?String(order.get(ti)).padStart(2,"0"):"—"}</span>`+
+      `<span class="nm" title="${t.name}">${shortName(t.name)}</span>`+
+      (showMeta?`<span class="meta" title="${sk==="pop"?"Score 평균":"Danbooru 장수"}">`+
+        (mv==null?"—":mv)+`</span>`:"")+
+      `<input class="w" value="${t.w.toFixed(2)}">`+
+      `<button class="x">×</button>`;
+    combo.appendChild(row);
+
+    const b=document.createElement("div");
+    b.className="bar"; b.dataset.k=k; b.title=t.name+" · 가로: 순서 / 세로: 가중치";
+    b.style.setProperty("--c",c);
+    b.innerHTML=`<span class="val"></span><span class="stem"></span>`;
+    bars.appendChild(b);
+
+    const n=document.createElement("span");
+    n.textContent=shortName(t.name); n.title=t.name; n.dataset.k=k;
+    n.style.setProperty("--c",c);
+    names.appendChild(n);
+  });
+  paintMirror();
+  paint();
+  paintSeedSelection();
+  renderSeedContext();
+}
+function paint(){
+  const ZERO=pctOf(0), ONE=pctOf(1);
+  // 최고·최저를 찾아둔다. 다만 1.0 은 "가중치를 안 준 값"이라 굵게 하지 않는다
+  let mx=-Infinity, mn=Infinity;
+  ai.forEach(i=>{const w=toks[i].w; if(w>mx)mx=w; if(w<mn)mn=w});
+  [...combo.children].forEach(row=>{
+    const t=toks[ai[row.dataset.k]], inp=row.querySelector(".w");
+    if(document.activeElement!==inp) inp.value=t.w.toFixed(2);
+    row.classList.toggle("neg", t.w<0);
+    row.classList.toggle("top", mx!==1 && t.w===mx);
+    row.classList.toggle("bot", mn!==1 && t.w===mn);
+  });
+  [...bars.querySelectorAll(".bar")].forEach(b=>{
+    const v=toks[ai[b.dataset.k]].w, p=pctOf(v), neg=v<0;
+    const stem=b.querySelector(".stem"), val=b.querySelector(".val");
+    b.classList.toggle("neg",neg); b.classList.toggle("pos",!neg);
+    stem.style.top="auto";
+    if(neg){ stem.style.bottom=p+"%";    stem.style.height=(ZERO-p)+"%";
+             val.style.bottom="calc("+p+"% - 14px)"; }
+    else   { stem.style.bottom=ZERO+"%"; stem.style.height=(p-ZERO)+"%";
+             val.style.bottom="calc("+p+"% + 2px)"; }
+    val.textContent=fmt(v);
+  });
+  paintTicks();
+  document.getElementById("wsum").textContent=ai.reduce((s,i)=>s+toks[i].w,0).toFixed(1);
+  document.getElementById("wcnt").textContent=ai.length;
+  const artistWeights=ai.filter(i=>isArtist(toks[i].name)).map(i=>toks[i].w);
+  document.getElementById("infoCount").textContent=artistWeights.length;
+  document.getElementById("infoMax").textContent=artistWeights.length?fmt(Math.max(...artistWeights)):"—";
+  document.getElementById("infoMin").textContent=artistWeights.length?fmt(Math.min(...artistWeights)):"—";
+}
+
+function paintTicks(){
+  ticks.innerHTML="";
+  for(let v=Math.ceil(LO*2)/2;v<=HI+.001;v+=.5){
+    const line=document.createElement("div"), label=document.createElement("span");
+    const p=pctOf(v);
+    line.className="tickline"+(v===0||v===1?" major":"");
+    line.style.bottom=p+"%";
+    label.className="ticklabel";
+    label.style.bottom=p+"%";
+    label.textContent=v===0?"0":v.toFixed(1);
+    ticks.append(line,label);
+  }
+}
+
+// 프롬프트 글자 ↔ 목록 ↔ 막대 ↔ 이름표. 넷이 같이 밝아진다
+function hi(k,on){
+  [combo.querySelector(`.arow[data-k="${k}"]`),
+   bars.querySelector(`.bar[data-k="${k}"]`),
+   names.querySelector(`span[data-k="${k}"]`),
+   mirror.querySelector(`.tk[data-k="${k}"]`)]
+   .forEach(el=>el&&el.classList.toggle("hi",on));
+}
+[combo,bars,names].forEach(host=>{
+  host.addEventListener("pointerover",e=>{const el=e.target.closest("[data-k]"); if(el)hi(el.dataset.k,true)});
+  host.addEventListener("pointerout" ,e=>{const el=e.target.closest("[data-k]"); if(el)hi(el.dataset.k,false)});
+});
+
+const artistpeek=document.getElementById("artistpeek"), peekimg=document.getElementById("peekimg"),
+      peekname=document.getElementById("peekname");
+const peekSources=["../resource/original.png","../resource/test.png"];
+function seedTone(name){
+  let value=0;
+  for(const ch of name||"")value=(value*31+ch.charCodeAt(0))%360;
+  return value;
+}
+function renderSeedContext(){
+  const label=selectedSeed?shortName(selectedSeed):"—";
+  document.getElementById("whoA").textContent=label;
+  document.getElementById("chunkSeed").textContent=label;
+  const hero=document.getElementById("artistHero");
+  const prompt=document.getElementById("artistPrompt");
+  const start=document.getElementById("chunkStart");
+  start.disabled=!selectedSeed;
+  hero.hidden=!selectedSeed;
+  prompt.hidden=!!selectedSeed;
+  if(!selectedSeed){
+    hero.removeAttribute("src");
+    hero.alt="";
+    hero.style.filter="";
+    return;
+  }
+  const tone=seedTone(selectedSeed);
+  hero.src=peekSources[tone%peekSources.length];
+  hero.alt=label+"의 단독 NAI 대표 이미지";
+  hero.style.filter=`hue-rotate(${tone}deg) saturate(.9)`;
+  document.getElementById("danbooruLink").href="https://danbooru.donmai.us/posts?tags="+encodeURIComponent(label);
+  document.getElementById("twitterLink").href="https://x.com/search?q="+encodeURIComponent(label);
+}
+function paintSeedSelection(){
+  document.querySelectorAll(".arow.seed,.bar.seed,#names .seed,.ptmirror .seed").forEach(el=>el.classList.remove("seed"));
+  if(!selectedSeed)return;
+  const k=ai.findIndex(ti=>toks[ti].name.toLowerCase()===selectedSeed.toLowerCase());
+  if(k<0)return;
+  [combo.querySelector(`.arow[data-k="${k}"]`),bars.querySelector(`.bar[data-k="${k}"]`),
+   names.querySelector(`span[data-k="${k}"]`),mirror.querySelector(`.tk[data-k="${k}"]`)]
+   .forEach(el=>el&&el.classList.add("seed"));
+}
+function selectSeed(k){
+  if(tournamentMoving)return;
+  const token=toks[ai[Number(k)]];
+  if(!token||!isArtist(token.name))return;
+  selectedSeed=token.name;
+  save({seedArtist:selectedSeed});
+  // 전역 4 : 시드가 바뀌면 그 시드로 만든 대진과 조율은 전부 무효다
+  if(document.body.classList.contains("chunkDuel")||document.body.classList.contains("chunkTune")){
+    resetTournament();
+    abandonTuning();
+    document.body.classList.remove("chunkDuel");
+  }
+  paintSeedSelection();
+  renderSeedContext();
+}
+bars.addEventListener("pointermove",e=>{
+  const bar=e.target.closest(".bar");
+  if(!bar){artistpeek.classList.remove("on");return}
+  const t=toks[ai[bar.dataset.k]], w=artistpeek.offsetWidth, h=artistpeek.offsetHeight||250;
+  peekname.textContent=shortName(t.name)+"  ·  "+fmt(t.w);
+  peekimg.src=peekSources[Number(bar.dataset.k)%peekSources.length];
+  peekimg.alt=shortName(t.name)+" 대표 이미지";
+  artistpeek.style.left=Math.min(innerWidth-w-10,e.clientX+16)+"px";
+  artistpeek.style.top=Math.max(10,Math.min(innerHeight-h-10,e.clientY-h/2))+"px";
+  artistpeek.classList.add("on");
+});
+bars.addEventListener("pointerleave",()=>artistpeek.classList.remove("on"));
+bars.addEventListener("click",e=>{const bar=e.target.closest(".bar");if(bar)selectSeed(bar.dataset.k)});
+names.addEventListener("click",e=>{const name=e.target.closest("[data-k]");if(name)selectSeed(name.dataset.k)});
+
+// 값을 바꾸는 단 하나의 통로
+function setW(k,v,growOnly){
+  toks[ai[k]].w=Math.round(Math.min(HARD,Math.max(-HARD,v))*20)/20;   // 0.05 눈금
+  fitAxis(growOnly); syncText(); paint();
+}
+
+function clearDropMarks(){
+  document.querySelectorAll(".drop-before,.drop-after,.dragging").forEach(el=>
+    el.classList.remove("drop-before","drop-after","dragging"));
+}
+
+function reorderArtist(fromK,toK,after){
+  if(fromK===toK)return;
+  const fromTi=ai[fromK], toTi=ai[toK];
+  if(fromTi==null||toTi==null||!isArtist(toks[fromTi].name)||!isArtist(toks[toTi].name))return;
+  const shown=ai.filter(ti=>isArtist(toks[ti].name));
+  const from=shown.indexOf(fromTi), to=shown.indexOf(toTi);
+  if(from<0||to<0)return;
+  const values=shown.map(ti=>({name:toks[ti].name,w:toks[ti].w}));
+  const [moving]=values.splice(from,1);
+  let at=to+(after?1:0)-(from<to?1:0);
+  values.splice(Math.max(0,Math.min(values.length,at)),0,moving);
+  const slots=toks.map((t,i)=>isArtist(t.name)?i:-1).filter(i=>i>=0);
+  slots.forEach((ti,i)=>Object.assign(toks[ti],values[i]));
+  sortKey.value="prompt"; sortDir.value="asc";
+  save({sortKey:"prompt",sortDir:"asc"});
+  syncText(); rebuild();
+}
+
+// 목록에서는 위아래로 끌어서 순서를 바꾼다
+combo.addEventListener("pointerdown",e=>{
+  if(e.target.closest("input,button"))return;
+  const row=e.target.closest(".arow");
+  if(!row||!isArtist(toks[ai[row.dataset.k]].name))return;
+  row.setPointerCapture(e.pointerId);
+  const y0=e.clientY; let active=false, target=null, after=false;
+  const move=ev=>{
+    if(!active&&Math.abs(ev.clientY-y0)<4)return;
+    active=true; row.classList.add("dragging");
+    document.querySelectorAll(".arow.drop-before,.arow.drop-after").forEach(el=>
+      el.classList.remove("drop-before","drop-after"));
+    target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest(".arow")||null;
+    if(!target||!isArtist(toks[ai[target.dataset.k]]?.name))return;
+    after=ev.clientY>target.getBoundingClientRect().top+target.getBoundingClientRect().height/2;
+    target.classList.add(after?"drop-after":"drop-before");
+  };
+  const up=()=>{
+    row.removeEventListener("pointermove",move); row.removeEventListener("pointerup",up);
+    const toK=target?.dataset.k; clearDropMarks();
+    if(active&&toK!=null)reorderArtist(Number(row.dataset.k),Number(toK),after);
+  };
+  row.addEventListener("pointermove",move); row.addEventListener("pointerup",up);
+});
+
+bars.addEventListener("pointerdown",e=>{
+  const b=e.target.closest(".bar"); if(!b)return;
+  b.setPointerCapture(e.pointerId);
+  const k=Number(b.dataset.k), x0=e.clientX, y0=e.clientY;
+  let mode=null, target=null, after=false;
+  const move=ev=>{
+    if(!mode){
+      const dx=ev.clientX-x0, dy=ev.clientY-y0;
+      if(Math.hypot(dx,dy)<4)return;
+      mode=Math.abs(dx)>Math.abs(dy)?"order":"weight";
+      b.classList.add("dragging");
+    }
+    if(mode==="order"){
+      document.querySelectorAll(".bar.drop-before,.bar.drop-after").forEach(el=>
+        el.classList.remove("drop-before","drop-after"));
+      target=document.elementFromPoint(ev.clientX,ev.clientY)?.closest(".bar")||null;
+      if(!target)return;
+      after=ev.clientX>target.getBoundingClientRect().left+target.getBoundingClientRect().width/2;
+      target.classList.add(after?"drop-after":"drop-before");
+      return;
+    }
+    const r=bars.getBoundingClientRect();
+    setW(k, LO+((r.bottom-ev.clientY)/(r.height-14))*(HI-LO), true);
+  };
+  const up=()=>{
+    b.removeEventListener("pointermove",move); b.removeEventListener("pointerup",up);
+    const toK=target?.dataset.k; clearDropMarks();
+    if(mode==="order"&&toK!=null)reorderArtist(k,Number(toK),after);
+    else if(mode==="weight")rebuild();
+  };
+  b.addEventListener("pointermove",move); b.addEventListener("pointerup",up);
+});
+combo.addEventListener("input",e=>{
+  if(!e.target.classList.contains("w"))return;
+  const v=parseFloat(e.target.value);
+  if(!isNaN(v)) setW(e.target.closest(".arow").dataset.k, v, false);
+});
+// 다 치고 나서(엔터·포커스 이탈) 정렬을 다시 맞춘다. 타이핑 중에 줄이 튀면 안 되니까
+combo.addEventListener("change",e=>{if(e.target.classList.contains("w"))rebuild()});
+combo.addEventListener("click",e=>{
+  const row=e.target.closest(".arow"); if(!row)return;
+  if(e.target.classList.contains("x")){
+    toks.splice(ai[row.dataset.k],1);
+    syncText(false); rebuild();
+    return;
+  }
+  selectSeed(row.dataset.k);
+});
+
+const addArtist=document.getElementById("addArtist");
+function addArtistTag(){
+  const raw=addArtist.value.trim(); if(!raw)return;
+  const parsed=parseCore(raw);
+  parsed.name=/^artist:/i.test(parsed.name)?parsed.name:"artist:"+parsed.name;
+  if(toks.some(t=>t.name.toLowerCase()===parsed.name.toLowerCase())){
+    addArtist.select(); return;
+  }
+  const last=toks.map((t,i)=>isArtist(t.name)?i:-1).filter(i=>i>=0).at(-1);
+  const fresh={pre:"",post:"",sep:"",w:parsed.w,name:parsed.name};
+  if(last==null){
+    if(toks.length)toks[toks.length-1].sep=toks[toks.length-1].sep||", ";
+    toks.push(fresh);
+  }else{
+    fresh.sep=toks[last].sep||", "; toks[last].sep=", "; toks.splice(last+1,0,fresh);
+  }
+  addArtist.value=""; syncText(false); rebuild();
+}
+document.getElementById("addArtistBtn").onclick=addArtistTag;
+addArtist.addEventListener("keydown",e=>{if(e.key==="Enter")addArtistTag()});
+
+// 글자를 직접 고쳐도 목록·막대·색이 따라온다
+pt.addEventListener("input",rebuild);
+
+sortKey.onchange=()=>{save({sortKey:sortKey.value}); rebuild()};
+sortDir.onchange=()=>{save({sortDir:sortDir.value}); rebuild()};
+document.getElementById("resetW").onclick=()=>{
+  ai.forEach(i=>toks[i].w=1); syncText(); rebuild();
+};
+const onlyA=document.getElementById("onlyA");
+onlyA.classList.toggle("on",onlyArtist);
+onlyA.onclick=()=>{
+  onlyArtist=!onlyArtist; onlyA.classList.toggle("on",onlyArtist);
+  save({onlyArtist}); rebuild();
+};
+
+/*
+MOCK chunk repository
+  These compositions exist only to demonstrate the Chunk contract and tooltip behavior.
+  A production repository must return the same order and weight values used to build prompts.
+INVARIANT visible member count and tooltip rows are derived from this one collection.
+*/
+const chunkLibrary={
+  "cold-fantasy":[["lack",1],["wlop",.8],["happoubi jin",1.25]],
+  "glass-portrait":[["mignon",1],["fuzichoco",.7]],
+  "vivid-contrast":[["ciloranko",1],["quasarcake",.65],["michiking",.85],["freng",.55]],
+  "soft-color":[["modare",1],["riich",.7],["fuzichoco",.8]],
+  "gray-outfit":[["asanagi",1],["parsley-f",-.4]],
+  "strong-line":[["sousouman",1],["wanke",.9],["toosaka asagi",.6]],
+  "dream-bg":[["wlop",1],["mignon",.75]],
+  "calm-color":[["happoubi jin",1],["quasarcake",.5],["fuzichoco",.8]]
+};
+const chunkTooltip=document.getElementById("chunkTooltip");
+function placeChunkTooltip(x,y){
+  const gap=14, w=chunkTooltip.offsetWidth, h=chunkTooltip.offsetHeight;
+  chunkTooltip.style.left=Math.max(8,Math.min(innerWidth-w-8,x+gap))+"px";
+  chunkTooltip.style.top=Math.max(8,Math.min(innerHeight-h-8,y+gap))+"px";
+}
+function showChunkTooltip(card,x,y){
+  const artists=chunkLibrary[card.dataset.chunk]; if(!artists)return;
+  const title=card.querySelector(".chunkname").firstChild.textContent.trim();
+  chunkTooltip.innerHTML=`<div class="chunktooltip-head"><b>${esc(title)}</b><span>${artists.length}명</span></div>`+
+    `<div class="chunktooltip-list">${artists.map((artist,index)=>{
+      const weight=Number(artist[1]);
+      return `<div class="chunktooltip-row"><span class="chunktooltip-order">${String(index+1).padStart(2,"0")}</span>`+
+        `<span class="chunktooltip-name">${esc(artist[0])}</span>`+
+        `<span class="chunktooltip-weight${weight<0?" neg":""}">${weight.toFixed(2)}</span></div>`;
+    }).join("")}</div>`;
+  chunkTooltip.classList.add("on");
+  chunkTooltip.setAttribute("aria-hidden","false");
+  placeChunkTooltip(x,y);
+}
+function hideChunkTooltip(){
+  chunkTooltip.classList.remove("on");
+  chunkTooltip.setAttribute("aria-hidden","true");
+}
+document.querySelectorAll(".chunkcard[data-chunk]").forEach(card=>{
+  const artists=chunkLibrary[card.dataset.chunk];
+  const meta=card.querySelector(".chunkmeta"), status=meta.textContent.split("·").slice(1).join("·").trim();
+  meta.textContent=artists.length+"명"+(status?" · "+status:"");
+  card.setAttribute("aria-describedby","chunkTooltip");
+  card.addEventListener("pointermove",e=>showChunkTooltip(card,e.clientX,e.clientY));
+  card.addEventListener("pointerleave",hideChunkTooltip);
+  card.addEventListener("focus",()=>{
+    const r=card.getBoundingClientRect(); showChunkTooltip(card,r.right,r.top);
+  });
+  card.addEventListener("blur",hideChunkTooltip);
+});
+
+/*
+FEATURE blind-pairwise-tournament
+  Candidate labels are hidden from the main A/B decision surface. The user judges images only.
+  Sixteen candidates require fifteen decisions. Round capacity is 8, 4, 2, 1 matches.
+  Semifinal outcomes later supply first, second, and third place in the standalone-artist flow.
+
+EVENT choose A or B
+  1. lock both candidates against double input
+  2. color-confirm winner and desaturate loser
+  3. move winner thumbnail toward the visible bracket/history destination
+  4. write one winner decision
+  5. render next match and update all projections
+
+EVENT rollback
+  Reopening an earlier match removes every dependent downstream winner, then makes that pair current.
+
+MOCK tournamentPlayers are placeholder chunks and repeated local images.
+TODO generate or load real candidates using the frozen seed, probe prompt, model, and generation settings.
+*/
+const tournamentPlayers=[
+  ["차가운 판타지","../resource/original.png",0],
+  ["유리빛 인물화","../resource/test.png",24],
+  ["선명한 명암","../resource/original.png",-31],
+  ["부드러운 채색","../resource/test.png",44],
+  ["무채색 의상","../resource/original.png",-12],
+  ["강한 선화","../resource/test.png",68],
+  ["몽환 배경","../resource/original.png",92],
+  ["차분한 색감","../resource/test.png",-54],
+  ["옅은 수채","../resource/original.png",14],
+  ["금빛 역광","../resource/test.png",118],
+  ["푸른 야경","../resource/original.png",166],
+  ["고전 삽화","../resource/test.png",-82],
+  ["맑은 선화","../resource/original.png",37],
+  ["짙은 채도","../resource/test.png",204],
+  ["겨울 공기","../resource/original.png",-108],
+  ["따뜻한 필름","../resource/test.png",146]
+].map((p,id)=>({id,name:p[0],src:p[1],tone:p[2]}));
+const tournamentRoundMatches=[8,4,2,1];
+let tournamentWinners={};
+let tournamentOrder=[];
+let tournamentMoving=false;
+const reducedMotion=matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+const tKey=(round,match)=>round+"-"+match;
+function tCandidates(round,match){
+  if(round===0)return [match*2,match*2+1];
+  return [tournamentWinners[tKey(round-1,match*2)]??null,
+          tournamentWinners[tKey(round-1,match*2+1)]??null];
+}
+function clearTournamentAfter(round,match){
+  let child=match;
+  for(let r=round+1;r<4;r++){
+    child=Math.floor(child/2);
+    const key=tKey(r,child);
+    delete tournamentWinners[key];
+    tournamentOrder=tournamentOrder.filter(k=>k!==key);
+  }
+}
+function chooseTournament(round,match,player){
+  const candidates=tCandidates(round,match), key=tKey(round,match);
+  if(!candidates.includes(player))return;
+  clearTournamentAfter(round,match);
+  if(tournamentWinners[key]===player){
+    delete tournamentWinners[key];
+    tournamentOrder=tournamentOrder.filter(k=>k!==key);
+  }else{
+    tournamentWinners[key]=player;
+    tournamentOrder=tournamentOrder.filter(k=>k!==key);
+    tournamentOrder.push(key);
+  }
+  renderTournament();
+  requestAnimationFrame(animateDuelArrival);
+}
+function currentTournamentMatch(){
+  for(let round=0;round<4;round++)for(let match=0;match<tournamentRoundMatches[round];match++){
+    const candidates=tCandidates(round,match);
+    if(candidates.every(v=>v!=null)&&tournamentWinners[tKey(round,match)]==null)return {round,match,candidates};
+  }
+  return null;
+}
+function tournamentImage(player){
+  const p=tournamentPlayers[player];
+  return `<img src="${p.src}" alt="" style="filter:hue-rotate(${p.tone}deg) saturate(.86)">`;
+}
+function tournamentSlot(player,round,match,where){
+  if(player==null)return `<span class="${where} empty" aria-hidden="true"></span>`;
+  const winner=tournamentWinners[tKey(round,match)];
+  const state=winner==null?"live":winner===player?"win":"lose";
+  const p=tournamentPlayers[player];
+  return `<button class="${where} ${state}" data-t-player="${player}" data-t-round="${round}" data-t-match="${match}" title="${p.name}" aria-label="${p.name}">${tournamentImage(player)}</button>`;
+}
+function renderBracket(){
+  const current=currentTournamentMatch();
+  const columns=[];
+  const roundLabels=["16강","8강","4강","결승"];
+  for(let round=0;round<4;round++){
+    const matches=[];
+    for(let match=0;match<tournamentRoundMatches[round];match++){
+      const candidates=tCandidates(round,match), decided=tournamentWinners[tKey(round,match)]!=null;
+      const active=current&&current.round===round&&current.match===match;
+      matches.push(`<div class="bmatch${decided?" decided":""}${active?" current":""}">${tournamentSlot(candidates[0],round,match,"bslot")}${tournamentSlot(candidates[1],round,match,"bslot")}</div>`);
+    }
+    const active=current&&current.round===round;
+    const progress=active?`<b>${current.match+1}/${tournamentRoundMatches[round]}</b>`:"";
+    columns.push(`<div class="bround${active?" active":""}"><div class="broundhead">${roundLabels[round]}${progress}</div><div class="bcolumn">${matches.join("")}</div></div>`);
+  }
+  const champion=tournamentWinners["3-0"];
+  columns.push(`<div class="bround${champion!=null?" active":""}"><div class="broundhead">우승</div><div class="bcolumn">${champion==null
+    ?`<span class="bchamp empty" aria-hidden="true"></span>`
+    :`<button class="bchamp done" data-t-player="${champion}" data-t-round="3" data-t-match="0" title="${tournamentPlayers[champion].name}" aria-label="${tournamentPlayers[champion].name}">${tournamentImage(champion)}</button>`}</div></div>`);
+  document.getElementById("bracketCanvas").innerHTML=columns.join("");
+}
+function renderRoundScale(){
+  const current=currentTournamentMatch();
+  const active=current?current.round:4;
+  const labels=["16","8","4","2","◆"];
+  const scale=document.getElementById("roundScale");
+  scale.style.setProperty("--round-progress",(active/4*80)+"%");
+  scale.innerHTML=labels.map((label,i)=>
+    `<span class="rmark${i<active?" done":""}${i===active?" on":""}" title="${i<4?label+"강":"우승"}"><i></i><span>${label}</span></span>`
+  ).join("");
+}
+function renderHistory(){
+  const resolved=tournamentOrder.filter(key=>tournamentWinners[key]!=null).map((key,index)=>({key,step:index+1}));
+  const groups=new Map(), labels=["16강","8강","4강","결승"];
+  const addRecord=(round,record)=>{
+    if(!groups.has(round))groups.set(round,[]);
+    groups.get(round).push(record);
+  };
+  const current=currentTournamentMatch();
+  if(current){
+    addRecord(current.round,`<div class="hmatch current" data-step="${resolved.length+1}">${tournamentSlot(current.candidates[0],current.round,current.match,"hslot")}<span class="hvs">◇</span>${tournamentSlot(current.candidates[1],current.round,current.match,"hslot")}</div>`);
+  }
+  resolved.reverse().forEach(({key,step})=>{
+    const [round,match]=key.split("-").map(Number), candidates=tCandidates(round,match);
+    const pair=`${tournamentSlot(candidates[0],round,match,"hslot")}<span class="hvs">◇</span>${tournamentSlot(candidates[1],round,match,"hslot")}`;
+    addRecord(round,`<div class="hmatch" data-step="${step}">${pair}</div>`);
+  });
+  const html=[...groups.keys()].sort((a,b)=>b-a).map(round=>{
+    const decided=Object.keys(tournamentWinners).filter(key=>Number(key.split("-")[0])===round).length;
+    const active=current&&current.round===round;
+    return `<section class="hgroup${active?" current":""}" data-round="${round}">`+
+      `<div class="hgroup-head"><span>${labels[round]}</span><b>${decided}/${tournamentRoundMatches[round]}</b></div>`+
+      `<div class="hgroup-list">${groups.get(round).join("")}</div></section>`;
+  }).join("");
+  document.getElementById("matchHistory").innerHTML=html;
+}
+function setDuelCandidate(button,image,player,current){
+  delete button.dataset.tPlayer;
+  delete button.dataset.tRound;
+  delete button.dataset.tMatch;
+  button.classList.toggle("empty",player==null);
+  if(player==null){
+    button.disabled=true;
+    image.removeAttribute("src");
+    image.alt="";
+    image.style.filter="";
+    return;
+  }
+  const p=tournamentPlayers[player];
+  button.disabled=!current;
+  image.src=p.src;
+  image.alt=p.name;
+  image.style.filter=`hue-rotate(${p.tone}deg) saturate(.86)`;
+  if(current){
+    button.dataset.tPlayer=player;
+    button.dataset.tRound=current.round;
+    button.dataset.tMatch=current.match;
+  }
+}
+function renderDuel(){
+  const current=currentTournamentMatch();
+  const champion=tournamentWinners["3-0"]??null;
+  const candidates=current?current.candidates:[champion,null];
+  const round=current?["16","8","4","2"][current.round]:"◆";
+  document.getElementById("duelRoundLeft").textContent=round;
+  document.getElementById("duelRoundRight").textContent=round;
+  setDuelCandidate(document.getElementById("duelLeftPick"),document.getElementById("duelLeftImage"),candidates[0],current);
+  setDuelCandidate(document.getElementById("duelRightPick"),document.getElementById("duelRightImage"),candidates[1],current);
+}
+function tournamentStatus(current){
+  if(!current)return `<b>완료</b> · 15/15`;
+  const round=["16강","8강","4강","결승"][current.round];
+  return `<b>${round}</b> · ${current.match+1}/${tournamentRoundMatches[current.round]} 경기`;
+}
+function renderTournament(){
+  renderBracket(); renderRoundScale(); renderHistory(); renderDuel();
+  const current=currentTournamentMatch();
+  const status=tournamentStatus(current);
+  const seed=selectedSeed?esc(shortName(selectedSeed)):"—";
+  document.getElementById("tournamentStatus").innerHTML=`<span>${seed}</span> · ${status}`;
+  document.getElementById("bracketStatus").innerHTML=status;
+  const count=Object.keys(tournamentWinners).length;
+  document.getElementById("bracketCount").textContent=count+"/15";
+  document.getElementById("historyCount").textContent=count+"/15";
+  document.getElementById("tUndo").disabled=tournamentOrder.length===0;
+  // 우승자가 나오기 전에는 조율할 대상 자체가 없다
+  const champion=tournamentWinners["3-0"];
+  const tuneBtn=document.getElementById("tuneStart");
+  tuneBtn.disabled=champion==null;
+  tuneBtn.classList.toggle("on",champion!=null);
+}
+function animateDuelArrival(){
+  if(reducedMotion||!document.body.classList.contains("chunkDuel"))return;
+  const left=document.getElementById("duelLeftPick"), right=document.getElementById("duelRightPick");
+  left.animate([{opacity:.15,transform:"translateX(-22px)"},{opacity:1,transform:"translateX(0)"}],
+    {duration:260,easing:"cubic-bezier(.2,.8,.2,1)"});
+  right.animate([{opacity:.15,transform:"translateX(22px)"},{opacity:1,transform:"translateX(0)"}],
+    {duration:260,easing:"cubic-bezier(.2,.8,.2,1)"});
+  document.getElementById("tournamentStatus").animate(
+    [{boxShadow:"0 0 0 #f0c44000"},{boxShadow:"0 0 22px #f0c44066"},{boxShadow:"0 0 0 #f0c44000"}],
+    {duration:420,easing:"ease-out"});
+}
+function motionTarget(button){
+  const selector=`[data-t-player="${button.dataset.tPlayer}"][data-t-round="${button.dataset.tRound}"][data-t-match="${button.dataset.tMatch}"]`;
+  const targets=[...document.querySelectorAll(selector)].filter(el=>el!==button);
+  return targets.find(el=>{
+    const r=el.getBoundingClientRect();
+    return el.classList.contains("bslot")&&r.bottom>40&&r.top<innerHeight;
+  })||targets.find(el=>{
+    const r=el.getBoundingClientRect(); return r.bottom>40&&r.top<innerHeight;
+  })||null;
+}
+async function animateTournamentChoice(button){
+  if(tournamentMoving||button.disabled)return;
+  const round=Number(button.dataset.tRound), match=Number(button.dataset.tMatch), player=Number(button.dataset.tPlayer);
+  if(reducedMotion){chooseTournament(round,match,player);return}
+  tournamentMoving=true;
+  document.body.classList.add("tournamentMoving");
+  const other=button===document.getElementById("duelLeftPick")
+    ?document.getElementById("duelRightPick"):document.getElementById("duelLeftPick");
+  button.classList.add("choice-win");
+  other.classList.add("choice-lose");
+  const source=button.querySelector("img"), from=source.getBoundingClientRect(), target=motionTarget(button);
+  let flight=null;
+  if(target){
+    const to=target.getBoundingClientRect(), token=source.cloneNode();
+    token.removeAttribute("id");
+    token.alt="";
+    token.className="motion-token";
+    Object.assign(token.style,{left:from.left+"px",top:from.top+"px",width:from.width+"px",height:from.height+"px",filter:source.style.filter});
+    document.body.appendChild(token);
+    const dx=to.left-from.left, dy=to.top-from.top, sx=to.width/from.width, sy=to.height/from.height;
+    flight=token.animate([
+      {transform:"translate(0,0) scale(1)",opacity:1,offset:0},
+      {transform:`translate(${dx*.35}px,${dy*.18-18}px) scale(.72)`,opacity:1,offset:.38},
+      {transform:`translate(${dx}px,${dy}px) scale(${sx},${sy})`,opacity:.94,offset:1}
+    ],{duration:520,easing:"cubic-bezier(.25,.75,.2,1)",fill:"forwards"});
+    await flight.finished.catch(()=>{});
+    token.remove();
+  }else{
+    await new Promise(resolve=>setTimeout(resolve,320));
+  }
+  button.classList.remove("choice-win");
+  other.classList.remove("choice-lose");
+  chooseTournament(round,match,player);
+  tournamentMoving=false;
+  document.body.classList.remove("tournamentMoving");
+}
+function tournamentClick(event){
+  if(tournamentMoving)return;
+  const button=event.target.closest("[data-t-player]");
+  if(!button)return;
+  chooseTournament(Number(button.dataset.tRound),Number(button.dataset.tMatch),Number(button.dataset.tPlayer));
+}
+document.getElementById("bracketCanvas").addEventListener("click",tournamentClick);
+document.getElementById("matchHistory").addEventListener("click",tournamentClick);
+// 대전 두 칸은 토너먼트와 조율이 같이 쓴다. 어느 단계인지에 따라 판정이 달라진다
+function duelPick(button){
+  if(document.body.classList.contains("chunkTune")){animateTuneChoice(button);return}
+  animateTournamentChoice(button);
+}
+document.getElementById("duelLeftPick").addEventListener("click",e=>duelPick(e.currentTarget));
+document.getElementById("duelRightPick").addEventListener("click",e=>duelPick(e.currentTarget));
+document.getElementById("tUndo").onclick=()=>{
+  if(tournamentMoving)return;
+  const key=tournamentOrder.at(-1); if(!key)return;
+  const [round,match]=key.split("-").map(Number);
+  delete tournamentWinners[key]; tournamentOrder.pop(); clearTournamentAfter(round,match); renderTournament();
+};
+function resetTournament(){
+  if(tournamentMoving)return;
+  tournamentWinners={};
+  tournamentOrder=[];
+  renderTournament();
+}
+function startTournament(){
+  resetTournament();
+  abandonTuning();
+  document.body.classList.add("chunkStage","chunkDuel");
+  document.body.classList.remove("noF","noR");
+  save({noF:false,noR:false});
+  requestAnimationFrame(animateDuelArrival);
+}
+document.getElementById("tReset").onclick=resetTournament;
+renderTournament();
+
+// 1단계는 새 화면이 아니라 기존 네 영역의 역할만 바꾼다
+document.getElementById("chunkStart").onclick=()=>{
+  if(!selectedSeed)return;
+  resetTournament();
+  document.body.classList.add("chunkStage");
+  document.body.classList.remove("chunkDuel");
+  document.body.classList.remove("noF","noR");
+  save({noF:false,noR:false});
+};
+document.querySelectorAll(".chunkcard:not(.create)").forEach(card=>card.onclick=startTournament);
+document.getElementById("newChunkButton").onclick=startTournament;
+document.getElementById("duelExit").onclick=()=>{
+  resetTournament();
+  abandonTuning();
+  document.body.classList.remove("chunkDuel");
+};
+document.getElementById("chunkBack").onclick=()=>{
+  resetTournament();
+  abandonTuning();
+  document.body.classList.remove("chunkStage","chunkDuel");
+};
+/*
+FEATURE weight-tuning
+  The tournament produced a membership. This stage produces the numbers.
+
+  ALGORITHM coordinate descent with a shrinking step
+    Hold every weight but one. Offer the held value against the held value plus one step
+    in the current direction. If the probe wins, keep it and keep going the same way.
+    If it loses, turn around. Two turns without a win means the step has overshot, so
+    halve it. When the halved step falls under the 0.05 grid the axis has said everything
+    it can say, and the cursor moves to the next artist.
+    This is not a search for the global optimum and must never be described as one.
+    It is a way of asking a person a question they can actually answer: "this one, or that one."
+
+  WHY NOT A SLIDER
+    A slider asks the user to imagine the result of a number. This asks them to look at two
+    images. The only judgement the tool needs from a person is the one a person is good at.
+
+  STATE  tune.axes are the coordinates, tune.trials is the decision log, tune.pair is live.
+  EVENT  choosing a side writes one Trial and recomputes the next pair from the axes.
+  EVENT  undo pops the last Trial and reopens that axis at the step it had.
+  EVENT  skip settles the current axis without a decision. this is a user override, not the
+         algorithm giving up.
+  INVARIANT the probe side is redrawn per trial (global 11) and no weight is ever rendered
+         onto the comparison surface.
+  MOCK   both candidate images are the champion thumbnail under different filters. A real
+         implementation generates two images from the frozen probe with one weight changed.
+  TODO   sigma. differences smaller than seed noise are unmeasurable, so the initial step and
+         the stop condition should come from a measured seed-jitter figure, not the 0.05 grid.
+  TODO   persist Tuning so a run survives a reload, and record the probe prompt with it.
+  ACCEPTANCE the artist named in the status line is the only bar with probe markers, the two
+         markers differ by exactly the displayed step, and every kept value appears in the log.
+*/
+
+/*
+MOCK chunk compositions for the eight tournament candidates that are not in the library.
+  These exist so every possible champion can enter tuning. They are demonstration records.
+TODO the real candidate generator produces compositions; this map disappears with it.
+*/
+const extraChunks={
+  "옅은 수채":[["fuzichoco",1],["modare",.6]],
+  "금빛 역광":[["wlop",1],["ciloranko",.85],["mignon",.5]],
+  "푸른 야경":[["quasarcake",1],["wanke",.7]],
+  "고전 삽화":[["toosaka asagi",1],["happoubi jin",.75],["lack",.45]],
+  "맑은 선화":[["sousouman",1],["michiking",.8]],
+  "짙은 채도":[["asanagi",1],["freng",.9],["mignon",.55]],
+  "겨울 공기":[["modare",1],["wlop",.65],["fuzichoco",.4]],
+  "따뜻한 필름":[["mignon",1],["lack",.7],["parsley-f",-.3]]
+};
+const chunkByName=new Map();
+document.querySelectorAll(".chunkcard[data-chunk]").forEach(card=>
+  chunkByName.set(card.querySelector(".chunkname").firstChild.textContent.trim(),card.dataset.chunk));
+
+// 시드에서 자란 청크는 시드를 품고 있어야 한다. MOCK 구성이 빠뜨렸으면 여기서 채운다
+function playerComposition(player){
+  const p=tournamentPlayers[player];
+  const key=chunkByName.get(p.name);
+  const rows=(key?chunkLibrary[key]:extraChunks[p.name])||[];
+  const members=rows.map(r=>({name:r[0],w:Number(r[1])}));
+  const seed=selectedSeed?shortName(selectedSeed):null;
+  if(seed&&!members.some(m=>m.name.toLowerCase()===seed.toLowerCase()))members.unshift({name:seed,w:1});
+  return members;
+}
+
+const TUNE_STEP0=.2, GRID=.05;
+const onGrid=v=>Math.round(v/GRID)*GRID;
+const clampW=v=>Math.min(HARD,Math.max(-HARD,v));
+const stepDown=s=>Math.floor((s/2)/GRID+1e-9)*GRID;   // 0.2 → 0.1 → 0.05 → 0(끝)
+let tune=null;
+
+function startTuning(){
+  const champion=tournamentWinners["3-0"];
+  if(champion==null)return;
+  const p=tournamentPlayers[champion];
+  tune={
+    champion, label:p.name, src:p.src, tone:p.tone,
+    axes:playerComposition(champion).map(m=>{
+      const w=onGrid(clampW(m.w));
+      return {name:m.name,w,base:w,step:TUNE_STEP0,dir:1,reversals:0,settled:false};
+    }),
+    trials:[], cursor:0, pair:null
+  };
+  advanceAxis(true);
+  document.body.classList.remove("chunkDuel","chunkSave");
+  document.body.classList.add("chunkStage","chunkTune");
+  document.body.classList.remove("noF","noR");
+  save({noF:false,noR:false});
+  renderTuning();
+}
+function abandonTuning(){
+  // 전역 15 : 그만두면 우승 시점의 값으로 돌아가고 라이브러리는 손대지 않는다
+  tune=null;
+  document.body.classList.remove("chunkTune","chunkSave");
+}
+function buildPair(){
+  const a=tune.axes[tune.cursor];
+  tune.pair=null;
+  if(!a||a.settled)return;
+  const hold=a.w;
+  let probe=onGrid(clampW(hold+a.dir*a.step));
+  if(probe===hold){                       // 벽에 붙었으면 반대쪽을 물어본다
+    a.dir=-a.dir;
+    probe=onGrid(clampW(hold+a.dir*a.step));
+  }
+  if(probe===hold){a.settled=true;return}  // 양쪽 다 못 움직이면 이 축은 끝
+  tune.pair={axis:tune.cursor,hold,probe,probeLeft:Math.random()<.5};
+}
+function advanceAxis(reset){
+  if(reset)tune.cursor=0;
+  for(let n=0;n<tune.axes.length;n++){
+    const i=(tune.cursor+n)%tune.axes.length;
+    if(tune.axes[i].settled)continue;
+    tune.cursor=i;
+    buildPair();
+    if(tune.pair)return;
+  }
+  tune.pair=null;                          // 전부 수렴했다
+}
+function decideTune(chosenLeft){
+  const pair=tune.pair; if(!pair)return;
+  const a=tune.axes[pair.axis];
+  const tookProbe=(chosenLeft===pair.probeLeft);
+  tune.trials.push({
+    axis:pair.axis, name:a.name, step:a.step,
+    kept:tookProbe?pair.probe:pair.hold,
+    dropped:tookProbe?pair.hold:pair.probe,
+    prevW:a.w, prevDir:a.dir, prevReversals:a.reversals
+  });
+  if(tookProbe){a.w=pair.probe; a.reversals=0}
+  else{a.dir=-a.dir; a.reversals++}
+  if(a.reversals>=2){
+    const next=stepDown(a.step);
+    if(next<GRID-1e-9)a.settled=true;
+    else{a.step=next; a.reversals=0}
+  }
+  advanceAxis(false);
+  renderTuning();
+}
+function undoTune(){
+  // TODO 되돌리기가 step 축소까지 정확히 되돌리지는 않는다. Trial 에 축소 여부를 같이 적어야 한다
+  const t=tune.trials.pop(); if(!t)return;
+  const a=tune.axes[t.axis];
+  a.settled=false; a.w=t.prevW; a.dir=t.prevDir; a.reversals=t.prevReversals; a.step=t.step;
+  tune.cursor=t.axis;
+  buildPair();
+  renderTuning();
+}
+function skipAxis(){
+  const a=tune.axes[tune.cursor]; if(!a)return;
+  a.settled=true;
+  advanceAxis(false);
+  renderTuning();
+}
+
+// ── 조율 바닥 그리기 ──
+function tuneRange(){
+  let mx=1,mn=0;
+  const eat=v=>{if(v>mx)mx=v; if(v<mn)mn=v};
+  tune.axes.forEach(a=>{eat(a.w); eat(a.base)});
+  tune.trials.forEach(t=>{eat(t.kept); eat(t.dropped)});
+  if(tune.pair){eat(tune.pair.hold); eat(tune.pair.probe)}
+  const pad=Math.max((mx-mn)*.15,.25);
+  return {lo:Math.max(-HARD,Math.floor((mn-pad)*2)/2), hi:Math.min(HARD,Math.ceil((mx+pad)*2)/2)};
+}
+function renderTuneFloor(){
+  const {lo,hi}=tuneRange(), pc=v=>(v-lo)/(hi-lo)*100;
+  const ticks=document.getElementById("tuneTicks");
+  ticks.innerHTML="";
+  for(let v=Math.ceil(lo*2)/2;v<=hi+.001;v+=.5){
+    const line=document.createElement("div"), label=document.createElement("span");
+    line.className="tickline"+(Math.abs(v)<1e-9||Math.abs(v-1)<1e-9?" major":"");
+    line.style.bottom=pc(v)+"%";
+    label.className="ticklabel"; label.style.bottom=pc(v)+"%";
+    label.textContent=Math.abs(v)<1e-9?"0":v.toFixed(1);
+    ticks.append(line,label);
+  }
+  const host=document.getElementById("tuneBars"), namesRow=document.getElementById("tuneNames");
+  [...host.querySelectorAll(".tunebar")].forEach(el=>el.remove());
+  namesRow.innerHTML="";
+  const ZERO=pc(0);
+  tune.axes.forEach((a,i)=>{
+    const live=tune.pair&&tune.pair.axis===i;
+    const bar=document.createElement("div");
+    bar.className="tunebar"+(a.w<0?" neg":"")+(a.settled?" settled":"")+(live?" live":"");
+    bar.style.setProperty("--c",colorOf("artist:"+a.name));
+    bar.dataset.axis=i;
+    bar.title=a.name+(a.settled?" · 확정":" · 조율 대기")+" · 눌러서 이 작가부터 다시";
+    const p=pc(a.w), neg=a.w<0;
+    // 지나간 값의 자취. 살아남은 값은 실선, 버려진 값은 점선
+    const seen=new Map();
+    tune.trials.filter(t=>t.axis===i).forEach(t=>{
+      seen.set(t.dropped,seen.get(t.dropped)||false);
+      seen.set(t.kept,true);
+    });
+    let ghosts="";
+    seen.forEach((kept,v)=>{
+      if(Math.abs(v-a.w)<1e-9)return;
+      ghosts+=`<span class="tghost${kept?" kept":""}" style="bottom:${pc(v)}%"></span>`;
+    });
+    let probes="";
+    if(live){
+      // 그래프에는 두 값을 다 쓴다. 가려야 하는 것은 "어느 쪽 이미지가 어느 값인가"뿐이다
+      const {hold,probe}=tune.pair;
+      probes=`<span class="tprobe hold" style="bottom:${pc(hold)}%"><span>지금 ${hold.toFixed(2)}</span></span>`+
+             `<span class="tprobe" style="bottom:${pc(probe)}%"><span>후보 ${probe.toFixed(2)}</span></span>`;
+    }
+    bar.innerHTML=ghosts+
+      `<span class="tstem" style="${neg?`top:${100-ZERO}%;height:${ZERO-p}%`:`bottom:${ZERO}%;height:${p-ZERO}%`}"></span>`+
+      `<span class="tval" style="bottom:calc(${p}% ${neg?"- 14px":"+ 2px"})">${a.w.toFixed(2)}</span>`+
+      probes;
+    host.appendChild(bar);
+
+    const n=document.createElement("span");
+    n.textContent=a.name; n.title=a.name;
+    n.className=live?"live":(a.settled?"settled":"");
+    n.style.setProperty("--c",colorOf("artist:"+a.name));
+    namesRow.appendChild(n);
+  });
+}
+function renderTuneLog(){
+  const rows=[];
+  if(tune.pair){
+    const a=tune.axes[tune.pair.axis];
+    rows.push(`<div class="tunerow current" style="--c:${colorOf("artist:"+a.name)}">`+
+      `<span class="tname">${esc(a.name)}</span><span class="tstepmark">±${a.step.toFixed(2)}</span>`+
+      `<span class="tpair">판정 대기 <span class="tarrow">·</span> A / B</span></div>`);
+  }
+  [...tune.trials].reverse().forEach(t=>{
+    rows.push(`<div class="tunerow" style="--c:${colorOf("artist:"+t.name)}">`+
+      `<span class="tname">${esc(t.name)}</span><span class="tstepmark">±${t.step.toFixed(2)}</span>`+
+      `<span class="tpair"><b>${t.kept.toFixed(2)}</b><span class="tarrow">◇</span><s>${t.dropped.toFixed(2)}</s></span></div>`);
+  });
+  document.getElementById("tuneLog").innerHTML=rows.join("")||
+    `<div class="tunehint">아직 판정이 없다.<br>두 이미지 중 마음에 드는 쪽을 고르면<br>그 작가의 가중치가 그쪽으로 움직인다.</div>`;
+  document.getElementById("tuneCount").textContent=tune.trials.length;
+}
+function setTuneCandidate(button,image,value){
+  // 값은 화면 어디에도 쓰지 않는다. 숫자가 보이면 그림이 아니라 산수를 고르게 된다 (전역 11)
+  delete button.dataset.tPlayer; delete button.dataset.tRound; delete button.dataset.tMatch;
+  button.classList.remove("empty");
+  button.disabled=false;
+  image.src=tune.src;
+  image.alt="가중치 후보";
+  // MOCK 두 후보가 눈으로 구별돼야 화면이 설명이 된다. 실제로는 값이 다른 두 장을 생성한다
+  const drift=(value-1)*90, sat=Math.max(.25,.86+(value-1)*.5), br=1+(value-1)*.12;
+  image.style.filter=`hue-rotate(${tune.tone+drift}deg) saturate(${sat.toFixed(3)}) brightness(${br.toFixed(3)})`;
+}
+function renderTuneDuel(){
+  const L=document.getElementById("duelLeftPick"), R=document.getElementById("duelRightPick");
+  const li=document.getElementById("duelLeftImage"), ri=document.getElementById("duelRightImage");
+  document.getElementById("duelRoundLeft").textContent="A";
+  document.getElementById("duelRoundRight").textContent="B";
+  if(!tune.pair){
+    [[L,li],[R,ri]].forEach(([b,img],i)=>{
+      delete b.dataset.tPlayer;
+      b.disabled=true;
+      b.classList.toggle("empty",i===1);
+      if(i===1){img.removeAttribute("src"); img.alt=""; img.style.filter=""; return}
+      img.src=tune.src; img.alt="조율 완료";
+      img.style.filter=`hue-rotate(${tune.tone}deg) saturate(.86)`;
+    });
+    return;
+  }
+  const {hold,probe,probeLeft}=tune.pair;
+  setTuneCandidate(L,li,probeLeft?probe:hold);
+  setTuneCandidate(R,ri,probeLeft?hold:probe);
+  if(document.body.classList.contains("chunkSave")){L.disabled=true; R.disabled=true}
+}
+function renderTuning(){
+  if(!tune)return;
+  renderTuneFloor(); renderTuneLog(); renderTuneDuel();
+  const settled=tune.axes.filter(a=>a.settled).length;
+  const a=tune.pair?tune.axes[tune.pair.axis]:null;
+  document.getElementById("tuneCursor").textContent=settled+"/"+tune.axes.length;
+  document.getElementById("tuneStepLabel").textContent=(a?a.step:GRID).toFixed(2);
+  document.getElementById("tuneWho").textContent=a?a.name:"전부 수렴";
+  document.getElementById("tuneUndo").disabled=tune.trials.length===0;
+  document.getElementById("tuneSkip").disabled=!tune.pair;
+  const seed=selectedSeed?esc(shortName(selectedSeed)):"—";
+  document.getElementById("tournamentStatus").innerHTML=
+    `<span>${seed}</span> · <b>가중치 조율</b> · ${settled}/${tune.axes.length} 확정 · ${tune.trials.length}판`;
+}
+async function animateTuneChoice(button){
+  if(!tune||!tune.pair||button.disabled||tournamentMoving)return;
+  const chosenLeft=button.id==="duelLeftPick";
+  if(reducedMotion){decideTune(chosenLeft);return}
+  tournamentMoving=true;
+  document.body.classList.add("tournamentMoving");
+  const other=chosenLeft?document.getElementById("duelRightPick"):document.getElementById("duelLeftPick");
+  button.classList.add("choice-win"); other.classList.add("choice-lose");
+  const source=button.querySelector("img"), from=source.getBoundingClientRect();
+  const target=document.querySelector(".tunebar.live");
+  if(target){
+    const to=target.getBoundingClientRect(), token=source.cloneNode();
+    token.removeAttribute("id"); token.alt=""; token.className="motion-token";
+    Object.assign(token.style,{left:from.left+"px",top:from.top+"px",
+      width:from.width+"px",height:from.height+"px",filter:source.style.filter});
+    document.body.appendChild(token);
+    const dx=to.left+to.width/2-from.left-from.width/2, dy=to.top-from.top;
+    await token.animate([
+      {transform:"translate(0,0) scale(1)",opacity:1},
+      {transform:`translate(${dx}px,${dy}px) scale(${Math.max(.18,to.width/from.width)})`,opacity:.9}
+    ],{duration:380,easing:"cubic-bezier(.25,.75,.2,1)",fill:"forwards"}).finished.catch(()=>{});
+    token.remove();
+  }else await new Promise(r=>setTimeout(r,220));
+  button.classList.remove("choice-win"); other.classList.remove("choice-lose");
+  tournamentMoving=false;
+  document.body.classList.remove("tournamentMoving");
+  decideTune(chosenLeft);
+}
+// 확정된 축이라도 사용자가 다시 열 수 있다. 알고리즘은 못 열고 사람만 연다 (전역 12)
+document.getElementById("tuneBars").addEventListener("click",e=>{
+  const bar=e.target.closest(".tunebar"); if(!bar||!tune)return;
+  const a=tune.axes[Number(bar.dataset.axis)]; if(!a)return;
+  a.settled=false; a.reversals=0;
+  if(a.step<GRID)a.step=GRID;
+  tune.cursor=Number(bar.dataset.axis);
+  buildPair(); renderTuning();
+});
+document.getElementById("tuneStart").onclick=startTuning;
+document.getElementById("tuneUndo").onclick=undoTune;
+document.getElementById("tuneSkip").onclick=skipAxis;
+document.getElementById("tuneDone").onclick=openSave;
+
+/*
+FEATURE chunk-save-flow
+  EVENT  저장 writes a Chunk into the library and returns to chunk-selection with the card marked
+  EVENT  프롬프트에 넣기 is the only path from an experiment back into PromptState (global 14)
+*/
+function openSave(){
+  if(!tune)return;
+  document.body.classList.add("chunkSave");
+  const moved=tune.axes.filter(a=>Math.abs(a.w-a.base)>1e-9).length;
+  document.getElementById("saveSeed").textContent=selectedSeed?shortName(selectedSeed):"—";
+  const hero=document.getElementById("saveHero");
+  hero.src=tune.src;
+  hero.style.filter=`hue-rotate(${tune.tone}deg) saturate(.86)`;
+  const nameField=document.getElementById("saveName");
+  if(!nameField.value)nameField.value=tune.label;
+  document.getElementById("saveSummary").textContent=
+    `${tune.axes.length}명 · ${tune.trials.length}판 판정 · ${moved}명 값 변경`;
+  document.getElementById("saveList").innerHTML=tune.axes.map(a=>{
+    const changed=Math.abs(a.w-a.base)>1e-9;
+    return `<div class="saverow${changed?" moved":""}" style="--c:${colorOf("artist:"+a.name)}">`+
+      `<span class="sname">${esc(a.name)}</span>`+
+      `<span class="sfrom">${a.base.toFixed(2)} →</span>`+
+      `<span class="sto">${a.w.toFixed(2)}</span></div>`;
+  }).join("");
+  renderTuneDuel();
+}
+document.getElementById("saveBack").onclick=()=>{
+  document.body.classList.remove("chunkSave");
+  renderTuning();
+};
+function registerChunkCard(key,title,rows,src,tone){
+  chunkLibrary[key]=rows;
+  const card=document.createElement("button");
+  card.className="chunkcard fresh";
+  card.dataset.chunk=key;
+  card.innerHTML=`<img src="${src}" alt="${esc(title)} 청크" style="filter:hue-rotate(${tone}deg) saturate(.86)">`+
+    `<span class="chunkname">${esc(title)}<span class="chunkmeta">${rows.length}명 · 조율 완료</span></span>`;
+  card.setAttribute("aria-describedby","chunkTooltip");
+  card.addEventListener("pointermove",e=>showChunkTooltip(card,e.clientX,e.clientY));
+  card.addEventListener("pointerleave",hideChunkTooltip);
+  card.addEventListener("focus",()=>{const r=card.getBoundingClientRect();showChunkTooltip(card,r.right,r.top)});
+  card.addEventListener("blur",hideChunkTooltip);
+  card.onclick=startTournament;
+  const grid=document.querySelector(".chunkgrid");
+  grid.insertBefore(card,document.getElementById("newChunkButton"));
+}
+document.getElementById("saveCommit").onclick=()=>{
+  if(!tune)return;
+  const title=document.getElementById("saveName").value.trim()||tune.label;
+  const rows=tune.axes.map(a=>[a.name,a.w]);
+  registerChunkCard("saved-"+Date.now().toString(36),title,rows,tune.src,tune.tone);
+  resetTournament();
+  abandonTuning();
+  document.body.classList.add("chunkStage");
+  document.getElementById("saveName").value="";
+};
+// 프롬프트 글자에 쓰는 유일한 경로. 수동 편집과 같은 토큰 길을 지난다 (전역 1, 14)
+function applyChunkToPrompt(rows){
+  rows.forEach(([name,w])=>{
+    const tag="artist:"+name;
+    const hit=toks.findIndex(t=>t.name.toLowerCase()===tag.toLowerCase());
+    if(hit>=0){toks[hit].w=w; return}
+    const last=toks.map((t,i)=>isArtist(t.name)?i:-1).filter(i=>i>=0).at(-1);
+    const fresh={pre:"",post:"",sep:"",w,name:tag};
+    if(last==null){
+      if(toks.length)toks[toks.length-1].sep=toks[toks.length-1].sep||", ";
+      toks.push(fresh);
+    }else{
+      fresh.sep=toks[last].sep||", "; toks[last].sep=", "; toks.splice(last+1,0,fresh);
+    }
+  });
+  syncText(false); rebuild();
+}
+document.getElementById("saveApply").onclick=()=>{
+  if(!tune)return;
+  applyChunkToPrompt(tune.axes.map(a=>[a.name,a.w]));
+  const btn=document.getElementById("saveApply");
+  btn.textContent="넣었음 ✓";
+  setTimeout(()=>{btn.textContent="프롬프트에 넣기"},1400);
+};
+
+if(new URLSearchParams(location.search).has("chunk")){
+  document.body.classList.add("chunkStage");
+  document.body.classList.remove("noF","noR");
+}
+
+rebuild();
+</script>
+<!--
+V0.5 ACCEPTANCE MATRIX
+
+01 NO SEED
+   GIVEN the prompt contains artist tags but the user has selected none
+   THEN #whoA and #chunkSeed show an empty value, #artistPrompt is visible,
+   AND #chunkStart is disabled.
+
+02 SELECT SEED
+   WHEN the user clicks an artist in #combo, #bars, or #names
+   THEN all four projections highlight the same artist,
+   AND #artistHero, #danbooruLink, #twitterLink, and the experiment context update.
+
+03 BROWSE CHUNKS
+   WHEN #chunkStart is clicked
+   THEN .chunk-entry replaces .artist-normal,
+   AND #bars plus #names remain visible in the floor,
+   AND no old tournament record is visible.
+
+04 INSPECT CHUNK
+   WHEN a .chunkcard[data-chunk] is hovered or focused
+   THEN #chunkTooltip lists every member in prompt order with two-decimal weight,
+   AND its row count equals the card's member count.
+
+05 START TOURNAMENT
+   WHEN an existing chunk card or #newChunkButton is clicked
+   THEN prior winners are cleared, .duel-left and .duel-right appear,
+   #tournamentBracket replaces the graph, and .tournament-history replaces normal history.
+
+06 DECIDE MATCH
+   WHEN #duelLeftPick or #duelRightPick is clicked once
+   THEN duplicate input is locked during feedback, one winner is stored,
+   motion explains where the decision went, and the next available match appears.
+
+07 UNDERSTAND PROGRESS
+   DURING a tournament #tournamentStatus and #bracketStatus show round and round-local match index,
+   #roundScale and .broundhead agree, and history groups show decided/total counts.
+
+08 ROLLBACK
+   WHEN a decided .bslot or .hslot is clicked
+   THEN that winner may be changed or removed, dependent later rounds are cleared,
+   and every tournament projection rerenders from the same state.
+
+09 CHANGE SEED
+   WHEN a different artist is selected during a tournament
+   THEN the tournament is cleared and the UI returns to chunk selection for the new seed.
+
+10 COMPLETE
+   AFTER fifteen valid decisions
+   THEN one champion remains, status shows completion, both history and bracket retain all rounds,
+   AND #tuneStart becomes enabled.
+
+V0.6 ACCEPTANCE MATRIX
+
+11 ENTER TUNING
+   WHEN #tuneStart is pressed after a champion exists
+   THEN #tuneGraph replaces #tournamentBracket, .tune-history replaces .tournament-history,
+   the duel panels stay in place, and every chunk member has one bar.
+   AND the seed artist appears among the bars even if the MOCK composition omitted it.
+
+12 ONE AXIS AT A TIME
+   DURING tuning exactly one .tunebar carries .live and exactly two .tprobe markers,
+   the artist named in #tuneWho is that bar's artist,
+   AND the two marker values differ by the value shown in #tuneStepLabel.
+
+13 BLIND DECISION
+   THE comparison surface shows no weight value on or beside either image,
+   AND repeating the same trial places the probe on either side with equal chance.
+
+14 DECIDE
+   WHEN a side is chosen
+   THEN one row is added to #tuneLog, the live bar's value moves only if the probe won,
+   the rejected value remains as a dashed ghost line, and the kept value as a solid one.
+
+15 STEP SHRINKS ONLY
+   AFTER two consecutive losses on one axis #tuneStepLabel halves and never grows again
+   within that axis, and an axis whose halved step falls under 0.05 becomes .settled.
+
+16 USER OVERRIDE
+   WHEN a .settled bar is clicked
+   THEN that axis reopens at no less than the 0.05 step and becomes the live axis.
+   The algorithm itself never reopens a settled axis.
+
+17 UNDO
+   WHEN #tuneUndo is pressed
+   THEN the last trial is removed, its axis returns to the value and direction it had
+   before that decision, and #tuneLog, the bars, and the duel pair all rerender from it.
+
+18 ABANDON
+   WHEN the seed changes, #duelExit, or #chunkBack is used during tuning
+   THEN tuning is discarded, no library record is created, and PromptState is unchanged.
+
+19 SAVE
+   WHEN #tuneDone then #saveCommit is pressed
+   THEN .chunkgrid gains one card marked .fresh whose tooltip rows equal #saveList rows,
+   AND the prompt text is still byte-identical to what it was before tuning began.
+
+20 APPLY
+   WHEN #saveApply is pressed
+   THEN every member weight appears in the prompt text, members already present are
+   updated in place without changing their prompt order, absent members are appended
+   after the last artist tag, and #combo plus #bars rerender from the new text.
+-->
+</body>
+</html>

@@ -15,8 +15,8 @@ writing:
 
 ## 목적
 
-오프라인 카탈로그 파이프라인은 Runtime을 가볍게 유지하면서 모바일 Compose 화면에 필요한 Core Catalog를 공급한다.
-이 파이프라인은 Danbooru 태그 전체 검색 앱을 만드는 것이 아니라, 검수된 Product Category 칩 데이터를 만드는 도구다.
+오프라인 카탈로그 파이프라인은 Runtime을 가볍게 유지하면서 모바일 Compose 화면에 필요한 Core Catalog와 Tag Dictionary chunk를 공급한다.
+Core Catalog는 검수된 Product Category 칩 데이터를 만드는 도구이고, Tag Dictionary chunk는 전체 태그 탐색/검색을 lazy load로 제공하기 위한 사전 데이터다.
 
 ## 1차 원천
 
@@ -33,11 +33,10 @@ writing:
 검수 전 후보는 `resource/catalog/generated/core-catalog-candidates.json`에 둔다.
 사람이 관리하는 override는 `resource/catalog/overrides/core-catalog-overrides.json`에 둔다.
 앱에 번들링하는 최종 산출물은 `src/prompt/catalog/coreCatalog.generated.ts` 또는 `src/prompt/catalog/coreCatalog.generated.json`에 둔다.
-검색창용 지연 로드 데이터는 추후 `public/catalog/liteAutocompleteIndex.json`로 분리한다.
-Tag Dictionary용 카테고리 chunk는 `resource/catalog/generated/tag-dictionary`에서 먼저 검증하고, 런타임 lazy load가 붙는 시점에 `public/catalog/tag-dictionary`로 내보낸다.
+Tag Dictionary용 카테고리 chunk는 `resource/catalog/generated/tag-dictionary`에서 먼저 검증하고, 런타임 lazy load용으로 `public/catalog/tag-dictionary`에 동기화한다.
 
-초기에는 Core Catalog만 만든다.
-Lite Autocomplete Index는 Compose MVP가 동작한 뒤 만든다.
+현재 Runtime은 Core Catalog를 번들에 포함하고, Tag Dictionary manifest와 category chunk는 public asset으로 지연 로드한다.
+별도 `liteAutocompleteIndex.json` 계획은 현재 Tag Dictionary chunk 구조로 대체되었다.
 
 ## Tag Dictionary Chunk 전략
 
@@ -71,6 +70,8 @@ Core Catalog는 검수된 작은 칩 목록이고, Tag Dictionary chunk는 원�
 `Adult Content` 하위 chunk는 `sensitive-select` 모드로 표시한다.
 
 Compose 기본 선택형 UI는 `headcount`, `background`, `framing`, `pose`, `expression`, `appearance`, `outfit` 같은 작업 중심 그룹을 유지한다.
+이 선택형 UI는 Full Tag Dictionary가 아니라 Quick Catalog Chips의 역할이다.
+Full Tag Dictionary는 탐색과 검색을 담당하고, Quick Catalog Chips는 target hint, aliases, default visible 같은 편집 메타데이터를 담당한다.
 `outfit`은 `Clothing and Accessories`의 하위 chunk를 이용해 상의, 하의, 속옷/양말, 모자/헤드기어, 신발, 액세서리 같은 소분류 선택으로 확장한다.
 Danbooru에 없는 사용자의 직접 관리 프롬프트 조각은 `커스텀 메인`과 `커스텀 네거`로 분리한다.
 `커스텀 메인`은 Main Prompt에 넣을 사용자 정의 태그 묶음이고, `커스텀 네거`는 Negative Prompt에 넣을 사용자 정의 태그 묶음이다.
@@ -144,13 +145,13 @@ Product Category override와 사람이 승인한 판단은 유지한다.
 
 즉 원천 데이터는 교체 가능하지만, 제품 카테고리 계약과 승인된 catalog 판단은 제품 자산으로 보존한다.
 
-## 초기 구현 범위
+## 현재 구현 범위
 
-첫 구현은 Node 기반 CLI 스크립트 하나로 충분하다.
+현재 구현은 Node 기반 catalog build/split/sync 스크립트로 구성된다.
 입력은 로컬 `tags.json` 경로다.
-출력은 후보 JSON과 작은 generated catalog다.
+출력은 후보 JSON, 작은 generated Core Catalog, Tag Dictionary manifest/chunk다.
 리뷰 UI는 아직 만들지 않는다.
-초기 리뷰는 JSON override 파일 편집으로 처리한다.
+리뷰는 JSON override 파일 편집으로 처리한다.
 
 빌더가 성공하면 카테고리별 후보 수, accepted 수, rejected 수, defaultVisible 수를 출력한다.
 오류는 원천 경로 문제, JSON parse 문제, 스키마 문제, 산출물 쓰기 문제로 구분한다.

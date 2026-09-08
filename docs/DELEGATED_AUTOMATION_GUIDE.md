@@ -161,7 +161,10 @@ NovelAI 이미지 생성 페이지 위에 주입되는 북마크릿 오버레이
 
 대상 파일:
 
-- `src/hooks/useAutoGenerator.ts`
+- `src/queue/queuePlanner.ts`
+- `src/queue/queueSession.ts`
+- `src/queue/useQueueRunner.ts`
+- `src/hooks/useQueueDraftControls.ts`
 
 책임:
 
@@ -178,14 +181,14 @@ NovelAI 이미지 생성 페이지 위에 주입되는 북마크릿 오버레이
 
 현재 위험:
 
-- `executeLoop()`가 build, encode, paste, queue, seed 결정을 모두 갖고 있다.
-- NovelAI Generate 버튼의 ready 상태 확인이 제한적이다.
-- loop count는 ref에 있지만 UI 투영과 세션 상태가 분리되어 있지 않다.
+- Queue planner, session, runner는 분리되었지만 UI draft와 실행 세션의 경계가 흐려지면 다시 강결합될 수 있다.
+- NovelAI Generate 버튼의 ready 상태와 외부 UI 변화는 여전히 automation adapter의 취약 지점이다.
+- 실패 원인과 마지막 phase를 장기 실행 로그로 충분히 남기지는 않는다.
 
 권장 방향:
 
-- 세션 상태를 `idle`, `starting`, `waiting`, `applying`, `generating`, `paused`, `failed`, `stopped`, `completed`처럼 명시한다.
-- 각 tick은 `planNextGeneration()`, `encodeGenerationPayload()`, `dispatchToNovelAI()`, `scheduleNextTick()`으로 나눈다.
+- 세션 상태를 `idle`, `starting`, `waiting`, `applying`, `cooldown`, `failed`, `stopped`, `completed`처럼 명시한다.
+- 각 tick은 `planNextQueueTick()`, `runApplyPipeline()`, `scheduleNextTick()`으로 나눈다.
 - 실패는 항목 실패와 세션 실패로 구분한다.
 
 ### 3.6. 파싱과 라운드트립 계약
@@ -269,7 +272,7 @@ NovelAI 이미지 생성 페이지 위에 주입되는 북마크릿 오버레이
 - `ApplyEffectResult`
 - `ProofResult`
 
-이 추상화는 새 기능을 위한 장식이 아니라, 기존 `App.tsx`, `useAutoGenerator.ts`, `pasteDispatch.ts`에 몰린 책임을 줄이기 위한 기준선이다.
+이 추상화는 새 기능을 위한 장식이 아니라, 기존 `App.tsx`, Queue runner, automation adapter에 책임이 다시 몰리지 않게 하는 기준선이다.
 
 ## 5. 에러와 피드백 원칙
 
@@ -336,7 +339,7 @@ NovelAI 이미지 생성 페이지 위에 주입되는 북마크릿 오버레이
 ### 2단계: 적용 파이프라인 분리
 
 - `App.tsx`의 단일 적용 흐름에서 build, encode, dispatch를 분리한다.
-- `useAutoGenerator.ts`도 같은 파이프라인 함수를 사용하게 만든다.
+- Queue runner도 같은 파이프라인 함수를 사용하게 만든다.
 - UI는 `isApplying` 같은 투영 상태만 받는다.
 
 ### 3단계: 라운드트립 proof 추가
@@ -351,7 +354,7 @@ NovelAI 이미지 생성 페이지 위에 주입되는 북마크릿 오버레이
 - DOM 탐색 실패를 도메인 오류로 반환한다.
 - 상태 배너 또는 apply 버튼 피드백으로 연결한다.
 
-### 5단계: 자동 생성 루프 FSM화
+### 5단계: Queue 세션 FSM 유지
 
 - 세션 상태와 tick 결과를 명시한다.
 - 중지, 완료, 실패, 대기 전이를 테스트한다.
@@ -406,7 +409,7 @@ NovelAI 직접 API 연동은 현재 1순위 리팩토링 범위에서 제외한�
 
 ## 11. 현재 품질 기준선
 
-기준일: 2026-06-03
+기준일: 2026-06-30
 
 실행 결과:
 
@@ -432,7 +435,7 @@ NovelAI 직접 API 연동은 현재 1순위 리팩토링 범위에서 제외한�
 
 - 공용 적용 파이프라인 `src/automation/applyPipeline.ts`를 추가했다.
 - 단일 적용 버튼과 자동 생성 루프가 같은 `runApplyPipeline()` 경로를 사용한다.
-- `App.tsx`와 `useAutoGenerator.ts`에서 직접 PNG 인코딩과 paste 발송 조립을 제거했다.
+- `App.tsx`와 Queue runner 경로에서 직접 PNG 인코딩과 paste 발송 조립을 제거했다.
 - seed 0 랜덤 치환을 `buildCommentJson()` 밖으로 꺼내 `requestedSeed`와 `appliedSeed`로 추적한다.
 - `dispatchPasteEvent()`가 paste target, import, generate 자동화 결과를 명시적으로 반환한다.
 - 단일 적용과 자동 생성 루프가 effect 실패를 사용자에게 알리고 후속 진행을 중단한다.
@@ -440,6 +443,6 @@ NovelAI 직접 API 연동은 현재 1순위 리팩토링 범위에서 제외한�
 
 아직 남은 일:
 
-- 자동 생성 루프는 pipeline을 공유하지만, 세션 FSM으로 모델링되지는 않았다.
-- applied seed는 코드 레벨에서 추적되지만, 아직 사용자 UI나 로그에 노출되지 않는다.
-- 상태 배너는 도입됐지만, 아직 장기 실행 세션의 세부 상태 로그까지 표현하지는 않는다.
+- Queue 세션은 분리되었지만, 장기 실행 세션의 세부 debug log는 아직 작게만 남아 있다.
+- applied seed는 planning 결과로 추적되지만, 사용자에게 보이는 장기 실행 이력은 더 보강할 수 있다.
+- 상태 배너는 도입됐지만, 장기 실행 세션의 phase history를 충분히 표현하지는 않는다.

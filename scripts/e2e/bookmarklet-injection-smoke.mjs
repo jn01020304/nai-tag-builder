@@ -40,7 +40,7 @@ function bytesToBits(bytes) {
 async function dropStealthPng(page, payload) {
   const signatureBytes = Array.from("stealth_pngcomp", (char) => char.charCodeAt(0));
   const payloadBytes = Array.from(gzip(new TextEncoder().encode(JSON.stringify(payload))));
-  const length = payloadBytes.length;
+  const length = payloadBytes.length * 8;
   const lengthBytes = [
     (length >>> 24) & 255,
     (length >>> 16) & 255,
@@ -251,6 +251,7 @@ async function main() {
             <p style="color: #0b103a;">Readable NovelAI text sample</p>
             <textarea class="ProseMirror" style="width: 320px; height: 200px;">1girl, official art</textarea>
             <input id="mock-width" type="number" value="832" style="background: #d8d3c4; border: 1px solid #b9b29f; color: #1b1a16;" />
+            <div id="unrelated-progress" role="progressbar">Background sync</div>
             <button id="mock-import">Import Metadata</button>
             <button id="mock-generate" style="background: #5fbf3f; color: #ffffff;" disabled>Generate 1 Image</button>
           </main>
@@ -294,6 +295,16 @@ async function main() {
 
     await page.addScriptTag({ path: DIST_SCRIPT });
     await page.locator("[data-testid='overlay-header']").waitFor({ timeout: 5000 });
+    await page.addScriptTag({ path: DIST_SCRIPT });
+    await page.locator("[data-testid='overlay-header']").waitFor({ timeout: 5000 });
+    const lifecycleState = await page.evaluate(() => ({
+      rootCount: document.querySelectorAll("#nai-tag-builder-root").length,
+      hasUnmount: typeof window.__NAI_TAG_BUILDER_INSTANCE__?.unmount === "function",
+    }));
+    assert(
+      lifecycleState.rootCount === 1 && lifecycleState.hasUnmount,
+      `Bookmarklet lifecycle replacement failed: ${JSON.stringify(lifecycleState)}`,
+    );
     await page.locator("[data-testid='mode-tab-compose']").click();
     await page.locator("[data-testid='main-prompt-textarea']").waitFor({ timeout: 5000 });
 
@@ -420,6 +431,33 @@ async function main() {
       path: path.join(ROOT, "test-results", "bookmarklet-injection-smoke.png"),
       fullPage: true,
     });
+
+    const resizeStarted = await page.evaluate(() => {
+      const handle = document.querySelector("[data-testid='overlay-resize-right']");
+      if (!(handle instanceof HTMLElement)) return false;
+      handle.dispatchEvent(new MouseEvent("mousedown", {
+        bubbles: true,
+        button: 0,
+        clientX: 500,
+        clientY: 300,
+      }));
+      return document.body.style.cursor !== "";
+    });
+    assert(resizeStarted, "Resize listener did not start before lifecycle cleanup test.");
+    await page.evaluate(() => {
+      document.querySelector("button[title='닫기']")?.click();
+    });
+    await page.locator("#nai-tag-builder-root").waitFor({ state: "detached", timeout: 3000 });
+    const disposedState = await page.evaluate(() => ({
+      hasLifecycleHandle: window.__NAI_TAG_BUILDER_INSTANCE__ !== undefined,
+      bodyCursor: document.body.style.cursor,
+      bodyUserSelect: document.body.style.userSelect,
+    }));
+    assert(!disposedState.hasLifecycleHandle, "Bookmarklet lifecycle handle remained after close.");
+    assert(
+      disposedState.bodyCursor === "" && disposedState.bodyUserSelect === "",
+      `Resize globals remained after close: ${JSON.stringify(disposedState)}`,
+    );
 
     console.log("bookmarklet injection smoke passed");
   } finally {

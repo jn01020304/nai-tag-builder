@@ -1,0 +1,801 @@
+<!doctype html>
+<html lang="ko" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>껍데기 v8 — 눈금과 작가 미리보기</title>
+<style>
+  /* ── NAI 공식 페이지의 결: 짙은 남색 바닥, 촘촘한 여백, 강조는 노란 버튼 하나 ── */
+  :root{
+    --bg:#0c0e13; --panel:#151920; --panel2:#1b202a; --line:#252b36;
+    --ink:#dfe4ec; --dim:#7b8494; --hole:#1a1f28;
+    --accent:#f0c440; --sel:#2c4a7a;
+    --fs:13px; --gap:6px; --r:6px;
+  }
+  html[data-theme="light"]{
+    --bg:#eef0f4; --panel:#ffffff; --panel2:#f3f5f9; --line:#d6dae2;
+    --ink:#1b1f27; --dim:#767f8d; --hole:#e9ecf1; --accent:#d9a712; --sel:#cfe0fb;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{
+    background:var(--bg); color:var(--ink);
+    font-family:system-ui,"Segoe UI","Malgun Gothic",sans-serif;
+    font-size:var(--fs); line-height:1.5;
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+
+  /* ── 상단 툴바 ── */
+  .top{
+    flex:0 0 auto; height:40px; display:flex; align-items:center; gap:8px;
+    padding:0 8px; background:var(--panel); border-bottom:1px solid var(--line);
+  }
+  .brand{font-weight:700; letter-spacing:-.3px; padding-right:4px}
+  .chip{
+    display:flex; align-items:center; gap:6px; padding:3px 9px;
+    background:var(--panel2); border:1px solid var(--line); border-radius:var(--r);
+    color:var(--dim); font-size:.9em;
+  }
+  .chip b{color:var(--ink); font-weight:600}
+  .top .spacer{flex:1}
+  .ico{
+    font:inherit; color:var(--dim); background:transparent; border:1px solid transparent;
+    border-radius:var(--r); padding:3px 8px; cursor:pointer;
+  }
+  .ico:hover,.ico.on{color:var(--ink); background:var(--panel2); border-color:var(--line)}
+
+  /* ── 4열 무대 ── */
+  .stage{flex:1 1 auto; display:flex; min-height:0; padding:var(--gap); gap:0}
+  .col{display:flex; flex-direction:column; min-width:0; min-height:0}
+  #sideL{flex:0 0 320px}
+  #mainL{flex:1 1 55%}
+  #mainR{flex:1 1 45%}
+  #sideR{flex:0 0 132px}
+  /* 사이드바는 위에서 아래까지 온전히 자기 옆면을 갖는다.
+     바닥 그래프는 가운데 기둥 안에서만 살고, 사이드바 아래로는 넘어오지 않는다 */
+  #center{flex:1 1 auto; display:flex; flex-direction:column; min-width:0; min-height:0}
+  .mains{flex:1 1 auto; display:flex; min-width:0; min-height:0}
+  body.noL #sideL,body.noL #spL{display:none}
+  body.noR #sideR,body.noR #spR{display:none}
+
+  .panel{
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--r);
+    display:flex; flex-direction:column; min-height:0; overflow:hidden;
+  }
+  .panel+.panel{margin-top:var(--gap)}
+  .phead{
+    flex:0 0 auto; display:flex; align-items:center; gap:6px;
+    padding:5px 8px; border-bottom:1px solid var(--line);
+    color:var(--dim); font-size:.86em;
+  }
+  .phead .spacer{flex:1}
+  .pbody{flex:1 1 auto; min-height:0; overflow:auto; padding:8px}
+  .pfoot{flex:0 0 auto; border-top:1px solid var(--line); padding:6px 8px}
+
+  .hole{
+    height:100%; min-height:48px; border-radius:var(--r); background:var(--hole);
+    display:flex; align-items:center; justify-content:center;
+    color:var(--dim); font-size:.85em; text-align:center; padding:8px;
+  }
+
+  /* ── 칸 사이 손잡이 ── */
+  .split{flex:0 0 var(--gap); cursor:col-resize; position:relative}
+  .split::after{content:""; position:absolute; inset:0 1px; border-radius:2px}
+  .split:hover::after{background:var(--accent); opacity:.4}
+  .split.v{cursor:row-resize}
+  .split.v::after{inset:1px 0}
+
+  /* ── 왼쪽 사이드바 ── */
+  .row{display:flex; align-items:center; gap:6px}
+  .sel{
+    font:inherit; color:var(--ink); background:var(--panel2);
+    border:1px solid var(--line); border-radius:var(--r); padding:3px 6px;
+  }
+  .tabs{display:flex; gap:2px; flex:0 0 auto}
+  .tab{
+    font:inherit; color:var(--dim); background:transparent; border:none;
+    padding:4px 9px; border-radius:var(--r) var(--r) 0 0; cursor:pointer;
+  }
+  .tab.on{color:var(--ink); background:var(--panel2)}
+  .tabbody{display:none; flex:1 1 auto; min-height:0; flex-direction:column}
+  .tabbody.on{display:flex}
+
+  /* ── 프롬프트 글상자 ──
+     textarea 안의 글자는 부분 색칠이 안 된다. 그래서 두 겹으로 쌓는다:
+     아래 = 색칠한 사본(mirror), 위 = 글자를 투명하게 만든 진짜 textarea.
+     커서와 선택은 위층이, 색은 아래층이 담당한다. 둘의 글자 상자는 완전히 같아야 겹친다. */
+  .ptwrap{
+    flex:0 0 auto; position:relative; overflow:hidden;
+    background:var(--panel2); border:1px solid var(--line);
+    border-radius:0 var(--r) var(--r) var(--r);
+  }
+  .ptwrap:focus-within{border-color:var(--accent)}
+  .ptmirror,.pt{
+    position:absolute; inset:0; width:100%; height:100%;
+    font:inherit; font-family:inherit; font-size:inherit; line-height:1.6;
+    padding:8px; border:none; background:transparent;
+    white-space:pre-wrap; overflow-wrap:break-word; word-break:break-word;
+    letter-spacing:inherit; tab-size:2;
+  }
+  .ptmirror{color:var(--dim); overflow:hidden; pointer-events:none; z-index:0}
+  .pt{color:transparent; caret-color:var(--ink); resize:none; outline:none; overflow:auto; z-index:1}
+  .pt::selection{background:var(--sel)}
+  .ptmirror .tk{border-radius:2px}
+  .ptmirror .tk.hi{background:var(--sel)}
+
+  /* ── 목록 = 프롬프트를 읽어서 보여주는 창구 ── */
+  .combobar{
+    flex:0 0 auto; display:flex; align-items:center; gap:6px;
+    padding:6px 3px 4px; color:var(--dim); font-size:.82em;
+  }
+  .combobar .spacer{flex:1}
+  .mini{
+    font:inherit; font-size:.95em; color:var(--dim); background:transparent;
+    border:1px solid var(--line); border-radius:4px; padding:1px 6px; cursor:pointer;
+  }
+  .mini:hover{color:var(--ink)}
+  .mini.on{color:var(--ink); background:var(--panel2)}
+  .pick{
+    flex:1 1 0; min-width:0; font:inherit; font-size:.95em;
+    color:var(--ink); background:var(--panel2);
+    border:1px solid var(--line); border-radius:4px; padding:1px 3px; cursor:pointer;
+  }
+  #combo{flex:1 1 auto; min-height:0; overflow:auto}
+
+  .arow{
+    display:flex; align-items:center; gap:5px; padding:1px 3px;
+    border-radius:4px; border-left:3px solid transparent;
+  }
+  .arow:hover{background:var(--panel2)}
+  .arow.hi{background:var(--panel2); border-left-color:var(--c)}
+  .arow .dot{flex:0 0 8px; height:8px; border-radius:50%; background:var(--c)}
+  .arow .nm{
+    flex:1 1 auto; min-width:0; overflow:hidden; text-overflow:ellipsis;
+    white-space:nowrap; font-size:.9em; color:var(--c);     /* 글자 자체가 그 작가의 색 */
+  }
+  .arow.plain .nm{color:var(--dim)}
+  /* 지금 조합에서 가장 세게/가장 약하게 누른 작가. 1.0 은 손대지 않은 값이라 제외 */
+  .arow.top .nm,.arow.bot .nm,.arow.top .w,.arow.bot .w{font-weight:700}
+  /* 지금 정렬 기준이 되는 수치. 왜 이 순서로 섰는지 눈으로 확인하라고 띄운다 */
+  .arow .meta{flex:0 0 auto; color:var(--dim); font-size:.78em; font-variant-numeric:tabular-nums}
+  .arow .w{
+    flex:0 0 50px; text-align:center; font:inherit; font-size:.9em; color:var(--ink);
+    background:var(--panel2); border:1px solid var(--line); border-radius:4px; padding:1px 3px;
+  }
+  .arow.neg .w{color:#ff8f8f}
+  .arow .x{flex:0 0 auto; border:none; background:none; color:var(--dim); cursor:pointer; font:inherit}
+  .arow .x:hover{color:var(--accent)}
+
+  .genbtn{
+    width:100%; font:inherit; font-weight:700; color:#20180a;
+    background:var(--accent); border:none; border-radius:var(--r);
+    padding:9px; cursor:pointer;
+  }
+  .genbtn:hover{filter:brightness(1.08)}
+
+  /* ── 가운데: 결과 ── */
+  .canvas{
+    flex:1 1 auto; min-height:0; display:flex; align-items:center; justify-content:center; padding:10px;
+  }
+  .canvas .hole{width:min(100%,420px); aspect-ratio:832/1216; height:auto}
+  .barbtn{
+    font:inherit; color:var(--dim); background:var(--panel2);
+    border:1px solid var(--line); border-radius:var(--r); padding:3px 8px; cursor:pointer;
+  }
+  .barbtn:hover{color:var(--ink)}
+
+  /* ── 오른쪽 메인: 작가 ── */
+  .agrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(92px,1fr)); gap:6px}
+  .agrid div{aspect-ratio:3/4; background:var(--hole); border-radius:4px}
+  .find{
+    width:100%; font:inherit; color:var(--ink); background:var(--panel2);
+    border:1px solid var(--line); border-radius:var(--r); padding:5px 8px; outline:none;
+  }
+  .find:focus{border-color:var(--accent)}
+
+  /* ── 오른쪽 사이드바: 히스토리 ── */
+  .hist{display:flex; flex-direction:column; gap:6px}
+  .hist div{aspect-ratio:3/4; background:var(--hole); border-radius:4px}
+  .hist div:first-child{outline:2px solid var(--accent); outline-offset:-2px}
+
+  /* ── 바닥 그래프 ── */
+  .floor{
+    flex:0 0 auto;
+    background:var(--panel); border:1px solid var(--line); border-radius:var(--r);
+    display:flex; flex-direction:column; overflow:hidden;
+  }
+  body.noF .floor,body.noF #spF{display:none}
+  .bars{
+    flex:1 1 auto; min-height:0; display:flex; align-items:stretch; gap:2px;
+    padding:14px 10px 0; position:relative; overflow-x:auto;
+  }
+  .ticks{position:absolute; inset:14px 10px 0; pointer-events:none; z-index:0}
+  .tickline{position:absolute; left:0; right:0; border-top:1px dashed var(--line)}
+  .tickline.major{border-top-style:solid; border-top-color:var(--dim); opacity:.8}
+  .ticklabel{
+    position:absolute; left:2px; padding:0 3px; border-radius:3px;
+    background:var(--panel); color:var(--dim); font-size:.68em;
+    font-variant-numeric:tabular-nums; transform:translateY(50%);
+  }
+  .bar{flex:1 1 0; min-width:24px; cursor:ns-resize; position:relative; z-index:2}
+  .bar .stem{position:absolute; left:1px; right:1px; background:var(--c); opacity:.75; min-height:2px}
+  .bar.pos .stem{border-radius:3px 3px 0 0}
+  .bar.neg .stem{border-radius:0 0 3px 3px; opacity:.55}
+  .bar:hover .stem,.bar.hi .stem{opacity:1}
+  .bar.hi::before{content:""; position:absolute; inset:0; background:var(--c); opacity:.12; border-radius:3px}
+  .bar .val{
+    position:absolute; left:0; right:0; text-align:center; font-size:.74em;
+    color:var(--dim); pointer-events:none; z-index:5;
+  }
+  .bar.hi .val{color:var(--ink)}
+  .names{flex:0 0 auto; display:flex; gap:2px; padding:3px 10px 6px; overflow-x:auto}
+  .names span{
+    flex:1 1 0; min-width:24px; text-align:center; font-size:.72em;
+    overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+    border-top:2px solid var(--c); padding-top:2px; color:var(--dim); cursor:default;
+  }
+  .names span.hi{color:var(--ink)}
+
+  .artistpeek{
+    position:fixed; z-index:100; width:176px; padding:6px;
+    background:var(--panel); border:1px solid var(--line); border-radius:8px;
+    box-shadow:0 12px 34px #0009; pointer-events:none;
+    opacity:0; transform:translateY(5px); transition:opacity .08s,transform .08s;
+  }
+  .artistpeek.on{opacity:1; transform:translateY(0)}
+  .artistpeek img{
+    display:block; width:100%; aspect-ratio:832/1216; object-fit:cover;
+    border-radius:5px; background:var(--hole);
+  }
+  .artistpeek .peekname{margin-top:5px; font-weight:700; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+  .artistpeek .peekmeta{color:var(--dim); font-size:.78em}
+
+  @media (max-width:900px){
+    .stage{flex-direction:column}
+    .mains{flex-direction:column}
+    #sideL,#sideR{flex:0 0 auto; height:200px}
+    #mainL,#mainR{flex:1 1 auto; min-height:220px}
+    .split{display:none}
+    .floor{margin-top:var(--gap)}   /* 손잡이가 사라지므로 간격을 직접 준다 */
+  }
+</style>
+</head>
+<body>
+
+<div class="top">
+  <button class="ico" id="tL" title="왼쪽 접기">▤</button>
+  <span class="brand">Tag Lab</span>
+  <span class="chip">Anlas <b>9335</b></span>
+  <span class="spacer"></span>
+  <button class="ico">✦</button><button class="ico">⊞ 32</button><button class="ico">◲ 1</button>
+  <span class="spacer"></span>
+  <button class="ico" id="fsD">A−</button>
+  <button class="ico" id="fsU">A+</button>
+  <button class="ico" id="th">◐</button>
+  <button class="ico" id="tF" title="바닥 그래프 접기">▭</button>
+  <button class="ico" id="tR" title="히스토리 접기">▦</button>
+</div>
+
+<div class="stage">
+
+  <!-- 왼쪽 사이드바 : 프롬프트 (원본 글자 + 그 글자를 읽은 목록) -->
+  <div class="col" id="sideL">
+    <div class="panel" style="flex:1 1 auto">
+      <div class="phead">
+        <select class="sel"><option>V4.5 Full</option></select>
+        <select class="sel"><option>Anime</option></select>
+      </div>
+      <div class="pbody" style="display:flex;flex-direction:column;gap:0;padding-bottom:4px">
+        <div class="tabs">
+          <button class="tab on" data-t="t1">Prompt</button>
+          <button class="tab" data-t="t2">Undesired</button>
+        </div>
+
+        <div class="tabbody on" id="t1">
+          <div class="ptwrap" id="ptwrap" style="height:150px">
+            <div class="ptmirror" id="mirror" aria-hidden="true"></div>
+            <textarea class="pt" id="pt" spellcheck="false">1girl, solo, portrait,
+
+artist:lack, 0.5::artist:riich::, 0.5::artist:sousouman::, artist:wlop,
+artist:wanke, artist:ciloranko, 0.8::artist:happoubi jin::, artist:michiking,
+0.9::artist:toosaka asagi::, artist:modare, artist:freng, 0.4::artist:quasarcake::,
+0.5::artist:fuzichoco::, artist:sho (sho lwlw), artist:mignon, artist:asanagi,
+-0.4::artist:parsley-f::,
+
+solo artist, year 2025, shallow depth of field, best quality</textarea>
+          </div>
+          <div class="split v" id="spT" style="flex:0 0 8px;margin:0"></div>
+
+          <div class="combobar">
+            <span><b id="wcnt" style="color:var(--ink)">0</b>개 · 합 <b id="wsum" style="color:var(--ink)">0</b></span>
+            <span class="spacer"></span>
+            <button class="mini on" id="onlyA">작가만</button>
+            <button class="mini" id="resetW">전부 1.0</button>
+          </div>
+          <div class="combobar" style="padding:0 3px 4px">
+            <select class="pick" id="sortKey">
+              <option value="prompt">프롬프트</option>
+              <option value="weight">가중치순</option>
+              <option value="pop">작가 인기순</option>
+              <option value="train">작가 학습량순</option>
+            </select>
+            <select class="pick" id="sortDir" style="flex:0 0 84px">
+              <option value="asc">오름차순</option>
+              <option value="desc">내림차순</option>
+            </select>
+          </div>
+          <div id="combo"></div>
+        </div>
+
+        <div class="tabbody" id="t2" style="padding-top:6px"><div class="hole">Undesired Content</div></div>
+      </div>
+      <div class="pfoot">
+        <div class="row" style="color:var(--dim);font-size:.85em">
+          <span>Steps <b style="color:var(--ink)">28</b></span>
+          <span>Guidance <b style="color:var(--ink)">8</b></span>
+          <span>Sampler <b style="color:var(--ink)">Euler A</b></span>
+        </div>
+      </div>
+    </div>
+    <div class="panel" style="flex:0 0 auto">
+      <div class="pfoot" style="border-top:none"><button class="genbtn">Generate 1 Image</button></div>
+    </div>
+  </div>
+
+  <div class="split" id="spL"></div>
+
+  <!-- 가운데 기둥 : 메인 두 칸 + 그 아래 바닥 그래프 -->
+  <div id="center">
+  <div class="mains">
+
+  <!-- 왼쪽 메인 : NAI 이미지 만들기 -->
+  <div class="col" id="mainL">
+    <div class="panel" style="flex:1 1 auto">
+      <div class="phead">이미지 제작<span class="spacer"></span><span>832 × 1216</span></div>
+      <div class="canvas"><div class="hole">NAI로 만들어진 이미지</div></div>
+      <div class="pfoot row">
+        <button class="barbtn">⚙</button>
+        <button class="barbtn">seed 4257072022</button>
+        <span class="spacer"></span>
+        <button class="barbtn">📌</button><button class="barbtn">⧉</button><button class="barbtn">💾</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="split" id="spM"></div>
+
+  <!-- 오른쪽 메인 : 작가 그림 보기 -->
+  <div class="col" id="mainR">
+    <div class="panel" id="rA" style="flex:1 1 auto">
+      <div class="phead">작가 그림<span class="spacer"></span><span id="whoA">lack</span></div>
+      <div class="pbody">
+        <div class="agrid">
+          <div></div><div></div><div></div><div></div><div></div><div></div>
+          <div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+      </div>
+      <div class="pfoot"><input class="find" placeholder="작가 이름으로 찾기"></div>
+    </div>
+    <div class="split v" id="spV"></div>
+    <div class="panel" id="rB" style="flex:0 0 116px">
+      <div class="phead">관련 정보 · 수치</div>
+      <div class="pbody"><div class="hole">그래프 / 도표</div></div>
+    </div>
+  </div>
+
+  </div><!-- /.mains -->
+
+  <div class="split v" id="spF" style="flex:0 0 var(--gap)"></div>
+
+  <!-- 바닥 : 조합 가중치 그래프 -->
+  <div class="floor" id="floor" style="height:150px">
+    <div class="phead">
+      조합 가중치<span class="spacer"></span>
+      <span id="axisLab">축 0 ~ 1.5 · 눈금 0.5</span>
+      <span id="fcnt">0개</span>
+    </div>
+    <div class="bars" id="bars">
+      <div class="ticks" id="ticks"></div>
+    </div>
+    <div class="names" id="names"></div>
+  </div>
+  </div><!-- /#center -->
+
+  <div class="split" id="spR"></div>
+
+  <!-- 오른쪽 사이드바 : 히스토리 -->
+  <div class="col" id="sideR">
+    <div class="panel" style="flex:1 1 auto">
+      <div class="phead">History ▶</div>
+      <div class="pbody"><div class="hist">
+        <div></div><div></div><div></div><div></div><div></div><div></div>
+      </div></div>
+    </div>
+  </div>
+
+</div>
+
+<div class="artistpeek" id="artistpeek">
+  <img id="peekimg" alt="">
+  <div class="peekname" id="peekname"></div>
+  <div class="peekmeta">NAI 대표 이미지 · 고정 프롬프트</div>
+</div>
+
+<script>
+// ── 만진 것은 전부 기억한다. 브라우저가 저장을 막아도 화면은 정상이어야 한다 ──
+const KEY="shell-v8";
+const load=()=>{try{return JSON.parse(localStorage.getItem(KEY)||"{}")}catch{return{}}};
+const save=p=>{try{localStorage.setItem(KEY,JSON.stringify({...load(),...p}))}catch{}};
+const S=load(), root=document.documentElement;
+
+let fs=S.fs||13;
+const applyFs=()=>{root.style.setProperty("--fs",fs+"px");save({fs})};
+applyFs();
+fsU.onclick=()=>{fs=Math.min(fs+1,20);applyFs()};
+fsD.onclick=()=>{fs=Math.max(fs-1,11);applyFs()};
+
+if(S.theme)root.setAttribute("data-theme",S.theme);
+th.onclick=()=>{const n=root.getAttribute("data-theme")==="dark"?"light":"dark";
+  root.setAttribute("data-theme",n);save({theme:n})};
+
+if(S.noL)document.body.classList.add("noL");
+if(S.noR)document.body.classList.add("noR");
+tL.onclick=()=>{document.body.classList.toggle("noL");save({noL:document.body.classList.contains("noL")})};
+tR.onclick=()=>{document.body.classList.toggle("noR");save({noR:document.body.classList.contains("noR")})};
+
+const floor=document.getElementById("floor");
+if(S.noF)document.body.classList.add("noF");
+if(S.floorH)floor.style.height=S.floorH+"px";
+tF.onclick=()=>{document.body.classList.toggle("noF");save({noF:document.body.classList.contains("noF")})};
+document.getElementById("spF").addEventListener("pointerdown",e=>{
+  const h=e.currentTarget; h.setPointerCapture(e.pointerId);
+  const y0=e.clientY, h0=floor.getBoundingClientRect().height;
+  const move=ev=>{floor.style.height=Math.min(520,Math.max(70,h0-(ev.clientY-y0)))+"px"};
+  const up=()=>{h.removeEventListener("pointermove",move);h.removeEventListener("pointerup",up);
+    save({floorH:Math.round(floor.getBoundingClientRect().height)})};
+  h.addEventListener("pointermove",move); h.addEventListener("pointerup",up);
+});
+
+// 탭
+document.querySelectorAll(".tab").forEach(b=>b.onclick=()=>{
+  document.querySelectorAll(".tab").forEach(x=>x.classList.remove("on"));
+  document.querySelectorAll(".tabbody").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); document.getElementById(b.dataset.t).classList.add("on");
+});
+
+// 가로/세로 손잡이
+function drag(handle,target,key,axis,dir,min,max){
+  handle.addEventListener("pointerdown",e=>{
+    handle.setPointerCapture(e.pointerId);
+    const p0=axis==="x"?e.clientX:e.clientY;
+    const r=target.getBoundingClientRect(), s0=axis==="x"?r.width:r.height;
+    const move=ev=>{
+      const p=axis==="x"?ev.clientX:ev.clientY;
+      target.style.flex="0 0 "+Math.min(max,Math.max(min,s0+(p-p0)*dir))+"px";
+    };
+    const up=()=>{handle.removeEventListener("pointermove",move);
+      handle.removeEventListener("pointerup",up);
+      const rr=target.getBoundingClientRect();
+      save({[key]:Math.round(axis==="x"?rr.width:rr.height)})};
+    handle.addEventListener("pointermove",move);
+    handle.addEventListener("pointerup",up);
+  });
+}
+const sideL=document.getElementById("sideL"), sideR=document.getElementById("sideR"),
+      mainL=document.getElementById("mainL"), rB=document.getElementById("rB"),
+      pt=document.getElementById("pt"), mirror=document.getElementById("mirror"),
+      ptwrap=document.getElementById("ptwrap");
+if(S.sideL)sideL.style.flex="0 0 "+S.sideL+"px";
+if(S.sideR)sideR.style.flex="0 0 "+S.sideR+"px";
+if(S.mainL)mainL.style.flex="0 0 "+S.mainL+"px";
+if(S.rB)   rB.style.flex   ="0 0 "+S.rB+"px";
+if(S.ptH)  ptwrap.style.height=S.ptH+"px";
+drag(spL,sideL,"sideL","x",+1,200,560);
+drag(spM,mainL,"mainL","x",+1,240,1400);
+drag(spR,sideR,"sideR","x",-1,90,420);
+drag(spV,rB,"rB","y",-1,70,600);
+document.getElementById("spT").addEventListener("pointerdown",e=>{
+  const h=e.currentTarget; h.setPointerCapture(e.pointerId);
+  const y0=e.clientY, h0=ptwrap.getBoundingClientRect().height;
+  const move=ev=>{ptwrap.style.height=Math.min(600,Math.max(52,h0+(ev.clientY-y0)))+"px"};
+  const up=()=>{h.removeEventListener("pointermove",move);h.removeEventListener("pointerup",up);
+    save({ptH:Math.round(ptwrap.getBoundingClientRect().height)})};
+  h.addEventListener("pointermove",move); h.addEventListener("pointerup",up);
+});
+
+/* ══════════════════════════════════════════════════════════════
+   프롬프트 글자가 유일한 원본이다.
+   색칠한 사본, 목록, 막대는 전부 그 글자를 읽어서 그린 것이고
+   어느 쪽을 만지든 곧바로 그 글자가 다시 쓰인다.
+   ══════════════════════════════════════════════════════════════ */
+
+// 색은 이름에 붙어 다닌다. 정렬하든 지웠다 다시 넣든 그 태그의 색은 안 바뀐다
+const hues=new Map(); let hueN=0;
+function hueOf(name){
+  if(!hues.has(name)) hues.set(name, Math.round((hueN++*137.508)%360));
+  return hues.get(name);
+}
+const colorOf=name=>`hsl(${hueOf(name)} 62% 62%)`;
+
+const fmt=v=>String(Math.round(v*100)/100);
+const isArtist=n=>/^artist:/i.test(n);
+const shortName=n=>n.replace(/^artist:/i,"");
+const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+// 프롬프트 글자 → 토큰. 여백과 줄바꿈은 손대지 않고 그대로 들고 있는다
+function parseCore(core){
+  const m=/^(-?\d+(?:\.\d+)?)\s*::\s*([\s\S]+?)\s*::$/.exec(core);
+  return m ? {w:parseFloat(m[1]), name:m[2]} : {w:1, name:core};
+}
+function tokenize(text){
+  const out=[]; let start=0;
+  for(let i=0;i<=text.length;i++){
+    if(i<text.length && text[i]!==",") continue;
+    const body=text.slice(start,i);
+    let sep="";
+    if(i<text.length){
+      let j=i+1; while(j<text.length && /\s/.test(text[j])) j++;
+      sep=text.slice(i,j); i=j-1; start=j;
+    }
+    const m=/^(\s*)([\s\S]*?)(\s*)$/.exec(body);
+    out.push({pre:m[1], post:m[3], sep, ...parseCore(m[2])});
+    if(!sep) break;
+  }
+  return out;
+}
+const tokenText=t=>t.w===1 ? t.name : `${fmt(t.w)}::${t.name}::`;
+
+function syncText(){
+  const s=pt.selectionStart;
+  pt.value=toks.map(t=>t.pre+tokenText(t)+t.post+t.sep).join("");
+  try{pt.selectionStart=pt.selectionEnd=Math.min(s,pt.value.length)}catch{}
+  paintMirror();
+}
+// 아래층 사본을 다시 칠한다. 글자 하나하나가 그 작가의 색을 갖는다
+function paintMirror(){
+  const slot=new Map(); ai.forEach((ti,k)=>slot.set(ti,k));
+  let html="";
+  toks.forEach((t,i)=>{
+    const k=slot.get(i), body=esc(tokenText(t));
+    html+=esc(t.pre)
+       + (k===undefined ? body
+          : `<span class="tk" data-k="${k}" style="color:${colorOf(t.name)}">${body}</span>`)
+       + esc(t.post) + esc(t.sep);
+  });
+  mirror.innerHTML=html+"\n";
+  mirror.scrollTop=pt.scrollTop;
+}
+pt.addEventListener("scroll",()=>{mirror.scrollTop=pt.scrollTop});
+
+/* ── 세로 축 ──
+   -10~10 은 NAI가 허용하는 한계일 뿐 늘 그만큼 그릴 이유는 없다.
+   지금 들어 있는 값에 맞춰 축을 좁히되, 0 과 1.0 은 기준선이라 항상 품는다.
+   끌어올리는 중에는 축을 줄이지 않는다(줄었다 늘었다 하면 손이 흔들린다). */
+const HARD=10;
+let LO=-0.5, HI=1.5;
+const upTo=v=>Math.ceil(v*2)/2, downTo=v=>Math.floor(v*2)/2;   // 0.5 눈금 바깥으로
+function fitAxis(growOnly){
+  let mx=1, mn=0;                       // 1.0 과 0 은 무조건 보인다
+  ai.forEach(i=>{const w=toks[i].w; if(w>mx)mx=w; if(w<mn)mn=w});
+  const pad=Math.max((mx-mn)*0.12, 0.25);
+  let hi=Math.min(HARD, upTo(mx+pad)), lo=Math.max(-HARD, downTo(mn-pad));
+  if(growOnly){ hi=Math.max(hi,HI); lo=Math.min(lo,LO); }
+  HI=hi; LO=lo;
+  document.getElementById("axisLab").textContent=`축 ${fmt(LO)} ~ ${fmt(HI)} · 눈금 0.5`;
+}
+const pctOf=v=>(v-LO)/(HI-LO)*100;
+
+let toks=[], ai=[], onlyArtist=S.onlyArtist!==false;
+const combo=document.getElementById("combo"),
+      bars=document.getElementById("bars"), ticks=document.getElementById("ticks"),
+      names=document.getElementById("names"),
+      sortKey=document.getElementById("sortKey"), sortDir=document.getElementById("sortDir");
+sortKey.value=S.sortKey||"prompt";
+sortDir.value=S.sortDir||"asc";
+
+/* Danbooru에서 실제로 긁어온 값 (2026-08-23 기준).
+   인기  = 그 작가 그림들의 Score 평균. 전량이 아니라 order:random 표본의 평균이다.
+   학습량 = 그 작가 태그의 post_count.
+   riich 는 태그 자체가 없고 sho (sho lwlw) 는 0장이라 값이 없다 */
+const DAN={
+  "mignon":       {pop:232.0, train:963},
+  "freng":        {pop:123.4, train:670},
+  "asanagi":      {pop:106.2, train:1628},
+  "michiking":    {pop: 97.4, train:280},
+  "modare":       {pop: 64.4, train:1070},
+  "happoubi jin": {pop: 62.1, train:1458},
+  "quasarcake":   {pop: 40.4, train:375},
+  "lack":         {pop: 37.4, train:1341},
+  "ciloranko":    {pop: 34.1, train:252},
+  "sousouman":    {pop: 33.2, train:1160},
+  "wanke":        {pop: 32.0, train:178},
+  "toosaka asagi":{pop: 22.7, train:2061},
+  "wlop":         {pop: 22.4, train:400},
+  "fuzichoco":    {pop: 19.9, train:1161},
+  "parsley-f":    {pop: 16.0, train:892},
+  "sho (sho lwlw)":{pop:null, train:0},
+};
+const danOf=(n,f)=>{const d=DAN[shortName(n)]; return d?d[f]:null};
+// 정렬 기준. prompt 는 프롬프트에 적힌 자리 그대로
+const sortVal={
+  prompt:i=>i,
+  weight:i=>toks[i].w,
+  pop:   i=>danOf(toks[i].name,"pop"),
+  train: i=>danOf(toks[i].name,"train"),
+};
+// 수치를 모르는 태그는 오름/내림과 무관하게 늘 맨 끝으로 보낸다
+function cmp(a,b,d){
+  const A=a[1],B=b[1], an=A==null||Number.isNaN(A), bn=B==null||Number.isNaN(B);
+  if(an&&bn) return a[0]-b[0];
+  if(an) return 1;
+  if(bn) return -1;
+  return (A-B)*d || a[0]-b[0];
+}
+
+function rebuild(){
+  toks=tokenize(pt.value);
+  ai=toks.map((t,i)=>i).filter(i=>toks[i].name && (!onlyArtist || isArtist(toks[i].name)));
+  // 정렬은 보기 순서일 뿐, 프롬프트 글자는 건드리지 않는다.
+  // 그래야 "프롬프트" 순으로 언제든 되돌아올 수 있다
+  const f=sortVal[sortKey.value]||sortVal.prompt, d=sortDir.value==="desc"?-1:1;
+  ai=ai.map(i=>[i,f(i)]).sort((a,b)=>cmp(a,b,d)).map(x=>x[0]);
+  fitAxis(false);
+  render();
+}
+function render(){
+  combo.innerHTML=""; names.innerHTML="";
+  [...bars.querySelectorAll(".bar")].forEach(b=>b.remove());
+  ai.forEach((ti,k)=>{
+    const t=toks[ti], c=colorOf(t.name);
+
+    const row=document.createElement("div");
+    row.className="arow"+(isArtist(t.name)?"":" plain");
+    row.dataset.k=k; row.style.setProperty("--c",c);
+    const sk=sortKey.value, showMeta=(sk==="pop"||sk==="train");
+    const mv=showMeta?danOf(t.name,sk):undefined;
+    row.innerHTML=`<span class="dot"></span>`+
+      `<span class="nm" title="${t.name}">${shortName(t.name)}</span>`+
+      (showMeta?`<span class="meta" title="${sk==="pop"?"Score 평균":"Danbooru 장수"}">`+
+        (mv==null?"—":mv)+`</span>`:"")+
+      `<input class="w" value="${t.w.toFixed(2)}">`+
+      `<button class="x">×</button>`;
+    combo.appendChild(row);
+
+    const b=document.createElement("div");
+    b.className="bar"; b.dataset.k=k; b.title=t.name;
+    b.style.setProperty("--c",c);
+    b.innerHTML=`<span class="val"></span><span class="stem"></span>`;
+    bars.appendChild(b);
+
+    const n=document.createElement("span");
+    n.textContent=shortName(t.name); n.title=t.name; n.dataset.k=k;
+    n.style.setProperty("--c",c);
+    names.appendChild(n);
+  });
+  paintMirror();
+  paint();
+}
+function paint(){
+  const ZERO=pctOf(0), ONE=pctOf(1);
+  // 최고·최저를 찾아둔다. 다만 1.0 은 "가중치를 안 준 값"이라 굵게 하지 않는다
+  let mx=-Infinity, mn=Infinity;
+  ai.forEach(i=>{const w=toks[i].w; if(w>mx)mx=w; if(w<mn)mn=w});
+  [...combo.children].forEach(row=>{
+    const t=toks[ai[row.dataset.k]], inp=row.querySelector(".w");
+    if(document.activeElement!==inp) inp.value=t.w.toFixed(2);
+    row.classList.toggle("neg", t.w<0);
+    row.classList.toggle("top", mx!==1 && t.w===mx);
+    row.classList.toggle("bot", mn!==1 && t.w===mn);
+  });
+  [...bars.querySelectorAll(".bar")].forEach(b=>{
+    const v=toks[ai[b.dataset.k]].w, p=pctOf(v), neg=v<0;
+    const stem=b.querySelector(".stem"), val=b.querySelector(".val");
+    b.classList.toggle("neg",neg); b.classList.toggle("pos",!neg);
+    stem.style.top="auto";
+    if(neg){ stem.style.bottom=p+"%";    stem.style.height=(ZERO-p)+"%";
+             val.style.bottom="calc("+p+"% - 14px)"; }
+    else   { stem.style.bottom=ZERO+"%"; stem.style.height=(p-ZERO)+"%";
+             val.style.bottom="calc("+p+"% + 2px)"; }
+    val.textContent=fmt(v);
+  });
+  paintTicks();
+  document.getElementById("wsum").textContent=ai.reduce((s,i)=>s+toks[i].w,0).toFixed(1);
+  document.getElementById("wcnt").textContent=ai.length;
+  document.getElementById("fcnt").textContent=ai.length+"개";
+}
+
+function paintTicks(){
+  ticks.innerHTML="";
+  for(let v=Math.ceil(LO*2)/2;v<=HI+.001;v+=.5){
+    const line=document.createElement("div"), label=document.createElement("span");
+    const p=pctOf(v);
+    line.className="tickline"+(v===0||v===1?" major":"");
+    line.style.bottom=p+"%";
+    label.className="ticklabel";
+    label.style.bottom=p+"%";
+    label.textContent=v===0?"0":v.toFixed(1);
+    ticks.append(line,label);
+  }
+}
+
+// 프롬프트 글자 ↔ 목록 ↔ 막대 ↔ 이름표. 넷이 같이 밝아진다
+function hi(k,on){
+  [combo.querySelector(`.arow[data-k="${k}"]`),
+   bars.querySelector(`.bar[data-k="${k}"]`),
+   names.querySelector(`span[data-k="${k}"]`),
+   mirror.querySelector(`.tk[data-k="${k}"]`)]
+   .forEach(el=>el&&el.classList.toggle("hi",on));
+}
+[combo,bars,names].forEach(host=>{
+  host.addEventListener("pointerover",e=>{const el=e.target.closest("[data-k]"); if(el)hi(el.dataset.k,true)});
+  host.addEventListener("pointerout" ,e=>{const el=e.target.closest("[data-k]"); if(el)hi(el.dataset.k,false)});
+});
+
+const artistpeek=document.getElementById("artistpeek"), peekimg=document.getElementById("peekimg"),
+      peekname=document.getElementById("peekname");
+const peekSources=["../resource/original.png","../resource/test.png"];
+bars.addEventListener("pointermove",e=>{
+  const bar=e.target.closest(".bar");
+  if(!bar){artistpeek.classList.remove("on");return}
+  const t=toks[ai[bar.dataset.k]], w=artistpeek.offsetWidth, h=artistpeek.offsetHeight||250;
+  peekname.textContent=shortName(t.name)+"  ·  "+fmt(t.w);
+  peekimg.src=peekSources[Number(bar.dataset.k)%peekSources.length];
+  peekimg.alt=shortName(t.name)+" 대표 이미지";
+  artistpeek.style.left=Math.min(innerWidth-w-10,e.clientX+16)+"px";
+  artistpeek.style.top=Math.max(10,Math.min(innerHeight-h-10,e.clientY-h/2))+"px";
+  artistpeek.classList.add("on");
+});
+bars.addEventListener("pointerleave",()=>artistpeek.classList.remove("on"));
+
+// 값을 바꾸는 단 하나의 통로
+function setW(k,v,growOnly){
+  toks[ai[k]].w=Math.round(Math.min(HARD,Math.max(-HARD,v))*20)/20;   // 0.05 눈금
+  fitAxis(growOnly); syncText(); paint();
+}
+bars.addEventListener("pointerdown",e=>{
+  const b=e.target.closest(".bar"); if(!b)return;
+  b.setPointerCapture(e.pointerId);
+  const k=b.dataset.k;
+  // 축 밖으로 끌어올리면 값이 축을 밀어내며 늘어난다. 손이 멈출 때까지 축은 안 줄어든다
+  const move=ev=>{
+    const r=bars.getBoundingClientRect();
+    setW(k, LO+((r.bottom-ev.clientY)/(r.height-14))*(HI-LO), true);
+  };
+  move(e);
+  // 끌고 있는 동안에는 순서를 안 바꾼다. 손을 뗀 뒤에야 축과 정렬을 다시 맞춘다
+  const up=()=>{b.removeEventListener("pointermove",move);b.removeEventListener("pointerup",up);
+    rebuild()};
+  b.addEventListener("pointermove",move); b.addEventListener("pointerup",up);
+});
+combo.addEventListener("input",e=>{
+  if(!e.target.classList.contains("w"))return;
+  const v=parseFloat(e.target.value);
+  if(!isNaN(v)) setW(e.target.closest(".arow").dataset.k, v, false);
+});
+// 다 치고 나서(엔터·포커스 이탈) 정렬을 다시 맞춘다. 타이핑 중에 줄이 튀면 안 되니까
+combo.addEventListener("change",e=>{if(e.target.classList.contains("w"))rebuild()});
+combo.addEventListener("click",e=>{
+  if(!e.target.classList.contains("x"))return;
+  toks.splice(ai[e.target.closest(".arow").dataset.k],1);
+  syncText(); rebuild();
+});
+
+// 글자를 직접 고쳐도 목록·막대·색이 따라온다
+pt.addEventListener("input",rebuild);
+
+sortKey.onchange=()=>{save({sortKey:sortKey.value}); rebuild()};
+sortDir.onchange=()=>{save({sortDir:sortDir.value}); rebuild()};
+document.getElementById("resetW").onclick=()=>{
+  ai.forEach(i=>toks[i].w=1); syncText(); rebuild();
+};
+const onlyA=document.getElementById("onlyA");
+onlyA.classList.toggle("on",onlyArtist);
+onlyA.onclick=()=>{
+  onlyArtist=!onlyArtist; onlyA.classList.toggle("on",onlyArtist);
+  save({onlyArtist}); rebuild();
+};
+
+rebuild();
+</script>
+</body>
+</html>

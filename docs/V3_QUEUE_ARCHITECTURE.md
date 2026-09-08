@@ -35,11 +35,11 @@ v3는 가볍고 예측 가능한 반복 실행을 만드는 단계다.
 
 ## 현재 구현 진단
 
-현재 반복 생성은 `src/hooks/useAutoGenerator.ts`에 집중되어 있다.
-이 hook은 auto generate 토글, interval, target count, seed rule, queue ref, queue mode, next preset 선택, seed 계산, timeout 예약, apply pipeline 호출, 실패 처리까지 모두 알고 있다.
+현재 반복 생성은 `src/queue` 도메인으로 분리되었다.
+`queuePlanner.ts`는 다음 tick 선택과 seed rule 계산을 담당하고, `queueSession.ts`는 세션 상태 전이를 담당하며, `useQueueRunner.ts`는 timeout 예약과 `runApplyPipeline()` 호출을 연결한다.
 
-이 구조는 빠르게 동작을 붙이기에는 좋았지만 v3의 장기 구조로는 무겁다.
-Queue 정책과 세션 상태, UI draft, Automation 실행이 같은 hook 안에 섞이면 실패 상태를 설명하기 어렵고, 향후 character preset 순환이나 Review handoff를 붙일 때 강결합이 커진다.
+이전의 `useAutoGenerator.ts` 집중 구조는 축소되었고, UI draft adapter는 `useQueueDraftControls` 쪽으로 이동했다.
+Queue 정책과 세션 상태, UI draft, Automation 실행을 분리한 현재 구조가 v3의 기준이다.
 
 `src/components/PresetManager.tsx`도 preset 관리와 queue 편집을 함께 맡고 있다.
 초기 구현에서는 `Queue Images`가 여러 이미지의 NovelAI 메타데이터를 각각 Preset으로 저장한 뒤 기존 Queue 뒤에 추가한다.
@@ -183,42 +183,34 @@ failed에서는 실패 코드와 복구 힌트를 Status Banner로 보여주고,
 자동 생성 중 Stop 버튼은 Footer에 고정한다.
 Stop 버튼은 Body 스크롤 아래로 내려가면 안 된다.
 
-## 파일 구조 제안
+## 현재 파일 구조
 
-v3 구현은 새 `src/queue/` 폴더를 기준으로 시작한다.
+v3 구현은 `src/queue/` 폴더를 기준으로 한다.
 `queueTypes.ts`는 QueueDraft, QueueSession, QueueTickPlan, QueueTickResult를 정의한다.
 `queuePlanner.ts`는 다음 tick을 선택하고 seed를 계산한다.
 `queueSession.ts`는 세션 상태 전이를 순수 함수로 모델링한다.
 `useQueueRunner.ts`는 React hook으로 timeout 예약, stop, start, tick 실행을 연결한다.
-`QueuePanel.tsx`는 모바일 작업면 UI를 담당한다.
+`src/hooks/useQueueDraftControls.ts`는 UI draft와 runner를 연결한다.
+`src/components/QueueWorkspace.tsx`는 모바일 Queue 작업면 UI를 담당한다.
 
-기존 `src/hooks/useAutoGenerator.ts`는 v3 구현 중 점진적으로 축소한다.
-최종적으로는 `useQueueRunner.ts` 또는 그 adapter로 대체한다.
+## 구현 상태
 
-`src/components/AutoGeneratePanel.tsx`는 v3에서는 Queue 설정 UI로 흡수하거나, Tune 화면의 간단한 "Apply 후 1회 Generate" 옵션만 남긴다.
+타입과 순수 planner는 구현되어 있다.
+현재 `queue`, `queueMode`, `runsPerPreset`, `seedRule`, `intervalSec`, `targetCount`는 Queue draft controls를 통해 표현된다.
 
-## 구현 순서
-
-첫 단계는 타입과 순수 planner를 만든다.
-이 단계에서는 UI를 거의 바꾸지 않는다.
-현재 `queue`, `queueMode`, `runsPerPreset`, `seedRule`, `intervalSec`, `targetCount`를 `QueueDraft`로 표현할 수 있게 만든다.
-
-둘째 단계는 `planNextQueueTick()`을 만든다.
+`planNextQueueTick()`은 구현되어 있다.
 현재 state, preset id 배열, preset lookup 결과, seed rule, current index를 입력받아 다음 `QueueTickPlan`을 반환한다.
 이 함수는 DOM과 React state를 몰라야 한다.
 
-셋째 단계는 세션 전이 함수를 만든다.
+세션 전이 함수는 구현되어 있다.
 start, tick success, tick failure, stop, complete 이벤트를 받아 다음 `QueueSession`을 반환한다.
 이 함수도 순수 함수여야 한다.
 
-넷째 단계는 `useQueueRunner()`를 만든다.
+`useQueueRunner()`는 구현되어 있다.
 이 hook만 timeout과 `runApplyPipeline()` 호출을 가진다.
 한 tick이 성공으로 닫힌 뒤에만 다음 timeout을 예약한다.
 
-다섯째 단계는 기존 `useAutoGenerator.ts`를 adapter로 바꾸거나 제거한다.
-이때 `App.tsx`가 queue 세부 구현을 직접 알지 않도록 한다.
-
-여섯째 단계는 Queue 작업면 UI를 분리한다.
+Queue 작업면 UI는 `QueueWorkspace`로 분리되어 있다.
 모바일 화면에서는 preset 목록, run summary, target count, interval, seed rule, queue mode, stop policy만 기본 노출한다.
 
 ## 검증 계약

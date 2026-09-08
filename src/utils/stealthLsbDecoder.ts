@@ -83,10 +83,12 @@ export async function decodeStealthMetadataFromImage(blob: Blob): Promise<unknow
           length = (length << 1) | bit;
           lengthBits += 1;
           if (lengthBits === 32) {
-            if (length <= 0 || length * 8 > width * height) {
+            const consumedBits = x * height + y + 1;
+            const remainingBits = width * height - consumedBits;
+            if (length <= 0 || length % 8 !== 0 || length > remainingBits) {
               return null;
             }
-            dataLength = length;
+            dataLength = length / 8;
             dataBytes = new Uint8Array(dataLength);
             state = "data";
           }

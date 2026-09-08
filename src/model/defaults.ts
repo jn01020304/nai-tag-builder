@@ -1,4 +1,5 @@
 import type { MetadataState, PromptState, ParamsState, AdvancedFlags } from '../types/metadata';
+import { pairCharacterEntries } from "./characterIdentity";
 
 type RawMetadataState =
   Partial<MetadataState> &
@@ -76,16 +77,26 @@ export const DEFAULT_STATE: MetadataState = {
 
 // R4: 로드 타임 정규화 — 기존 프리셋/상태에 없는 필드를 DEFAULT_STATE로 채움
 // flat → nested 마이그레이션도 처리
+function normalizePromptState(prompt: PromptState): PromptState {
+  return {
+    ...prompt,
+    ...pairCharacterEntries(
+      prompt.characters,
+      prompt.negativeCharacters,
+    ),
+  };
+}
+
 export function normalizeMetadataState(raw?: RawMetadataState | null): MetadataState {
   // flat 구조 감지 (D2 이전 데이터)
   if (raw && 'basePrompt' in raw && !('prompt' in raw)) {
     return {
-      prompt: {
+      prompt: normalizePromptState({
         basePrompt: raw.basePrompt ?? DEFAULT_PROMPT.basePrompt,
         characters: raw.characters ?? DEFAULT_PROMPT.characters,
         negativeBase: raw.negativeBase ?? DEFAULT_PROMPT.negativeBase,
         negativeCharacters: raw.negativeCharacters ?? DEFAULT_PROMPT.negativeCharacters,
-      },
+      }),
       params: {
         steps: raw.steps ?? DEFAULT_PARAMS.steps,
         width: raw.width ?? DEFAULT_PARAMS.width,
@@ -128,7 +139,7 @@ export function normalizeMetadataState(raw?: RawMetadataState | null): MetadataS
   }
   // nested 구조 — 각 그룹별 default 병합
   return {
-    prompt: { ...DEFAULT_PROMPT, ...raw?.prompt },
+    prompt: normalizePromptState({ ...DEFAULT_PROMPT, ...raw?.prompt }),
     params: { ...DEFAULT_PARAMS, ...raw?.params },
     advanced: { ...DEFAULT_ADVANCED, ...raw?.advanced },
     useCoords: raw?.useCoords ?? DEFAULT_STATE.useCoords,

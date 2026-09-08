@@ -59,7 +59,7 @@ UI/UX를 모바일 기준으로 압축했다.
 
 - Main/Undesired Prompt textarea 위의 작은 중복 라벨 제거
 - Character Prompt / Character Undesired Content 중복 라벨 제거
-- Tag Dictionary를 MainPromptSection 내부로 통합하여 더 가볍고 응집력 있는 도구로 변경
+- Tag Dictionary를 Compose 흐름의 별도 섹션으로 유지하되 Quick Catalog Chips와 Full Dictionary를 한 섹션 안에서 함께 제공
 - `Insert target: ...` 텍스트 제거
 - prompt tab 라벨을 모바일용 `Main` / `Negative`로 단축
 - 탭이 현재 편집 대상과 색상 식별을 담당

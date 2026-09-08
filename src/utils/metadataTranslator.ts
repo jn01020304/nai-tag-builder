@@ -1,5 +1,17 @@
-import type { CommentJson, MetadataState, NoiseSchedule, Sampler } from '../types/metadata';
-import { DEFAULT_STATE, DEFAULT_PROMPT, DEFAULT_PARAMS, DEFAULT_ADVANCED } from '../model/defaults';
+import type {
+  CharCaption,
+  CommentJson,
+  MetadataState,
+  NoiseSchedule,
+  Sampler,
+} from "../types/metadata";
+import { createCharacterId } from "../model/characterIdentity";
+import {
+  DEFAULT_ADVANCED,
+  DEFAULT_PARAMS,
+  DEFAULT_PROMPT,
+  DEFAULT_STATE,
+} from "../model/defaults";
 
 type NovelAiMetadata = Partial<CommentJson> & {
     guidance?: number;
@@ -31,6 +43,17 @@ function isNoiseSchedule(value: unknown): value is NoiseSchedule {
     return typeof value === 'string' && NOISE_SCHEDULES.includes(value as NoiseSchedule);
 }
 
+function readCenter(
+  primary: CharCaption | undefined,
+  fallback: CharCaption | undefined,
+): { centerX: number; centerY: number } {
+  const center = primary?.centers?.[0] ?? fallback?.centers?.[0];
+  return {
+    centerX: center?.x ?? 0.5,
+    centerY: center?.y ?? 0.5,
+  };
+}
+
 export function translateNovelAiMetadata(rawData: unknown, source?: string): MetadataState {
     const state: MetadataState = {
         prompt: { ...DEFAULT_PROMPT },
@@ -44,35 +67,47 @@ export function translateNovelAiMetadata(rawData: unknown, source?: string): Met
     const data = rawData;
     if (source) state.source = source;
 
+    const positiveCharacters = data.v4_prompt?.caption?.char_captions;
+    const negativeCharacters = data.v4_negative_prompt?.caption?.char_captions;
+
     if (data.v4_prompt?.caption) {
         state.prompt.basePrompt = data.v4_prompt.caption.base_caption || '';
-        const charCaptions = data.v4_prompt.caption.char_captions || [];
-        state.prompt.characters = charCaptions.map((c, i) => ({
-            id: 'char_' + Date.now() + '_' + i,
-            caption: c.char_caption || '',
-            centerX: c.centers?.[0]?.x ?? 0.5,
-            centerY: c.centers?.[0]?.y ?? 0.5,
-        }));
         if (typeof data.v4_prompt.use_coords === 'boolean') state.useCoords = data.v4_prompt.use_coords;
         if (typeof data.v4_prompt.use_order === 'boolean') state.useOrder = data.v4_prompt.use_order;
     } else if (typeof data.prompt === 'string') {
         state.prompt.basePrompt = data.prompt;
-        state.prompt.characters = [];
     }
 
     if (data.v4_negative_prompt?.caption) {
         state.prompt.negativeBase = data.v4_negative_prompt.caption.base_caption || '';
-        const charCaptions = data.v4_negative_prompt.caption.char_captions || [];
-        state.prompt.negativeCharacters = charCaptions.map((c, i) => ({
-            id: 'char_neg_' + Date.now() + '_' + i,
-            caption: c.char_caption || '',
-            centerX: c.centers?.[0]?.x ?? 0.5,
-            centerY: c.centers?.[0]?.y ?? 0.5,
-        }));
     } else {
         const neg = data.negative_prompt || data.uc;
         if (typeof neg === 'string') {
             state.prompt.negativeBase = neg;
+        }
+    }
+
+    if (data.v4_prompt?.caption || data.v4_negative_prompt?.caption) {
+        const positive = positiveCharacters ?? [];
+        const negative = negativeCharacters ?? [];
+        const characterIds = Array.from(
+            { length: Math.max(positive.length, negative.length) },
+            createCharacterId,
+        );
+
+        state.prompt.characters = characterIds.map((id, index) => ({
+            id,
+            caption: positive[index]?.char_caption ?? '',
+            ...readCenter(positive[index], negative[index]),
+        }));
+        state.prompt.negativeCharacters = characterIds.map((id, index) => ({
+            id,
+            caption: negative[index]?.char_caption ?? '',
+            ...readCenter(negative[index], positive[index]),
+        }));
+    } else {
+        if (typeof data.prompt === 'string') state.prompt.characters = [];
+        if (typeof data.negative_prompt === 'string' || typeof data.uc === 'string') {
             state.prompt.negativeCharacters = [];
         }
     }

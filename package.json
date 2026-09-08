@@ -12,7 +12,7 @@
     "relations:build": "node scripts/catalog/build-tag-relations.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test:unit": "tsx scripts/test/queue-planner-test.ts && tsx scripts/test/queue-session-test.ts",
+    "test:unit": "tsx scripts/test/metadata-patch-test.ts && tsx scripts/test/metadata-translator-test.ts && tsx scripts/test/png-parser-test.ts && tsx scripts/test/preset-queue-test.ts && tsx scripts/test/apply-pipeline-test.ts && tsx scripts/test/queue-planner-test.ts && tsx scripts/test/queue-session-test.ts",
     "test:e2e:compose": "node scripts/e2e/compose-smoke.mjs",
     "test:e2e:bookmarklet": "node scripts/e2e/bookmarklet-injection-smoke.mjs",
     "test:e2e:theme": "node scripts/e2e/theme-probe-smoke.mjs",
