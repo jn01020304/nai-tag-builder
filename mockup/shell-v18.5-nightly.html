@@ -58,6 +58,14 @@
       <div class="setting-danger">기존 음수 프롬프트 값은 꺼도 보존돼. 작가 조합의 음수 가중치는 항상 잠겨 있어.</div>
     </section>
     <section class="settings-group">
+      <div class="settings-title">NovelAI 연결</div>
+      <label class="setting-row">
+        <div class="setting-copy"><b>API 토큰</b><small>계정 설정의 Persistent API Token · 이 브라우저에만 저장</small></div>
+        <div class="setting-actions"><input class="ui-scale-input" id="novelaiTokenInput" type="password" autocomplete="off" spellcheck="false" placeholder="pst-…" aria-label="NovelAI API 토큰" style="width:10em"></div>
+      </label>
+      <div class="setting-danger">토큰이 있으면 Generate 버튼은 실제로 Anlas를 씁니다. Tournament와 조율 후보는 아직 샘플 이미지입니다.</div>
+    </section>
+    <section class="settings-group">
       <div class="settings-title">레이아웃</div>
       <button class="ghostbtn settings-wide" id="settingsReset">패널 배치 초기화</button>
     </section>
@@ -281,6 +289,7 @@ solo artist, year 2025, shallow depth of field, best quality</textarea>
 
       <div class="pfoot side-normal-only generate-foot">
         <button class="genbtn-nai" id="genRun"><span id="genRunLabel">Generate 1 Image</span><span class="anlas-pill">0 ✦</span></button>
+        <div class="gen-error" id="genError" role="alert" hidden></div>
       </div>
     </div>
   </div>
@@ -557,6 +566,7 @@ solo artist, year 2025, shallow depth of field, best quality</textarea>
 
 <script src="shell-v18.5-nightly.catalog.js"></script>
 <script src="shell-v18.5-nightly.png.js"></script>
+<script src="shell-v18.5-nightly.novelai.js"></script>
 
 <script src="shell-v18.5-nightly.js"></script>
 

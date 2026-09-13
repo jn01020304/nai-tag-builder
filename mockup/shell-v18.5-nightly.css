@@ -992,6 +992,7 @@
   #sideL .ai-select{width:100%; min-width:0; font:inherit; font-size:.86em; font-weight:600; color:var(--ink); background:var(--panel2); border:1px solid var(--line); border-radius:4px; padding:4px 6px; outline:none}
   #sideL .genbtn-nai{display:flex; align-items:center; justify-content:space-between; width:100%; font:inherit; font-weight:700; font-size:1em; color:#1a1506; background:var(--accent); border:none; border-radius:var(--r); padding:9px 12px; cursor:pointer; box-shadow:0 4px 14px rgba(240,196,64,.2)}
   #sideL .genbtn-nai:hover{filter:brightness(1.08)}
+  #sideL .gen-error{margin-top:6px; font-size:.85em; color:#ff8a80; white-space:pre-wrap}
   #sideL .anlas-pill{font-size:.82em; font-weight:700; padding:1px 6px; border-radius:999px; background:rgba(0,0,0,.18); color:#1a1506}
   #sideL .generate-foot{border-top:1px solid var(--line); padding:6px 8px}
 

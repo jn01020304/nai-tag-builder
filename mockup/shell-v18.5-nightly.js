@@ -5239,7 +5239,20 @@ function addHistoryShot(src, payload = buildNovelAIPayload(), asset = {}) {
   });
   renderDetailHistory();
 }
-function requestGeneration(payload, mockRender = {}) {
+const novelaiTokenInput = document.getElementById("novelaiTokenInput");
+const genError = document.getElementById("genError");
+novelaiTokenInput.value = novelaiApi.readToken();
+novelaiTokenInput.addEventListener("change", () => { novelaiTokenInput.value = novelaiApi.writeToken(novelaiTokenInput.value); });
+function showGenerationError(message = "") {
+  genError.textContent = message;
+  genError.hidden = !message;
+}
+// 사람이 누른 Generate만 실제 API로 보낸다. Tournament·조율 자동 큐는 NovelAI 약관상 샘플 유지
+async function requestGeneration(payload, mockRender = {}, options = {}) {
+  if (payload.source === "generate" && novelaiApi.readToken()) {
+    const shot = await novelaiApi.generateImage(payload, options);
+    return { src: URL.createObjectURL(shot.blob), blob: shot.blob, file: null, fileName: shot.fileName, payload };
+  }
   return {
     src: mockRender.src || (HISTORY.length % 2 ? "../resource/original.png" : "../resource/test.png"),
     ...normalizeImageAsset(mockRender, ""),
@@ -5252,13 +5265,19 @@ function nextContinuousSeed(seed, mode) {
   return seed >= 4294967295 ? 0 : seed + 1;
 }
 let generationCancelRequested = false;
+let generationAbort = null;
 async function runMockGeneration() {
   if (generatingShot) {
     generationCancelRequested = true;
+    generationAbort?.abort();
     genRunLabel.textContent = "취소 중…";
     return;
   }
   if (!pt.value.trim()) return;
+  if (!novelaiApi.readToken()) {
+    showGenerationError("사용자 설정(⚙)에서 NovelAI 토큰을 입력하면 실제로 생성됩니다. 지금은 샘플 이미지입니다.");
+  }
+  else showGenerationError();
   generatingShot = true;
   generationCancelRequested = false;
   const button = document.getElementById("genRun");
@@ -5279,7 +5298,8 @@ async function runMockGeneration() {
       generationState.seed = seed;
       const payload = buildNovelAIPayload({ source: "generate", seed });
       const mockRender = { src: (historyLength + index) % 2 ? "../resource/original.png" : "../resource/test.png" };
-      const shot = await requestGeneration(payload, mockRender);
+      generationAbort = new AbortController();
+      const shot = await requestGeneration(payload, mockRender, { signal: generationAbort.signal });
       addHistoryShot(shot.src, payload, shot);
       showCurrentShot(HISTORY[0]);
       if (generationCancelRequested) break;
@@ -5290,11 +5310,18 @@ async function runMockGeneration() {
         if (!generationCancelRequested) seed = nextContinuousSeed(seed, seedMode);
       }
     }
+  }
+  catch (error) {
+    if (error?.name !== "AbortError") {
+      showGenerationError(error?.message || "생성 실패");
+      console.error("generation failed", error);
+    }
+  }
+  finally {
     if (seedWasLocked) generationState.seed = startingSeed;
     persistGenerationState();
     paintUiSeed();
-  }
-  finally {
+    generationAbort = null;
     generatingShot = false;
     generationCancelRequested = false;
     button.removeAttribute("aria-busy");
