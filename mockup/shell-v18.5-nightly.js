@@ -4408,14 +4408,10 @@ function setupChunkEditing() {
   });
   grid.addEventListener("dragend", () => { dragged = null; });
 }
-const HISTORY = [
-  { id: "h6", at: "22:41", seed: 4257072022, src: "../resource/original.png" },
-  { id: "h5", at: "22:33", seed: 1180552317, src: "../resource/test.png" },
-  { id: "h4", at: "22:20", seed: 884301764, src: "../resource/original.png" },
-  { id: "h3", at: "22:02", seed: 512773390, src: "../resource/test.png" },
-  { id: "h2", at: "21:47", seed: 99204411, src: "../resource/original.png" },
-  { id: "h1", at: "21:30", seed: 36618205, src: "../resource/test.png" }
-];
+const HISTORY = [];
+// PNG 한 장이 1~2MB라 브라우저 저장소를 지키려고 최근 것만 남긴다
+const MAX_HISTORY = 100;
+const historyAssetKey = id => `history:${id}`;
 const histRail = document.getElementById("histRail");
 const detailCompare = document.getElementById("detailCompare");
 const detailCompareToggle = document.getElementById("detailCompareToggle");
@@ -5230,16 +5226,44 @@ function normalizeImageAsset(asset = {}, fallbackFileName = "") {
     fileName: asset.fileName || fallbackFileName
   };
 }
+function persistHistoryIndex() {
+  save({ history: HISTORY.filter(history => history.blob).map(({ id, at, seed, fileName, payload }) => ({ id, at, seed, fileName, payload })) });
+}
 function addHistoryShot(src, payload = buildNovelAIPayload(), asset = {}) {
-  HISTORY.unshift({
+  const history = {
     id: "g" + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
     at: new Date().toTimeString().slice(0, 5),
     seed: payload.seed,
     src,
     ...normalizeImageAsset(asset, ""),
     payload
-  });
+  };
+  HISTORY.unshift(history);
+  for (const removed of HISTORY.splice(MAX_HISTORY)) {
+    if (removed.src?.startsWith("blob:")) URL.revokeObjectURL(removed.src);
+    void deleteReferenceAsset(historyAssetKey(removed.id)).catch(() => {});
+  }
   renderDetailHistory();
+  if (history.blob) {
+    void persistReferenceAsset(historyAssetKey(history.id), history.blob)
+      .then(persistHistoryIndex)
+      .catch(error => console.error("history persistence failed", error));
+  }
+}
+async function restoreHistory() {
+  const stored = Array.isArray(S.history) ? S.history.filter(entry => entry && typeof entry.id === "string").slice(0, MAX_HISTORY) : [];
+  for (const entry of stored) {
+    try {
+      const blob = await loadReferenceAsset(historyAssetKey(entry.id));
+      if (!(blob instanceof Blob)) continue;
+      HISTORY.push({ id: entry.id, at: String(entry.at || ""), seed: entry.seed, src: URL.createObjectURL(blob), blob, file: null, fileName: entry.fileName || `nai-${entry.seed}.png`, payload: entry.payload || null });
+    }
+    catch { }
+  }
+  // 그림이 사라진 기록은 목록에서도 뺀다
+  if (HISTORY.length !== stored.length) persistHistoryIndex();
+  renderDetailHistory();
+  if (HISTORY[0] && !shotHole.classList.contains("has")) showCurrentShot(HISTORY[0]);
 }
 const novelaiTokenInput = document.getElementById("novelaiTokenInput");
 const genError = document.getElementById("genError");
@@ -5251,7 +5275,7 @@ function showGenerationError(message = "") {
 }
 // 사람이 누른 Generate만 실제 API로 보낸다. Tournament·조율 자동 큐는 NovelAI 약관상 샘플 유지
 async function requestGeneration(payload, mockRender = {}, options = {}) {
-  if (payload.source === "generate" && novelaiApi.readToken()) {
+  if (payload.source === "generate") {
     const shot = await novelaiApi.generateImage(payload, options);
     return { src: URL.createObjectURL(shot.blob), blob: shot.blob, file: null, fileName: shot.fileName, payload };
   }
@@ -5268,7 +5292,7 @@ function nextContinuousSeed(seed, mode) {
 }
 let generationCancelRequested = false;
 let generationAbort = null;
-async function runMockGeneration() {
+async function runGeneration() {
   if (generatingShot) {
     generationCancelRequested = true;
     generationAbort?.abort();
@@ -5277,13 +5301,13 @@ async function runMockGeneration() {
   }
   if (!pt.value.trim()) return;
   if (!novelaiApi.readToken()) {
-    showGenerationError("사용자 설정(⚙)에서 NovelAI 토큰을 입력하면 실제로 생성됩니다. 지금은 샘플 이미지입니다.");
+    showGenerationError("사용자 설정(⚙)에서 NovelAI 토큰을 먼저 입력하세요.");
+    return;
   }
-  else showGenerationError();
+  showGenerationError();
   generatingShot = true;
   generationCancelRequested = false;
   const button = document.getElementById("genRun");
-  const historyLength = HISTORY.length;
   const seedWasLocked = generationState.seedLocked;
   const startingSeed = seedWasLocked ? generationState.seed : Math.floor(Math.random() * 4294967296);
   const count = generationOrchestration.count;
@@ -5299,9 +5323,8 @@ async function runMockGeneration() {
     for (let index = 0; index < count && !generationCancelRequested; index++) {
       generationState.seed = seed;
       const payload = buildNovelAIPayload({ source: "generate", seed });
-      const mockRender = { src: (historyLength + index) % 2 ? "../resource/original.png" : "../resource/test.png" };
       generationAbort = new AbortController();
-      const shot = await requestGeneration(payload, mockRender, { signal: generationAbort.signal });
+      const shot = await requestGeneration(payload, {}, { signal: generationAbort.signal });
       addHistoryShot(shot.src, payload, shot);
       showCurrentShot(HISTORY[0]);
       if (generationCancelRequested) break;
@@ -5450,7 +5473,7 @@ document.getElementById("detailCompareCanvas").addEventListener("click", () => {
   paintDetailCompare();
 });
 document.getElementById("detailCompareClose").addEventListener("click", () => closeDetailCompare(true));
-document.getElementById("genRun").addEventListener("click", runMockGeneration);
+document.getElementById("genRun").addEventListener("click", runGeneration);
 addEventListener("keydown", event => {
   if (event.key !== "Escape")
     return;
@@ -5490,6 +5513,7 @@ function initApp() {
   renderUnfinishedRunCards();
   renderCompetition();
   renderDetailHistory();
+  void restoreHistory();
   syncDetailCompareAvailability();
   persistGenerationState();
 }
