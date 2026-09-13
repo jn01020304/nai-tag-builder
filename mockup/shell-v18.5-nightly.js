@@ -584,8 +584,10 @@ function bindPair(key, input, range, summary, normalize, format) {
   setValue(generationState[key]);
   return setValue;
 }
+// Opus 무료 생성 상한. 넘으면 Anlas가 나간다
+const MAX_FREE_STEPS = 28;
 const setSteps = bindPair("steps", inpSteps, rangeSteps, sumSteps,
-  value => Math.max(1, Math.min(50, Math.round(Number(value) || 1))),
+  value => Math.max(1, Math.min(MAX_FREE_STEPS, Math.round(Number(value) || 1))),
   value => String(value));
 const setGuidance = bindPair("guidance", inpGuidance, rangeGuidance, sumGuidance,
   value => Math.max(1, Math.min(20, Number(value) || 1)),
@@ -4816,7 +4818,7 @@ function metadataFieldRegistry() {
       generationState.resolution = { ...payload.resolution }; persistGenerationState(); renderResolutionFromState();
       return { ok: true, message: "Resolution 가져오기 완료" };
     } },
-    { field: "steps", historyLabel: "Steps", actionLabel: "Steps", present: payload => Number.isFinite(Number(payload.steps)), value: payload => String(payload.steps), apply: payload => { setSteps(payload.steps); persistGenerationState(); return { ok: true, message: "Steps 가져오기 완료" }; } },
+    { field: "steps", historyLabel: "Steps", actionLabel: "Steps", present: payload => Number.isFinite(Number(payload.steps)), value: payload => String(payload.steps), apply: payload => { setSteps(payload.steps); persistGenerationState(); return { ok: true, message: Number(payload.steps) > MAX_FREE_STEPS ? `Steps ${payload.steps}는 무료 상한을 넘어 ${MAX_FREE_STEPS}로 가져왔습니다` : "Steps 가져오기 완료" }; } },
     { field: "guidance", historyLabel: "Prompt Guidance", actionLabel: "Guidance", present: payload => Number.isFinite(Number(payload.guidance)), value: payload => Number(payload.guidance).toFixed(1), apply: payload => { setGuidance(payload.guidance); persistGenerationState(); return { ok: true, message: "Prompt Guidance 가져오기 완료" }; } },
     { field: "rescale", historyLabel: "CFG Rescale", actionLabel: "Rescale", present: payload => Number.isFinite(Number(payload.rescale)), value: payload => formatRescale(Number(payload.rescale)), apply: payload => { setRescale(payload.rescale); persistGenerationState(); return { ok: true, message: "CFG Rescale 가져오기 완료" }; } },
     { field: "sampler", historyLabel: "Sampler", actionLabel: "Sampler", present: payload => !!payload.sampler, value: payload => String(payload.sampler), apply: payload => {

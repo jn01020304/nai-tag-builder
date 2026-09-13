@@ -42,6 +42,8 @@ function buildRequest(payload) {
   if (!model) throw new Error(`API 모델 ID가 없는 Model입니다: ${payload.model}`);
   const unsupported = unsupportedInputs(payload);
   if (unsupported.length) throw new Error(`${unsupported.join(", ")}는 아직 실제 생성에서 지원하지 않습니다.`);
+  // UI를 거치지 않은 payload도 유료 요청으로 새지 않게 막는다
+  if (!(Number(payload.steps) >= 1 && Number(payload.steps) <= 28)) throw new Error(`Steps ${payload.steps}는 무료 범위(1~28)를 벗어납니다.`);
   const v5 = model.startsWith("nai-diffusion-5");
   // V5는 프롬프트 태그로 알파 채널을 켠다 (NovelAI V5 공지 기준)
   const transparent = v5 && !!payload.transparentBackground;

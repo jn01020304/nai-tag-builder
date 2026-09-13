@@ -58,6 +58,8 @@ assert.equal(v5Plain.model, "nai-diffusion-5-full");
 assert.equal(v5Plain.parameters.straight_alpha, undefined);
 assert.equal(v5Plain.input, payload.prompt);
 assert.throws(() => api.buildRequest({ ...payload, model: "V9" }), /API 모델 ID/);
+assert.throws(() => api.buildRequest({ ...payload, steps: 29 }), /무료 범위/);
+assert.equal(plain(api.buildRequest({ ...payload, steps: 28 })).parameters.steps, 28);
 assert.throws(() => api.buildRequest({ ...payload, vibeTransfer: [{ active: true }] }), /Vibe Transfer/);
 
 // 최소 zip 작성기: 저장/deflate 두 방식 모두 확인
