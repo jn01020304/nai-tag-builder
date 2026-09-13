@@ -2,10 +2,8 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import vm from "node:vm";
 
-const html = readFileSync(new URL("../../mockup/shell-v18.5-nightly.html", import.meta.url), "utf8");
-for (const match of html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)) {
-  if (!/application\/json|\bsrc=/.test(match[1])) new vm.Script(match[2]);
-}
+const html = readFileSync(new URL("../../mockup/shell-v18.5-nightly.js", import.meta.url), "utf8");
+new vm.Script(html);
 const extract = (start, end) => html.slice(html.indexOf(start), html.indexOf(end, html.indexOf(start)));
 const context = vm.createContext({
   esc: value => String(value).replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;"),
@@ -99,4 +97,4 @@ context.duelPayloads = { left: null, right: null };
 context.renderDuelCompositions();
 assert.ok(!host.innerHTML.includes("duel-common-block"));
 assert.ok(!html.includes("tournamentBracket"));
-console.log("PASS: inline syntax, 961 common-block cases, markup, aspect ratios, image loading, and layout exit");
+console.log("PASS: app syntax, 961 common-block cases, markup, aspect ratios, image loading, and layout exit");
