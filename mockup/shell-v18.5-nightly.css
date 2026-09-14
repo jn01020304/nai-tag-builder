@@ -29,6 +29,9 @@
     color:var(--dim); font-size:.9em;
   }
   .chip b{color:var(--ink); font-weight:600}
+  .chip-allowance{margin-left:8px; padding-left:8px; border-left:1px solid var(--line)}
+  .chip-allowance.low{color:#ffb74d}
+  .chip.error b{color:#ff8a80}
   .top .spacer{flex:1}
   .ico{
     font:inherit; color:var(--dim); background:transparent; border:1px solid transparent;

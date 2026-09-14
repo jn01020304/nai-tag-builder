@@ -5378,8 +5378,41 @@ async function restoreHistory() {
 }
 const novelaiTokenInput = document.getElementById("novelaiTokenInput");
 const genError = document.getElementById("genError");
+const anlasChip = document.getElementById("anlasChip"), anlasValue = document.getElementById("anlasValue"), allowanceValue = document.getElementById("allowanceValue");
+let accountRefresh = 0;
+async function refreshAccountStatus() {
+  const request = ++accountRefresh;
+  if (!novelaiApi.readToken()) {
+    anlasChip.classList.remove("error");
+    anlasValue.textContent = "—";
+    allowanceValue.hidden = true;
+    anlasChip.title = "토큰을 넣으면 계정 잔량을 불러옵니다";
+    return;
+  }
+  try {
+    const status = await novelaiApi.fetchAccountStatus();
+    if (request !== accountRefresh) return;
+    anlasChip.classList.remove("error");
+    anlasValue.textContent = status.anlas == null ? "—" : status.anlas.toLocaleString("en-US");
+    const allowance = status.allowance;
+    allowanceValue.hidden = !allowance;
+    if (allowance) {
+      allowanceValue.textContent = allowance.available ? `V5 ${allowance.percent}%` : "V5 한도 소진";
+      allowanceValue.classList.toggle("low", !allowance.available || allowance.percent < 10);
+    }
+    anlasChip.title = `갱신 ${new Date().toTimeString().slice(0, 5)}`;
+  }
+  catch (error) {
+    if (request !== accountRefresh) return;
+    anlasChip.classList.add("error");
+    anlasValue.textContent = "!";
+    allowanceValue.hidden = true;
+    anlasChip.title = error?.message || "계정 정보를 불러오지 못했습니다.";
+  }
+}
 novelaiTokenInput.value = novelaiApi.readToken();
-novelaiTokenInput.addEventListener("change", () => { novelaiTokenInput.value = novelaiApi.writeToken(novelaiTokenInput.value); });
+novelaiTokenInput.addEventListener("change", () => { novelaiTokenInput.value = novelaiApi.writeToken(novelaiTokenInput.value); void refreshAccountStatus(); });
+anlasChip.addEventListener("click", () => void refreshAccountStatus());
 function showGenerationError(message = "") {
   genError.textContent = message;
   genError.hidden = !message;
@@ -5454,6 +5487,7 @@ async function runGeneration() {
     }
   }
   finally {
+    void refreshAccountStatus();
     if (seedWasLocked) generationState.seed = startingSeed;
     persistGenerationState();
     paintUiSeed();
@@ -5634,6 +5668,7 @@ function initApp() {
   renderCompetition();
   renderDetailHistory();
   void restoreHistory();
+  void refreshAccountStatus();
   syncDetailCompareAvailability();
   persistGenerationState();
 }

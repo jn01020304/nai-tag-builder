@@ -103,10 +103,23 @@ assert.equal(ok.fileName, "nai-42.png");
 await assert.rejects(api.generateImage(payload, { token: "bad", fetchImpl: async () => new Response('{"statusCode":401,"message":"Unauthorized"}', { status: 401 }) }), /토큰이 올바르지/);
 await assert.rejects(api.generateImage(payload, { token: "", fetchImpl: async () => assert.fail("토큰 없이 요청하면 안 된다") }), /토큰을 먼저/);
 
+let accountUrl = "";
+const account = plain(await api.fetchAccountStatus({ token: "pst-test", fetchImpl: async (url, init) => {
+  accountUrl = url;
+  assert.equal(init.headers.Authorization, "Bearer pst-test");
+  return new Response(JSON.stringify({ tier: 3, active: true, trainingStepsLeft: { fixedTrainingStepsLeft: 9000, purchasedTrainingSteps: 335 }, usage: { isNegative: false, percent: 72, timeUntilNextPercent: 120 } }), { status: 200 });
+} }));
+assert.equal(accountUrl, "https://image.novelai.net/user/subscription");
+assert.deepEqual(account, { tier: 3, active: true, anlas: 9335, allowance: { percent: 72, available: true, secondsToNextPercent: 120 } });
+const noUsage = plain(await api.fetchAccountStatus({ token: "t", fetchImpl: async () => new Response(JSON.stringify({ tier: 0, usage: { isNegative: true, percent: 0 } }), { status: 200 }) }));
+assert.equal(noUsage.anlas, null);
+assert.equal(noUsage.allowance.available, false);
+await assert.rejects(api.fetchAccountStatus({ token: "bad", fetchImpl: async () => new Response("{}", { status: 401 }) }), /토큰이 올바르지/);
+
 const store = new Map();
 const storage = { getItem: key => store.get(key) ?? null, setItem: (key, value) => store.set(key, value), removeItem: key => store.delete(key) };
 assert.equal(api.writeToken("  pst-abc  ", storage), "pst-abc");
 assert.equal(api.readToken(storage), "pst-abc");
 api.writeToken("", storage);
 assert.equal(api.readToken(storage), "");
-console.log("PASS: request mapping, V5 body, transparent tag, character coords, unsupported inputs, zip stored/deflate, fetch success/401/no token, token storage");
+console.log("PASS: request mapping, V5 body, transparent tag, character coords, unsupported inputs, zip stored/deflate, fetch success/401/no token, account status, token storage");

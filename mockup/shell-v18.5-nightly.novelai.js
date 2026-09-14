@@ -141,5 +141,24 @@ async function generateImage(payload, { token = readToken(), signal, fetchImpl =
   const blob = new Blob([png.bytes], { type: "image/png" });
   return { blob, fileName: `nai-${payload.seed}.png` };
 }
-return Object.freeze({ MODEL_IDS, readToken, writeToken, buildRequest, extractFirstPng, generateImage });
+// Anlas는 API에서 trainingSteps(고정+구매) 이름으로 온다. usage는 V5 사용 한도
+async function fetchAccountStatus({ token = readToken(), signal, fetchImpl = globalThis.fetch } = {}) {
+  if (!token) throw new Error("사용자 설정에서 NovelAI 토큰을 먼저 입력하세요.");
+  const response = await fetchImpl("https://image.novelai.net/user/subscription", { headers: { Authorization: `Bearer ${token}` }, signal });
+  if (!response.ok) throw new Error(await errorMessage(response));
+  const data = await response.json();
+  const steps = data?.trainingStepsLeft || {};
+  const anlas = Number(steps.fixedTrainingStepsLeft) + Number(steps.purchasedTrainingSteps);
+  const usage = data?.usage;
+  return {
+    tier: Number(data?.tier),
+    active: !!data?.active,
+    anlas: Number.isFinite(anlas) ? anlas : null,
+    // TODO: percent가 남은 양인지 쓴 양인지 실제 계정 값으로 확인 필요 (NAIWeaver는 남은 양으로 표시)
+    allowance: usage && Number.isFinite(Number(usage.percent))
+      ? { percent: Number(usage.percent), available: !usage.isNegative, secondsToNextPercent: Number(usage.timeUntilNextPercent) || 0 }
+      : null
+  };
+}
+return Object.freeze({ MODEL_IDS, readToken, writeToken, buildRequest, extractFirstPng, generateImage, fetchAccountStatus });
 })();
