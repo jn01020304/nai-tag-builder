@@ -522,7 +522,7 @@ solo artist, year 2025, shallow depth of field, best quality</textarea>
     <button class="panelcontrol edgehandle" data-panel="noR" title="오른쪽 패널 열기" aria-label="오른쪽 패널 열기" aria-pressed="true">‹</button>
     <div class="panel" style="flex:1 1 auto">
       <div class="history-normal">
-        <div class="phead">History ▶<span class="spacer"></span><button class="history-import-btn" id="historyImportBtn" title="NovelAI PNG 메타데이터 불러오기" aria-label="NovelAI PNG 메타데이터 불러오기">⍗</button><input class="history-import-input" id="historyImportInput" type="file" accept="image/png"><button class="panelcontrol" data-panel="noR" title="오른쪽 패널 접기" aria-label="오른쪽 패널 접기" aria-pressed="false">›</button></div>
+        <div class="phead">History ▶<span class="spacer"></span><button class="history-import-btn" id="historyClearBtn" title="History 전체 삭제" aria-label="History 전체 삭제" disabled>🗑</button><button class="history-import-btn" id="historyImportBtn" title="NovelAI PNG 메타데이터 불러오기" aria-label="NovelAI PNG 메타데이터 불러오기">⍗</button><input class="history-import-input" id="historyImportInput" type="file" accept="image/png"><button class="panelcontrol" data-panel="noR" title="오른쪽 패널 접기" aria-label="오른쪽 패널 접기" aria-pressed="false">›</button></div>
         <div class="pbody"><div class="hist" id="histRail" aria-label="생성 기록"></div></div>
       </div>
       <div class="competition-history">
@@ -550,6 +550,7 @@ solo artist, year 2025, shallow depth of field, best quality</textarea>
 <div class="image-context-menu" id="imageContextMenu" role="menu" hidden>
   <button type="button" role="menuitem" data-image-action="copy">이미지 복사</button>
   <button type="button" role="menuitem" data-image-action="save">이미지 저장</button>
+  <button type="button" role="menuitem" data-image-action="delete-history" class="danger" hidden>History에서 삭제</button>
 </div>
 <div class="nai-toast" id="naiToast" role="status" aria-live="polite"></div>
 <div class="inspect-modal" id="inspectModal" hidden>

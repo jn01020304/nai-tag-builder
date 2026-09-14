@@ -293,6 +293,7 @@
     border-radius:4px; color:var(--dim); background:transparent; font:inherit; cursor:pointer;
   }
   .history-import-btn:hover{color:var(--ink); border-color:var(--line); background:var(--panel2)}
+  .history-import-btn:disabled{opacity:.35; cursor:default; border-color:transparent; background:transparent}
   .history-import-input{display:none}
   .history-detail .pbody{padding:8px; gap:8px; overflow:auto}
   .history-detail-layout{display:flex; flex-direction:column; gap:8px; min-height:100%}
@@ -1020,6 +1021,8 @@
   .image-context-menu button:hover,.image-context-menu button:focus-visible{
     color:var(--accent); background:var(--panel2); outline:none;
   }
+  .image-context-menu button.danger{color:#ff8a80}
+  .image-context-menu button[hidden]{display:none}
   .detail-compare{
     display:none; position:absolute; inset:0; z-index:30; overflow:hidden;
     background:var(--panel); border:1px solid var(--line); border-radius:var(--r);

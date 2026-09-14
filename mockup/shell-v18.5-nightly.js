@@ -4412,6 +4412,7 @@ const HISTORY = [];
 // PNG 한 장이 1~2MB라 브라우저 저장소를 지키려고 최근 것만 남긴다
 const MAX_HISTORY = 100;
 const historyAssetKey = id => `history:${id}`;
+const historyClearBtn = document.getElementById("historyClearBtn");
 const histRail = document.getElementById("histRail");
 const detailCompare = document.getElementById("detailCompare");
 const detailCompareToggle = document.getElementById("detailCompareToggle");
@@ -4630,6 +4631,7 @@ function historyImageObject(history) {
   });
 }
 function renderDetailHistory() {
+  historyClearBtn.disabled = !HISTORY.length;
   histRail.innerHTML = HISTORY.map(history => {
     const object = historyImageObject(history);
     const order = detailComparePick.indexOf(object.id);
@@ -5250,6 +5252,41 @@ function addHistoryShot(src, payload = buildNovelAIPayload(), asset = {}) {
       .catch(error => console.error("history persistence failed", error));
   }
 }
+function removeHistoryEntries(ids) {
+  const targets = new Set(ids);
+  const detailIndex = historyDetailIndex();
+  const shownId = shotHole.querySelector("img")?.dataset.imageId?.replace(/^current:/, "");
+  for (let index = HISTORY.length - 1; index >= 0; index--) {
+    const history = HISTORY[index];
+    if (!targets.has(history.id)) continue;
+    HISTORY.splice(index, 1);
+    if (history.src?.startsWith("blob:")) URL.revokeObjectURL(history.src);
+    for (const imageId of [`history:${history.id}`, `current:${history.id}`]) {
+      imageObjects.delete(imageId);
+      detailComparePick = detailComparePick.filter(pick => pick !== imageId);
+    }
+    void deleteReferenceAsset(historyAssetKey(history.id)).catch(error => console.error("history delete failed", error));
+  }
+  persistHistoryIndex();
+  if (shownId && targets.has(shownId)) {
+    shotHole.classList.remove("has");
+    shotHole.textContent = "NAI로 만들어진 이미지";
+  }
+  if (historyDetailId && targets.has(historyDetailId)) {
+    // 보던 장이 지워지면 같은 자리의 다음 장을 연다
+    if (HISTORY.length) openHistoryAt(Math.min(detailIndex, HISTORY.length - 1));
+    else closeHistoryDetail();
+  }
+  if (detailComparePick.length < 2) document.body.classList.remove("detail-compare-open");
+  if (detailCompareSelecting) updateDetailCompareToggle();
+  renderDetailHistory();
+}
+historyClearBtn.addEventListener("click", () => {
+  if (!HISTORY.length) return;
+  if (!confirm(`History ${HISTORY.length}장을 모두 삭제할까요? 되돌릴 수 없습니다.`)) return;
+  removeHistoryEntries(HISTORY.map(history => history.id));
+  showToast("History를 모두 삭제했습니다");
+});
 async function restoreHistory() {
   const stored = Array.isArray(S.history) ? S.history.filter(entry => entry && typeof entry.id === "string").slice(0, MAX_HISTORY) : [];
   for (const entry of stored) {
@@ -5397,6 +5434,8 @@ function closeImageContextMenu() {
 }
 function openImageContextMenu(object, x, y) {
   contextImageId = object.id;
+  const historyId = object.meta?.historyId;
+  imageContextMenu.querySelector('[data-image-action="delete-history"]').hidden = !(historyId && HISTORY.some(history => history.id === historyId));
   imageContextMenu.hidden = false;
   const width = imageContextMenu.offsetWidth, height = imageContextMenu.offsetHeight, scale = uiScale;
   const viewportWidth = innerWidth / scale, viewportHeight = innerHeight / scale;
@@ -5425,6 +5464,10 @@ imageContextMenu.addEventListener("click", async event => {
     else if (action === "save") {
       await saveImageObject(object);
       showToast("이미지 저장 시작");
+    }
+    else if (action === "delete-history" && object.meta?.historyId) {
+      removeHistoryEntries([object.meta.historyId]);
+      showToast("History에서 삭제했습니다");
     }
   }
   catch (error) {
