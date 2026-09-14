@@ -4648,7 +4648,8 @@ function renderDetailHistory() {
     return `<div class="histshot${current ? " current" : ""}${selected ? " on" : ""}${detailCompareSelecting ? " selectable" : ""}" data-history-id="${history.id}">` +
       `<button type="button" data-history-action="open"${current ? ' aria-current="true"' : ""} aria-label="${history.at} 생성 결과${detailCompareSelecting ? " 비교에 선택" : " 보기"}">` +
       `<img class="image-object${selected ? " compare-selected" : ""}" data-image-id="${object.id}" src="${history.src}" alt=""></button>` +
-      `<span class="historder">${selected ? order + 1 : ""}</span></div>`;
+      `<span class="historder">${selected ? order + 1 : ""}</span>` +
+      `<button type="button" class="histdel" data-history-delete title="History에서 삭제" aria-label="${history.at} 생성 결과 삭제">×</button></div>`;
   }).join("");
   syncImageSelectionState();
 }
@@ -5441,9 +5442,13 @@ document.addEventListener("click", event => {
   toggleDetailCompareSelection(object.id);
 }, true);
 histRail.addEventListener("click", event => {
-  if (document.body.classList.contains("chunkStage")) return;
   const shot = event.target.closest(".histshot");
   if (!shot) return;
+  if (event.target.closest("[data-history-delete]")) {
+    removeHistoryEntries([shot.dataset.historyId]);
+    return;
+  }
+  if (document.body.classList.contains("chunkStage")) return;
   const history = HISTORY.find(item => item.id === shot.dataset.historyId);
   if (history) openHistoryDetail(history);
 });

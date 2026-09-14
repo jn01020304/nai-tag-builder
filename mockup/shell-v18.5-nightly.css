@@ -288,6 +288,14 @@
     border:1px solid var(--line); font-size:.72em; font-weight:800; pointer-events:none;
   }
   .histshot.on .historder{display:grid; background:var(--accent); color:#211903; border-color:var(--accent)}
+  .histshot .histdel{
+    position:absolute; right:4px; top:4px; width:20px; height:20px; padding:0; display:grid; place-items:center;
+    border:1px solid var(--line); border-radius:999px; background:#000c; color:var(--ink);
+    font-size:13px; line-height:1; opacity:0; transition:opacity .12s;
+  }
+  .histshot:hover .histdel,.histshot .histdel:focus-visible{opacity:1}
+  .histshot .histdel:hover{color:#ff8a80; border-color:#ff8a80}
+  .histshot.selectable .histdel{display:none}
   .history-import-btn{
     width:24px; height:24px; display:grid; place-items:center; padding:0; border:1px solid transparent;
     border-radius:4px; color:var(--dim); background:transparent; font:inherit; cursor:pointer;
@@ -1078,6 +1086,7 @@
   body.compact-layout #histRail{height:100%;flex-direction:row;align-items:stretch}
   body.compact-layout #histRail .histshot{flex:0 0 auto;width:auto;height:100%;aspect-ratio:var(--shot)}
   body.compact-layout #histRail .histshot button,body.compact-layout #histRail .histshot img{width:auto;height:100%}
+  body.compact-layout #histRail .histshot .histdel{width:20px;height:20px}
   body.compact-layout #shotHole:not(.has){width:110px;max-width:45%;height:auto;min-height:48px;aspect-ratio:var(--shot)}
   body.narrow-layout .top{gap:4px;padding:0 4px}
   body.narrow-layout .top .chip{display:none}
