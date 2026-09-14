@@ -4858,6 +4858,39 @@ function imageMetadataFields(payload) {
 const availableMetadataFields = payload => payload
   ? [...metadataFieldRegistry().filter(field => field.present(payload)), ...imageMetadataFields(payload)] : [];
 const metadataSettingsFields = ["modelMode", "qualityPreset", "ucPreset", "resolution", "steps", "guidance", "rescale", "sampler", "noiseSchedule", "transparentBackground"];
+// Opus 무료 생성 넓이 상한 (1024×1024)
+const MAX_FREE_PIXELS = 1024 * 1024;
+const onOff = value => value ? "On" : "Off";
+// Settings를 가져오면 실제로 바뀌는 항목만 "현재 → 가져올 값"으로 돌려준다
+function metadataSettingsDiff(payload, state = generationState) {
+  const has = key => Object.prototype.hasOwnProperty.call(payload, key);
+  const rows = [];
+  const add = (label, from, to, warn = "") => { if (warn || String(from) !== String(to)) rows.push({ label, from: String(from), to: String(to), warn }); };
+  if (payload.model) add("Model", `${state.model} · ${state.datasetMode}`, `${payload.model} · ${payload.datasetMode || state.datasetMode}`);
+  if (payload.qualityPreset != null) add("Quality Tags", state.qualityPreset, payload.qualityPreset);
+  if (payload.ucPreset != null) add("UC Preset", state.ucPreset, payload.ucPreset);
+  if (payload.resolution?.label) {
+    const pixels = Number(payload.resolution.width) * Number(payload.resolution.height);
+    add("Resolution", state.resolution.label, payload.resolution.label, pixels > MAX_FREE_PIXELS ? "무료 넓이(1024×1024) 초과, Anlas 소모" : "");
+  }
+  if (Number.isFinite(Number(payload.steps))) {
+    const steps = Number(payload.steps);
+    add("Steps", state.steps, Math.min(steps, MAX_FREE_STEPS), steps > MAX_FREE_STEPS ? `원본 ${steps}, 무료 상한 ${MAX_FREE_STEPS}로 제한` : "");
+  }
+  if (Number.isFinite(Number(payload.guidance))) add("Prompt Guidance", Number(state.guidance).toFixed(1), Number(payload.guidance).toFixed(1));
+  if (Number.isFinite(Number(payload.rescale))) add("CFG Rescale", formatRescale(Number(state.rescale)), formatRescale(Number(payload.rescale)));
+  if (payload.sampler) add("Sampler", state.sampler, payload.sampler);
+  if (payload.noiseSchedule) add("Noise Schedule", state.noiseSchedule, payload.noiseSchedule);
+  if (has("transparentBackground")) add("Transparent BG", onOff(state.transparentBackground), onOff(payload.transparentBackground));
+  if (has("variety")) add("Variety+", onOff(state.variety), onOff(payload.variety));
+  return rows;
+}
+function metadataSettingsDiffHtml(payload) {
+  const rows = metadataSettingsDiff(payload);
+  if (!rows.length) return `<dl class="metadata-diff"><span class="same">Settings를 가져와도 바뀌는 값이 없습니다.</span></dl>`;
+  return `<dl class="metadata-diff">${rows.map(row =>
+    `<dt>${esc(row.label)}</dt><dd${row.warn ? ' class="warn"' : ""}>${esc(row.from)} → ${esc(row.to)}${row.warn ? ` · ${esc(row.warn)}` : ""}</dd>`).join("")}</dl>`;
+}
 function metadataImportHtml(payload) {
   if (!payload) return "";
   const has = key => Object.prototype.hasOwnProperty.call(payload, key);
@@ -4869,7 +4902,7 @@ function metadataImportHtml(payload) {
     ["settings", "Settings", settings],
     ["seed", "Seed", Number.isFinite(Number(payload.seed))]
   ];
-  return `<div class="metadata-import">${groups.map(([id, label, enabled]) => `<label><input type="checkbox" data-metadata-group="${id}"${enabled ? " checked" : " disabled"}>${label}</label>`).join("")}<button class="history-apply" type="button" data-metadata-import>선택 항목 가져오기</button></div>`;
+  return `<div class="metadata-import">${groups.map(([id, label, enabled]) => `<label><input type="checkbox" data-metadata-group="${id}"${enabled ? " checked" : " disabled"}>${label}</label>`).join("")}<button class="history-apply" type="button" data-metadata-import>선택 항목 가져오기</button>${settings ? metadataSettingsDiffHtml(payload) : ""}</div>`;
 }
 async function applyMetadataImport(payload, host) {
   if (!payload || !host) return;
@@ -5184,7 +5217,10 @@ function inspectJsonPreview(value, max = 12000) {
 async function importMetadataFromButton(button, payload) {
   button.disabled = true;
   try {
-    await applyMetadataImport(payload, button.closest(".metadata-import"));
+    const host = button.closest(".metadata-import");
+    await applyMetadataImport(payload, host);
+    host?.querySelector(".metadata-diff")?.insertAdjacentHTML("afterend", metadataSettingsDiffHtml(payload));
+    host?.querySelector(".metadata-diff")?.remove();
   }
   catch (error) {
     showToast(error?.message || "메타데이터를 가져오지 못했습니다.");

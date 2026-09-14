@@ -49,6 +49,7 @@ function buildRequest(payload) {
   const transparent = v5 && !!payload.transparentBackground;
   const prompt = transparent ? withTransparentTag(payload.prompt) : payload.prompt;
   const width = Number(payload.resolution?.width), height = Number(payload.resolution?.height);
+  if (!(width > 0 && height > 0 && width * height <= 1024 * 1024)) throw new Error(`해상도 ${width}×${height}는 무료 넓이(1024×1024)를 넘습니다.`);
   // 빈 캐릭터 칸은 빈 char_caption으로 보내지 않는다
   const characters = (payload.characters || []).filter(character => character.enabled && character.modelAllowed && String(character.prompt || "").trim()).map(character => ({ ...character, ...characterCenter(character) }));
   const useCoords = characters.some(character => character.manual);

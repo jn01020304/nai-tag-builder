@@ -59,6 +59,8 @@ assert.equal(v5Plain.parameters.straight_alpha, undefined);
 assert.equal(v5Plain.input, payload.prompt);
 assert.throws(() => api.buildRequest({ ...payload, model: "V9" }), /API 모델 ID/);
 assert.throws(() => api.buildRequest({ ...payload, steps: 29 }), /무료 범위/);
+assert.throws(() => api.buildRequest({ ...payload, resolution: { width: 1536, height: 1024 } }), /무료 넓이/);
+assert.equal(plain(api.buildRequest({ ...payload, resolution: { width: 1024, height: 1024 } })).parameters.width, 1024);
 assert.equal(plain(api.buildRequest({ ...payload, steps: 28 })).parameters.steps, 28);
 assert.throws(() => api.buildRequest({ ...payload, vibeTransfer: [{ active: true }] }), /Vibe Transfer/);
 
