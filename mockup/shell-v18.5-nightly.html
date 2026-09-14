@@ -275,14 +275,14 @@ solo artist, year 2025, shallow depth of field, best quality</textarea>
         </div>
         <div class="ai-control-row">
           <div class="ai-control-label"><span>Sampler</span></div>
-          <select class="ai-select" id="selSampler"><option selected>Euler Ancestral</option><option>DPM++ 2S Ancestral</option><option>Euler</option><option>DPM++ 2M</option><option>DDIM</option></select>
+          <select class="ai-select" id="selSampler"><option selected>Euler Ancestral</option><option>DPM++ 2S Ancestral</option><option>Euler</option><option>DPM++ 2M</option><option value="DPM++ 2M SDE">DPM++ 2M SDE (V5)</option><option>DDIM</option></select>
         </div>
         <div class="ai-control-row">
           <div class="ai-control-label"><span>Prompt Guidance Rescale</span></div>
           <div class="ai-slider-box"><input class="ai-num-input" id="inpRescale" type="number" step="0.05" min="0" max="1" value="0.5"><input class="ai-range" id="rangeRescale" type="range" step="0.05" min="0" max="1" value="0.5"></div>
         </div>
         <div class="ai-control-row">
-          <div class="ai-control-label"><span>Noise Schedule</span></div>
+          <div class="ai-control-label"><span>Noise Schedule</span><span id="noiseLockNote" hidden>V5는 karras 고정</span></div>
           <select class="ai-select" id="selNoise"><option selected>karras</option><option>native</option><option>exponential</option><option>polyexponential</option></select>
         </div>
       </div>

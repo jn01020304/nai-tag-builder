@@ -8,8 +8,10 @@ const MODEL_IDS = Object.freeze({
 });
 const SAMPLER_IDS = Object.freeze({
   "Euler Ancestral": "k_euler_ancestral", "Euler": "k_euler", "DPM++ 2S Ancestral": "k_dpmpp_2s_ancestral",
-  "DPM++ 2M": "k_dpmpp_2m", "DDIM": "ddim_v3"
+  "DPM++ 2M": "k_dpmpp_2m", "DDIM": "ddim_v3", "DPM++ 2M SDE": "k_dpmpp_2m_sde"
 });
+// TODO: k_dpmpp_2m_sde는 NAIWeaver 기준 V5 전용. 실제 V5 생성으로 서버 수락 확인 필요
+const V5_ONLY_SAMPLERS = new Set(["DPM++ 2M SDE"]);
 function readToken(storage = globalThis.localStorage) {
   try { return String(storage?.getItem(TOKEN_KEY) || "").trim(); }
   catch { return ""; }
@@ -45,6 +47,9 @@ function buildRequest(payload) {
   // UI를 거치지 않은 payload도 유료 요청으로 새지 않게 막는다
   if (!(Number(payload.steps) >= 1 && Number(payload.steps) <= 28)) throw new Error(`Steps ${payload.steps}는 무료 범위(1~28)를 벗어납니다.`);
   const v5 = model.startsWith("nai-diffusion-5");
+  // 모르는 샘플러를 조용히 다른 값으로 바꿔 보내지 않는다
+  if (!SAMPLER_IDS[payload.sampler]) throw new Error(`지원하지 않는 Sampler입니다: ${payload.sampler}`);
+  if (!v5 && V5_ONLY_SAMPLERS.has(payload.sampler)) throw new Error(`${payload.sampler}는 V5 전용 Sampler입니다.`);
   // V5는 프롬프트 태그로 알파 채널을 켠다 (NovelAI V5 공지 기준)
   const transparent = v5 && !!payload.transparentBackground;
   const prompt = transparent ? withTransparentTag(payload.prompt) : payload.prompt;
@@ -58,7 +63,7 @@ function buildRequest(payload) {
     params_version: v5 ? 4 : 3,
     width, height,
     scale: Number(payload.guidance),
-    sampler: SAMPLER_IDS[payload.sampler] || "k_euler_ancestral",
+    sampler: SAMPLER_IDS[payload.sampler],
     steps: Number(payload.steps),
     n_samples: 1,
     seed: Number(payload.seed),

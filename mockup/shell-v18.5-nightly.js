@@ -526,10 +526,29 @@ function renderModelControls() {
   transparentToggle.setAttribute("aria-pressed", String(generationState.transparentBackground));
   transparentToggle.textContent = generationState.transparentBackground ? "On" : "Off";
 
+  syncModelLockedSettings(capabilities);
   if (typeof renderGenerationInputs === "function") renderGenerationInputs();
   if (typeof renderCharacters === "function")
     renderCharacters();
   syncExperimentIfActive();
+}
+const V5_ONLY_SAMPLERS = new Set(["DPM++ 2M SDE"]);
+// V5는 노이즈 스케줄이 karras로 고정된다. 사용자가 고른 값은 state에 남겨 다른 모델로 돌아가면 복원한다
+function syncModelLockedSettings(capabilities = modelCapabilities()) {
+  const v5 = capabilities.family === "v5";
+  selNoise.disabled = v5;
+  selNoise.value = v5 ? "karras" : generationState.noiseSchedule;
+  selNoise.title = v5 ? "V5 요청은 karras로 고정됩니다" : "";
+  document.getElementById("noiseLockNote").hidden = !v5;
+  for (const option of selSampler.options) option.disabled = !v5 && V5_ONLY_SAMPLERS.has(option.value);
+  if (!v5 && V5_ONLY_SAMPLERS.has(generationState.sampler)) {
+    generationState.sampler = "Euler Ancestral";
+    selSampler.value = generationState.sampler;
+    sumSampler.textContent = generationState.sampler;
+    persistGenerationState();
+    // 초기화 도중에는 토스트 요소가 아직 없을 수 있다
+    try { showToast("DPM++ 2M SDE는 V5 전용이라 Euler Ancestral로 바꿨습니다"); } catch { }
+  }
 }
 function setModel(model) {
   generationState.model = MODEL_CAPABILITIES[model] ? model : DEFAULT_MODEL;
@@ -1172,7 +1191,7 @@ function hydrateGenerationUi() {
   renderModelControls();
   selSampler.value = generationState.sampler;
   sumSampler.textContent = generationState.sampler;
-  selNoise.value = generationState.noiseSchedule;
+  syncModelLockedSettings();
   const variety = document.getElementById("btnVariety");
   variety.classList.toggle("on", generationState.variety);
   variety.textContent = (generationState.variety ? "✔" : "✖") + " Variety+";
@@ -4839,7 +4858,7 @@ function metadataFieldRegistry() {
     } },
     { field: "noiseSchedule", historyLabel: "Noise Schedule", actionLabel: "Noise", present: payload => !!payload.noiseSchedule, value: payload => String(payload.noiseSchedule), apply: payload => {
       if (!selectHasOption(selNoise, String(payload.noiseSchedule))) return { ok: false, message: "현재 UI에서 지원하지 않는 Noise Schedule입니다." };
-      selNoise.value = String(payload.noiseSchedule); generationState.noiseSchedule = selNoise.value; persistGenerationState();
+      generationState.noiseSchedule = String(payload.noiseSchedule); syncModelLockedSettings(); persistGenerationState();
       return { ok: true, message: "Noise Schedule 가져오기 완료" };
     } },
     { field: "transparentBackground", historyLabel: "Transparent BG", actionLabel: "Transparent BG", present: payload => has(payload, "transparentBackground"), value: payload => payload.transparentBackground ? "On" : "Off", apply: payload => {
@@ -5105,7 +5124,7 @@ function matchNovelAIMetadataSchema(raw, pngWidth = 0, pngHeight = 0) {
   const samplerMap = {
     k_euler_ancestral: "Euler Ancestral", k_euler: "Euler",
     k_dpmpp_2s_ancestral: "DPM++ 2S Ancestral", k_dpmpp_2s_a: "DPM++ 2S Ancestral",
-    k_dpmpp_2m: "DPM++ 2M", ddim: "DDIM", ddim_v3: "DDIM"
+    k_dpmpp_2m: "DPM++ 2M", k_dpmpp_2m_sde: "DPM++ 2M SDE", ddim: "DDIM", ddim_v3: "DDIM"
   };
   const modelRaw = String(comment.model ?? comment.model_name ?? raw.Model ?? "").trim().toLowerCase();
   const source = String(raw.Source || "").trim();
