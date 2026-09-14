@@ -4758,6 +4758,10 @@ function showCurrentShot(history) {
   });
   shotHole.classList.add("has");
   shotHole.innerHTML = `<img class="image-object" data-image-id="${object.id}" src="${history.src}" alt="현재 생성 결과">`;
+  // 설정 비율이 아니라 실제 그림 비율로 틀을 맞춘다
+  const image = shotHole.querySelector("img");
+  const fitRatio = () => { if (image.naturalWidth && image.naturalHeight) shotHole.style.setProperty("--shot", `${image.naturalWidth}/${image.naturalHeight}`); };
+  if (image.complete) fitRatio(); else image.addEventListener("load", fitRatio, { once: true });
   syncImageSelectionState();
 }
 let historyDetailId = null;
@@ -5342,6 +5346,7 @@ function removeHistoryEntries(ids) {
   persistHistoryIndex();
   if (shownId && targets.has(shownId)) {
     shotHole.classList.remove("has");
+    shotHole.style.removeProperty("--shot");
     shotHole.textContent = "NAI로 만들어진 이미지";
   }
   if (historyDetailId && targets.has(historyDetailId)) {
