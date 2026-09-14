@@ -4430,11 +4430,19 @@ const inspectModal = document.getElementById("inspectModal");
 const naiToast = document.getElementById("naiToast");
 let inspectPreview = null;
 let toastTimer = 0;
-function showToast(message) {
+function showToast(message, action = null) {
   clearTimeout(toastTimer);
   naiToast.textContent = message;
+  if (action) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "toast-action";
+    button.textContent = action.label;
+    button.onclick = () => { clearTimeout(toastTimer); naiToast.classList.remove("on"); action.run(); };
+    naiToast.append(button);
+  }
   naiToast.classList.add("on");
-  toastTimer = setTimeout(() => naiToast.classList.remove("on"), 1800);
+  toastTimer = setTimeout(() => naiToast.classList.remove("on"), action ? 6000 : 1800);
 }
 
 function appendCommaPart(base, addition) {
@@ -5252,15 +5260,42 @@ function addHistoryShot(src, payload = buildNovelAIPayload(), asset = {}) {
       .catch(error => console.error("history persistence failed", error));
   }
 }
+// 마지막 삭제 한 번만 되돌릴 수 있다. 그림 blob은 메모리에 잡아둔다
+let lastHistoryRemoval = null;
+function discardHistoryRemoval() {
+  for (const { history } of lastHistoryRemoval || [])
+    if (history.src?.startsWith("blob:")) URL.revokeObjectURL(history.src);
+  lastHistoryRemoval = null;
+}
+function undoHistoryRemoval() {
+  const removal = lastHistoryRemoval;
+  if (!removal) return;
+  lastHistoryRemoval = null;
+  // 원래 자리 순서대로 끼워 넣는다
+  for (const { index, history } of [...removal].sort((a, b) => a.index - b.index)) {
+    HISTORY.splice(Math.min(index, HISTORY.length), 0, history);
+    if (history.blob) void persistReferenceAsset(historyAssetKey(history.id), history.blob).catch(error => console.error("history restore failed", error));
+  }
+  for (const { history } of HISTORY.splice(MAX_HISTORY)) {
+    if (history.src?.startsWith("blob:")) URL.revokeObjectURL(history.src);
+    void deleteReferenceAsset(historyAssetKey(history.id)).catch(() => {});
+  }
+  persistHistoryIndex();
+  if (!shotHole.classList.contains("has") && HISTORY[0]) showCurrentShot(HISTORY[0]);
+  renderDetailHistory();
+  showToast(`${removal.length}장을 되돌렸습니다`);
+}
 function removeHistoryEntries(ids) {
   const targets = new Set(ids);
   const detailIndex = historyDetailIndex();
   const shownId = shotHole.querySelector("img")?.dataset.imageId?.replace(/^current:/, "");
+  discardHistoryRemoval();
+  const removed = [];
   for (let index = HISTORY.length - 1; index >= 0; index--) {
     const history = HISTORY[index];
     if (!targets.has(history.id)) continue;
     HISTORY.splice(index, 1);
-    if (history.src?.startsWith("blob:")) URL.revokeObjectURL(history.src);
+    removed.push({ index, history });
     for (const imageId of [`history:${history.id}`, `current:${history.id}`]) {
       imageObjects.delete(imageId);
       detailComparePick = detailComparePick.filter(pick => pick !== imageId);
@@ -5280,12 +5315,14 @@ function removeHistoryEntries(ids) {
   if (detailComparePick.length < 2) document.body.classList.remove("detail-compare-open");
   if (detailCompareSelecting) updateDetailCompareToggle();
   renderDetailHistory();
+  if (!removed.length) return;
+  lastHistoryRemoval = removed;
+  showToast(removed.length === 1 ? "History에서 삭제했습니다" : `History ${removed.length}장을 삭제했습니다`, { label: "되돌리기", run: undoHistoryRemoval });
 }
 historyClearBtn.addEventListener("click", () => {
   if (!HISTORY.length) return;
   if (!confirm(`History ${HISTORY.length}장을 모두 삭제할까요? 되돌릴 수 없습니다.`)) return;
   removeHistoryEntries(HISTORY.map(history => history.id));
-  showToast("History를 모두 삭제했습니다");
 });
 async function restoreHistory() {
   const stored = Array.isArray(S.history) ? S.history.filter(entry => entry && typeof entry.id === "string").slice(0, MAX_HISTORY) : [];
@@ -5467,7 +5504,6 @@ imageContextMenu.addEventListener("click", async event => {
     }
     else if (action === "delete-history" && object.meta?.historyId) {
       removeHistoryEntries([object.meta.historyId]);
-      showToast("History에서 삭제했습니다");
     }
   }
   catch (error) {
