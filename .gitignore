@@ -31,3 +31,20 @@ test-results/
 
 # 단부루 대표 이미지 로컬 캐시 (107MB). cache-images.mjs 로 언제든 다시 받는다
 resource/catalog/images/
+
+# 개인 기록: 로컬에만 두고 공개 저장소에 올리지 않는다
+novel/
+memory/
+.claude/
+.agents/
+.codex/
+decision-making/
+exports/nai-tag-builder/
+CLAUDE.md
+GEMINI.md
+메모장*.md
+유나의 메모장.md
+잼개선.md
+최종합.md
+클제공.md
+페이블 대화기록.md
